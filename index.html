@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.44</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.45</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -549,7 +549,10 @@ function parsear() {
     ' hora_chegada: HH:MM;' +
     ' cidade: cidade destino em MAIUSCULAS sem UF;' +
     ' uf: sigla 2 letras maiusculas, padrao RS se nao encontrar;' +
-    ' motivo: REGRA PRINCIPAL - leia TODO o texto e colete TODOS os nomes de pacientes mencionados em qualquer parte.' +
+    ' motivo: REGRA PRINCIPAL - primeiro verifique se ha pacientes.' +
+    ' Se NAO houver pacientes (Lista de Paciente vazia), use o campo "Clinica de destino" como motivo em MAIUSCULAS.' +
+    ' Exemplos sem pacientes: "BUSCAR VEICULO EM CONSERTO", "BUSCAR MEDICAMENTOS", "REUNIAO NA SECRETARIA".' +
+    ' Se houver pacientes, leia TODO o texto e colete TODOS os nomes mencionados em qualquer parte.' +
     ' Os nomes podem estar no campo Lista de Paciente(s), em linhas separadas, em texto livre ou em qualquer outra parte.' +
     ' NUNCA omita nenhum nome. NUNCA abrevie nomes.' +
     ' Formato quando ha pacientes sendo levados/transportados/internados:' +
@@ -639,10 +642,10 @@ function parsearLocal(raw) {
     if (/^\d{6}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/20'+s.slice(4);
     return s;
   }
-  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{6,8}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
-  if (m) found.data_saida = normalizarData(m[1]);
-  m = raw.match(/Data de Chegada[^:]*:\s*(\d{6,8}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
-  if (m) found.data_chegada = normalizarData(m[1]);
+  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
+  if (m) found.data_saida = normalizarData(m[1].replace(/\s+/g,''));
+  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
+  if (m) found.data_chegada = normalizarData(m[1].replace(/\s+/g,''));
 
   // horas
   // Hora — aceita 06:00, 06 HS, 18.30 HS, 18h30
@@ -729,7 +732,8 @@ function parsearLocal(raw) {
       var destStr = destLivre ? destLivre[1].trim().toUpperCase() : (clinica || '');
       found.motivo = ('TRANSPORTE DE PACIENTE ' + nomeLivre + (destStr ? ' A ' + destStr : '')).trim();
     } else if (clinica) {
-      found.motivo = 'TRANSPORTE DE PACIENTE A ' + clinica;
+      // Sem pacientes — usa campo clinica/destino diretamente como motivo
+      found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
     }
   }
 
