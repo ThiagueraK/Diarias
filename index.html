@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.37</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.38</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -613,7 +613,7 @@ function parsear() {
     ' Expanda abreviacoes: HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO = ONCOLOGIA.' +
     ' Use null se nao encontrar. Texto:\n\n' + raw;
 
-  fetch('https://diarias.aceitacoes.workers.dev', {
+  fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: prompt })
@@ -976,8 +976,15 @@ function adicionarProcesso(dados) {
   salvar(); atualizarBadge();
 }
 function salvar() {
+  // Salva no IndexedDB local
   dbSalvar(processos);
   atualizarBackupInfo();
+  // Sincroniza com KV na nuvem
+  fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ processos: processos })
+  }).catch(function(e){ console.log('Sync KV falhou (offline?):', e.message); });
 }
 function atualizarBadge() { document.getElementById('badgeCount').textContent = processos.length; }
 
@@ -1307,11 +1314,35 @@ function resetar() {
 // Abre IndexedDB, migra localStorage se necessário, carrega dados e inicia UI
 dbAbrir(function() {
   dbMigrarLocalStorage(function() {
-    dbCarregar(function(lista) {
-      processos = lista;
-      document.getElementById('filtroData').value = filtroAtivo;
-      atualizarBadge();
-      atualizarBackupInfo();
+    dbCarregar(function(listaLocal) {
+      // Tenta carregar do KV na nuvem
+      fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var listaKV = data.processos || [];
+        // Mescla: usa KV se tiver mais dados, senão usa local
+        if (listaKV.length >= listaLocal.length) {
+          processos = listaKV;
+          dbSalvar(processos); // Atualiza local com KV
+        } else {
+          processos = listaLocal;
+          // Sincroniza local para KV
+          fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ processos: processos })
+          }).catch(function(){});
+        }
+      })
+      .catch(function() {
+        // Sem internet — usa dados locais
+        processos = listaLocal;
+      })
+      .finally(function() {
+        document.getElementById('filtroData').value = filtroAtivo;
+        atualizarBadge();
+        atualizarBackupInfo();
+      });
     });
   });
 });
