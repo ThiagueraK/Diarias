@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="SGD Diarias">
 <meta name="application-name" content="SGD Diarias">
 <meta name="theme-color" content="#0f1117">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com https://maps.google.com; connect-src *;">
 <meta name="msapplication-TileColor" content="#0f1117">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
@@ -581,6 +582,12 @@ document.getElementById('btnParsear').addEventListener('click', parsear);
 function parsear() {
   var raw = document.getElementById('pasteInput').value;
   if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
+  // Limpar caracteres invisíveis e normalizar espaços
+  raw = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  raw = raw.replace(/[ \t]+/g,' ');
+  raw = raw.replace(/\n[ \t]+/g,'\n');
+  raw = raw.replace(/[ \t]+\n/g,'\n');
+  raw = raw.replace(/\n{3,}/g,'\n\n');
 
   // Mostrar loading
   var btn = document.getElementById('btnParsear');
@@ -609,6 +616,11 @@ function parsear() {
     ' - Nunca abrevie nomes proprios;' +
     ' - Se nao identificar motivo use null.' +
     ' IMPORTANTE: procure os dados em todo o texto, nao apenas nos campos de formulario.' +
+    ' As datas podem aparecer no formato DD/MM/AAAA ou DD/MM/AA.' +
+    ' Campos como Data de Saida*, Data de Chegada*, Hora de Saida*, Hora de Chegada* tem o asterisco como parte do label.' +
+    ' O valor do campo pode estar na mesma linha ou na linha seguinte ao label.' +
+    ' Exemplo: "Data de Saida*: 02/03/2026" ou "Data de Saida*:\n02/03/2026".' +
+    ' Para data_saida e data_chegada: se forem iguais, repita o mesmo valor nos dois campos.' +
     ' Use null apenas se realmente nao encontrar o campo. Texto:\n\n' + raw;
 
   fetch('https://api.anthropic.com/v1/messages', {
@@ -623,8 +635,10 @@ function parsear() {
   .then(function(r){ return r.json(); })
   .then(function(data) {
     var texto = (data.content||[]).map(function(c){ return c.text||''; }).join('');
+    console.log('Resposta IA:', texto);
     texto = texto.replace(/```json|```/g,'').trim();
     var parsed = JSON.parse(texto);
+    console.log('JSON parsed:', JSON.stringify(parsed));
     preencherCampos(parsed);
   })
   .catch(function() {
@@ -647,13 +661,13 @@ function parsearLocal(raw) {
   if (m) found.servidor = m[1].trim().toUpperCase();
   m = raw.match(/Placa do Ve[ii]culo[^:]*:\s*([A-Z0-9\- ]+)/i);
   if (m) found.placa = m[1].trim().toUpperCase();
-  m = raw.match(/Data de Sa[ii]da\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i);
+  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?)/i);
   if (m) found.data_saida = m[1].trim();
-  m = raw.match(/Data de Chegada\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i);
+  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?)/i);
   if (m) found.data_chegada = m[1].trim();
-  m = raw.match(/Hora de Sa[ii]da\*?:\s*(\d{1,2}:\d{2})/i);
+  m = raw.match(/Hora de Sa.da[^:]*:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_saida = m[1].trim();
-  m = raw.match(/Hora de Chegada\*?:\s*(\d{1,2}:\d{2})/i);
+  m = raw.match(/Hora de Chegada[^:]*:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_chegada = m[1].trim();
   m = raw.match(/Cidade de destino\*?:\s*([^\n\r]+)/i);
   if (m) {
