@@ -580,36 +580,77 @@ document.querySelectorAll('input[name="distancia"]').forEach(function(r) {
 document.getElementById('btnParsear').addEventListener('click', parsear);
 function parsear() {
   var raw = document.getElementById('pasteInput').value;
-  if (!raw.trim()) { alert('Cole o conteúdo do processo primeiro.'); return; }
-  var found = {}, notFound = [];
+  if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
 
+  // Mostrar loading
+  var btn = document.getElementById('btnParsear');
+  btn.disabled = true;
+  btn.textContent = 'Analisando...';
+
+  var prompt = 'Voce e um assistente que extrai dados de processos administrativos brasileiros de diarias.' +
+    ' Analise o texto abaixo e retorne SOMENTE um JSON valido sem markdown com os campos:' +
+    ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
+    '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
+    ' Regras:' +
+    ' num_processo no formato X.XXX/AAAA;' +
+    ' servidor em maiusculas sem cargo (ex: JOAO DA SILVA);' +
+    ' placa no formato AAA-0000 ou AAA0A00;' +
+    ' datas no formato DD/MM/AAAA;' +
+    ' horas no formato HH:MM;' +
+    ' cidade em maiusculas sem UF;' +
+    ' uf sigla 2 letras maiusculas, se nao encontrado use RS como padrao;' +
+    ' motivo em maiusculas seguindo estas regras:' +
+    ' - Se houver paciente sendo transportado use: TRANSPORTE DE PACIENTE [NOME COMPLETO DO PACIENTE] A [CLINICA/HOSPITAL];' +
+    ' - Se for buscar paciente use: BUSCAR PACIENTE [NOME COMPLETO DO PACIENTE] EM [CLINICA/HOSPITAL];' +
+    ' - Se for conduzir servidor use: CONDUZIR SERVIDOR [NOME] A [DESTINO/MOTIVO];' +
+    ' - Sempre inclua o nome completo do paciente ou servidor e o local de destino quando disponivel;' +
+    ' - Nunca abrevie nomes;' +
+    ' - Se nao conseguir identificar o motivo use null.' +
+    ' Use null para campos nao encontrados. Texto:\n\n' + raw;
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var texto = (data.content||[]).map(function(c){ return c.text||''; }).join('');
+    texto = texto.replace(/```json|```/g,'').trim();
+    var parsed = JSON.parse(texto);
+    preencherCampos(parsed);
+  })
+  .catch(function() {
+    // Fallback: parser local se API falhar
+    preencherCampos(parsearLocal(raw));
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = 'Reconhecer Dados Automaticamente';
+  });
+}
+
+function parsearLocal(raw) {
+  var found = {};
   var m;
   m = raw.match(/Proc\.\s*Administrativo\s*([\d\.\/]+)/i);
   if (m) found.num_processo = m[1].trim();
-
   m = raw.match(/Motorista ou Servidor\*?:\s*(.+)/i);
   if (m) found.servidor = m[1].trim().toUpperCase();
-  else notFound.push('Servidor');
-
-  m = raw.match(/Placa do Ve[íi]culo[^:]*:\s*([A-Z0-9\- ]+)/i);
+  m = raw.match(/Placa do Ve[ii]culo[^:]*:\s*([A-Z0-9\- ]+)/i);
   if (m) found.placa = m[1].trim().toUpperCase();
-
-  m = raw.match(/Data de Sa[íi]da\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i);
-  if (m) found.data_saida = brParaISO(m[1].trim());
-  else notFound.push('Data de Saída');
-
+  m = raw.match(/Data de Sa[ii]da\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i);
+  if (m) found.data_saida = m[1].trim();
   m = raw.match(/Data de Chegada\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i);
-  if (m) found.data_chegada = brParaISO(m[1].trim());
-  else notFound.push('Data de Chegada');
-
-  m = raw.match(/Hora de Sa[íi]da\*?:\s*(\d{1,2}:\d{2})/i);
+  if (m) found.data_chegada = m[1].trim();
+  m = raw.match(/Hora de Sa[ii]da\*?:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_saida = m[1].trim();
-  else notFound.push('Hora de Saída');
-
   m = raw.match(/Hora de Chegada\*?:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_chegada = m[1].trim();
-  else notFound.push('Hora de Chegada');
-
   m = raw.match(/Cidade de destino\*?:\s*([^\n\r]+)/i);
   if (m) {
     var partes = m[1].trim().split(/\s+/);
@@ -617,48 +658,70 @@ function parsear() {
       found.uf = partes.pop().toUpperCase();
       found.cidade = partes.join(' ').toUpperCase();
     } else { found.cidade = m[1].trim().toUpperCase(); }
-  } else notFound.push('Cidade');
-
+  }
+  if (!found.uf) found.uf = 'RS';
   var pm = raw.match(/Lista de Paciente\(s\)[^:]*:\s*([^\n\r]+)/i);
-  var cm = raw.match(/Cl[íi]nica de destino[^:]*:\s*([^\n\r]+)/i);
+  var cm = raw.match(/Cl[ii]nica de destino[^:]*:\s*([^\n\r]+)/i);
   if (pm || cm) {
     var pac = pm ? pm[1].trim().toUpperCase() : '';
     var cli = cm ? cm[1].trim().toUpperCase() : '';
-    if (pac && cli) found.motivo = 'TRANSPORTE DE PACIENTE '+pac+' À '+cli;
+    if (pac && cli) found.motivo = 'TRANSPORTE DE PACIENTE '+pac+' A '+cli;
     else if (pac) found.motivo = 'TRANSPORTE DE PACIENTE '+pac;
-    else found.motivo = 'TRANSPORTE DE PACIENTE À '+cli;
+    else found.motivo = 'TRANSPORTE DE PACIENTE A '+cli;
   }
+  return found;
+}
 
-  ['servidor','cidade','uf','motivo','placa','num_processo'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled'); }
-  });
-  ['data_saida','data_chegada','hora_saida','hora_chegada'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled'); }
-  });
+function preencherCampos(found) {
+  // Converter datas para ISO se vierem no formato BR
+  if (found.data_saida && found.data_saida.indexOf('/') !== -1) found.data_saida = brParaISO(found.data_saida);
+  if (found.data_chegada && found.data_chegada.indexOf('/') !== -1) found.data_chegada = brParaISO(found.data_chegada);
+
+  var nomes = {servidor:'Servidor',cidade:'Cidade',uf:'UF',motivo:'Motivo',placa:'Placa',
+    data_saida:'Data Saida',data_chegada:'Data Chegada',hora_saida:'Hora Saida',hora_chegada:'Hora Chegada',num_processo:'Nr Processo'};
 
   var tagsEl = document.getElementById('parsedTags');
   tagsEl.innerHTML = '';
-  var nomes = {servidor:'Servidor',cidade:'Cidade',uf:'UF',motivo:'Motivo',placa:'Placa',
-    data_saida:'Data Saída',data_chegada:'Data Chegada',hora_saida:'Hora Saída',hora_chegada:'Hora Chegada',num_processo:'Nº Processo'};
-  Object.keys(found).forEach(function(k) {
-    var t = document.createElement('div'); t.className='tag ok';
-    t.innerHTML='<span class="dot"></span>'+(nomes[k]||k); tagsEl.appendChild(t);
+
+  ['servidor','cidade','uf','motivo','placa','num_processo'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled');
+      var t = document.createElement('div'); t.className='tag ok';
+      t.innerHTML='<span class="dot"></span>'+(nomes[id]||id); tagsEl.appendChild(t);
+    } else if (el) {
+      var t2 = document.createElement('div'); t2.className='tag warn';
+      t2.innerHTML='<span class="dot"></span>'+(nomes[id]||id)+' nao encontrado'; tagsEl.appendChild(t2);
+    }
   });
-  notFound.forEach(function(k) {
-    var t = document.createElement('div'); t.className='tag warn';
-    t.innerHTML='<span class="dot"></span>'+k+' não encontrado'; tagsEl.appendChild(t);
+  ['data_saida','data_chegada','hora_saida','hora_chegada'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled');
+      var t = document.createElement('div'); t.className='tag ok';
+      t.innerHTML='<span class="dot"></span>'+(nomes[id]||id); tagsEl.appendChild(t);
+    } else if (el) {
+      var t2 = document.createElement('div'); t2.className='tag warn';
+      t2.innerHTML='<span class="dot"></span>'+(nomes[id]||id)+' nao encontrado'; tagsEl.appendChild(t2);
+    }
   });
+
   tagsEl.classList.add('visible');
   document.querySelector('.card').scrollIntoView({behavior:'smooth'});
 
-  // Mostrar mapa assim que os dados forem reconhecidos
+  // UF padrão RS se não encontrado
+  if (!found.uf) {
+    found.uf = 'RS';
+    var elUF = document.getElementById('uf');
+    if (elUF) { elUF.value = 'RS'; elUF.classList.add('autofilled'); }
+    var tRS = document.createElement('div'); tRS.className='tag ok';
+    tRS.innerHTML='<span class="dot"></span>UF (padrao RS)'; tagsEl.appendChild(tRS);
+  }
+
   if (found.cidade) {
     var ufMapa = found.uf || 'RS';
     gerarMapa(found.cidade, ufMapa);
   }
 }
+
 
 // ═══════════════════════════════════════════════════════
 // GERAR DESCRIÇÃO
