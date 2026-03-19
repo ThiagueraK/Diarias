@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.29</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.30</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -613,10 +613,7 @@ function parsear() {
     ' Expanda abreviacoes: p/ = para, HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, ONCO = ONCOLOGIA.' +
     ' Use null se nao encontrar. Texto:\n\n' + raw;
 
-  var grokUrl = 'https://api.x.ai/v1/chat/completions';
-  var proxyUrl = 'https://diarias.aceitacoes.workers.dev/?url=' + encodeURIComponent(grokUrl);
-
-  fetch(proxyUrl, {
+  fetch('https://diarias.aceitacoes.workers.dev', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
