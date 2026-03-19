@@ -587,33 +587,36 @@ function parsear() {
   btn.disabled = true;
   btn.textContent = 'Analisando...';
 
-  var prompt = 'Voce e um assistente que extrai dados de processos administrativos brasileiros de diarias.' +
-    ' Analise o texto abaixo e retorne SOMENTE um JSON valido sem markdown com os campos:' +
+  var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
+    ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, despachos e anotacoes.' +
+    ' Retorne SOMENTE um JSON valido sem markdown com exatamente estes campos:' +
     ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
     '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
-    ' Regras:' +
-    ' num_processo no formato X.XXX/AAAA;' +
-    ' servidor em maiusculas sem cargo (ex: JOAO DA SILVA);' +
-    ' placa no formato AAA-0000 ou AAA0A00;' +
-    ' datas no formato DD/MM/AAAA;' +
-    ' horas no formato HH:MM;' +
-    ' cidade em maiusculas sem UF;' +
-    ' uf sigla 2 letras maiusculas, se nao encontrado use RS como padrao;' +
-    ' motivo em maiusculas seguindo estas regras:' +
-    ' - Se houver paciente sendo transportado use: TRANSPORTE DE PACIENTE [NOME COMPLETO DO PACIENTE] A [CLINICA/HOSPITAL];' +
-    ' - Se for buscar paciente use: BUSCAR PACIENTE [NOME COMPLETO DO PACIENTE] EM [CLINICA/HOSPITAL];' +
-    ' - Se for conduzir servidor use: CONDUZIR SERVIDOR [NOME] A [DESTINO/MOTIVO];' +
-    ' - Sempre inclua o nome completo do paciente ou servidor e o local de destino quando disponivel;' +
-    ' - Nunca abrevie nomes;' +
-    ' - Se nao conseguir identificar o motivo use null.' +
-    ' Use null para campos nao encontrados. Texto:\n\n' + raw;
+    ' Regras de extracao:' +
+    ' num_processo: numero no formato X.XXX/AAAA encontrado apos Proc. Administrativo ou similar;' +
+    ' servidor: nome completo em maiusculas SEM cargo (remover palavras como Motorista, Servidor, condutor, medico, enfermeiro etc);' +
+    ' placa: formato AAA-0000 ou AAA0A00 (padrao Mercosul);' +
+    ' data_saida: procure por Data de Saida ou similar, formato final DD/MM/AAAA;' +
+    ' data_chegada: procure por Data de Chegada ou similar, formato final DD/MM/AAAA;' +
+    ' hora_saida: procure por Hora de Saida ou similar, formato HH:MM;' +
+    ' hora_chegada: procure por Hora de Chegada ou similar, formato HH:MM;' +
+    ' cidade: nome da cidade destino em maiusculas sem UF;' +
+    ' uf: sigla do estado em 2 letras maiusculas, se nao encontrado use RS;' +
+    ' motivo: siga estas regras em ordem:' +
+    ' - Se houver paciente sendo levado/transportado/internado: TRANSPORTE DE PACIENTE [NOME COMPLETO] A [CLINICA/HOSPITAL];' +
+    ' - Se for buscar/trazer paciente: BUSCAR PACIENTE [NOME COMPLETO] EM [CLINICA/HOSPITAL];' +
+    ' - Se for conduzir servidor: CONDUZIR SERVIDOR [NOME] A [DESTINO];' +
+    ' - Nunca abrevie nomes proprios;' +
+    ' - Se nao identificar motivo use null.' +
+    ' IMPORTANTE: procure os dados em todo o texto, nao apenas nos campos de formulario.' +
+    ' Use null apenas se realmente nao encontrar o campo. Texto:\n\n' + raw;
 
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
+      max_tokens: 800,
       messages: [{ role: 'user', content: prompt }]
     })
   })
@@ -630,7 +633,8 @@ function parsear() {
   })
   .finally(function() {
     btn.disabled = false;
-    btn.textContent = 'Reconhecer Dados Automaticamente';
+    btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+    document.getElementById('pasteInput').value = '';
   });
 }
 
