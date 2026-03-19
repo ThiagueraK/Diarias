@@ -617,33 +617,32 @@ function parsear() {
   btn.textContent = 'Analisando...';
 
   var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
-    ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, despachos e anotacoes.' +
+    ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
     ' Retorne SOMENTE um JSON valido sem markdown com exatamente estes campos:' +
     ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
     '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
-    ' Regras de extracao:' +
-    ' num_processo: numero no formato X.XXX/AAAA encontrado apos Proc. Administrativo ou similar;' +
-    ' servidor: nome completo em maiusculas SEM cargo (remover palavras como Motorista, Servidor, condutor, medico, enfermeiro etc);' +
-    ' placa: formato AAA-0000 ou AAA0A00 (padrao Mercosul);' +
-    ' data_saida: procure por Data de Saida ou similar, formato final DD/MM/AAAA;' +
-    ' data_chegada: procure por Data de Chegada ou similar, formato final DD/MM/AAAA;' +
-    ' hora_saida: procure por Hora de Saida ou similar, formato HH:MM;' +
-    ' hora_chegada: procure por Hora de Chegada ou similar, formato HH:MM;' +
-    ' cidade: nome da cidade destino em maiusculas sem UF;' +
-    ' uf: sigla do estado em 2 letras maiusculas, se nao encontrado use RS;' +
-    ' motivo: siga estas regras em ordem:' +
-    ' - Se houver paciente sendo levado/transportado/internado: TRANSPORTE DE PACIENTE [NOME COMPLETO] A [CLINICA/HOSPITAL];' +
-    ' - Se for buscar/trazer paciente: BUSCAR PACIENTE [NOME COMPLETO] EM [CLINICA/HOSPITAL];' +
-    ' - Se for conduzir servidor: CONDUZIR SERVIDOR [NOME] A [DESTINO];' +
-    ' - Nunca abrevie nomes proprios;' +
-    ' - Se nao identificar motivo use null.' +
-    ' IMPORTANTE: procure os dados em todo o texto, nao apenas nos campos de formulario.' +
-    ' As datas podem aparecer no formato DD/MM/AAAA ou DD/MM/AA.' +
-    ' Campos como Data de Saida*, Data de Chegada*, Hora de Saida*, Hora de Chegada* tem o asterisco como parte do label.' +
-    ' O valor do campo pode estar na mesma linha ou na linha seguinte ao label.' +
-    ' Exemplo: "Data de Saida*: 02/03/2026" ou "Data de Saida*:\n02/03/2026".' +
-    ' Para data_saida e data_chegada: se forem iguais, repita o mesmo valor nos dois campos.' +
-    ' Use null apenas se realmente nao encontrar o campo. Texto:\n\n' + raw;
+    ' Regras:' +
+    ' num_processo: numero no formato X.XXX/AAAA apos Proc. Administrativo;' +
+    ' servidor: nome completo em MAIUSCULAS, remover cargos (Motorista, condutor, medico etc) e matriculas (Matr:XXXXX);' +
+    ' placa: somente os caracteres da placa no formato AAA0000 ou AAA0A00, ignorar modelo do veiculo antes da placa (ex: SPIN TQU 6B33 -> TQU6B33);' +
+    ' data_saida: DD/MM/AAAA;' +
+    ' data_chegada: DD/MM/AAAA;' +
+    ' hora_saida: HH:MM;' +
+    ' hora_chegada: HH:MM;' +
+    ' cidade: cidade destino em MAIUSCULAS sem UF;' +
+    ' uf: sigla 2 letras, padrao RS se nao encontrar;' +
+    ' motivo: extraia do texto livre, campos de observacao, descricao ou qualquer parte do texto que indique o objetivo da viagem.' +
+    ' Formate o motivo seguindo estas regras:' +
+    ' - Paciente sendo levado/transportado/internado/encaminhado: TRANSPORTE DE PACIENTE [NOME COMPLETO] A [CLINICA/HOSPITAL];' +
+    ' - Buscar/trazer/retorno de paciente: BUSCAR PACIENTE [NOME COMPLETO] EM [CLINICA/HOSPITAL];' +
+    ' - Conduzir servidor: CONDUZIR SERVIDOR [NOME] A [DESTINO];' +
+    ' - Abreviacoes comuns: p/ = para, internacao = internacao, ONCO = ONCOLOGIA, HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA;' +
+    ' - Expanda abreviacoes e corrija nomes de hospitais para o nome completo;' +
+    ' - Nunca abrevie nomes proprios de pacientes;' +
+    ' - Se mencionar nome de paciente sem campo explicito, inclua no motivo;' +
+    ' - Se nao encontrar motivo use null.' +
+    ' DATAS: o valor pode estar na mesma linha ou linha seguinte ao label. Se iguais repita nos dois campos.' +
+    ' Use null apenas se realmente nao encontrar. Texto:\n\n' + raw;
 
   var apiKey = localStorage.getItem('sgd_apikey') || '';
   if (!apiKey) {
