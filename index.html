@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.42</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.43</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -538,7 +538,10 @@ function parsear() {
     '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
     ' Regras:' +
     ' num_processo: formato X.XXX/AAAA apos Proc. Administrativo;' +
-    ' servidor: nome completo em MAIUSCULAS, remover cargos (motorista, tecnico, enfermeiro, coordenador etc) e matriculas (Matr:XXXXX);' +
+    ' servidor: use EXCLUSIVAMENTE o nome do campo "Motorista ou Servidor*:" do formulario.' +
+    ' IGNORE completamente nomes que aparecem em despachos, assinaturas de coordenadores ou outros setores.' +
+    ' Remova cargos (motorista, tecnico, enfermeiro, coordenador etc) e matriculas (Matr:XXXXX).' +
+    ' Coloque em MAIUSCULAS;' +
     ' placa: somente os caracteres no formato AAA0000 ou AAA0A00, ignorar marca/modelo antes da placa; se veiculo locado coloque LOCADO;' +
     ' data_saida: DD/MM/AAAA (converter formatos como 140326 para 14/03/2026);' +
     ' data_chegada: DD/MM/AAAA;' +
@@ -553,8 +556,9 @@ function parsear() {
     ' TRANSPORTE DE PACIENTES [NOME1], [NOME2] E [NOME3] A [CLINICA/HOSPITAL]' +
     ' Formato quando ha apenas 1 paciente: TRANSPORTE DE PACIENTE [NOME] A [CLINICA/HOSPITAL]' +
     ' Formato quando vai buscar/trazer/retornar com pacientes: BUSCAR PACIENTE(S) [NOMES] NO/NA [CLINICA/HOSPITAL]' +
-    ' IMPORTANTE: para buscar use sempre o campo Clinica de destino como local de onde vai buscar.' +
-    ' Mesmo que o texto diga apenas buscar sem mencionar local, use a Clinica de destino do formulario.' +
+    ' IMPORTANTE: para buscar/trazer use SEMPRE o campo "Clinica de destino" como local de onde vai buscar.' +
+    ' Mesmo que o texto nao mencione local explicitamente, use a Clinica de destino.' +
+    ' Expanda a clinica: HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO.' +
     ' Formato quando acompanha sem nomes individuais: use o texto descritivo da lista como motivo em MAIUSCULAS.' +
     ' Expanda abreviacoes de clinicas:' +
     ' HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA,' +
