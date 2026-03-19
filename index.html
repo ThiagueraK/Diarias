@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.45</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.47</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -531,45 +531,25 @@ function parsear() {
   btn.disabled = true;
   btn.textContent = 'Analisando com IA...';
 
-  var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
-    ' Analise TODO o texto com maxima atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
-    ' Retorne SOMENTE um JSON valido sem markdown com exatamente estes campos:' +
-    ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
-    '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
-    ' Regras:' +
-    ' num_processo: formato X.XXX/AAAA apos Proc. Administrativo;' +
-    ' servidor: use EXCLUSIVAMENTE o nome do campo "Motorista ou Servidor*:" do formulario.' +
-    ' IGNORE completamente nomes que aparecem em despachos, assinaturas de coordenadores ou outros setores.' +
-    ' Remova cargos (motorista, tecnico, enfermeiro, coordenador etc) e matriculas (Matr:XXXXX).' +
-    ' Coloque em MAIUSCULAS;' +
-    ' placa: somente os caracteres no formato AAA0000 ou AAA0A00, ignorar marca/modelo antes da placa; se veiculo locado coloque LOCADO;' +
-    ' data_saida: DD/MM/AAAA (converter formatos como 140326 para 14/03/2026);' +
-    ' data_chegada: DD/MM/AAAA;' +
-    ' hora_saida: HH:MM (converter 0900 para 09:00, 06 HS para 06:00, 18.30 HS para 18:30);' +
-    ' hora_chegada: HH:MM;' +
-    ' cidade: cidade destino em MAIUSCULAS sem UF;' +
-    ' uf: sigla 2 letras maiusculas, padrao RS se nao encontrar;' +
-    ' motivo: REGRA PRINCIPAL - primeiro verifique se ha pacientes.' +
-    ' Se NAO houver pacientes (Lista de Paciente vazia), use o campo "Clinica de destino" como motivo em MAIUSCULAS.' +
-    ' Exemplos sem pacientes: "BUSCAR VEICULO EM CONSERTO", "BUSCAR MEDICAMENTOS", "REUNIAO NA SECRETARIA".' +
-    ' Se houver pacientes, leia TODO o texto e colete TODOS os nomes mencionados em qualquer parte.' +
-    ' Os nomes podem estar no campo Lista de Paciente(s), em linhas separadas, em texto livre ou em qualquer outra parte.' +
-    ' NUNCA omita nenhum nome. NUNCA abrevie nomes.' +
-    ' Formato quando ha pacientes sendo levados/transportados/internados:' +
-    ' TRANSPORTE DE PACIENTES [NOME1], [NOME2] E [NOME3] A [CLINICA/HOSPITAL]' +
-    ' Formato quando ha apenas 1 paciente: TRANSPORTE DE PACIENTE [NOME] A [CLINICA/HOSPITAL]' +
-    ' Formato quando vai buscar/trazer/retornar com pacientes: BUSCAR PACIENTE(S) [NOMES] NO/NA [CLINICA/HOSPITAL]' +
-    ' IMPORTANTE: para buscar/trazer use SEMPRE o campo "Clinica de destino" como local de onde vai buscar.' +
-    ' Mesmo que o texto nao mencione local explicitamente, use a Clinica de destino.' +
-    ' Expanda a clinica: HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO.' +
-    ' Formato quando acompanha sem nomes individuais: use o texto descritivo da lista como motivo em MAIUSCULAS.' +
-    ' Expanda abreviacoes de clinicas:' +
-    ' HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA,' +
-    ' HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO,' +
-    ' ONCO = ONCOLOGIA,' +
-    ' HCOS = HOSPITAL DE CARIDADE DE SANTA MARIA,' +
-    ' UPA = UNIDADE DE PRONTO ATENDIMENTO.' +
-    ' Use null apenas se realmente nao houver motivo. Texto:\n\n' + raw;
+  var prompt =
+    'Voce e um agente administrativo especializado em processos de diarias de viagem da Prefeitura de Tupancireta/RS.\n'
+    + 'Leia TODO o texto do processo abaixo com atencao total e extraia os dados preenchendo o JSON.\n'
+    + 'Raciocine sobre o conteudo — nao dependa apenas de campos rotulados. O texto pode ter dados em campos de formulario, texto livre, listas, observacoes ou qualquer parte.\n\n'
+    + 'Retorne SOMENTE um objeto JSON valido, sem explicacoes, sem markdown, sem texto antes ou depois.\n\n'
+    + 'Campos do JSON:\n'
+    + '{\n'
+    + '  "num_processo": "numero no formato X.XXX/AAAA que aparece apos Proc. Administrativo",\n'
+    + '  "servidor": "nome completo do motorista ou servidor em MAIUSCULAS — use EXCLUSIVAMENTE o campo Motorista ou Servidor do formulario, ignore nomes de coordenadores, secretarias ou assinantes de despachos",\n'
+    + '  "placa": "somente a placa no formato AAA0000 ou AAA0A00 — ignore marca e modelo do veiculo; se for veiculo locado sem placa coloque LOCADO",\n'
+    + '  "data_saida": "data no formato DD/MM/AAAA — converta qualquer formato como 140326 para 14/03/2026",\n'
+    + '  "data_chegada": "data no formato DD/MM/AAAA",\n'
+    + '  "hora_saida": "horario no formato HH:MM — converta 0900 para 09:00, 06 HS para 06:00, 18.30 HS para 18:30",\n'
+    + '  "hora_chegada": "horario no formato HH:MM",\n'
+    + '  "cidade": "cidade de destino em MAIUSCULAS sem UF",\n'
+    + '  "uf": "sigla do estado em 2 letras maiusculas, padrao RS se nao encontrar",\n'
+    + '  "motivo": "descreva o objetivo real da viagem em MAIUSCULAS. Raciocine sobre o contexto: pode ser transporte de pacientes, buscar paciente, buscar veiculo, reuniao, consulta, etc. Se houver pacientes liste TODOS os nomes. Expanda abreviacoes: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA, HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA. Formato sugerido: TRANSPORTE DE PACIENTES [NOMES] A [LOCAL] ou BUSCAR PACIENTE [NOME] NO [LOCAL] ou o texto que melhor descreve a viagem"\n'
+    + '}\n\n'
+    + 'Processo:\n\n' + raw;
 
   fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
     method: 'POST',
@@ -723,14 +703,41 @@ function parsearLocal(raw) {
     }
   }
 
-  // Estrategia 2: texto livre com levar/internar/paciente
+  // Estrategia 2: texto livre com levar/internar/paciente + nomes em linhas seguintes
   if (!found.motivo) {
-    var textoLivre = raw.match(/(?:levar|internar|transportar)\s+paciente[^\n]*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})/i);
-    if (textoLivre) {
-      var nomeLivre = textoLivre[1].trim().toUpperCase();
-      var destLivre = raw.match(/(?:na|no|para)\s+((?:ONCO|HUSM|Hospital|Cl.nica|UPA|Santa Casa)[^\n]+)/i);
-      var destStr = destLivre ? destLivre[1].trim().toUpperCase() : (clinica || '');
-      found.motivo = ('TRANSPORTE DE PACIENTE ' + nomeLivre + (destStr ? ' A ' + destStr : '')).trim();
+    // Detecta bloco de texto livre: acao + nomes em linhas separadas
+    var blocoM = raw.match(/(?:levar|buscar|trazer|internar|transportar)[^\n]*\n([\s\S]{0,300}?)(?=\n_|\nAnexo|\nDespacho|\nQuem)/i);
+    if (blocoM) {
+      var bloco = blocoM[0];
+      // Detecta acao e destino
+      var isBuscarL = /buscar|trazer|retorno/i.test(bloco);
+      var destM = bloco.match(/(?:na|no|para|em)\s+((?:ONCO|HUSM|HCAA|HCOS|Hospital|Cl.nica|UPA|Santa Casa|Oncologia)[^\n,]+)/i);
+      var destL = destM ? destM[1].trim() : (clinica || '');
+      // Expande abreviacoes
+      destL = destL.replace(/\bHUSM\b/gi,'HOSPITAL UNIVERSITARIO DE SANTA MARIA');
+      destL = destL.replace(/\bHCAA\b/gi,'HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO');
+      destL = destL.replace(/\bONCO\b/gi,'ONCOLOGIA');
+      // Coleta nomes das linhas seguintes
+      var linhasBloco = blocoM[1].split('\n').map(function(l){return l.trim();});
+      var nomesL = [];
+      for (var lb = 0; lb < linhasBloco.length; lb++) {
+        var lb2 = linhasBloco[lb];
+        if (!lb2 || lb2.length < 4) continue;
+        // Remove prefixos como '+ac...' 
+        lb2 = lb2.replace(/^\+ac\.+\s*/i,'');
+        if (!lb2 || lb2.length < 4) continue;
+        if (/^(levar|buscar|trazer|despacho|anexo|quem|Marcos|Thiago|Ramonny|Giovani)/i.test(lb2)) continue;
+        if (lb2.split(' ').length >= 2) nomesL.push(lb2.toUpperCase());
+      }
+      if (nomesL.length > 0) {
+        var pluralL = nomesL.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
+        var prefixoL = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
+        var nomesStrL = nomesL.length === 1 ? nomesL[0] : nomesL.slice(0,-1).join(', ') + ' E ' + nomesL[nomesL.length-1];
+        var sufixoL = destL ? (isBuscarL ? ' EM ' : ' A ') + destL.toUpperCase() : '';
+        found.motivo = (prefixoL + nomesStrL + sufixoL).trim();
+      } else if (destL) {
+        found.motivo = (isBuscarL ? 'BUSCAR' : 'TRANSPORTE') + ' A ' + destL.toUpperCase();
+      }
     } else if (clinica) {
       // Sem pacientes — usa campo clinica/destino diretamente como motivo
       found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
