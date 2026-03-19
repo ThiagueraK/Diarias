@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.50</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.51</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1294,18 +1294,23 @@ function resetar() {
 // INIT
 // ═══════════════════════════════════════════════════════
 // Abre IndexedDB, migra localStorage se necessário, carrega dados e inicia UI
-// Verifica se extensao enviou dados
-var dadosPendentes = localStorage.getItem('sgd_paste_pendente');
-if (dadosPendentes) {
-  localStorage.removeItem('sgd_paste_pendente');
-  setTimeout(function() {
-    document.getElementById('pasteInput').value = dadosPendentes;
+// Verifica se extensao enviou dados via hash na URL
+function lerDadosExtensao() {
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('dados=') === -1) return;
+  try {
+    var encoded = hash.replace('#dados=', '').replace(/^.*dados=/, '');
+    var decoded = decodeURIComponent(escape(atob(encoded)));
+    if (!decoded) return;
+    history.replaceState(null, '', window.location.pathname);
+    document.getElementById('pasteInput').value = decoded;
     document.getElementById('tabGerador').click();
     document.getElementById('pasteInput').scrollIntoView({behavior:'smooth'});
-    // Reconhece automaticamente
     setTimeout(function() { parsear(); }, 300);
-  }, 800);
+  } catch(e) { console.error('Erro ao ler dados da extensao:', e); }
 }
+setTimeout(lerDadosExtensao, 800);
+window.addEventListener('hashchange', lerDadosExtensao);
 
 // Carrega dados do KV na nuvem
 fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
