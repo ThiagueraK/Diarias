@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.39</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.40</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -295,9 +295,9 @@
       <div class="field">
         <label>Categoria</label>
         <div class="radio-group">
-          <div class="radio-btn"><input type="radio" name="tipo" id="t1" value="ALIMENTAÇÃO" checked><label for="t1">Alimentação</label></div>
+          <div class="radio-btn"><input type="radio" name="tipo" id="t1" value="ALIMENTAÇÃO"><label for="t1">Alimentação</label></div>
           <div class="radio-btn"><input type="radio" name="tipo" id="t2" value="HOSPEDAGEM E ALIMENTAÇÃO"><label for="t2">Hospedagem e Alimentação</label></div>
-          <div class="radio-btn"><input type="radio" name="tipo" id="t3" value="TRANSPORTE"><label for="t3">Transporte</label></div>
+          <div class="radio-btn"><input type="radio" name="tipo" id="t3" value="TRANSPORTE" checked><label for="t3">Transporte</label></div>
           <div class="radio-btn"><input type="radio" name="tipo" id="t4" value="COMBUSTÍVEL"><label for="t4">Combustível</label></div>
         </div>
       </div>
@@ -814,7 +814,6 @@ function gerar() {
 
   setTimeout(function() {
     document.getElementById('outputCard').scrollIntoView({behavior:'smooth',block:'nearest'});
-    setTimeout(abrirModal, 600);
   }, 100);
 }
 
@@ -1192,7 +1191,10 @@ function baixar(conteudo, nome, tipo) {
 // ═══════════════════════════════════════════════════════
 // COPIAR
 // ═══════════════════════════════════════════════════════
-document.getElementById('btnCopy').addEventListener('click', copiar);
+document.getElementById('btnCopy').addEventListener('click', function() {
+  copiar();
+  setTimeout(abrirModal, 400);
+});
 function copiar() {
   var texto = document.getElementById('outputText').textContent;
   if (navigator.clipboard && window.isSecureContext) {
@@ -1235,7 +1237,7 @@ function resetar() {
   document.getElementById('parsedTags').innerHTML='';
   document.getElementById('outputCard').classList.remove('visible');
   document.getElementById('tipBox').style.display='none';
-  document.getElementById('t1').checked=true;
+  document.getElementById('t3').checked=true;
   document.getElementById('d1').checked=true;
   document.getElementById('campo_outra').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
