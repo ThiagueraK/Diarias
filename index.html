@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.33</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.37</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -592,17 +592,49 @@ function parsear() {
 
   var btn = document.getElementById('btnParsear');
   btn.disabled = true;
-  btn.textContent = 'Analisando...';
+  btn.textContent = 'Analisando com IA...';
 
-  try {
+  var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
+    ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
+    ' Retorne SOMENTE um JSON valido sem markdown com exatamente estes campos:' +
+    ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
+    '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
+    ' Regras:' +
+    ' num_processo: numero no formato X.XXX/AAAA apos Proc. Administrativo;' +
+    ' servidor: nome completo em MAIUSCULAS, remover cargos e matriculas;' +
+    ' placa: somente os caracteres da placa no formato AAA0000 ou AAA0A00, ignorar modelo do veiculo;' +
+    ' data_saida: DD/MM/AAAA; data_chegada: DD/MM/AAAA;' +
+    ' hora_saida: HH:MM; hora_chegada: HH:MM;' +
+    ' cidade: cidade destino em MAIUSCULAS sem UF;' +
+    ' uf: sigla 2 letras, padrao RS se nao encontrar;' +
+    ' motivo: se houver pacientes liste todos separados por virgula e E antes do ultimo.' +
+    ' Formato: TRANSPORTE DE PACIENTE(S) [NOMES] A [CLINICA] ou BUSCAR PACIENTE(S) [NOMES] EM [LOCAL].' +
+    ' Se nao houver nomes use o texto da lista como motivo.' +
+    ' Expanda abreviacoes: HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO = ONCOLOGIA.' +
+    ' Use null se nao encontrar. Texto:\n\n' + raw;
+
+  fetch('https://diarias.aceitacoes.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: prompt })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var texto = data.text || '';
+    texto = texto.replace(/```json|```/g,'').trim();
+    if (!texto) throw new Error('Resposta vazia');
+    var parsed = JSON.parse(texto);
+    preencherCampos(parsed);
+  })
+  .catch(function(e) {
+    console.error('IA erro:', e.message);
     preencherCampos(parsearLocal(raw));
-  } catch(e) {
-    console.error('Erro parser:', e);
-  }
-
-  btn.disabled = false;
-  btn.textContent = '\uD83D\uDD0D Reconhecer Dados Automaticamente';
-  document.getElementById('pasteInput').value = '';
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = '\uD83D\uDD0D Reconhecer Dados Automaticamente';
+    document.getElementById('pasteInput').value = '';
+  });
 }
 
 
@@ -632,19 +664,48 @@ function parsearLocal(raw) {
   if (m) {
     var placaM = m[1].match(/\b([A-Z]{3}[\s\-]?[0-9][A-Z0-9][0-9]{2})\b/i);
     if (placaM) found.placa = placaM[1].replace(/[\s\-]/g,'').toUpperCase();
+    // Veiculo locado — sem placa valida
+    else if (/locado|alugado/i.test(m[1])) found.placa = 'LOCADO';
   }
 
   // datas
-  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
-  if (m) found.data_saida = m[1].trim();
-  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
-  if (m) found.data_chegada = m[1].trim();
+  function normalizarData(s) {
+    s = s.trim();
+    // Formato DD/MM/AAAA ou DD/MM/AA ou DD-MM-AAAA
+    if (/^\d{1,2}[\/\-]\d{1,2}/.test(s)) return s;
+    // Formato DDMMAAAA (ex: 14032026)
+    if (/^\d{8}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/'+s.slice(4);
+    // Formato DDMMAA (ex: 140326)
+    if (/^\d{6}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/20'+s.slice(4);
+    return s;
+  }
+  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{6,8}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
+  if (m) found.data_saida = normalizarData(m[1]);
+  m = raw.match(/Data de Chegada[^:]*:\s*(\d{6,8}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
+  if (m) found.data_chegada = normalizarData(m[1]);
 
   // horas
-  m = raw.match(/Hora de Sa.da[^:]*:\s*(\d{1,2}:\d{2})/i);
-  if (m) found.hora_saida = m[1].trim();
-  m = raw.match(/Hora de Chegada[^:]*:\s*(\d{1,2}:\d{2})/i);
-  if (m) found.hora_chegada = m[1].trim();
+  // Hora — aceita 06:00, 06 HS, 18.30 HS, 18h30
+  function extrairHora(texto) {
+    texto = texto.trim();
+    // Formato HH:MM
+    var m1 = texto.match(/(\d{1,2}):(\d{2})/);
+    if (m1) return m1[1].padStart(2,'0') + ':' + m1[2];
+    // Formato HH.MM HS
+    var m2 = texto.match(/(\d{1,2})\.(\d{2})\s*(?:HS|H|hrs?)?/i);
+    if (m2) return m2[1].padStart(2,'0') + ':' + m2[2];
+    // Formato HHMM sem separador (ex: 0900, 1500)
+    var m4 = texto.match(/^(\d{4})$/);
+    if (m4) return m4[1].slice(0,2) + ':' + m4[1].slice(2);
+    // Formato HH HS (sem minutos)
+    var m3 = texto.match(/(\d{1,2})\s*(?:HS|H|hrs?)/i);
+    if (m3) return m3[1].padStart(2,'0') + ':00';
+    return null;
+  }
+  m = raw.match(/Hora de Sa.da[^:]*:\s*([^\n\r]+)/i);
+  if (m) { var h = extrairHora(m[1]); if (h) found.hora_saida = h; }
+  m = raw.match(/Hora de Chegada[^:]*:\s*([^\n\r]+)/i);
+  if (m) { var h2 = extrairHora(m[1]); if (h2) found.hora_chegada = h2; }
 
   // cidade + UF
   m = raw.match(/Cidade de destino\*?:\s*([^\n\r]+)/i);
@@ -687,12 +748,15 @@ function parsearLocal(raw) {
     if (nomes.length > 0) {
       var plural = nomes.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
       var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
-      // Formata lista: A, B, C E D
       var nomesStr = nomes.length === 1
         ? nomes[0]
         : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
       var sufixo = clinica ? (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase() : '';
       found.motivo = (prefixo + nomesStr + sufixo).trim();
+    } else if (listaTexto.trim()) {
+      // Lista tem texto mas sem nomes individuais — usa o texto direto como motivo
+      var textoLista = listaTexto.trim().replace(/\.$/, '').toUpperCase();
+      found.motivo = textoLista;
     }
   }
 
