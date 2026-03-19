@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="SGD Diarias">
 <meta name="application-name" content="SGD Diarias">
 <meta name="theme-color" content="#0f1117">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com https://maps.google.com; connect-src *;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://generativelanguage.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com https://openstreetmap.org https://*.openstreetmap.org https://nominatim.openstreetmap.org; connect-src *; frame-src https://*.openstreetmap.org;">
 <meta name="msapplication-TileColor" content="#0f1117">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
@@ -249,6 +249,10 @@
   .btn-pc-fechar{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
   .btn-pc-fechar:hover{border-color:var(--text-muted);color:var(--text);}
 
+  .btn-config{margin-left:auto;background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text-muted);cursor:pointer;font-size:16px;transition:all .15s;}
+  .btn-config:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-config.ativa{border-color:var(--success);color:var(--success);}
+
   @media(max-width:580px){
     .grid-2{grid-template-columns:1fr;} .span-2{grid-column:span 1;}
     .radio-group{flex-wrap:wrap;} .radio-btn{flex:1 1 45%;}
@@ -263,7 +267,25 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
+    <button class="btn-config" id="btnConfig" title="Configurar chave de API">⚙️</button>
   </header>
+
+  <!-- Modal de configuração -->
+  <div class="modal-overlay" id="modalConfig" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;">
+    <div class="modal" style="max-width:460px;">
+      <h2>⚙️ Configuração</h2>
+      <p style="font-size:13px;color:var(--text-muted);font-family:var(--mono);margin:8px 0 20px;">Cole sua chave da API do Google Gemini para ativar o reconhecimento inteligente. A chave fica salva no navegador.</p>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Chave de API Google Gemini</label>
+        <input type="password" id="inputApiKey" placeholder="AIza...">
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:16px;">Obtenha sua chave gratuita em <strong>aistudio.google.com</strong> → Get API Key</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-modal-skip" id="btnConfigCancelar">Cancelar</button>
+        <button class="btn-modal-ok" id="btnConfigSalvar">💾 Salvar Chave</button>
+      </div>
+    </div>
+  </div>
 
   <!-- TABS -->
   <div class="tabs">
@@ -623,26 +645,36 @@ function parsear() {
     ' Para data_saida e data_chegada: se forem iguais, repita o mesmo valor nos dois campos.' +
     ' Use null apenas se realmente nao encontrar o campo. Texto:\n\n' + raw;
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  var apiKey = localStorage.getItem('sgd_apikey') || '';
+  if (!apiKey) {
+    // Sem chave — usar parser local
+    preencherCampos(parsearLocal(raw));
+    btn.disabled = false;
+    btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+    document.getElementById('pasteInput').value = '';
+    return;
+  }
+
+  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=' + apiKey;
+
+  fetch(geminiUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: prompt }]
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0, maxOutputTokens: 800 }
     })
   })
   .then(function(r){ return r.json(); })
   .then(function(data) {
-    var texto = (data.content||[]).map(function(c){ return c.text||''; }).join('');
-    console.log('Resposta IA:', texto);
+    var texto = ((data.candidates||[])[0]||{}).content;
+    texto = ((texto||{}).parts||[])[0];
+    texto = (texto||{}).text || '';
     texto = texto.replace(/```json|```/g,'').trim();
     var parsed = JSON.parse(texto);
-    console.log('JSON parsed:', JSON.stringify(parsed));
     preencherCampos(parsed);
   })
   .catch(function() {
-    // Fallback: parser local se API falhar
     preencherCampos(parsearLocal(raw));
   })
   .finally(function() {
@@ -796,21 +828,60 @@ function gerar() {
 }
 
 function gerarMapa(cidade, uf) {
-  var origem = 'Tupancireta,RS,Brasil';
-  var destino = cidade.trim() + ',' + uf.trim() + ',Brasil';
+  var origem = 'Tupancireta, RS, Brasil';
+  var destino = cidade + ', ' + uf + ', Brasil';
 
-  // Embed sem API key
-  var embedUrl = 'https://maps.google.com/maps?q=' +
-    encodeURIComponent(origem) + '+to:' +
-    encodeURIComponent(destino) +
-    '&output=embed&hl=pt-BR';
+  // OpenStreetMap embed via openrouteservice — sem API key, sem CORS
+  var embedUrl = 'https://www.openstreetmap.org/export/embed.html' +
+    '?bbox=-56.0%2C-31.0%2C-50.0%2C-27.0' +
+    '&layer=mapnik' +
+    '&marker=' + encodeURIComponent(destino);
 
-  // URL para abrir no Google Maps
+  // Usar uMap para rota visual — funciona sem iframe bloqueio
+  // Alternativa: usar leaflet embed do osm via from/to
+  var routeUrl = 'https://router.project-osrm.org/route/v1/driving/';
+
+  // Geocodificar origem e destino com Nominatim e montar iframe
+  var iframeEl = document.getElementById('mapaIframe');
+  iframeEl.src = '';
+
+  // Buscar coordenadas com Nominatim (OpenStreetMap geocoder)
+  Promise.all([
+    fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(origem) + '&format=json&limit=1').then(function(r){ return r.json(); }),
+    fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(destino) + '&format=json&limit=1').then(function(r){ return r.json(); })
+  ]).then(function(results) {
+    var orig = results[0][0];
+    var dest = results[1][0];
+    if (!orig || !dest) {
+      iframeEl.src = 'https://www.openstreetmap.org/export/embed.html?layer=mapnik';
+      return;
+    }
+    var oLon = parseFloat(orig.lon), oLat = parseFloat(orig.lat);
+    var dLon = parseFloat(dest.lon), dLat = parseFloat(dest.lat);
+
+    // Calcular bbox para enquadrar os dois pontos
+    var minLon = Math.min(oLon, dLon) - 0.5;
+    var maxLon = Math.max(oLon, dLon) + 0.5;
+    var minLat = Math.min(oLat, dLat) - 0.3;
+    var maxLat = Math.max(oLat, dLat) + 0.3;
+
+    // Embed OpenStreetMap com marcadores nos dois pontos
+    var embedSrc = 'https://www.openstreetmap.org/export/embed.html' +
+      '?bbox=' + minLon + '%2C' + minLat + '%2C' + maxLon + '%2C' + maxLat +
+      '&layer=mapnik' +
+      '&marker=' + oLat + '%2C' + oLon +
+      '&marker=' + dLat + '%2C' + dLon;
+
+    iframeEl.src = embedSrc;
+  }).catch(function() {
+    iframeEl.src = 'https://www.openstreetmap.org/export/embed.html?layer=mapnik';
+  });
+
+  // URL Google Maps para abrir rota completa
   var mapsUrl = 'https://www.google.com/maps/dir/' +
     encodeURIComponent('Tupancireta RS') + '/' +
     encodeURIComponent(cidade + ' ' + uf);
 
-  document.getElementById('mapaIframe').src = embedUrl;
   document.getElementById('mapaLinkExt').href = mapsUrl;
   document.getElementById('mapaCard').classList.add('visible');
 
@@ -1522,6 +1593,47 @@ document.getElementById('importFileInput').addEventListener('change', function(e
 
 // Inicializar info de backup
 atualizarBackupInfo();
+
+// ═══════════════════════════════════════════════════════
+// CONFIGURAÇÃO API KEY
+// ═══════════════════════════════════════════════════════
+function atualizarBtnConfig() {
+  var key = localStorage.getItem('sgd_apikey') || '';
+  var btn = document.getElementById('btnConfig');
+  if (key && key.startsWith('sk-')) {
+    btn.classList.add('ativa');
+    btn.title = 'API configurada ✅ — clique para alterar';
+  } else {
+    btn.classList.remove('ativa');
+    btn.title = 'Configurar chave de API';
+  }
+}
+
+document.getElementById('btnConfig').addEventListener('click', function() {
+  var key = localStorage.getItem('sgd_apikey') || '';
+  document.getElementById('inputApiKey').value = key;
+  var modal = document.getElementById('modalConfig');
+  modal.style.display = 'flex';
+  document.getElementById('inputApiKey').focus();
+});
+
+document.getElementById('btnConfigSalvar').addEventListener('click', function() {
+  var key = document.getElementById('inputApiKey').value.trim();
+  if (key && !key.startsWith('AIza')) {
+    alert('Chave invalida. A chave do Gemini deve comecar com AIza...');
+    return;
+  }
+  localStorage.setItem('sgd_apikey', key);
+  document.getElementById('modalConfig').style.display = 'none';
+  atualizarBtnConfig();
+  alert(key ? 'Chave Gemini salva! Reconhecimento com IA ativo.' : 'Chave removida. Usando parser local.');
+});
+
+document.getElementById('btnConfigCancelar').addEventListener('click', function() {
+  document.getElementById('modalConfig').style.display = 'none';
+});
+
+atualizarBtnConfig();
 
 }); // DOMContentLoaded
 </script>
