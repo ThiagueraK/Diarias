@@ -625,7 +625,7 @@ function parsear() {
 
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 800,
@@ -659,7 +659,7 @@ function parsearLocal(raw) {
   if (m) found.num_processo = m[1].trim();
   m = raw.match(/Motorista ou Servidor\*?:\s*(.+)/i);
   if (m) found.servidor = m[1].trim().toUpperCase();
-  m = raw.match(/Placa do Ve[ii]culo[^:]*:\s*([A-Z0-9\- ]+)/i);
+  m = raw.match(/Placa[^:]*:\s*(\S+)/i);
   if (m) found.placa = m[1].trim().toUpperCase();
   m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?)/i);
   if (m) found.data_saida = m[1].trim();
