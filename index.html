@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="SGD Diarias">
 <meta name="application-name" content="SGD Diarias">
 <meta name="theme-color" content="#0f1117">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://generativelanguage.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com https://openstreetmap.org https://*.openstreetmap.org https://nominatim.openstreetmap.org; connect-src *; frame-src https://*.openstreetmap.org;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://generativelanguage.googleapis.com https://corsproxy.io https://fonts.googleapis.com https://fonts.gstatic.com https://openstreetmap.org https://*.openstreetmap.org https://nominatim.openstreetmap.org; connect-src *; frame-src https://*.openstreetmap.org;">
 <meta name="msapplication-TileColor" content="#0f1117">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
@@ -277,7 +277,7 @@
       <p style="font-size:13px;color:var(--text-muted);font-family:var(--mono);margin:8px 0 20px;">Cole sua chave da API do Google Gemini para ativar o reconhecimento inteligente. A chave fica salva no navegador.</p>
       <div class="field" style="margin-bottom:14px;">
         <label>Chave de API Google Gemini</label>
-        <input type="password" id="inputApiKey" placeholder="AIza...">
+        <input type="password" autocomplete="off" id="inputApiKey" placeholder="AIza...">
       </div>
       <p style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:16px;">Obtenha sua chave gratuita em <strong>aistudio.google.com</strong> → Get API Key</p>
       <div style="display:flex;gap:10px;">
@@ -326,11 +326,11 @@
     <div class="card">
       <div class="card-title">02 — Servidor e Destino</div>
       <div class="grid-2">
-        <div class="field span-2"><label>Nome do Servidor / Credor</label><input type="text" id="servidor" placeholder="Nome completo em maiúsculas"></div>
-        <div class="field"><label>Nº do Processo</label><input type="text" id="num_processo" placeholder="Ex: 2.263/2026"></div>
-        <div class="field"><label>Cidade de Destino</label><input type="text" id="cidade" placeholder="Ex: SANTA MARIA"></div>
-        <div class="field"><label>UF</label><input type="text" id="uf" placeholder="RS" maxlength="2"></div>
-        <div class="field span-2"><label>Motivo da Viagem</label><input type="text" id="motivo" placeholder="Ex: TRANSPORTE DE PACIENTE"></div>
+        <div class="field span-2"><label>Nome do Servidor / Credor</label><input type="text" autocomplete="off" id="servidor" placeholder="Nome completo em maiúsculas"></div>
+        <div class="field"><label>Nº do Processo</label><input type="text" autocomplete="off" id="num_processo" placeholder="Ex: 2.263/2026"></div>
+        <div class="field"><label>Cidade de Destino</label><input type="text" autocomplete="off" id="cidade" placeholder="Ex: SANTA MARIA"></div>
+        <div class="field"><label>UF</label><input type="text" autocomplete="off" id="uf" placeholder="RS" maxlength="2"></div>
+        <div class="field span-2"><label>Motivo da Viagem</label><input type="text" autocomplete="off" id="motivo" placeholder="Ex: TRANSPORTE DE PACIENTE"></div>
       </div>
     </div>
 
@@ -355,9 +355,9 @@
       </div>
       <div class="field" id="campo_outra" style="display:none;margin-top:12px;">
         <label>Descreva o fechamento</label>
-        <input type="text" id="outra_desc" placeholder="Ex: VALOR REFERENTE A VIAGEM INTERESTADUAL">
+        <input type="text" autocomplete="off" id="outra_desc" placeholder="Ex: VALOR REFERENTE A VIAGEM INTERESTADUAL">
       </div>
-      <div class="field" style="margin-top:14px;"><label>Placa do Veículo (opcional)</label><input type="text" id="placa" placeholder="Ex: TQU-6B52"></div>
+      <div class="field" style="margin-top:14px;"><label>Placa do Veículo (opcional)</label><input type="text" autocomplete="off" id="placa" placeholder="Ex: TQU-6B52"></div>
     </div>
 
     <button class="btn-generate" id="btnGerar">⚡ Gerar Descrição</button>
@@ -654,26 +654,44 @@ function parsear() {
     return;
   }
 
-  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + apiKey;
+  var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(geminiUrl);
 
-  fetch(geminiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: 800 }
-    })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data) {
-    var texto = ((data.candidates||[])[0]||{}).content;
-    texto = ((texto||{}).parts||[])[0];
-    texto = (texto||{}).text || '';
+  var reqBody = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0, maxOutputTokens: 800 }
+  });
+
+  function parseGemini(data) {
+    if (data.error) throw new Error(data.error.message);
+    var texto = (((data.candidates||[])[0]||{}).content||{});
+    texto = ((texto.parts||[])[0]||{}).text || '';
     texto = texto.replace(/```json|```/g,'').trim();
-    var parsed = JSON.parse(texto);
+    if (!texto) throw new Error('Resposta vazia');
+    return JSON.parse(texto);
+  }
+
+  function tentarFetch(url) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: reqBody
+    }).then(function(r) { return r.json(); }).then(parseGemini);
+  }
+
+  tentarFetch(geminiUrl)
+  .catch(function(e1) {
+    console.log('Direto falhou, tentando proxy...', e1.message);
+    return tentarFetch(proxyUrl);
+  })
+  .then(function(parsed) {
     preencherCampos(parsed);
   })
-  .catch(function() {
+  .catch(function(e) {
+    console.error('Gemini erro:', e.message);
+    if (e.message && e.message.indexOf('429') !== -1) {
+      alert('Limite atingido. Aguarde 1 minuto e tente novamente.');
+    }
     preencherCampos(parsearLocal(raw));
   })
   .finally(function() {
