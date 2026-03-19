@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.51</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.52</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -557,7 +557,12 @@ function parsear() {
     + '  "hora_chegada": "horario no formato HH:MM",\n'
     + '  "cidade": "cidade de destino em MAIUSCULAS sem UF",\n'
     + '  "uf": "sigla do estado em 2 letras maiusculas, padrao RS se nao encontrar",\n'
-    + '  "motivo": "descreva o objetivo real da viagem em MAIUSCULAS. Raciocine sobre o contexto: pode ser transporte de pacientes, buscar paciente, buscar veiculo, reuniao, consulta, etc. Se houver pacientes liste TODOS os nomes. Expanda abreviacoes: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA, HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA. Formato sugerido: TRANSPORTE DE PACIENTES [NOMES] A [LOCAL] ou BUSCAR PACIENTE [NOME] NO [LOCAL] ou o texto que melhor descreve a viagem"\n'
+    + '  "motivo": "descreva o objetivo real da viagem em MAIUSCULAS seguindo esta logica:\n'
+    + '    1. Se Lista de Paciente(s) tiver NOMES de pessoas: TRANSPORTE DE PACIENTE(S) [TODOS OS NOMES] A [CLINICA] ou BUSCAR PACIENTE(S) [NOMES] NO [LOCAL]\n'
+    + '    2. Se Lista de Paciente(s) tiver texto descritivo SEM nomes individuais (ex: ACOMPANHAR PACIENTES PARA CONSULTA...): use esse texto descritivo INTEGRALMENTE em MAIUSCULAS como motivo\n'
+    + '    3. Se Lista de Paciente(s) estiver vazia mas Clinica de destino tiver texto descritivo (ex: buscar veiculo em conserto): use esse texto como motivo\n'
+    + '    4. Se for reuniao, consulta tecnica ou viagem administrativa: descreva o objetivo conforme o texto\n'
+    + '    Expanda sempre: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA, HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA"\n'
     + '}\n\n'
     + (servidorAncorado ? 'IMPORTANTE: O campo Motorista ou Servidor do formulario contem EXATAMENTE: "' + servidorAncorado + '". Use este valor para o campo servidor, sem alteracoes.\n\n' : '')
     + 'Processo:\n\n' + raw;
