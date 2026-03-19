@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.38</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.39</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -449,69 +449,6 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// INDEXEDDB ENGINE
-// ═══════════════════════════════════════════════════════
-var DB_NAME = 'sgd_diarias';
-var DB_VERSION = 1;
-var DB_STORE = 'processos';
-var db = null;
-
-function dbAbrir(callback) {
-  if (db) { callback(db); return; }
-  var req = indexedDB.open(DB_NAME, DB_VERSION);
-  req.onupgradeneeded = function(e) {
-    var d = e.target.result;
-    if (!d.objectStoreNames.contains(DB_STORE)) {
-      d.createObjectStore(DB_STORE, { keyPath: 'id' });
-    }
-  };
-  req.onsuccess = function(e) {
-    db = e.target.result;
-    callback(db);
-  };
-  req.onerror = function() {
-    console.error('IndexedDB erro ao abrir');
-  };
-}
-
-function dbCarregar(callback) {
-  dbAbrir(function(d) {
-    var tx = d.transaction(DB_STORE, 'readonly');
-    var store = tx.objectStore(DB_STORE);
-    var req = store.getAll();
-    req.onsuccess = function() {
-      callback(req.result || []);
-    };
-    req.onerror = function() { callback([]); };
-  });
-}
-
-function dbSalvar(lista) {
-  dbAbrir(function(d) {
-    var tx = d.transaction(DB_STORE, 'readwrite');
-    var store = tx.objectStore(DB_STORE);
-    store.clear();
-    lista.forEach(function(p) { store.put(p); });
-  });
-}
-
-function dbMigrarLocalStorage(callback) {
-  // Migra dados do localStorage para IndexedDB se existirem
-  var antigos = localStorage.getItem('sgd_processos');
-  if (!antigos) { callback(); return; }
-  try {
-    var lista = JSON.parse(antigos);
-    if (lista.length > 0) {
-      dbSalvar(lista);
-      processos = lista;
-      localStorage.removeItem('sgd_processos');
-      console.log('Migrados ' + lista.length + ' processos do localStorage para IndexedDB.');
-    }
-  } catch(e) { console.error('Erro na migracao:', e); }
-  callback();
-}
-
 document.addEventListener('DOMContentLoaded', function() {
 // ═══════════════════════════════════════════════════════
 // ESTADO
@@ -976,10 +913,8 @@ function adicionarProcesso(dados) {
   salvar(); atualizarBadge();
 }
 function salvar() {
-  // Salva no IndexedDB local
-  dbSalvar(processos);
   atualizarBackupInfo();
-  // Sincroniza com KV na nuvem
+  // Salva no KV na nuvem
   fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1312,39 +1247,20 @@ function resetar() {
 // INIT
 // ═══════════════════════════════════════════════════════
 // Abre IndexedDB, migra localStorage se necessário, carrega dados e inicia UI
-dbAbrir(function() {
-  dbMigrarLocalStorage(function() {
-    dbCarregar(function(listaLocal) {
-      // Tenta carregar do KV na nuvem
-      fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        var listaKV = data.processos || [];
-        // Mescla: usa KV se tiver mais dados, senão usa local
-        if (listaKV.length >= listaLocal.length) {
-          processos = listaKV;
-          dbSalvar(processos); // Atualiza local com KV
-        } else {
-          processos = listaLocal;
-          // Sincroniza local para KV
-          fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ processos: processos })
-          }).catch(function(){});
-        }
-      })
-      .catch(function() {
-        // Sem internet — usa dados locais
-        processos = listaLocal;
-      })
-      .finally(function() {
-        document.getElementById('filtroData').value = filtroAtivo;
-        atualizarBadge();
-        atualizarBackupInfo();
-      });
-    });
-  });
+// Carrega dados do KV na nuvem
+fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
+.then(function(r){ return r.json(); })
+.then(function(data) {
+  processos = data.processos || [];
+})
+.catch(function() {
+  processos = [];
+  console.log('KV indisponivel, iniciando vazio.');
+})
+.finally(function() {
+  document.getElementById('filtroData').value = filtroAtivo;
+  atualizarBadge();
+  atualizarBackupInfo();
 });
 
 
