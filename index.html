@@ -249,10 +249,6 @@
   .btn-pc-fechar{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
   .btn-pc-fechar:hover{border-color:var(--text-muted);color:var(--text);}
 
-  .btn-config{margin-left:auto;background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text-muted);cursor:pointer;font-size:16px;transition:all .15s;}
-  .btn-config:hover{border-color:var(--accent);color:var(--accent);}
-  .btn-config.ativa{border-color:var(--success);color:var(--success);}
-
   @media(max-width:580px){
     .grid-2{grid-template-columns:1fr;} .span-2{grid-column:span 1;}
     .radio-group{flex-wrap:wrap;} .radio-btn{flex:1 1 45%;}
@@ -267,26 +263,10 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <button class="btn-config" id="btnConfig" title="Configurar chave de API">⚙️</button>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.28</span>
   </header>
 
   <!-- Modal de configuração -->
-  <div class="modal-overlay" id="modalConfig" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;">
-    <div class="modal" style="max-width:460px;">
-      <h2>⚙️ Configuração</h2>
-      <p style="font-size:13px;color:var(--text-muted);font-family:var(--mono);margin:8px 0 20px;">Cole sua chave da API do Google Gemini para ativar o reconhecimento inteligente. A chave fica salva no navegador.</p>
-      <div class="field" style="margin-bottom:14px;">
-        <label>Chave de API Google Gemini</label>
-        <input type="password" autocomplete="off" id="inputApiKey" placeholder="AIza...">
-      </div>
-      <p style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:16px;">Obtenha sua chave gratuita em <strong>aistudio.google.com</strong> → Get API Key</p>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-modal-skip" id="btnConfigCancelar">Cancelar</button>
-        <button class="btn-modal-ok" id="btnConfigSalvar">💾 Salvar Chave</button>
-      </div>
-    </div>
-  </div>
-
   <!-- TABS -->
   <div class="tabs">
     <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
@@ -604,17 +584,15 @@ document.getElementById('btnParsear').addEventListener('click', parsear);
 function parsear() {
   var raw = document.getElementById('pasteInput').value;
   if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
-  // Limpar caracteres invisíveis e normalizar espaços
   raw = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   raw = raw.replace(/[ \t]+/g,' ');
   raw = raw.replace(/\n[ \t]+/g,'\n');
   raw = raw.replace(/[ \t]+\n/g,'\n');
   raw = raw.replace(/\n{3,}/g,'\n\n');
 
-  // Mostrar loading
   var btn = document.getElementById('btnParsear');
   btn.disabled = true;
-  btn.textContent = 'Analisando...';
+  btn.textContent = 'Analisando com IA...';
 
   var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
     ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
@@ -624,74 +602,44 @@ function parsear() {
     ' Regras:' +
     ' num_processo: numero no formato X.XXX/AAAA apos Proc. Administrativo;' +
     ' servidor: nome completo em MAIUSCULAS, remover cargos (Motorista, condutor, medico etc) e matriculas (Matr:XXXXX);' +
-    ' placa: somente os caracteres da placa no formato AAA0000 ou AAA0A00, ignorar modelo do veiculo antes da placa (ex: SPIN TQU 6B33 -> TQU6B33);' +
-    ' data_saida: DD/MM/AAAA;' +
-    ' data_chegada: DD/MM/AAAA;' +
-    ' hora_saida: HH:MM;' +
-    ' hora_chegada: HH:MM;' +
+    ' placa: somente os caracteres da placa no formato AAA0000 ou AAA0A00, ignorar modelo do veiculo antes da placa;' +
+    ' data_saida: DD/MM/AAAA; data_chegada: DD/MM/AAAA;' +
+    ' hora_saida: HH:MM; hora_chegada: HH:MM;' +
     ' cidade: cidade destino em MAIUSCULAS sem UF;' +
     ' uf: sigla 2 letras, padrao RS se nao encontrar;' +
-    ' motivo: extraia do texto livre, campos de observacao, descricao ou qualquer parte do texto que indique o objetivo da viagem.' +
-    ' Formate o motivo seguindo estas regras:' +
-    ' - Paciente sendo levado/transportado/internado/encaminhado: TRANSPORTE DE PACIENTE [NOME COMPLETO] A [CLINICA/HOSPITAL];' +
-    ' - Buscar/trazer/retorno de paciente: BUSCAR PACIENTE [NOME COMPLETO] EM [CLINICA/HOSPITAL];' +
-    ' - Conduzir servidor: CONDUZIR SERVIDOR [NOME] A [DESTINO];' +
-    ' - Abreviacoes comuns: p/ = para, internacao = internacao, ONCO = ONCOLOGIA, HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA;' +
-    ' - Expanda abreviacoes e corrija nomes de hospitais para o nome completo;' +
-    ' - Nunca abrevie nomes proprios de pacientes;' +
-    ' - Se mencionar nome de paciente sem campo explicito, inclua no motivo;' +
-    ' - Se nao encontrar motivo use null.' +
-    ' DATAS: o valor pode estar na mesma linha ou linha seguinte ao label. Se iguais repita nos dois campos.' +
-    ' Use null apenas se realmente nao encontrar. Texto:\n\n' + raw;
+    ' motivo: extraia do texto livre e campos de pacientes.' +
+    ' Se houver multiplos pacientes liste todos separados por virgula e E antes do ultimo.' +
+    ' Formato: TRANSPORTE DE PACIENTE(S) [NOMES] A [CLINICA/HOSPITAL] ou BUSCAR PACIENTE(S) [NOMES] EM [LOCAL].' +
+    ' Expanda abreviacoes: p/ = para, HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, ONCO = ONCOLOGIA.' +
+    ' Use null se nao encontrar. Texto:\n\n' + raw;
 
-  var apiKey = localStorage.getItem('sgd_apikey') || '';
-  if (!apiKey) {
-    // Sem chave — usar parser local
-    preencherCampos(parsearLocal(raw));
-    btn.disabled = false;
-    btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-    document.getElementById('pasteInput').value = '';
-    return;
-  }
+  var grokUrl = 'https://api.x.ai/v1/chat/completions';
+  var proxyUrl = 'https://diarias.aceitacoes.workers.dev/?url=' + encodeURIComponent(grokUrl);
 
-  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=' + apiKey;
-  var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(geminiUrl);
-
-  var reqBody = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0, maxOutputTokens: 800 }
-  });
-
-  function parseGemini(data) {
-    if (data.error) throw new Error(data.error.message);
-    var texto = (((data.candidates||[])[0]||{}).content||{});
-    texto = ((texto.parts||[])[0]||{}).text || '';
+  fetch(proxyUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer xai-6lnXYc3qQdqOW7avc4rOkXHthF9H4bWS2GpHtPY5GVjBTwV3mk86FpruVebPbAdLsaB4Mo7rqXl8cqcZ'
+    },
+    body: JSON.stringify({
+      model: 'grok-3-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0,
+      max_tokens: 800
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var texto = ((data.choices||[])[0]||{}).message;
+    texto = (texto||{}).content || '';
     texto = texto.replace(/```json|```/g,'').trim();
     if (!texto) throw new Error('Resposta vazia');
-    return JSON.parse(texto);
-  }
-
-  function tentarFetch(url) {
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: reqBody
-    }).then(function(r) { return r.json(); }).then(parseGemini);
-  }
-
-  tentarFetch(geminiUrl)
-  .catch(function(e1) {
-    console.log('Direto falhou, tentando proxy...', e1.message);
-    return tentarFetch(proxyUrl);
-  })
-  .then(function(parsed) {
+    var parsed = JSON.parse(texto);
     preencherCampos(parsed);
   })
   .catch(function(e) {
-    console.error('Gemini erro:', e.message);
-    if (e.message && e.message.indexOf('429') !== -1) {
-      alert('Limite atingido. Aguarde 1 minuto e tente novamente.');
-    }
+    console.error('Grok erro:', e.message);
     preencherCampos(parsearLocal(raw));
   })
   .finally(function() {
@@ -701,41 +649,110 @@ function parsear() {
   });
 }
 
+
 function parsearLocal(raw) {
   var found = {};
   var m;
+
+  // num_processo
   m = raw.match(/Proc\.\s*Administrativo\s*([\d\.\/]+)/i);
   if (m) found.num_processo = m[1].trim();
+
+  // servidor — campo formulario, remove cargo e matricula
   m = raw.match(/Motorista ou Servidor\*?:\s*(.+)/i);
-  if (m) found.servidor = m[1].trim().toUpperCase();
-  m = raw.match(/Placa[^:]*:\s*(\S+)/i);
-  if (m) found.placa = m[1].trim().toUpperCase();
-  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?)/i);
+  if (m) {
+    var srv = m[1].trim();
+    srv = srv.replace(/\.?\s*Matr[:\.]?\d+/gi, '').trim();
+    srv = srv.replace(/\b(condutor de ambulan.a|motorista|servidor|coordenador transporte|m.dico|enfermeiro|t.cnico)\b/gi, '').trim();
+    srv = srv.replace(/\s+/g, ' ').replace(/^[\s,\.]+|[\s,\.]+$/g, '');
+    found.servidor = srv.toUpperCase();
+  }
+  // Melhorar servidor com assinatura (linha antes de cargo, apos _)
+  var assinM = raw.match(/_\s*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})\s*\n\s*(Motorista|Coordenador|M.dico|Enfermeiro|condutor)/i);
+  if (assinM) found.servidor = assinM[1].trim().toUpperCase();
+
+  // placa — extrai padrao AAA0000 ou AAA0A00, ignora modelo antes
+  m = raw.match(/Placa[^:]*:\s*(.+)/i);
+  if (m) {
+    var placaM = m[1].match(/\b([A-Z]{3}[\s\-]?[0-9][A-Z0-9][0-9]{2})\b/i);
+    if (placaM) found.placa = placaM[1].replace(/[\s\-]/g,'').toUpperCase();
+  }
+
+  // datas
+  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
   if (m) found.data_saida = m[1].trim();
-  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?)/i);
+  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)/i);
   if (m) found.data_chegada = m[1].trim();
+
+  // horas
   m = raw.match(/Hora de Sa.da[^:]*:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_saida = m[1].trim();
   m = raw.match(/Hora de Chegada[^:]*:\s*(\d{1,2}:\d{2})/i);
   if (m) found.hora_chegada = m[1].trim();
+
+  // cidade + UF
   m = raw.match(/Cidade de destino\*?:\s*([^\n\r]+)/i);
   if (m) {
     var partes = m[1].trim().split(/\s+/);
-    if (partes.length>1 && /^[a-zA-Z]{2}$/.test(partes[partes.length-1])) {
+    if (partes.length > 1 && /^[a-zA-Z]{2}$/.test(partes[partes.length-1])) {
       found.uf = partes.pop().toUpperCase();
       found.cidade = partes.join(' ').toUpperCase();
     } else { found.cidade = m[1].trim().toUpperCase(); }
   }
   if (!found.uf) found.uf = 'RS';
-  var pm = raw.match(/Lista de Paciente\(s\)[^:]*:\s*([^\n\r]+)/i);
-  var cm = raw.match(/Cl[ii]nica de destino[^:]*:\s*([^\n\r]+)/i);
-  if (pm || cm) {
-    var pac = pm ? pm[1].trim().toUpperCase() : '';
-    var cli = cm ? cm[1].trim().toUpperCase() : '';
-    if (pac && cli) found.motivo = 'TRANSPORTE DE PACIENTE '+pac+' A '+cli;
-    else if (pac) found.motivo = 'TRANSPORTE DE PACIENTE '+pac;
-    else found.motivo = 'TRANSPORTE DE PACIENTE A '+cli;
+
+  // motivo — cascata de estrategias
+  var clinica = '';
+  var cm = raw.match(/Cl.nica de destino[^:]*:\s*([^\n\r]+)/i);
+  if (cm) clinica = cm[1].trim().toUpperCase();
+
+  // Estrategia 1: Lista de Paciente(s) estruturada — coleta TODOS os nomes
+  var listaCompleta = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nMarcos|\nPaulo|\nJaci|\nLuiz|\nIraj|Despacho|Anexo)/i);
+  if (listaCompleta) {
+    var listaTexto = listaCompleta[1];
+    var isBuscar = /buscar|busca|trazer|retorno|retornar/i.test(listaTexto);
+    var linhas = listaTexto.split('\n').map(function(l){ return l.trim(); });
+    var nomes = [];
+    for (var li = 0; li < linhas.length; li++) {
+      var linha = linhas[li];
+      if (!linha || linha.length < 4) continue;
+      if (/^(levar|buscar|trazer|transportar|conduzir|PREENCHIMENTO|Clinica|Lista|\+ac)/i.test(linha)) continue;
+      // Remove verbos e qualificadores do inicio
+      linha = linha.replace(/^(levar|buscar|trazer|transportar|conduzir)\s+/i, '');
+      linha = linha.replace(/^(paciente|gestante|crianca|idoso)\s+/i, '');
+      // Pega nome antes de 'para', 'apos', 'p/', 'para internar'
+      var nomeM = linha.match(/^([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^,\/\n]+?)(?:\s+para|\s+ap.s|\s+p\/|,|$)/i);
+      var nomeLinha = nomeM ? nomeM[1].trim() : linha.trim();
+      // Valida nome: pelo menos 2 palavras e nao parece cargo/sistema
+      if (nomeLinha.split(' ').length >= 2 && !/^(Despacho|Anexo|Revisar|Baixar)/i.test(nomeLinha)) {
+        nomes.push(nomeLinha.toUpperCase());
+      }
+    }
+    if (nomes.length > 0) {
+      var plural = nomes.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
+      var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
+      // Formata lista: A, B, C E D
+      var nomesStr = nomes.length === 1
+        ? nomes[0]
+        : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
+      var sufixo = clinica ? (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase() : '';
+      found.motivo = (prefixo + nomesStr + sufixo).trim();
+    }
   }
+
+  // Estrategia 2: texto livre com levar/internar/paciente
+  if (!found.motivo) {
+    var textoLivre = raw.match(/(?:levar|internar|transportar)\s+paciente[^\n]*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})/i);
+    if (textoLivre) {
+      var nomeLivre = textoLivre[1].trim().toUpperCase();
+      var destLivre = raw.match(/(?:na|no|para)\s+((?:ONCO|HUSM|Hospital|Cl.nica|UPA|Santa Casa)[^\n]+)/i);
+      var destStr = destLivre ? destLivre[1].trim().toUpperCase() : (clinica || '');
+      found.motivo = ('TRANSPORTE DE PACIENTE ' + nomeLivre + (destStr ? ' A ' + destStr : '')).trim();
+    } else if (clinica) {
+      found.motivo = 'TRANSPORTE DE PACIENTE A ' + clinica;
+    }
+  }
+
   return found;
 }
 
@@ -1611,46 +1628,7 @@ document.getElementById('importFileInput').addEventListener('change', function(e
 // Inicializar info de backup
 atualizarBackupInfo();
 
-// ═══════════════════════════════════════════════════════
-// CONFIGURAÇÃO API KEY
-// ═══════════════════════════════════════════════════════
-function atualizarBtnConfig() {
-  var key = localStorage.getItem('sgd_apikey') || '';
-  var btn = document.getElementById('btnConfig');
-  if (key && key.startsWith('sk-')) {
-    btn.classList.add('ativa');
-    btn.title = 'API configurada ✅ — clique para alterar';
-  } else {
-    btn.classList.remove('ativa');
-    btn.title = 'Configurar chave de API';
-  }
-}
 
-document.getElementById('btnConfig').addEventListener('click', function() {
-  var key = localStorage.getItem('sgd_apikey') || '';
-  document.getElementById('inputApiKey').value = key;
-  var modal = document.getElementById('modalConfig');
-  modal.style.display = 'flex';
-  document.getElementById('inputApiKey').focus();
-});
-
-document.getElementById('btnConfigSalvar').addEventListener('click', function() {
-  var key = document.getElementById('inputApiKey').value.trim();
-  if (key && typeof key === 'string' && key.length > 0 && !key.startsWith('AIza')) {
-    alert('Chave invalida. A chave do Gemini deve comecar com AIza...');
-    return;
-  }
-  localStorage.setItem('sgd_apikey', key);
-  document.getElementById('modalConfig').style.display = 'none';
-  atualizarBtnConfig();
-  alert(key ? 'Chave Gemini salva! Reconhecimento com IA ativo.' : 'Chave removida. Usando parser local.');
-});
-
-document.getElementById('btnConfigCancelar').addEventListener('click', function() {
-  document.getElementById('modalConfig').style.display = 'none';
-});
-
-atualizarBtnConfig();
 
 }); // DOMContentLoaded
 </script>
