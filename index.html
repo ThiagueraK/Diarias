@@ -654,7 +654,7 @@ function parsear() {
     return;
   }
 
-  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
+  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
 
   fetch(geminiUrl, {
     method: 'POST',
@@ -1618,7 +1618,7 @@ document.getElementById('btnConfig').addEventListener('click', function() {
 
 document.getElementById('btnConfigSalvar').addEventListener('click', function() {
   var key = document.getElementById('inputApiKey').value.trim();
-  if (key && !key.startsWith('AIza')) {
+  if (key && typeof key === 'string' && key.length > 0 && !key.startsWith('AIza')) {
     alert('Chave invalida. A chave do Gemini deve comecar com AIza...');
     return;
   }
