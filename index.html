@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.41</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.42</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -552,7 +552,9 @@ function parsear() {
     ' Formato quando ha pacientes sendo levados/transportados/internados:' +
     ' TRANSPORTE DE PACIENTES [NOME1], [NOME2] E [NOME3] A [CLINICA/HOSPITAL]' +
     ' Formato quando ha apenas 1 paciente: TRANSPORTE DE PACIENTE [NOME] A [CLINICA/HOSPITAL]' +
-    ' Formato quando vai buscar/trazer pacientes: BUSCAR PACIENTES [NOMES] EM [CLINICA/HOSPITAL]' +
+    ' Formato quando vai buscar/trazer/retornar com pacientes: BUSCAR PACIENTE(S) [NOMES] NO/NA [CLINICA/HOSPITAL]' +
+    ' IMPORTANTE: para buscar use sempre o campo Clinica de destino como local de onde vai buscar.' +
+    ' Mesmo que o texto diga apenas buscar sem mencionar local, use a Clinica de destino do formulario.' +
     ' Formato quando acompanha sem nomes individuais: use o texto descritivo da lista como motivo em MAIUSCULAS.' +
     ' Expanda abreviacoes de clinicas:' +
     ' HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA,' +
@@ -676,7 +678,7 @@ function parsearLocal(raw) {
   var listaCompleta = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nMarcos|\nPaulo|\nJaci|\nLuiz|\nIraj|Despacho|Anexo)/i);
   if (listaCompleta) {
     var listaTexto = listaCompleta[1];
-    var isBuscar = /buscar|busca|trazer|retorno|retornar/i.test(listaTexto);
+    var isBuscar = /buscar|busca|trazer|retorno|retornar|busca a|buscar a|buscar o/i.test(listaTexto);
     var linhas = listaTexto.split('\n').map(function(l){ return l.trim(); });
     var nomes = [];
     for (var li = 0; li < linhas.length; li++) {
