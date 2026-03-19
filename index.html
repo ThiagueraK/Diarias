@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.40</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.41</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -532,23 +532,35 @@ function parsear() {
   btn.textContent = 'Analisando com IA...';
 
   var prompt = 'Voce e um assistente especializado em extrair dados de processos administrativos brasileiros de diarias de viagem.' +
-    ' Analise TODO o texto abaixo com atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
+    ' Analise TODO o texto com maxima atencao, incluindo campos de formulario, texto livre, despachos e anotacoes.' +
     ' Retorne SOMENTE um JSON valido sem markdown com exatamente estes campos:' +
     ' {"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,' +
     '"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}' +
     ' Regras:' +
-    ' num_processo: numero no formato X.XXX/AAAA apos Proc. Administrativo;' +
-    ' servidor: nome completo em MAIUSCULAS, remover cargos e matriculas;' +
-    ' placa: somente os caracteres da placa no formato AAA0000 ou AAA0A00, ignorar modelo do veiculo;' +
-    ' data_saida: DD/MM/AAAA; data_chegada: DD/MM/AAAA;' +
-    ' hora_saida: HH:MM; hora_chegada: HH:MM;' +
+    ' num_processo: formato X.XXX/AAAA apos Proc. Administrativo;' +
+    ' servidor: nome completo em MAIUSCULAS, remover cargos (motorista, tecnico, enfermeiro, coordenador etc) e matriculas (Matr:XXXXX);' +
+    ' placa: somente os caracteres no formato AAA0000 ou AAA0A00, ignorar marca/modelo antes da placa; se veiculo locado coloque LOCADO;' +
+    ' data_saida: DD/MM/AAAA (converter formatos como 140326 para 14/03/2026);' +
+    ' data_chegada: DD/MM/AAAA;' +
+    ' hora_saida: HH:MM (converter 0900 para 09:00, 06 HS para 06:00, 18.30 HS para 18:30);' +
+    ' hora_chegada: HH:MM;' +
     ' cidade: cidade destino em MAIUSCULAS sem UF;' +
-    ' uf: sigla 2 letras, padrao RS se nao encontrar;' +
-    ' motivo: se houver pacientes liste todos separados por virgula e E antes do ultimo.' +
-    ' Formato: TRANSPORTE DE PACIENTE(S) [NOMES] A [CLINICA] ou BUSCAR PACIENTE(S) [NOMES] EM [LOCAL].' +
-    ' Se nao houver nomes use o texto da lista como motivo.' +
-    ' Expanda abreviacoes: HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO = ONCOLOGIA.' +
-    ' Use null se nao encontrar. Texto:\n\n' + raw;
+    ' uf: sigla 2 letras maiusculas, padrao RS se nao encontrar;' +
+    ' motivo: REGRA PRINCIPAL - leia TODO o texto e colete TODOS os nomes de pacientes mencionados em qualquer parte.' +
+    ' Os nomes podem estar no campo Lista de Paciente(s), em linhas separadas, em texto livre ou em qualquer outra parte.' +
+    ' NUNCA omita nenhum nome. NUNCA abrevie nomes.' +
+    ' Formato quando ha pacientes sendo levados/transportados/internados:' +
+    ' TRANSPORTE DE PACIENTES [NOME1], [NOME2] E [NOME3] A [CLINICA/HOSPITAL]' +
+    ' Formato quando ha apenas 1 paciente: TRANSPORTE DE PACIENTE [NOME] A [CLINICA/HOSPITAL]' +
+    ' Formato quando vai buscar/trazer pacientes: BUSCAR PACIENTES [NOMES] EM [CLINICA/HOSPITAL]' +
+    ' Formato quando acompanha sem nomes individuais: use o texto descritivo da lista como motivo em MAIUSCULAS.' +
+    ' Expanda abreviacoes de clinicas:' +
+    ' HUSM = HOSPITAL UNIVERSITARIO DE SANTA MARIA,' +
+    ' HCAA = HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO,' +
+    ' ONCO = ONCOLOGIA,' +
+    ' HCOS = HOSPITAL DE CARIDADE DE SANTA MARIA,' +
+    ' UPA = UNIDADE DE PRONTO ATENDIMENTO.' +
+    ' Use null apenas se realmente nao houver motivo. Texto:\n\n' + raw;
 
   fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
     method: 'POST',
