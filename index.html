@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.52</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.53</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -583,6 +583,11 @@ function parsear() {
     texto = jsonMatch[0];
     if (!texto) throw new Error('Resposta vazia');
     var parsed = JSON.parse(texto);
+    // Corrige motivo com parser local quando lista tem texto descritivo sem nomes
+    var localResult = parsearLocal(raw);
+    if (localResult.motivo && (!parsed.motivo || parsed.motivo.length < localResult.motivo.length)) {
+      parsed.motivo = localResult.motivo;
+    }
     preencherCampos(parsed);
   })
   .catch(function(e) {
