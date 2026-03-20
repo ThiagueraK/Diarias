@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.61</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.63</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -541,6 +541,16 @@ function parsear() {
       .replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
+  // Extrai trecho relevante para economizar tokens
+  function extrairTrechoRelevante(texto) {
+    var inicio = texto.search(/Motorista ou Servidor\*?:/i);
+    if (inicio === -1) inicio = texto.search(/Proc\.\s*Administrativo/i);
+    if (inicio === -1) return texto.substring(0, 3000);
+    inicio = Math.max(0, inicio - 300);
+    return texto.substring(inicio, inicio + 3000);
+  }
+  var rawIA = extrairTrechoRelevante(raw);
+
   var prompt =
     'Voce e um assistente administrativo da Prefeitura de Tupancireta/RS. Leia o processo abaixo e extraia os dados preenchendo o JSON.\n\n'
     + 'Retorne APENAS o JSON, sem texto adicional, sem markdown.\n\n'
@@ -553,7 +563,7 @@ function parsear() {
     + '- horas: formato HH:MM\n'
     + '- cidade: apenas a cidade principal de destino, sem UF\n'
     + '- motivo: descreva o objetivo completo da viagem em MAIUSCULAS. Inclua TODOS os nomes de pacientes e o destino. Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
-    + 'Processo:\n' + raw;
+    + 'Processo:\n' + rawIA;
 
 
   fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
