@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.57</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.58</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -542,7 +542,8 @@ function parsear() {
   }
 
   var prompt =
-    'Voce e um agente administrativo especializado em processos de diarias de viagem da Prefeitura de Tupancireta/RS.\n'
+    'Responda APENAS com um objeto JSON valido. Sem explicacoes, sem texto antes ou depois, sem markdown, sem ```json.\n'
+    + 'Voce e um agente administrativo especializado em processos de diarias de viagem da Prefeitura de Tupancireta/RS.\n'
     + 'Leia TODO o texto do processo abaixo com atencao total e extraia os dados preenchendo o JSON.\n'
     + 'Raciocine sobre o conteudo — nao dependa apenas de campos rotulados. O texto pode ter dados em campos de formulario, texto livre, listas, observacoes ou qualquer parte.\n\n'
     + 'Retorne SOMENTE um objeto JSON valido, sem explicacoes, sem markdown, sem texto antes ou depois.\n\n'
