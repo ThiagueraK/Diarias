@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.53</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.55</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -688,19 +688,24 @@ function parsearLocal(raw) {
   if (cm) clinica = cm[1].trim().toUpperCase();
 
   // Estrategia 1: Lista de Paciente(s) estruturada — coleta TODOS os nomes
-  var listaCompleta = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nMarcos|\nPaulo|\nJaci|\nLuiz|\nIraj|Despacho|Anexo)/i);
+  var listaCompleta = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nMarcos|\nPaulo|\nJaci|\nLuiz|\nIraj|Despacho|Anexo|$)/i);
   if (listaCompleta) {
-    var listaTexto = listaCompleta[1];
+    var listaTexto = listaCompleta[1].trim();
     var isBuscar = /buscar|busca|trazer|retorno|retornar|busca a|buscar a|buscar o/i.test(listaTexto);
+    // Detecta se é texto descritivo (frase) em vez de lista de nomes
+    var ehFraseDescritiva = /^(acompanhar|conduzir|transportar|levar|buscar|trazer|realizar|participar)/i.test(listaTexto.trim());
+    if (ehFraseDescritiva) {
+      found.motivo = listaTexto.replace(/\.\s*$/, '').toUpperCase();
+    } else {
     var linhas = listaTexto.split('\n').map(function(l){ return l.trim(); });
     var nomes = [];
     for (var li = 0; li < linhas.length; li++) {
       var linha = linhas[li];
       if (!linha || linha.length < 4) continue;
-      if (/^(levar|buscar|trazer|transportar|conduzir|PREENCHIMENTO|Clinica|Lista|\+ac)/i.test(linha)) continue;
+      if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|PREENCHIMENTO|Clinica|Lista|\+ac)/i.test(linha)) continue;
       // Remove verbos e qualificadores do inicio
-      linha = linha.replace(/^(levar|buscar|trazer|transportar|conduzir)\s+/i, '');
-      linha = linha.replace(/^(paciente|gestante|crianca|idoso)\s+/i, '');
+      linha = linha.replace(/^(levar|buscar|trazer|transportar|conduzir|acompanhar)\s+/i, '');
+      linha = linha.replace(/^(paciente|gestante|crianca|idoso|pacientes)\s+/i, '');
       // Pega nome antes de 'para', 'apos', 'p/', 'para internar'
       var nomeM = linha.match(/^([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^,\/\n]+?)(?:\s+para|\s+ap.s|\s+p\/|,|$)/i);
       var nomeLinha = nomeM ? nomeM[1].trim() : linha.trim();
@@ -717,11 +722,12 @@ function parsearLocal(raw) {
         : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
       var sufixo = clinica ? (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase() : '';
       found.motivo = (prefixo + nomesStr + sufixo).trim();
-    } else if (listaTexto.trim()) {
+    } else {
       // Lista tem texto mas sem nomes individuais — usa o texto direto como motivo
       var textoLista = listaTexto.trim().replace(/\.$/, '').toUpperCase();
-      found.motivo = textoLista;
+      if (textoLista.length > 3) found.motivo = textoLista;
     }
+    } // fecha else de ehFraseDescritiva
   }
 
   // Estrategia 2: texto livre com levar/internar/paciente + nomes em linhas seguintes
