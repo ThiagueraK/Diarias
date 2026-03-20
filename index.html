@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.55</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.56</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -610,58 +610,48 @@ function parsearLocal(raw) {
   m = raw.match(/Proc\.\s*Administrativo\s*([\d\.\/]+)/i);
   if (m) found.num_processo = m[1].trim();
 
-  // servidor — campo formulario, remove cargo e matricula
+  // servidor
   m = raw.match(/Motorista ou Servidor\*?:\s*(.+)/i);
   if (m) {
     var srv = m[1].trim();
     srv = srv.replace(/\.?\s*Matr[:\.]?\d+/gi, '').trim();
-    srv = srv.replace(/\b(condutor de ambulan.a|motorista|servidor|coordenador transporte|m.dico|enfermeiro|t.cnico)\b/gi, '').trim();
+    srv = srv.replace(/\b(condutor de ambulan.a|motorista|servidor|coordenador transporte|chefe de setor|m.dico|enfermeiro|t.cnico)\b/gi, '').trim();
     srv = srv.replace(/\s+/g, ' ').replace(/^[\s,\.]+|[\s,\.]+$/g, '');
     found.servidor = srv.toUpperCase();
   }
-  // Melhorar servidor com assinatura (linha antes de cargo, apos _)
-  var assinM = raw.match(/_\s*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})\s*\n\s*(Motorista|Coordenador|M.dico|Enfermeiro|condutor)/i);
+  var assinM = raw.match(/_\s*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})\s*\n\s*(Motorista|Coordenador|M.dico|Enfermeiro|condutor|Chefe)/i);
   if (assinM) found.servidor = assinM[1].trim().toUpperCase();
 
-  // placa — extrai padrao AAA0000 ou AAA0A00, ignora modelo antes
+  // placa
   m = raw.match(/Placa[^:]*:\s*(.+)/i);
   if (m) {
     var placaM = m[1].match(/\b([A-Z]{3}[\s\-]?[0-9][A-Z0-9][0-9]{2})\b/i);
     if (placaM) found.placa = placaM[1].replace(/[\s\-]/g,'').toUpperCase();
-    // Veiculo locado — sem placa valida
     else if (/locado|alugado/i.test(m[1])) found.placa = 'LOCADO';
   }
 
   // datas
   function normalizarData(s) {
-    s = s.trim();
-    // Formato DD/MM/AAAA ou DD/MM/AA ou DD-MM-AAAA
+    s = s.trim().replace(/\s+/g,'');
     if (/^\d{1,2}[\/\-]\d{1,2}/.test(s)) return s;
-    // Formato DDMMAAAA (ex: 14032026)
     if (/^\d{8}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/'+s.slice(4);
-    // Formato DDMMAA (ex: 140326)
     if (/^\d{6}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/20'+s.slice(4);
     return s;
   }
   m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
-  if (m) found.data_saida = normalizarData(m[1].replace(/\s+/g,''));
+  if (m) found.data_saida = normalizarData(m[1]);
   m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
-  if (m) found.data_chegada = normalizarData(m[1].replace(/\s+/g,''));
+  if (m) found.data_chegada = normalizarData(m[1]);
 
   // horas
-  // Hora — aceita 06:00, 06 HS, 18.30 HS, 18h30
   function extrairHora(texto) {
     texto = texto.trim();
-    // Formato HH:MM
     var m1 = texto.match(/(\d{1,2}):(\d{2})/);
     if (m1) return m1[1].padStart(2,'0') + ':' + m1[2];
-    // Formato HH.MM HS
     var m2 = texto.match(/(\d{1,2})\.(\d{2})\s*(?:HS|H|hrs?)?/i);
     if (m2) return m2[1].padStart(2,'0') + ':' + m2[2];
-    // Formato HHMM sem separador (ex: 0900, 1500)
     var m4 = texto.match(/^(\d{4})$/);
     if (m4) return m4[1].slice(0,2) + ':' + m4[1].slice(2);
-    // Formato HH HS (sem minutos)
     var m3 = texto.match(/(\d{1,2})\s*(?:HS|H|hrs?)/i);
     if (m3) return m3[1].padStart(2,'0') + ':00';
     return null;
@@ -682,97 +672,107 @@ function parsearLocal(raw) {
   }
   if (!found.uf) found.uf = 'RS';
 
-  // motivo — cascata de estrategias
-  var clinica = '';
-  var cm = raw.match(/Cl.nica de destino[^:]*:\s*([^\n\r]+)/i);
-  if (cm) clinica = cm[1].trim().toUpperCase();
-
-  // Estrategia 1: Lista de Paciente(s) estruturada — coleta TODOS os nomes
-  var listaCompleta = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nMarcos|\nPaulo|\nJaci|\nLuiz|\nIraj|Despacho|Anexo|$)/i);
-  if (listaCompleta) {
-    var listaTexto = listaCompleta[1].trim();
-    var isBuscar = /buscar|busca|trazer|retorno|retornar|busca a|buscar a|buscar o/i.test(listaTexto);
-    // Detecta se é texto descritivo (frase) em vez de lista de nomes
-    var ehFraseDescritiva = /^(acompanhar|conduzir|transportar|levar|buscar|trazer|realizar|participar)/i.test(listaTexto.trim());
-    if (ehFraseDescritiva) {
-      found.motivo = listaTexto.replace(/\.\s*$/, '').toUpperCase();
-    } else {
-    var linhas = listaTexto.split('\n').map(function(l){ return l.trim(); });
-    var nomes = [];
-    for (var li = 0; li < linhas.length; li++) {
-      var linha = linhas[li];
-      if (!linha || linha.length < 4) continue;
-      if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|PREENCHIMENTO|Clinica|Lista|\+ac)/i.test(linha)) continue;
-      // Remove verbos e qualificadores do inicio
-      linha = linha.replace(/^(levar|buscar|trazer|transportar|conduzir|acompanhar)\s+/i, '');
-      linha = linha.replace(/^(paciente|gestante|crianca|idoso|pacientes)\s+/i, '');
-      // Pega nome antes de 'para', 'apos', 'p/', 'para internar'
-      var nomeM = linha.match(/^([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^,\/\n]+?)(?:\s+para|\s+ap.s|\s+p\/|,|$)/i);
-      var nomeLinha = nomeM ? nomeM[1].trim() : linha.trim();
-      // Valida nome: pelo menos 2 palavras e nao parece cargo/sistema
-      if (nomeLinha.split(' ').length >= 2 && !/^(Despacho|Anexo|Revisar|Baixar)/i.test(nomeLinha)) {
-        nomes.push(nomeLinha.toUpperCase());
-      }
-    }
-    if (nomes.length > 0) {
-      var plural = nomes.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
-      var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
-      var nomesStr = nomes.length === 1
-        ? nomes[0]
-        : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
-      var sufixo = clinica ? (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase() : '';
-      found.motivo = (prefixo + nomesStr + sufixo).trim();
-    } else {
-      // Lista tem texto mas sem nomes individuais — usa o texto direto como motivo
-      var textoLista = listaTexto.trim().replace(/\.$/, '').toUpperCase();
-      if (textoLista.length > 3) found.motivo = textoLista;
-    }
-    } // fecha else de ehFraseDescritiva
+  // === MOTIVO ===
+  function expandir(txt) {
+    txt = txt.replace(/\bHUSM\b/gi, 'HOSPITAL UNIVERSITARIO DE SANTA MARIA');
+    txt = txt.replace(/\bHCAA\b/gi, 'HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO');
+    txt = txt.replace(/\bONCO\b/gi, 'ONCOLOGIA');
+    txt = txt.replace(/\bHCOS\b/gi, 'HOSPITAL DE CARIDADE DE SANTA MARIA');
+    txt = txt.replace(/\bp\//gi, 'PARA ');
+    return txt.toUpperCase();
+  }
+  function isNome(s) {
+    if (s.split(' ').length < 2) return false;
+    if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|para|realizar|Despacho|Anexo|Revisar)/i.test(s)) return false;
+    if (/\b(paciente|gestante|internação|internacao|consulta|quimioterapia|para realizar|cirurgia)\b/i.test(s)) return false;
+    return true;
   }
 
-  // Estrategia 2: texto livre com levar/internar/paciente + nomes em linhas seguintes
-  if (!found.motivo) {
-    // Detecta bloco de texto livre: acao + nomes em linhas separadas
-    var blocoM = raw.match(/(?:levar|buscar|trazer|internar|transportar)[^\n]*\n([\s\S]{0,300}?)(?=\n_|\nAnexo|\nDespacho|\nQuem)/i);
-    if (blocoM) {
-      var bloco = blocoM[0];
-      // Detecta acao e destino
-      var isBuscarL = /buscar|trazer|retorno/i.test(bloco);
-      var destM = bloco.match(/(?:na|no|para|em)\s+((?:ONCO|HUSM|HCAA|HCOS|Hospital|Cl.nica|UPA|Santa Casa|Oncologia)[^\n,]+)/i);
-      var destL = destM ? destM[1].trim() : (clinica || '');
-      // Expande abreviacoes
-      destL = destL.replace(/\bHUSM\b/gi,'HOSPITAL UNIVERSITARIO DE SANTA MARIA');
-      destL = destL.replace(/\bHCAA\b/gi,'HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO');
-      destL = destL.replace(/\bONCO\b/gi,'ONCOLOGIA');
-      // Coleta nomes das linhas seguintes
-      var linhasBloco = blocoM[1].split('\n').map(function(l){return l.trim();});
-      var nomesL = [];
-      for (var lb = 0; lb < linhasBloco.length; lb++) {
-        var lb2 = linhasBloco[lb];
-        if (!lb2 || lb2.length < 4) continue;
-        // Remove prefixos como '+ac...' 
-        lb2 = lb2.replace(/^\+ac\.+\s*/i,'');
-        if (!lb2 || lb2.length < 4) continue;
-        if (/^(levar|buscar|trazer|despacho|anexo|quem|Marcos|Thiago|Ramonny|Giovani)/i.test(lb2)) continue;
-        if (lb2.split(' ').length >= 2) nomesL.push(lb2.toUpperCase());
+  var clinicaM = raw.match(/Cl.nica de destino[^:]*:\s*([^\n\r]+)/i);
+  var clinica = clinicaM ? clinicaM[1].trim() : '';
+
+  var listaM = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nAnexo|\nDespacho|\nQuem|$)/i);
+
+  if (listaM) {
+    var bloco = listaM[1].trim();
+    var linhas = bloco.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+    var primeira = linhas.length > 0 ? linhas[0] : '';
+
+    // Frase descritiva no inicio (acompanhar, realizar, participar...)
+    if (/^(acompanhar|conduzir|realizar|participar)/i.test(primeira)) {
+      found.motivo = expandir(primeira.replace(/\.\s*$/,''));
+    }
+    // Buscar paciente com nome na mesma linha
+    else {
+      var buscarM2 = primeira.match(/^(buscar|trazer)\s+(?:a\s+|o\s+)?(?:paciente|gestante|crianca|idoso)?\s*(.+)/i);
+      if (buscarM2) {
+        var nomeBuscar = buscarM2[2].trim().replace(/\.\s*$/,'');
+        var destBuscar = clinica ? expandir(clinica.replace(/\.\s*$/,'')) : '';
+        found.motivo = ('BUSCAR PACIENTE ' + nomeBuscar.toUpperCase() + (destBuscar ? ' NO ' + destBuscar : '')).trim();
+      } else {
+        // Coleta nomes e descricao adicional
+        var nomes = [];
+        var descExtra = '';
+        for (var li = 0; li < linhas.length; li++) {
+          var linha = linhas[li].replace(/^\+ac\.+\s*/i,'').trim();
+          if (!linha || linha.length < 4) continue;
+          if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|para realizar|realizar|PREENCHIMENTO|Clinica|Lista)/i.test(linha)) {
+            if (!descExtra) descExtra = linha;
+            continue;
+          }
+          linha = linha.replace(/^(paciente|gestante|crianca|idoso|pacientes)\s+/i,'').trim();
+          if (isNome(linha)) nomes.push(linha);
+        }
+
+        if (nomes.length > 0) {
+          var plural = nomes.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
+          var isBuscar = /buscar|trazer|retorno|retornar/i.test(bloco + descExtra);
+          var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
+          var nomesStr = nomes.length === 1 ? nomes[0] : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
+          var sufixo = '';
+          if (descExtra) {
+            descExtra = descExtra.replace(/^(levar paciente?s?\s+|buscar paciente?s?\s+|levar\s+|buscar\s+)/i,'');
+            sufixo = ' ' + expandir(descExtra.replace(/\.\s*$/,''));
+          } else if (clinica) {
+            sufixo = (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase();
+          }
+          found.motivo = (prefixo + expandir(nomesStr) + sufixo).trim();
+        } else if (clinica) {
+          found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
+        }
       }
+    }
+  }
+
+  // Estrategia 2: texto livre com levar/buscar + nomes em linhas seguintes
+  if (!found.motivo) {
+    var livreM = raw.match(/((?:levar|buscar|trazer|internar|acompanhar)[^\n]+(?:\n(?![_])[^\n]{3,60})*)/i);
+    if (livreM) {
+      var blocoL = livreM[0];
+      var isBuscarL = /buscar|trazer|retorno/i.test(blocoL);
+      var destML = blocoL.match(/(?:na|no|para|em)\s+((?:ONCO|HUSM|HCAA|HCOS|Hospital|Cl.nica|UPA)[^\n,]+)/i);
+      var destL = destML ? destML[1].trim() : (clinica || '');
+      var nomesL = [];
+      blocoL.split('\n').forEach(function(linha) {
+        linha = linha.replace(/^\+ac\.+\s*/i,'').trim();
+        if (/^(levar|buscar|trazer|acompanhar|_)/i.test(linha)) return;
+        if (isNome(linha)) nomesL.push(linha.toUpperCase());
+      });
       if (nomesL.length > 0) {
         var pluralL = nomesL.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
         var prefixoL = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
         var nomesStrL = nomesL.length === 1 ? nomesL[0] : nomesL.slice(0,-1).join(', ') + ' E ' + nomesL[nomesL.length-1];
-        var sufixoL = destL ? (isBuscarL ? ' EM ' : ' A ') + destL.toUpperCase() : '';
-        found.motivo = (prefixoL + nomesStrL + sufixoL).trim();
-      } else if (destL) {
-        found.motivo = (isBuscarL ? 'BUSCAR' : 'TRANSPORTE') + ' A ' + destL.toUpperCase();
+        var conectorL = isBuscarL ? ' EM ' : ' A ';
+        found.motivo = (prefixoL + nomesStrL + (destL ? conectorL + expandir(destL) : '')).trim();
       }
     } else if (clinica) {
-      // Sem pacientes — usa campo clinica/destino diretamente como motivo
       found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
     }
   }
 
   return found;
 }
+
 
 function preencherCampos(found) {
   // Converter datas para ISO se vierem no formato BR
