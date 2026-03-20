@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.59</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.61</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -542,31 +542,19 @@ function parsear() {
   }
 
   var prompt =
-    'Responda APENAS com um objeto JSON valido. Sem explicacoes, sem texto antes ou depois, sem markdown, sem ```json.\n'
-    + 'Voce e um agente administrativo especializado em processos de diarias de viagem da Prefeitura de Tupancireta/RS.\n'
-    + 'Leia TODO o texto do processo abaixo com atencao total e extraia os dados preenchendo o JSON.\n'
-    + 'Raciocine sobre o conteudo — nao dependa apenas de campos rotulados. O texto pode ter dados em campos de formulario, texto livre, listas, observacoes ou qualquer parte.\n\n'
-    + 'Retorne SOMENTE um objeto JSON valido, sem explicacoes, sem markdown, sem texto antes ou depois.\n\n'
-    + 'Campos do JSON:\n'
-    + '{\n'
-    + '  "num_processo": "numero no formato X.XXX/AAAA que aparece apos Proc. Administrativo",\n'
-    + '  "servidor": "nome completo em MAIUSCULAS — extraia EXCLUSIVAMENTE do campo Motorista ou Servidor*: que aparece no formulario principal. NUNCA use nomes de despachos, coordenadores, secretarias ou assinantes digitais. O campo Motorista ou Servidor*: e sempre o primeiro a aparecer no formulario.",\n'
-    + '  "placa": "somente a placa no formato AAA0000 ou AAA0A00 — ignore marca e modelo do veiculo; se for veiculo locado sem placa coloque LOCADO",\n'
-    + '  "data_saida": "data no formato DD/MM/AAAA — converta qualquer formato como 140326 para 14/03/2026",\n'
-    + '  "data_chegada": "data no formato DD/MM/AAAA",\n'
-    + '  "hora_saida": "horario no formato HH:MM — converta 0900 para 09:00, 06 HS para 06:00, 18.30 HS para 18:30",\n'
-    + '  "hora_chegada": "horario no formato HH:MM",\n'
-    + '  "cidade": "cidade de destino em MAIUSCULAS sem UF",\n'
-    + '  "uf": "sigla do estado em 2 letras maiusculas, padrao RS se nao encontrar",\n'
-    + '  "motivo": "descreva o objetivo real da viagem em MAIUSCULAS seguindo esta logica:\n'
-    + '    1. Se Lista de Paciente(s) tiver NOMES de pessoas: TRANSPORTE DE PACIENTE(S) [TODOS OS NOMES] A [CLINICA] ou BUSCAR PACIENTE(S) [NOMES] NO [LOCAL]\n'
-    + '    2. Se Lista de Paciente(s) tiver texto descritivo SEM nomes individuais (ex: ACOMPANHAR PACIENTES PARA CONSULTA...): use esse texto descritivo INTEGRALMENTE em MAIUSCULAS como motivo\n'
-    + '    3. Se Lista de Paciente(s) estiver vazia mas Clinica de destino tiver texto descritivo (ex: buscar veiculo em conserto): use esse texto como motivo\n'
-    + '    4. Se for reuniao, consulta tecnica ou viagem administrativa: descreva o objetivo conforme o texto\n'
-    + '    Expanda sempre: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA, HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA"\n'
-    + '}\n\n'
-    + (servidorAncorado ? 'IMPORTANTE: O campo Motorista ou Servidor do formulario contem EXATAMENTE: "' + servidorAncorado + '". Use este valor para o campo servidor, sem alteracoes.\n\n' : '')
-    + 'Processo:\n\n' + raw;
+    'Voce e um assistente administrativo da Prefeitura de Tupancireta/RS. Leia o processo abaixo e extraia os dados preenchendo o JSON.\n\n'
+    + 'Retorne APENAS o JSON, sem texto adicional, sem markdown.\n\n'
+    + 'JSON a preencher:\n'
+    + '{"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}\n\n'
+    + 'Observacoes importantes:\n'
+    + '- servidor: use APENAS o campo "Motorista ou Servidor*:" do formulario, ignore nomes de despachos\n'
+    + '- placa: apenas os caracteres (ex: TQU6B33), ignore marca/modelo; se locado coloque LOCADO\n'
+    + '- datas: formato DD/MM/AAAA\n'
+    + '- horas: formato HH:MM\n'
+    + '- cidade: apenas a cidade principal de destino, sem UF\n'
+    + '- motivo: descreva o objetivo completo da viagem em MAIUSCULAS. Inclua TODOS os nomes de pacientes e o destino. Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
+    + 'Processo:\n' + raw;
+
 
   fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
     method: 'POST',
