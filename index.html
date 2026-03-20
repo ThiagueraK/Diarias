@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.63</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.64</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -574,14 +574,11 @@ function parsear() {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     var texto = data.text || '';
-    console.log('IA data completo:', JSON.stringify(data).substring(0,300));
-    console.log('IA resposta bruta:', texto.substring(0,300));
     // Remove blocos markdown
     texto = texto.replace(/```json|```/g,'').trim();
     // Extrai apenas o objeto JSON se vier com texto ao redor
     var jsonMatch = texto.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('Resposta completa:', texto);
       throw new Error('JSON nao encontrado na resposta');
     }
     texto = jsonMatch[0];
