@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.65</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.66</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -441,6 +441,11 @@
     <p>Opcional — preencha agora ou deixe em branco para completar depois.</p>
     <div class="field"><label>Nº do Empenho</label><input type="text" id="modal_empenho" placeholder="Ex: 2025NE001234"></div>
     <div class="field"><label>Valor (R$)</label><input type="text" id="modal_valor" placeholder="Ex: 150,00"></div>
+    <div style="margin:8px 0 16px;">
+      <button class="btn-modal-skip" id="btnAnexarPDF" style="width:100%;margin:0;">📎 Ler PDF do Empenho automaticamente</button>
+      <input type="file" id="inputPDF" accept=".pdf" style="display:none">
+      <div id="pdfStatus" style="font-size:12px;color:var(--text-muted);margin-top:6px;text-align:center;"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn-modal-skip" id="btnModalPular">Pular por agora</button>
       <button class="btn-modal-ok" id="btnModalOk">✅ Salvar na Tabela</button>
@@ -965,6 +970,52 @@ function fecharModal(salvar) {
   pendente = null;
 }
 document.getElementById('btnModalOk').addEventListener('click', function(){ fecharModal(true); });
+
+// PDF do empenho
+document.getElementById('btnAnexarPDF').addEventListener('click', function() {
+  document.getElementById('inputPDF').click();
+});
+
+document.getElementById('inputPDF').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var status = document.getElementById('pdfStatus');
+  status.textContent = 'Lendo PDF...';
+
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var base64 = ev.target.result.split(',')[1];
+    var promptPDF = 'Leia este PDF de empenho e extraia APENAS dois dados: '
+      + 'o numero do empenho e o valor total em reais. '
+      + 'Retorne SOMENTE um JSON sem markdown: {"empenho": "NUMERO", "valor": "000,00"}. '
+      + 'O valor deve ter virgula como separador decimal, sem R$.';
+
+    fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptPDF, pdf: base64 })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var texto = data.text || '';
+      texto = texto.replace(/```json|```/g,'').trim();
+      var jsonMatch = texto.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('JSON nao encontrado');
+      var parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.empenho) document.getElementById('modal_empenho').value = parsed.empenho;
+      if (parsed.valor) document.getElementById('modal_valor').value = parsed.valor;
+      status.textContent = '✅ Dados extraídos com sucesso!';
+      status.style.color = 'var(--success)';
+    })
+    .catch(function(e) {
+      status.textContent = '❌ Erro ao ler PDF: ' + e.message;
+      status.style.color = 'var(--danger)';
+    });
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
 document.getElementById('btnModalPular').addEventListener('click', function(){ fecharModal(false); });
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === document.getElementById('modalOverlay')) fecharModal(false);
