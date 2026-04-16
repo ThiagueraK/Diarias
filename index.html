@@ -256,6 +256,7 @@
     .tabela-controls{width:100%;}
   }
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -263,7 +264,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.70</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.71</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -982,44 +983,47 @@ document.getElementById('inputPDF').addEventListener('change', function(e) {
   var status = document.getElementById('pdfStatus');
   status.textContent = 'Lendo PDF...';
 
+  status.textContent = 'Lendo PDF...';
   var reader = new FileReader();
   reader.onload = function(ev) {
-    // Tenta extrair com parser local primeiro (sem gastar tokens)
-    var texto = '';
-    try {
-      // PDF como texto via atob — funciona para PDFs simples
-      var binary = atob(ev.target.result.split(',')[1]);
-      // Extrai texto legível do PDF (remove caracteres de controle)
-      texto = binary.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g, ' ');
-    } catch(e) { texto = ''; }
+    var arrayBuffer = ev.target.result;
+    // Usa PDF.js para extrair texto real do PDF
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(function(pdf) {
+      return pdf.getPage(1);
+    }).then(function(page) {
+      return page.getTextContent();
+    }).then(function(tc) {
+      var texto = tc.items.map(function(i){ return i.str; }).join(' ');
+      console.log('PDF texto extraido:', texto.substring(0, 300));
 
-    // Parser local do empenho
-    var empenhoExtraido = '';
-    var valorExtraido = '';
+      var empenhoExtraido = '';
+      var valorExtraido = '';
 
-    // Numero do empenho: padrao 004181/0000 -> 4181
-    var empM = texto.match(/\b0*(\d+)\/0+\b/);
-    if (empM) {
-      empenhoExtraido = String(parseInt(empM[1], 10));
-    }
+      // Numero: 004181/0000 -> 4181
+      var empM = texto.match(/\b0*(\d+)\/0+\b/);
+      if (empM) empenhoExtraido = String(parseInt(empM[1], 10));
 
-    // Valor do empenho: terceiro valor na linha saldo_orcado | saldo_anterior | VALOR_EMPENHO | saldo_atual
-    var valM = texto.match(/[\d\.]+,\d{2}\s+[\d\.]+,\d{2}\s+([\d\.]+,\d{2})\s+[\d\.]+,\d{2}/);
-    if (valM) {
-      valorExtraido = valM[1].replace(/\./g, ''); // remove pontos de milhar
-    }
+      // Valor do empenho: terceiro valor na sequencia saldo_orcado saldo_anterior VALOR saldo_atual
+      var valM = texto.match(/[\d\.]+,\d{2}\s+[\d\.]+,\d{2}\s+([\d\.]+,\d{2})\s+[\d\.]+,\d{2}/);
+      if (valM) valorExtraido = valM[1].replace(/\./g,'');
 
-    if (empenhoExtraido || valorExtraido) {
-      if (empenhoExtraido) document.getElementById('modal_empenho').value = empenhoExtraido;
-      if (valorExtraido) document.getElementById('modal_valor').value = valorExtraido;
-      status.textContent = '✅ Dados extraídos pelo parser local!';
-      status.style.color = 'var(--success)';
-    } else {
-      status.textContent = '⚠️ Nao foi possivel extrair os dados. Preencha manualmente.';
-      status.style.color = 'var(--warning, orange)';
-    }
+      if (empenhoExtraido || valorExtraido) {
+        if (empenhoExtraido) document.getElementById('modal_empenho').value = empenhoExtraido;
+        if (valorExtraido) document.getElementById('modal_valor').value = valorExtraido;
+        status.textContent = '✅ Dados extraídos pelo parser local!';
+        status.style.color = 'var(--success)';
+      } else {
+        status.textContent = '⚠️ Nao foi possivel extrair. Preencha manualmente.';
+        status.style.color = 'var(--warning, orange)';
+      }
+    }).catch(function(e) {
+      console.error('PDF.js erro:', e);
+      status.textContent = '❌ Erro ao ler PDF: ' + e.message;
+      status.style.color = 'var(--danger)';
+    });
   };
-  reader.readAsDataURL(file);
+  reader.readAsArrayBuffer(file);
   e.target.value = '';
 });
 
