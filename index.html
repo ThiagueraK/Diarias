@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.66</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.67</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -984,33 +984,66 @@ document.getElementById('inputPDF').addEventListener('change', function(e) {
 
   var reader = new FileReader();
   reader.onload = function(ev) {
-    var base64 = ev.target.result.split(',')[1];
-    var promptPDF = 'Leia este PDF de empenho e extraia APENAS dois dados: '
-      + 'o numero do empenho e o valor total em reais. '
-      + 'Retorne SOMENTE um JSON sem markdown: {"empenho": "NUMERO", "valor": "000,00"}. '
-      + 'O valor deve ter virgula como separador decimal, sem R$.';
+    // Tenta extrair com parser local primeiro (sem gastar tokens)
+    var texto = '';
+    try {
+      // PDF como texto via atob — funciona para PDFs simples
+      var binary = atob(ev.target.result.split(',')[1]);
+      // Extrai texto legível do PDF (remove caracteres de controle)
+      texto = binary.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\xFF]/g, ' ');
+    } catch(e) { texto = ''; }
 
-    fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptPDF, pdf: base64 })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var texto = data.text || '';
-      texto = texto.replace(/```json|```/g,'').trim();
-      var jsonMatch = texto.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('JSON nao encontrado');
-      var parsed = JSON.parse(jsonMatch[0]);
-      if (parsed.empenho) document.getElementById('modal_empenho').value = parsed.empenho;
-      if (parsed.valor) document.getElementById('modal_valor').value = parsed.valor;
-      status.textContent = '✅ Dados extraídos com sucesso!';
+    // Parser local do empenho
+    var empenhoExtraido = '';
+    var valorExtraido = '';
+
+    // Tenta extrair número do empenho — padrão NNNNNE000XXX ou só número
+    var empM = texto.match(/(?:empenho|emp(?:\.|\.?n[oº°]?)?)[^\d]*(\d{4}NE\d+|\d{4}[\/ ]\d{4,}|\d{3,6})/i);
+    if (empM) {
+      var empRaw = empM[1].replace(/[^\d]/g,'');
+      empenhoExtraido = String(parseInt(empRaw, 10)); // remove zeros à esquerda
+    }
+
+    // Tenta extrair valor total
+    var valM = texto.match(/(?:valor total|total geral|valor l.quido|valor)[^\d]{0,20}([\d\.]+,[\d]{2})/i);
+    if (valM) {
+      valorExtraido = valM[1].replace(/\./g,''); // remove pontos de milhar
+    }
+
+    if (empenhoExtraido || valorExtraido) {
+      if (empenhoExtraido) document.getElementById('modal_empenho').value = empenhoExtraido;
+      if (valorExtraido) document.getElementById('modal_valor').value = valorExtraido;
+      status.textContent = '✅ Dados extraídos!';
       status.style.color = 'var(--success)';
-    })
-    .catch(function(e) {
-      status.textContent = '❌ Erro ao ler PDF: ' + e.message;
-      status.style.color = 'var(--danger)';
-    });
+    } else {
+      // Fallback para IA se parser local não encontrou
+      status.textContent = 'Parser local falhou, usando IA...';
+      var base64 = ev.target.result.split(',')[1];
+      var promptPDF = 'Leia este PDF de empenho e extraia APENAS o numero do empenho e o valor total. '
+        + 'Retorne SOMENTE JSON sem markdown: {"empenho": "4186", "valor": "148,02"}. '
+        + 'O numero do empenho deve ser so os digitos sem zeros a esquerda e sem barras. '
+        + 'O valor deve ter virgula decimal, sem R$ e sem pontos de milhar.';
+      fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptPDF, pdf: base64 })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var txt = (data.text || '').replace(/```json|```/g,'').trim();
+        var jm = txt.match(/\{[\s\S]*\}/);
+        if (!jm) throw new Error('JSON nao encontrado');
+        var parsed = JSON.parse(jm[0]);
+        if (parsed.empenho) document.getElementById('modal_empenho').value = String(parseInt(parsed.empenho.replace(/[^\d]/g,''),10));
+        if (parsed.valor) document.getElementById('modal_valor').value = parsed.valor;
+        status.textContent = '✅ Dados extraídos pela IA!';
+        status.style.color = 'var(--success)';
+      })
+      .catch(function(e) {
+        status.textContent = '❌ Erro: ' + e.message;
+        status.style.color = 'var(--danger)';
+      });
+    }
   };
   reader.readAsDataURL(file);
   e.target.value = '';
