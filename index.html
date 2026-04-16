@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.68</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.69</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1016,33 +1016,8 @@ document.getElementById('inputPDF').addEventListener('change', function(e) {
       status.textContent = '✅ Dados extraídos pelo parser local!';
       status.style.color = 'var(--success)';
     } else {
-      // Fallback para IA se parser local não encontrou
-      status.textContent = 'Parser local falhou, usando IA...';
-      var base64 = ev.target.result.split(',')[1];
-      var promptPDF = 'Leia este PDF de empenho e extraia APENAS o numero do empenho e o valor total. '
-        + 'Retorne SOMENTE JSON sem markdown: {"empenho": "4186", "valor": "148,02"}. '
-        + 'O numero do empenho deve ser so os digitos sem zeros a esquerda e sem barras. '
-        + 'O valor deve ter virgula decimal, sem R$ e sem pontos de milhar.';
-      fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptPDF, pdf: base64 })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var txt = (data.text || '').replace(/```json|```/g,'').trim();
-        var jm = txt.match(/\{[\s\S]*\}/);
-        if (!jm) throw new Error('JSON nao encontrado');
-        var parsed = JSON.parse(jm[0]);
-        if (parsed.empenho) document.getElementById('modal_empenho').value = String(parseInt(parsed.empenho.replace(/[^\d]/g,''),10));
-        if (parsed.valor) document.getElementById('modal_valor').value = parsed.valor;
-        status.textContent = '✅ Dados extraídos pela IA!';
-        status.style.color = 'var(--success)';
-      })
-      .catch(function(e) {
-        status.textContent = '❌ Erro: ' + e.message;
-        status.style.color = 'var(--danger)';
-      });
+      status.textContent = '⚠️ Nao foi possivel extrair os dados. Preencha manualmente.';
+      status.style.color = 'var(--warning, orange)';
     }
   };
   reader.readAsDataURL(file);
