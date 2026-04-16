@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.67</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.68</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1013,7 +1013,7 @@ document.getElementById('inputPDF').addEventListener('change', function(e) {
     if (empenhoExtraido || valorExtraido) {
       if (empenhoExtraido) document.getElementById('modal_empenho').value = empenhoExtraido;
       if (valorExtraido) document.getElementById('modal_valor').value = valorExtraido;
-      status.textContent = '✅ Dados extraídos!';
+      status.textContent = '✅ Dados extraídos pelo parser local!';
       status.style.color = 'var(--success)';
     } else {
       // Fallback para IA se parser local não encontrou
@@ -1058,6 +1058,28 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 // STORAGE
 // ═══════════════════════════════════════════════════════
 function adicionarProcesso(dados) {
+  // Verifica duplicata: mesmo credor + mesma data de ida + mesma cidade
+  var duplicata = processos.find(function(p) {
+    var mesmoCred = p.servidor && dados.servidor &&
+      p.servidor.trim().toUpperCase() === dados.servidor.trim().toUpperCase();
+    var mesmaData = p.dataSaida && dados.dataSaida &&
+      p.dataSaida === dados.dataSaida;
+    var mesmaCid = p.cidade && dados.cidade &&
+      p.cidade.trim().toUpperCase() === dados.cidade.trim().toUpperCase();
+    return mesmoCred && mesmaData && mesmaCid;
+  });
+
+  if (duplicata) {
+    var msg = '⚠️ POSSÍVEL DUPLICATA DETECTADA!\n\n'
+      + 'Já existe um processo cadastrado com:\n'
+      + '• Credor: ' + (duplicata.servidor || '') + '\n'
+      + '• Data: ' + (duplicata.dataSaida || '') + '\n'
+      + '• Cidade: ' + (duplicata.cidade || '') + '\n'
+      + '• Processo: ' + (duplicata.numProcesso || '') + '\n\n'
+      + 'Deseja cadastrar mesmo assim?';
+    if (!confirm(msg)) return;
+  }
+
   processos.push(Object.assign({id: Date.now()}, dados));
   salvar(); atualizarBadge();
 }
