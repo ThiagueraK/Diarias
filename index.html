@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.69</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.70</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -997,17 +997,16 @@ document.getElementById('inputPDF').addEventListener('change', function(e) {
     var empenhoExtraido = '';
     var valorExtraido = '';
 
-    // Tenta extrair número do empenho — padrão NNNNNE000XXX ou só número
-    var empM = texto.match(/(?:empenho|emp(?:\.|\.?n[oº°]?)?)[^\d]*(\d{4}NE\d+|\d{4}[\/ ]\d{4,}|\d{3,6})/i);
+    // Numero do empenho: padrao 004181/0000 -> 4181
+    var empM = texto.match(/\b0*(\d+)\/0+\b/);
     if (empM) {
-      var empRaw = empM[1].replace(/[^\d]/g,'');
-      empenhoExtraido = String(parseInt(empRaw, 10)); // remove zeros à esquerda
+      empenhoExtraido = String(parseInt(empM[1], 10));
     }
 
-    // Tenta extrair valor total
-    var valM = texto.match(/(?:valor total|total geral|valor l.quido|valor)[^\d]{0,20}([\d\.]+,[\d]{2})/i);
+    // Valor do empenho: terceiro valor na linha saldo_orcado | saldo_anterior | VALOR_EMPENHO | saldo_atual
+    var valM = texto.match(/[\d\.]+,\d{2}\s+[\d\.]+,\d{2}\s+([\d\.]+,\d{2})\s+[\d\.]+,\d{2}/);
     if (valM) {
-      valorExtraido = valM[1].replace(/\./g,''); // remove pontos de milhar
+      valorExtraido = valM[1].replace(/\./g, ''); // remove pontos de milhar
     }
 
     if (empenhoExtraido || valorExtraido) {
