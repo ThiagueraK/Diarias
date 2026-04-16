@@ -263,7 +263,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.64</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.65</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -562,7 +562,12 @@ function parsear() {
     + '- datas: formato DD/MM/AAAA\n'
     + '- horas: formato HH:MM\n'
     + '- cidade: apenas a cidade principal de destino, sem UF\n'
-    + '- motivo: descreva o objetivo completo da viagem em MAIUSCULAS. Inclua TODOS os nomes de pacientes e o destino. Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
+    + '- motivo: descreva o objetivo da viagem em MAIUSCULAS. NUNCA cite nomes de pacientes.'
+    + ' Se houver 1 paciente use PACIENTE, se houver mais de 1 use PACIENTES LISTADOS EM ANEXO.'
+    + ' Exemplos: TRANSPORTE DE PACIENTE PARA QUIMIOTERAPIA NO HOSPITAL UNIVERSITARIO DE SANTA MARIA,'
+    + ' TRANSPORTE DE PACIENTES LISTADOS EM ANEXO PARA CONSULTA NA CLINICA DE OLHOS,'
+    + ' BUSCAR PACIENTE NO HOSPITAL UNIVERSITARIO DE SANTA MARIA.'
+    + ' Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
     + 'Processo:\n' + rawIA;
 
 
@@ -707,9 +712,8 @@ function parsearLocal(raw) {
     else {
       var buscarM2 = primeira.match(/^(buscar|trazer)\s+(?:a\s+|o\s+)?(?:paciente|gestante|crianca|idoso)?\s*(.+)/i);
       if (buscarM2) {
-        var nomeBuscar = buscarM2[2].trim().replace(/\.\s*$/,'');
         var destBuscar = clinica ? expandir(clinica.replace(/\.\s*$/,'')) : '';
-        found.motivo = ('BUSCAR PACIENTE ' + nomeBuscar.toUpperCase() + (destBuscar ? ' NO ' + destBuscar : '')).trim();
+        found.motivo = ('BUSCAR PACIENTE' + (destBuscar ? ' NO ' + destBuscar : '')).trim();
       } else {
         // Coleta nomes e descricao adicional
         var nomes = [];
@@ -726,18 +730,17 @@ function parsearLocal(raw) {
         }
 
         if (nomes.length > 0) {
-          var plural = nomes.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
           var isBuscar = /buscar|trazer|retorno|retornar/i.test(bloco + descExtra);
+          var plural = nomes.length > 1 ? 'PACIENTES LISTADOS EM ANEXO' : 'PACIENTE';
           var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
-          var nomesStr = nomes.length === 1 ? nomes[0] : nomes.slice(0,-1).join(', ') + ' E ' + nomes[nomes.length-1];
           var sufixo = '';
           if (descExtra) {
             descExtra = descExtra.replace(/^(levar paciente?s?\s+|buscar paciente?s?\s+|levar\s+|buscar\s+)/i,'');
             sufixo = ' ' + expandir(descExtra.replace(/\.\s*$/,''));
           } else if (clinica) {
-            sufixo = (isBuscar ? ' EM ' : ' A ') + clinica.toUpperCase();
+            sufixo = (isBuscar ? ' NO ' : ' A ') + expandir(clinica.replace(/\.\s*$/,''));
           }
-          found.motivo = (prefixo + expandir(nomesStr) + sufixo).trim();
+          found.motivo = (prefixo + sufixo).trim();
         } else if (clinica) {
           found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
         }
@@ -762,9 +765,10 @@ function parsearLocal(raw) {
       if (nomesL.length > 0) {
         var pluralL = nomesL.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
         var prefixoL = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
-        var nomesStrL = nomesL.length === 1 ? nomesL[0] : nomesL.slice(0,-1).join(', ') + ' E ' + nomesL[nomesL.length-1];
-        var conectorL = isBuscarL ? ' EM ' : ' A ';
-        found.motivo = (prefixoL + nomesStrL + (destL ? conectorL + expandir(destL) : '')).trim();
+        var pluralL = nomesL.length > 1 ? 'PACIENTES LISTADOS EM ANEXO' : 'PACIENTE';
+        var prefixoL2 = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
+        var conectorL = isBuscarL ? ' NO ' : ' A ';
+        found.motivo = (prefixoL2 + (destL ? conectorL + expandir(destL) : '')).trim();
       }
     } else if (clinica) {
       found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
