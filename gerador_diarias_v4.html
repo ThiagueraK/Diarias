@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SGD Diarias">
+<meta name="application-name" content="SGD Diarias">
+<meta name="theme-color" content="#0f1117">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; connect-src *; frame-src https:;">
+<meta name="msapplication-TileColor" content="#0f1117">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMGYxMTE3Ii8+PHJlY3QgeD0iNTYiIHk9IjQ0IiB3aWR0aD0iODAiIGhlaWdodD0iMTA0IiByeD0iMTAiIGZpbGw9IiMxODFjMjciIHN0cm9rZT0iIzJhMzA1MCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iNzIiIHk9IjM2IiB3aWR0aD0iNDgiIGhlaWdodD0iMjAiIHJ4PSI4IiBmaWxsPSIjNGY4ZWY3Ii8+PHJlY3QgeD0iNjgiIHk9IjgwIiB3aWR0aD0iNTYiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyYTMwNTAiLz48cmVjdCB4PSI2OCIgeT0iOTYiIHdpZHRoPSI0NCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxyZWN0IHg9IjY4IiB5PSIxMTIiIHdpZHRoPSI1MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJhMzA1MCIvPjxjaXJjbGUgY3g9IjE0NCIgY3k9IjE0NCIgcj0iMjgiIGZpbGw9IiM0ZjhlZjciLz48cGF0aCBkPSJNMTMyIDE0NCBMMTQwIDE1MiBMMTU2IDEzNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
+<title>SGD — Gerador de Diárias</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#0f1117; --surface:#181c27; --surface2:#1e2335; --border:#2a3050;
+    --accent:#4f8ef7; --accent2:#7c3aed; --success:#22c55e;
+    --warning:#f59e0b; --danger:#ef4444;
+    --text:#e2e8f0; --text-muted:#64748b; --text-dim:#94a3b8;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:24px 16px 48px;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
+  .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+
+  /* HEADER */
+  header{margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--border);padding-bottom:20px;}
+  .logo-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.3px;line-height:1.2;}
+  h1 span{display:block;font-size:12px;font-weight:400;color:var(--text-muted);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
+  .tab-btn{flex:1;padding:10px 16px;background:transparent;border:none;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--text-muted);transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .tab-btn:hover{color:var(--text);background:var(--surface2);}
+  .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;}
+  .tab-badge{background:rgba(255,255,255,.25);border-radius:20px;padding:1px 7px;font-size:11px;font-family:var(--mono);font-weight:600;}
+  .tab-btn:not(.active) .tab-badge{background:rgba(79,142,247,.15);color:var(--accent);}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+
+  /* PASTE */
+  .paste-zone{background:var(--surface);border:2px dashed var(--border);border-radius:14px;padding:20px;margin-bottom:16px;}
+  .paste-zone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .paste-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);display:flex;align-items:center;gap:8px;}
+  .paste-hint{font-size:11px;color:var(--text-muted);font-family:var(--mono);background:rgba(79,142,247,.1);padding:4px 10px;border-radius:20px;}
+  textarea#pasteInput{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.6;resize:vertical;min-height:80px;max-height:180px;outline:none;transition:border-color .15s;}
+  textarea#pasteInput:focus{border-color:var(--accent);}
+  textarea#pasteInput::placeholder{color:var(--text-muted);}
+  .btn-parse{margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-parse:hover{opacity:.88;}
+
+  /* TAGS */
+  .parsed-tags{display:none;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+  .parsed-tags.visible{display:flex;}
+  .tag{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;font-size:12px;font-family:var(--mono);}
+  .tag.ok{background:rgba(34,197,94,.12);color:var(--success);border:1px solid rgba(34,197,94,.25);}
+  .tag.warn{background:rgba(245,158,11,.12);color:var(--warning);border:1px solid rgba(245,158,11,.25);}
+  .tag .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .tag.ok .dot{background:var(--success);} .tag.warn .dot{background:var(--warning);}
+
+  /* DIVIDER */
+  .section-divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;}
+  .section-divider span{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;text-transform:uppercase;letter-spacing:1px;}
+  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* CARD */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .span-2{grid-column:span 2;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);}
+  input,select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  input.autofilled{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.06);}
+  input::placeholder{color:var(--text-muted);font-size:13px;}
+  select option{background:var(--surface2);}
+  .radio-group{display:flex;gap:8px;}
+  .radio-btn{flex:1;position:relative;}
+  .radio-btn input[type="radio"]{position:absolute;opacity:0;width:0;}
+  .radio-btn label{display:flex;align-items:center;justify-content:center;padding:10px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;transition:all .15s;text-transform:none;font-family:var(--sans);font-weight:400;color:var(--text-dim);text-align:center;line-height:1.3;}
+  .radio-btn input[type="radio"]:checked+label{background:rgba(79,142,247,.15);border-color:var(--accent);color:var(--accent);font-weight:500;}
+
+  /* BUTTONS */
+  .btn-generate{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:8px;}
+  .btn-generate:hover{opacity:.9;} .btn-generate:active{transform:scale(.99);}
+  .btn-reset{margin-top:10px;width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s;letter-spacing:.5px;}
+  .btn-reset:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* OUTPUT */
+  .output-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:none;margin-top:16px;}
+  .output-card.visible{display:block;}
+  .output-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2);}
+  .output-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--success);font-family:var(--mono);display:flex;align-items:center;gap:6px;}
+  .output-label::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .btn-copy{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--success);border:none;border-radius:7px;color:#0a1a0f;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .btn-copy:hover{background:#16a34a;color:#fff;} .btn-copy.copied{background:#166534;color:#bbf7d0;}
+  .output-text{padding:20px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+  .tip{font-size:12px;color:var(--text-muted);font-family:var(--mono);padding:10px 14px;background:rgba(79,142,247,.06);border-left:2px solid var(--accent);border-radius:0 6px 6px 0;margin-top:12px;display:none;}
+
+  /* ── ABA TABELA ── */
+  .tabela-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .tabela-header-left{display:flex;align-items:center;gap:10px;flex:1;flex-wrap:wrap;}
+
+  /* Seletor de data estilizado */
+  .date-selector-wrap{display:flex;align-items:center;gap:8px;}
+  .date-selector-wrap label{font-size:11px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;}
+  input#filtroData{width:auto;padding:8px 12px;font-size:13px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;}
+  input#filtroData:focus{border-color:var(--accent);}
+
+  .btn-hoje{padding:7px 12px;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);border-radius:7px;color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .btn-hoje:hover{background:rgba(79,142,247,.2);}
+
+  .dias-disponiveis{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .dia-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;transition:all .15s;}
+  .dia-pill:hover{border-color:var(--accent);color:var(--accent);}
+  .dia-pill.ativo{background:rgba(79,142,247,.15);border-color:var(--accent);color:var(--accent);font-weight:600;}
+  .dia-pill .pill-count{font-size:10px;opacity:.7;margin-left:4px;}
+
+  .tabela-controls{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;}
+  .btn-exportar{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s;font-weight:600;}
+  .btn-exportar:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-exportar.md{border-color:rgba(124,58,237,.4);color:var(--accent2);}
+  .btn-exportar.md:hover{border-color:var(--accent2);background:rgba(124,58,237,.08);}
+  .btn-exportar.danger:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* Info do dia selecionado */
+  .dia-info{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;}
+  .dia-info-date{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);}
+  .dia-info-count{font-family:var(--mono);font-size:12px;color:var(--text-muted);}
+  .dia-info-total{font-family:var(--mono);font-size:12px;color:var(--success);margin-left:auto;}
+
+  .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);font-family:var(--mono);font-size:13px;border:1px dashed var(--border);border-radius:12px;}
+  .empty-state .icon{font-size:32px;margin-bottom:12px;}
+  .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
+  thead{background:var(--surface2);}
+  th{padding:12px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;max-width:200px;word-break:break-word;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(79,142,247,.04);}
+  .td-num{color:var(--text-muted);font-size:11px;}
+  .td-empty{color:var(--text-muted);font-style:italic;}
+  .td-valor{color:var(--success);font-weight:600;}
+  .btn-del-row{background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all .15s;}
+  .btn-del-row:hover{color:var(--danger);background:rgba(239,68,68,.1);}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:420px;margin:16px;}
+  .modal h2{font-size:16px;font-weight:600;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--text-muted);font-family:var(--mono);margin-bottom:20px;}
+  .modal .field{margin-bottom:14px;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .btn-modal-ok{flex:1;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-modal-skip{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
+  .btn-modal-skip:hover{border-color:var(--text-muted);color:var(--text);}
+
+  /* BUSCA */
+  .busca-wrap{position:relative;margin-bottom:8px;display:flex;gap:8px;align-items:center;}
+  .busca-input-wrap{position:relative;flex:1;}
+  .busca-input-wrap input{width:100%;padding:11px 40px 11px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;}
+  .busca-input-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .busca-input-wrap input.ia-ativa{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(124,58,237,.15);}
+  .busca-input-wrap input::placeholder{color:var(--text-muted);}
+  .busca-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+  .busca-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:none;transition:color .15s;}
+  .busca-clear:hover{color:var(--danger);}
+  .busca-clear.visible{display:block;}
+  .btn-busca-ia{padding:10px 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;display:flex;align-items:center;gap:6px;}
+  .btn-busca-ia:hover{opacity:.88;}
+  .btn-busca-ia:disabled{opacity:.5;cursor:not-allowed;}
+  .busca-hint{font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:14px;padding:8px 12px;background:rgba(124,58,237,.06);border-left:2px solid var(--accent2);border-radius:0 6px 6px 0;}
+  .busca-hint strong{color:var(--accent2);}
+  .busca-loading{display:none;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;font-family:var(--mono);font-size:13px;color:var(--text-muted);}
+  .busca-loading.visible{display:flex;}
+  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .busca-ia-resultado{display:none;padding:10px 14px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:10px;margin-bottom:12px;font-family:var(--mono);font-size:12px;color:var(--accent2);}
+  .busca-ia-resultado.visible{display:block;}
+  .busca-info{font-size:12px;color:var(--text-muted);font-family:var(--mono);margin-bottom:10px;}
+  .busca-info strong{color:var(--accent);}
+  .highlight{background:rgba(79,142,247,.25);border-radius:2px;padding:0 2px;}
+  .highlight-ia{background:rgba(124,58,237,.25);border-radius:2px;padding:0 2px;}
+
+  /* MAPA */
+  .mapa-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:none;margin-top:14px;}
+  .mapa-card.visible{display:block;}
+  .mapa-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border);}
+  .mapa-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);display:flex;align-items:center;gap:8px;}
+  .mapa-actions{display:flex;gap:8px;}
+  .btn-mapa-ext{display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);border-radius:7px;color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s;}
+  .btn-mapa-ext:hover{background:rgba(79,142,247,.25);}
+  .mapa-iframe-wrap{position:relative;width:100%;height:340px;}
+  .mapa-iframe-wrap iframe{width:100%;height:100%;border:none;display:block;}
+  .mapa-info{display:flex;gap:16px;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .mapa-info-item{font-family:var(--mono);font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .mapa-info-item strong{color:var(--text);}
+
+  /* BACKUP */
+  .backup-wrap{display:flex;gap:8px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .backup-label{font-size:11px;font-family:var(--mono);color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-right:4px;}
+  .btn-backup{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--border);}
+  .btn-backup.export{background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.3);color:var(--accent);}
+  .btn-backup.export:hover{background:rgba(79,142,247,.2);border-color:var(--accent);}
+  .btn-backup.import{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.3);color:var(--accent2);}
+  .btn-backup.import:hover{background:rgba(124,58,237,.2);border-color:var(--accent2);}
+  .backup-info{font-size:11px;font-family:var(--mono);color:var(--text-muted);margin-left:auto;}
+  #importFileInput{display:none;}
+
+  /* STATUS PC */
+  tr.pc-ok td { background: rgba(34,197,94,.06) !important; }
+  tr.pc-ok td:first-child { border-left: 3px solid var(--success); }
+  tr.pc-pendente td { background: rgba(245,158,11,.04) !important; }
+  tr.pc-pendente td:first-child { border-left: 3px solid var(--warning); }
+  .badge-pc-ok { display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);font-weight:600;color:var(--success);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:2px 8px; }
+  .badge-pc-pendente { display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);font-weight:600;color:var(--warning);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:2px 8px; }
+  .filtro-pc-wrap { display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap; }
+  .filtro-pc-btn { padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--mono);font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);transition:all .15s; }
+  .filtro-pc-btn:hover { border-color:var(--accent);color:var(--accent); }
+  .filtro-pc-btn.ativo { background:rgba(79,142,247,.15);border-color:var(--accent);color:var(--accent); }
+  .filtro-pc-btn.ativo.pendente { background:rgba(245,158,11,.15);border-color:var(--warning);color:var(--warning); }
+  .filtro-pc-btn.ativo.ok { background:rgba(34,197,94,.15);border-color:var(--success);color:var(--success); }
+
+  /* PRESTAÇÃO DE CONTAS */
+  .btn-pc{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;padding:4px 8px;transition:all .15s;white-space:nowrap;}
+  .btn-pc:hover{background:rgba(79,142,247,.25);border-color:var(--accent);}
+  .modal-pc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;}
+  .modal-pc-overlay.open{display:flex;}
+  .modal-pc{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:560px;margin:16px;}
+  .modal-pc h2{font-size:15px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .modal-pc .pc-sub{font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:16px;}
+  .pc-texto{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;word-break:break-word;margin-bottom:14px;}
+  .pc-aviso{font-size:11px;color:var(--warning);font-family:var(--mono);padding:8px 12px;background:rgba(245,158,11,.08);border-left:2px solid var(--warning);border-radius:0 6px 6px 0;margin-bottom:14px;display:none;}
+  .pc-aviso.visible{display:block;}
+  .modal-pc-actions{display:flex;gap:10px;}
+  .btn-pc-copiar{flex:1;padding:11px;background:var(--success);border:none;border-radius:8px;color:#0a1a0f;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .btn-pc-copiar:hover{background:#16a34a;color:#fff;}
+  .btn-pc-copiar.copied{background:#166534;color:#bbf7d0;}
+  .btn-pc-fechar{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
+  .btn-pc-fechar:hover{border-color:var(--text-muted);color:var(--text);}
+
+  @media(max-width:580px){
+    .grid-2{grid-template-columns:1fr;} .span-2{grid-column:span 1;}
+    .radio-group{flex-wrap:wrap;} .radio-btn{flex:1 1 45%;}
+    .tabela-header{flex-direction:column;align-items:flex-start;}
+    .tabela-controls{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-badge">📋</div>
+    <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.65</span>
+  </header>
+
+  <!-- Modal de configuração -->
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
+    <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- ABA GERADOR                            -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-gerador">
+
+    <div class="paste-zone">
+      <div class="paste-zone-header">
+        <div class="paste-label">⚡ Cola aqui o processo do 1Doc</div>
+        <div class="paste-hint">Ctrl+A → Ctrl+C → Ctrl+V</div>
+      </div>
+      <textarea id="pasteInput" placeholder="Cole aqui o conteúdo copiado do processo no 1Doc. Os campos serão preenchidos automaticamente..."></textarea>
+      <button class="btn-parse" id="btnParsear">🔍 Reconhecer Dados Automaticamente</button>
+      <div class="parsed-tags" id="parsedTags"></div>
+    </div>
+
+    <div class="section-divider"><span>ou preencha manualmente</span></div>
+
+    <div class="card">
+      <div class="card-title">01 — Tipo de Diária</div>
+      <div class="field">
+        <label>Categoria</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="tipo" id="t1" value="ALIMENTAÇÃO"><label for="t1">Alimentação</label></div>
+          <div class="radio-btn"><input type="radio" name="tipo" id="t2" value="HOSPEDAGEM E ALIMENTAÇÃO"><label for="t2">Hospedagem e Alimentação</label></div>
+          <div class="radio-btn"><input type="radio" name="tipo" id="t3" value="TRANSPORTE" checked><label for="t3">Transporte</label></div>
+          <div class="radio-btn"><input type="radio" name="tipo" id="t4" value="COMBUSTÍVEL"><label for="t4">Combustível</label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">02 — Servidor e Destino</div>
+      <div class="grid-2">
+        <div class="field span-2"><label>Nome do Servidor / Credor</label><input type="text" autocomplete="off" id="servidor" placeholder="Nome completo em maiúsculas"></div>
+        <div class="field"><label>Nº do Processo</label><input type="text" autocomplete="off" id="num_processo" placeholder="Ex: 2.263/2026"></div>
+        <div class="field"><label>Cidade de Destino</label><input type="text" autocomplete="off" id="cidade" placeholder="Ex: SANTA MARIA"></div>
+        <div class="field"><label>UF</label><input type="text" autocomplete="off" id="uf" placeholder="RS" maxlength="2"></div>
+        <div class="field span-2"><label>Motivo da Viagem</label><input type="text" autocomplete="off" id="motivo" placeholder="Ex: TRANSPORTE DE PACIENTE"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">03 — Datas e Horários</div>
+      <div class="grid-2">
+        <div class="field"><label>Data de Saída</label><input type="date" id="data_saida"></div>
+        <div class="field"><label>Data de Chegada</label><input type="date" id="data_chegada"></div>
+        <div class="field"><label>Hora de Saída</label><input type="time" id="hora_saida"></div>
+        <div class="field"><label>Hora de Chegada</label><input type="time" id="hora_chegada"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">04 — Classificação e Veículo</div>
+      <div class="field">
+        <label>Tipo de Deslocamento</label>
+        <div class="radio-group">
+          <div class="radio-btn"><input type="radio" name="distancia" id="d1" value="interior" checked><label for="d1">Interior do Estado (até 350km — Sem Pernoite)</label></div>
+          <div class="radio-btn"><input type="radio" name="distancia" id="d2" value="outra"><label for="d2">Outra Classificação</label></div>
+        </div>
+      </div>
+      <div class="field" id="campo_outra" style="display:none;margin-top:12px;">
+        <label>Descreva o fechamento</label>
+        <input type="text" autocomplete="off" id="outra_desc" placeholder="Ex: VALOR REFERENTE A VIAGEM INTERESTADUAL">
+      </div>
+      <div class="field" style="margin-top:14px;"><label>Placa do Veículo (opcional)</label><input type="text" autocomplete="off" id="placa" placeholder="Ex: TQU-6B52"></div>
+    </div>
+
+    <button class="btn-generate" id="btnGerar">⚡ Gerar Descrição</button>
+    <button class="btn-reset" id="btnResetar">🗑 Limpar todos os campos</button>
+
+    <div class="output-card" id="outputCard">
+      <div class="output-header">
+        <div class="output-label">Descrição Gerada</div>
+        <button class="btn-copy" id="btnCopy"><span id="copyIcon">📋</span><span id="copyText">Copiar</span></button>
+      </div>
+      <div class="output-text" id="outputText"></div>
+    </div>
+    <div class="tip" id="tipBox">💡 Após copiar, cole diretamente no campo de descrição do 1Doc.</div>
+
+    <!-- Mapa do roteiro -->
+    <div class="mapa-card" id="mapaCard">
+      <div class="mapa-header">
+        <div class="mapa-label">🗺 Roteiro da Viagem</div>
+        <div class="mapa-actions">
+          <a class="btn-mapa-ext" id="mapaLinkExt" href="#" target="_blank">↗ Abrir no Google Maps</a>
+        </div>
+      </div>
+      <div class="mapa-iframe-wrap">
+        <iframe id="mapaIframe" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="mapa-info" id="mapaInfo"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- ABA TABELA                             -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-tabela">
+
+    <div class="tabela-header">
+      <div class="tabela-header-left">
+        <div class="date-selector-wrap">
+          <label>Filtrar por data:</label>
+          <input type="date" id="filtroData">
+        </div>
+        <button class="btn-hoje" id="btnHoje">📅 Hoje</button>
+      </div>
+      <div class="tabela-controls">
+        <button class="btn-exportar md" id="btnExportarMD">⬇ Exportar .MD</button>
+        <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
+        <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
+      </div>
+    </div>
+
+    <!-- Backup / Importação -->
+    <div class="backup-wrap">
+      <span class="backup-label">💾 Dados</span>
+      <button class="btn-backup export" id="btnBackupExport">⬇ Exportar Backup</button>
+      <button class="btn-backup import" id="btnBackupImport">⬆ Importar Backup</button>
+      <input type="file" id="importFileInput" accept=".json">
+      <span class="backup-info" id="backupInfo"></span>
+    </div>
+
+    <!-- Campo de busca -->
+    <div class="busca-wrap">
+      <div class="busca-input-wrap">
+        <span class="busca-icon">🔍</span>
+        <input type="text" id="campoBusca" placeholder="Pesquisa simples ou em linguagem natural com IA...">
+        <button class="busca-clear" id="btnLimparBusca" title="Limpar busca">✕</button>
+      </div>
+      <button class="btn-busca-ia" id="btnBuscaIA">✨ Buscar com IA</button>
+    </div>
+    <div class="busca-hint">💡 Digite normalmente para busca rápida, ou clique em <strong>✨ Buscar com IA</strong> para pesquisa em linguagem natural: <em>"João que foi para Santa Maria dia 16/03 com placa TQU"</em></div>
+    <div class="busca-loading" id="buscaLoading"><div class="spinner"></div> Interpretando sua consulta com IA...</div>
+    <div class="busca-ia-resultado" id="buscaIAResultado"></div>
+    <div class="busca-info" id="buscaInfo" style="display:none;"></div>
+
+    <!-- Pills dos dias disponíveis -->
+    <div class="dias-disponiveis" id="diasDisponiveis"></div>
+
+    <!-- Info do dia -->
+    <div class="dia-info" id="diaInfo" style="display:none;">
+      <span class="dia-info-date" id="diaInfoDate"></span>
+      <span class="dia-info-count" id="diaInfoCount"></span>
+      <span class="dia-info-total" id="diaInfoTotal"></span>
+    </div>
+
+    <!-- Filtro por status PC -->
+    <div class="filtro-pc-wrap" id="filtroPCWrap">
+      <button class="filtro-pc-btn ativo" data-pc="todos">📋 Todos</button>
+      <button class="filtro-pc-btn pendente" data-pc="pendente">⏳ Pendentes</button>
+      <button class="filtro-pc-btn ok" data-pc="ok">✅ Concluídos</button>
+    </div>
+
+    <div id="tabelaWrap"></div>
+
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>📄 Empenho e Valor</h2>
+    <p>Opcional — preencha agora ou deixe em branco para completar depois.</p>
+    <div class="field"><label>Nº do Empenho</label><input type="text" id="modal_empenho" placeholder="Ex: 2025NE001234"></div>
+    <div class="field"><label>Valor (R$)</label><input type="text" id="modal_valor" placeholder="Ex: 150,00"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-skip" id="btnModalPular">Pular por agora</button>
+      <button class="btn-modal-ok" id="btnModalOk">✅ Salvar na Tabela</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// ═══════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════
+var processos = [];
+var pendente = null;
+var filtroAtivo = hojeISO();
+var termoBusca = '';
+var filtrosIA = null; // objeto com filtros extraídos pela IA
+var modoIA = false;
+var filtroPCStatus = 'todos'; // 'todos' | 'pendente' | 'ok'
+
+// ═══════════════════════════════════════════════════════
+// UTILITÁRIOS DE DATA
+// ═══════════════════════════════════════════════════════
+function hojeISO() {
+  var d = new Date();
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+mm+'-'+dd;
+}
+function isoParaBR(iso) {
+  if (!iso) return '';
+  var p = iso.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function brParaISO(br) {
+  if (!br) return '';
+  var p = br.split('/');
+  if (p.length < 3) {
+    // formato DD/MM sem ano
+    return '2026-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+  }
+  var ano = p[2].length===2 ? '20'+p[2] : p[2];
+  return ano+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+}
+function formatarHora(s){ return s||''; }
+
+// ═══════════════════════════════════════════════════════
+// ABAS
+// ═══════════════════════════════════════════════════════
+document.getElementById('tabGerador').addEventListener('click', function() {
+  document.getElementById('panel-gerador').classList.add('active');
+  document.getElementById('panel-tabela').classList.remove('active');
+  this.classList.add('active');
+  document.getElementById('tabTabela').classList.remove('active');
+});
+document.getElementById('tabTabela').addEventListener('click', function() {
+  document.getElementById('panel-tabela').classList.add('active');
+  document.getElementById('panel-gerador').classList.remove('active');
+  this.classList.add('active');
+  document.getElementById('tabGerador').classList.remove('active');
+  renderTabela();
+});
+
+// ═══════════════════════════════════════════════════════
+// RADIO DISTÂNCIA
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('input[name="distancia"]').forEach(function(r) {
+  r.addEventListener('change', function() {
+    document.getElementById('campo_outra').style.display =
+      r.value==='outra' && r.checked ? 'flex' : 'none';
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// PARSER 1DOC
+// ═══════════════════════════════════════════════════════
+document.getElementById('btnParsear').addEventListener('click', parsear);
+function parsear() {
+  var raw = document.getElementById('pasteInput').value;
+  if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
+  raw = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  raw = raw.replace(/[ \t]+/g,' ');
+  raw = raw.replace(/\n[ \t]+/g,'\n');
+  raw = raw.replace(/[ \t]+\n/g,'\n');
+  raw = raw.replace(/\n{3,}/g,'\n\n');
+
+  var btn = document.getElementById('btnParsear');
+  btn.disabled = true;
+  btn.textContent = 'Analisando com Claude...';
+
+  // Pre-extrai servidor do campo do formulario para ancorar a IA
+  var servidorAncorado = '';
+  var srvMatch = raw.match(/Motorista ou Servidor\*?:\s*([^\n]+)/i);
+  if (srvMatch) {
+    servidorAncorado = srvMatch[1].trim()
+      .replace(/\.?\s*Matr[:\.]?\d+/gi, '')
+      .replace(/\b(condutor de ambulan.a|motorista|servidor|coordenador|chefe de setor|tecnico|medico|enfermeiro)\b/gi, '')
+      .replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+
+  // Extrai trecho relevante para economizar tokens
+  function extrairTrechoRelevante(texto) {
+    var inicio = texto.search(/Motorista ou Servidor\*?:/i);
+    if (inicio === -1) inicio = texto.search(/Proc\.\s*Administrativo/i);
+    if (inicio === -1) return texto.substring(0, 3000);
+    inicio = Math.max(0, inicio - 300);
+    return texto.substring(inicio, inicio + 3000);
+  }
+  var rawIA = extrairTrechoRelevante(raw);
+
+  var prompt =
+    'Voce e um assistente administrativo da Prefeitura de Tupancireta/RS. Leia o processo abaixo e extraia os dados preenchendo o JSON.\n\n'
+    + 'Retorne APENAS o JSON, sem texto adicional, sem markdown.\n\n'
+    + 'JSON a preencher:\n'
+    + '{"num_processo":null,"servidor":null,"placa":null,"data_saida":null,"data_chegada":null,"hora_saida":null,"hora_chegada":null,"cidade":null,"uf":null,"motivo":null}\n\n'
+    + 'Observacoes importantes:\n'
+    + '- servidor: use APENAS o campo "Motorista ou Servidor*:" do formulario, ignore nomes de despachos\n'
+    + '- placa: apenas os caracteres (ex: TQU6B33), ignore marca/modelo; se locado coloque LOCADO\n'
+    + '- datas: formato DD/MM/AAAA\n'
+    + '- horas: formato HH:MM\n'
+    + '- cidade: apenas a cidade principal de destino, sem UF\n'
+    + '- motivo: descreva o objetivo da viagem em MAIUSCULAS. NUNCA cite nomes de pacientes.'
+    + ' Se houver 1 paciente use PACIENTE, se houver mais de 1 use PACIENTES LISTADOS EM ANEXO.'
+    + ' Exemplos: TRANSPORTE DE PACIENTE PARA QUIMIOTERAPIA NO HOSPITAL UNIVERSITARIO DE SANTA MARIA,'
+    + ' TRANSPORTE DE PACIENTES LISTADOS EM ANEXO PARA CONSULTA NA CLINICA DE OLHOS,'
+    + ' BUSCAR PACIENTE NO HOSPITAL UNIVERSITARIO DE SANTA MARIA.'
+    + ' Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
+    + 'Processo:\n' + rawIA;
+
+
+  fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: prompt })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var texto = data.text || '';
+    // Remove blocos markdown
+    texto = texto.replace(/```json|```/g,'').trim();
+    // Extrai apenas o objeto JSON se vier com texto ao redor
+    var jsonMatch = texto.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('JSON nao encontrado na resposta');
+    }
+    texto = jsonMatch[0];
+    if (!texto) throw new Error('Resposta vazia');
+    var parsed = JSON.parse(texto);
+    // Corrige motivo com parser local quando lista tem texto descritivo sem nomes
+    var localResult = parsearLocal(raw);
+    if (localResult.motivo && (!parsed.motivo || parsed.motivo.length < localResult.motivo.length)) {
+      parsed.motivo = localResult.motivo;
+    }
+    preencherCampos(parsed);
+  })
+  .catch(function(e) {
+    console.error('IA erro:', e.message);
+    preencherCampos(parsearLocal(raw));
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = '\uD83D\uDD0D Reconhecer Dados Automaticamente';
+    document.getElementById('pasteInput').value = '';
+  });
+}
+
+
+function parsearLocal(raw) {
+  var found = {};
+  var m;
+
+  // num_processo
+  m = raw.match(/Proc\.\s*Administrativo\s*([\d\.\/]+)/i);
+  if (m) found.num_processo = m[1].trim();
+
+  // servidor
+  m = raw.match(/Motorista ou Servidor\*?:\s*(.+)/i);
+  if (m) {
+    var srv = m[1].trim();
+    srv = srv.replace(/\.?\s*Matr[:\.]?\d+/gi, '').trim();
+    srv = srv.replace(/\b(condutor de ambulan.a|motorista|servidor|coordenador transporte|chefe de setor|m.dico|enfermeiro|t.cnico)\b/gi, '').trim();
+    srv = srv.replace(/\s+/g, ' ').replace(/^[\s,\.]+|[\s,\.]+$/g, '');
+    found.servidor = srv.toUpperCase();
+  }
+  var assinM = raw.match(/_\s*\n([A-Z\u00C0-\u00FAa-z\u00E0-\u00FA][^\n]{5,60})\s*\n\s*(Motorista|Coordenador|M.dico|Enfermeiro|condutor|Chefe)/i);
+  if (assinM) found.servidor = assinM[1].trim().toUpperCase();
+
+  // placa
+  m = raw.match(/Placa[^:]*:\s*(.+)/i);
+  if (m) {
+    var placaM = m[1].match(/\b([A-Z]{3}[\s\-]?[0-9][A-Z0-9][0-9]{2})\b/i);
+    if (placaM) found.placa = placaM[1].replace(/[\s\-]/g,'').toUpperCase();
+    else if (/locado|alugado/i.test(m[1])) found.placa = 'LOCADO';
+  }
+
+  // datas
+  function normalizarData(s) {
+    s = s.trim().replace(/\s+/g,'');
+    if (/^\d{1,2}[\/\-]\d{1,2}/.test(s)) return s;
+    if (/^\d{8}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/'+s.slice(4);
+    if (/^\d{6}$/.test(s)) return s.slice(0,2)+'/'+s.slice(2,4)+'/20'+s.slice(4);
+    return s;
+  }
+  m = raw.match(/Data de Sa.da[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
+  if (m) found.data_saida = normalizarData(m[1]);
+  m = raw.match(/Data de Chegada[^:]*:\s*(\d{1,2}\s*[\/\-]\s*\d{1,2}(?:\s*[\/\-]\s*\d{2,4})?|\d{6,8})/i);
+  if (m) found.data_chegada = normalizarData(m[1]);
+
+  // horas
+  function extrairHora(texto) {
+    texto = texto.trim();
+    var m1 = texto.match(/(\d{1,2}):(\d{2})/);
+    if (m1) return m1[1].padStart(2,'0') + ':' + m1[2];
+    var m2 = texto.match(/(\d{1,2})\.(\d{2})\s*(?:HS|H|hrs?)?/i);
+    if (m2) return m2[1].padStart(2,'0') + ':' + m2[2];
+    var m4 = texto.match(/^(\d{4})$/);
+    if (m4) return m4[1].slice(0,2) + ':' + m4[1].slice(2);
+    var m3 = texto.match(/(\d{1,2})\s*(?:HS|H|hrs?)/i);
+    if (m3) return m3[1].padStart(2,'0') + ':00';
+    return null;
+  }
+  m = raw.match(/Hora de Sa.da[^:]*:\s*([^\n\r]+)/i);
+  if (m) { var h = extrairHora(m[1]); if (h) found.hora_saida = h; }
+  m = raw.match(/Hora de Chegada[^:]*:\s*([^\n\r]+)/i);
+  if (m) { var h2 = extrairHora(m[1]); if (h2) found.hora_chegada = h2; }
+
+  // cidade + UF
+  m = raw.match(/Cidade de destino\*?:\s*([^\n\r]+)/i);
+  if (m) {
+    var partes = m[1].trim().split(/\s+/);
+    if (partes.length > 1 && /^[a-zA-Z]{2}$/.test(partes[partes.length-1])) {
+      found.uf = partes.pop().toUpperCase();
+      found.cidade = partes.join(' ').toUpperCase();
+    } else { found.cidade = m[1].trim().toUpperCase(); }
+  }
+  if (!found.uf) found.uf = 'RS';
+
+  // === MOTIVO ===
+  function expandir(txt) {
+    txt = txt.replace(/\bHUSM\b/gi, 'HOSPITAL UNIVERSITARIO DE SANTA MARIA');
+    txt = txt.replace(/\bHCAA\b/gi, 'HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO');
+    txt = txt.replace(/\bONCO\b/gi, 'ONCOLOGIA');
+    txt = txt.replace(/\bHCOS\b/gi, 'HOSPITAL DE CARIDADE DE SANTA MARIA');
+    txt = txt.replace(/\bp\//gi, 'PARA ');
+    return txt.toUpperCase();
+  }
+  function isNome(s) {
+    if (s.split(' ').length < 2) return false;
+    if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|para|realizar|Despacho|Anexo|Revisar)/i.test(s)) return false;
+    if (/\b(paciente|gestante|internação|internacao|consulta|quimioterapia|para realizar|cirurgia)\b/i.test(s)) return false;
+    return true;
+  }
+
+  var clinicaM = raw.match(/Cl.nica de destino[^:]*:\s*([^\n\r]+)/i);
+  var clinica = clinicaM ? clinicaM[1].trim() : '';
+
+  var listaM = raw.match(/Lista de Paciente\(s\)[^:]*:([\s\S]+?)(?=\n_|\nAnexo|\nDespacho|\nQuem|$)/i);
+
+  if (listaM) {
+    var bloco = listaM[1].trim();
+    var linhas = bloco.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+    var primeira = linhas.length > 0 ? linhas[0] : '';
+
+    // Frase descritiva no inicio (acompanhar, realizar, participar...)
+    if (/^(acompanhar|conduzir|realizar|participar)/i.test(primeira)) {
+      found.motivo = expandir(primeira.replace(/\.\s*$/,''));
+    }
+    // Buscar paciente com nome na mesma linha
+    else {
+      var buscarM2 = primeira.match(/^(buscar|trazer)\s+(?:a\s+|o\s+)?(?:paciente|gestante|crianca|idoso)?\s*(.+)/i);
+      if (buscarM2) {
+        var destBuscar = clinica ? expandir(clinica.replace(/\.\s*$/,'')) : '';
+        found.motivo = ('BUSCAR PACIENTE' + (destBuscar ? ' NO ' + destBuscar : '')).trim();
+      } else {
+        // Coleta nomes e descricao adicional
+        var nomes = [];
+        var descExtra = '';
+        for (var li = 0; li < linhas.length; li++) {
+          var linha = linhas[li].replace(/^\+ac\.+\s*/i,'').trim();
+          if (!linha || linha.length < 4) continue;
+          if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|para realizar|realizar|PREENCHIMENTO|Clinica|Lista)/i.test(linha)) {
+            if (!descExtra) descExtra = linha;
+            continue;
+          }
+          linha = linha.replace(/^(paciente|gestante|crianca|idoso|pacientes)\s+/i,'').trim();
+          if (isNome(linha)) nomes.push(linha);
+        }
+
+        if (nomes.length > 0) {
+          var isBuscar = /buscar|trazer|retorno|retornar/i.test(bloco + descExtra);
+          var plural = nomes.length > 1 ? 'PACIENTES LISTADOS EM ANEXO' : 'PACIENTE';
+          var prefixo = isBuscar ? 'BUSCAR ' + plural : 'TRANSPORTE DE ' + plural;
+          var sufixo = '';
+          if (descExtra) {
+            descExtra = descExtra.replace(/^(levar paciente?s?\s+|buscar paciente?s?\s+|levar\s+|buscar\s+)/i,'');
+            sufixo = ' ' + expandir(descExtra.replace(/\.\s*$/,''));
+          } else if (clinica) {
+            sufixo = (isBuscar ? ' NO ' : ' A ') + expandir(clinica.replace(/\.\s*$/,''));
+          }
+          found.motivo = (prefixo + sufixo).trim();
+        } else if (clinica) {
+          found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
+        }
+      }
+    }
+  }
+
+  // Estrategia 2: texto livre com levar/buscar + nomes em linhas seguintes
+  if (!found.motivo) {
+    var livreM = raw.match(/((?:levar|buscar|trazer|internar|acompanhar)[^\n]+(?:\n(?![_])[^\n]{3,60})*)/i);
+    if (livreM) {
+      var blocoL = livreM[0];
+      var isBuscarL = /buscar|trazer|retorno/i.test(blocoL);
+      var destML = blocoL.match(/(?:na|no|para|em)\s+((?:ONCO|HUSM|HCAA|HCOS|Hospital|Cl.nica|UPA)[^\n,]+)/i);
+      var destL = destML ? destML[1].trim() : (clinica || '');
+      var nomesL = [];
+      blocoL.split('\n').forEach(function(linha) {
+        linha = linha.replace(/^\+ac\.+\s*/i,'').trim();
+        if (/^(levar|buscar|trazer|acompanhar|_)/i.test(linha)) return;
+        if (isNome(linha)) nomesL.push(linha.toUpperCase());
+      });
+      if (nomesL.length > 0) {
+        var pluralL = nomesL.length > 1 ? 'PACIENTES ' : 'PACIENTE ';
+        var prefixoL = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
+        var pluralL = nomesL.length > 1 ? 'PACIENTES LISTADOS EM ANEXO' : 'PACIENTE';
+        var prefixoL2 = isBuscarL ? 'BUSCAR ' + pluralL : 'TRANSPORTE DE ' + pluralL;
+        var conectorL = isBuscarL ? ' NO ' : ' A ';
+        found.motivo = (prefixoL2 + (destL ? conectorL + expandir(destL) : '')).trim();
+      }
+    } else if (clinica) {
+      found.motivo = clinica.toUpperCase().replace(/\.\s*$/,'');
+    }
+  }
+
+  return found;
+}
+
+
+function preencherCampos(found) {
+  // Converter datas para ISO se vierem no formato BR
+  if (found.data_saida && found.data_saida.indexOf('/') !== -1) found.data_saida = brParaISO(found.data_saida);
+  if (found.data_chegada && found.data_chegada.indexOf('/') !== -1) found.data_chegada = brParaISO(found.data_chegada);
+
+  var nomes = {servidor:'Servidor',cidade:'Cidade',uf:'UF',motivo:'Motivo',placa:'Placa',
+    data_saida:'Data Saida',data_chegada:'Data Chegada',hora_saida:'Hora Saida',hora_chegada:'Hora Chegada',num_processo:'Nr Processo'};
+
+  var tagsEl = document.getElementById('parsedTags');
+  tagsEl.innerHTML = '';
+
+  ['servidor','cidade','uf','motivo','placa','num_processo'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled');
+      var t = document.createElement('div'); t.className='tag ok';
+      t.innerHTML='<span class="dot"></span>'+(nomes[id]||id); tagsEl.appendChild(t);
+    } else if (el) {
+      var t2 = document.createElement('div'); t2.className='tag warn';
+      t2.innerHTML='<span class="dot"></span>'+(nomes[id]||id)+' nao encontrado'; tagsEl.appendChild(t2);
+    }
+  });
+  ['data_saida','data_chegada','hora_saida','hora_chegada'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && found[id]) { el.value = found[id]; el.classList.add('autofilled');
+      var t = document.createElement('div'); t.className='tag ok';
+      t.innerHTML='<span class="dot"></span>'+(nomes[id]||id); tagsEl.appendChild(t);
+    } else if (el) {
+      var t2 = document.createElement('div'); t2.className='tag warn';
+      t2.innerHTML='<span class="dot"></span>'+(nomes[id]||id)+' nao encontrado'; tagsEl.appendChild(t2);
+    }
+  });
+
+  tagsEl.classList.add('visible');
+  document.querySelector('.card').scrollIntoView({behavior:'smooth'});
+
+  // UF padrão RS se não encontrado
+  if (!found.uf) {
+    found.uf = 'RS';
+    var elUF = document.getElementById('uf');
+    if (elUF) { elUF.value = 'RS'; elUF.classList.add('autofilled'); }
+    var tRS = document.createElement('div'); tRS.className='tag ok';
+    tRS.innerHTML='<span class="dot"></span>UF (padrao RS)'; tagsEl.appendChild(tRS);
+  }
+
+  if (found.cidade) {
+    var ufMapa = found.uf || 'RS';
+    gerarMapa(found.cidade, ufMapa);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// GERAR DESCRIÇÃO
+// ═══════════════════════════════════════════════════════
+document.getElementById('btnGerar').addEventListener('click', gerar);
+function gerar() {
+  var tipo = document.querySelector('input[name="tipo"]:checked').value;
+  var servidor = document.getElementById('servidor').value.trim().toUpperCase();
+  var cidade = document.getElementById('cidade').value.trim().toUpperCase();
+  var uf = document.getElementById('uf').value.trim().toUpperCase();
+  var motivo = document.getElementById('motivo').value.trim().toUpperCase();
+  var dataSaidaISO = document.getElementById('data_saida').value;
+  var dataChegadaISO = document.getElementById('data_chegada').value;
+  var dataSaida = isoParaBR(dataSaidaISO);
+  var dataChegada = isoParaBR(dataChegadaISO);
+  var horaSaida = document.getElementById('hora_saida').value;
+  var horaChegada = document.getElementById('hora_chegada').value;
+  var distancia = document.querySelector('input[name="distancia"]:checked').value;
+  var outraDesc = document.getElementById('outra_desc').value.trim().toUpperCase();
+  var placa = document.getElementById('placa').value.trim().toUpperCase();
+  var numProcesso = document.getElementById('num_processo').value.trim();
+
+  if (!servidor||!cidade||!uf||!motivo||!dataSaida||!dataChegada||!horaSaida||!horaChegada) {
+    alert('Preencha todos os campos obrigatórios antes de gerar.'); return;
+  }
+  var fechamento = distancia==='interior'
+    ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE'
+    : (outraDesc||'VALOR REFERENTE A VIAGEM');
+
+  var desc = 'DIÁRIA '+tipo+' VIAGEM '+cidade+'/'+uf+', '+servidor+' '+motivo+
+    '. DATA DE SAÍDA: '+dataSaida+', DATA DE CHEGADA: '+dataChegada+
+    ', HORA DE SAÍDA: '+horaSaida+', HORA DE CHEGADA: '+horaChegada+'. '+fechamento+'.';
+
+  document.getElementById('outputText').textContent = desc;
+  document.getElementById('outputCard').classList.add('visible');
+  document.getElementById('tipBox').style.display = 'block';
+  document.getElementById('btnCopy').className = 'btn-copy';
+  document.getElementById('copyIcon').textContent = '📋';
+  document.getElementById('copyText').textContent = 'Copiar';
+
+  // Data de referência = data de saída do processo (ou hoje se vazia)
+  var diaRef = hojeISO();
+
+  pendente = {servidor:servidor, numProcesso:numProcesso, cidade:cidade+'/'+uf,
+    dataSaida:dataSaida, dataChegada:dataChegada, placa:placa, diaRef:diaRef};
+
+  // Gerar mapa
+  gerarMapa(cidade, uf);
+
+  setTimeout(function() {
+    document.getElementById('outputCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }, 100);
+}
+
+function gerarMapa(cidade, uf) {
+  var origem = 'Tupancireta, RS, Brasil';
+  var destino = cidade + ', ' + uf + ', Brasil';
+
+  // OpenStreetMap embed via openrouteservice — sem API key, sem CORS
+  var embedUrl = 'https://www.openstreetmap.org/export/embed.html' +
+    '?bbox=-56.0%2C-31.0%2C-50.0%2C-27.0' +
+    '&layer=mapnik' +
+    '&marker=' + encodeURIComponent(destino);
+
+  // Usar uMap para rota visual — funciona sem iframe bloqueio
+  // Alternativa: usar leaflet embed do osm via from/to
+  var routeUrl = 'https://router.project-osrm.org/route/v1/driving/';
+
+  // Geocodificar origem e destino com Nominatim e montar iframe
+  var iframeEl = document.getElementById('mapaIframe');
+  iframeEl.src = '';
+
+  // Buscar coordenadas com Nominatim (OpenStreetMap geocoder)
+  Promise.all([
+    fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(origem) + '&format=json&limit=1').then(function(r){ return r.json(); }),
+    fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(destino) + '&format=json&limit=1').then(function(r){ return r.json(); })
+  ]).then(function(results) {
+    var orig = results[0][0];
+    var dest = results[1][0];
+    if (!orig || !dest) {
+      iframeEl.src = 'https://www.openstreetmap.org/export/embed.html?layer=mapnik';
+      return;
+    }
+    var oLon = parseFloat(orig.lon), oLat = parseFloat(orig.lat);
+    var dLon = parseFloat(dest.lon), dLat = parseFloat(dest.lat);
+
+    // Calcular bbox para enquadrar os dois pontos
+    var minLon = Math.min(oLon, dLon) - 0.5;
+    var maxLon = Math.max(oLon, dLon) + 0.5;
+    var minLat = Math.min(oLat, dLat) - 0.3;
+    var maxLat = Math.max(oLat, dLat) + 0.3;
+
+    // Embed OpenStreetMap com marcadores nos dois pontos
+    var embedSrc = 'https://www.openstreetmap.org/export/embed.html' +
+      '?bbox=' + minLon + '%2C' + minLat + '%2C' + maxLon + '%2C' + maxLat +
+      '&layer=mapnik' +
+      '&marker=' + oLat + '%2C' + oLon +
+      '&marker=' + dLat + '%2C' + dLon;
+
+    iframeEl.src = embedSrc;
+  }).catch(function() {
+    iframeEl.src = 'https://www.openstreetmap.org/export/embed.html?layer=mapnik';
+  });
+
+  // URL Google Maps para abrir rota completa
+  var mapsUrl = 'https://www.google.com/maps/dir/' +
+    encodeURIComponent('Tupancireta RS') + '/' +
+    encodeURIComponent(cidade + ' ' + uf);
+
+  document.getElementById('mapaLinkExt').href = mapsUrl;
+  document.getElementById('mapaCard').classList.add('visible');
+
+  document.getElementById('mapaInfo').innerHTML =
+    '<div class="mapa-info-item">&#128205; <strong>Origem:</strong> Tupanciret&atilde; / RS</div>' +
+    '<div class="mapa-info-item">&#127937; <strong>Destino:</strong> ' + cidade + ' / ' + uf + '</div>';
+}
+
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function abrirModal() {
+  document.getElementById('modal_empenho').value = '';
+  document.getElementById('modal_valor').value = '';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modal_empenho').focus();
+}
+function fecharModal(salvar) {
+  document.getElementById('modalOverlay').classList.remove('open');
+  if (!pendente) return;
+  var empenho = salvar ? document.getElementById('modal_empenho').value.trim() : '';
+  var valor = salvar ? document.getElementById('modal_valor').value.trim() : '';
+  adicionarProcesso(Object.assign({}, pendente, {empenho:empenho, valor:valor}));
+  pendente = null;
+}
+document.getElementById('btnModalOk').addEventListener('click', function(){ fecharModal(true); });
+document.getElementById('btnModalPular').addEventListener('click', function(){ fecharModal(false); });
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === document.getElementById('modalOverlay')) fecharModal(false);
+});
+
+// ═══════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════
+function adicionarProcesso(dados) {
+  processos.push(Object.assign({id: Date.now()}, dados));
+  salvar(); atualizarBadge();
+}
+function salvar() {
+  atualizarBackupInfo();
+  // Salva no KV na nuvem
+  fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ processos: processos })
+  }).catch(function(e){ console.log('Sync KV falhou (offline?):', e.message); });
+}
+function atualizarBadge() { document.getElementById('badgeCount').textContent = processos.length; }
+
+// ═══════════════════════════════════════════════════════
+// RENDER TABELA COM FILTRO POR DATA
+// ═══════════════════════════════════════════════════════
+function getDiasDisponiveis() {
+  var dias = {};
+  processos.forEach(function(p) {
+    var d = p.diaRef || hojeISO();
+    dias[d] = (dias[d]||0) + 1;
+  });
+  return dias;
+}
+
+function renderPills(dias) {
+  var el = document.getElementById('diasDisponiveis');
+  var keys = Object.keys(dias).sort().reverse(); // mais recente primeiro
+  if (keys.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = keys.map(function(d) {
+    var ativo = d === filtroAtivo ? ' ativo' : '';
+    return '<span class="dia-pill'+ativo+'" data-dia="'+d+'">'+isoParaBR(d)+'<span class="pill-count">('+dias[d]+')</span></span>';
+  }).join('');
+}
+
+function renderTabela() {
+  var dias = getDiasDisponiveis();
+  renderPills(dias);
+
+  // Atualiza input date
+  document.getElementById('filtroData').value = filtroAtivo;
+
+  // Filtro por data OU busca global OU busca IA
+  var modoGlobal = !modoIA && termoBusca.length >= 2;
+  var modoStatusGlobal = filtroPCStatus === 'pendente' || filtroPCStatus === 'ok';
+  var filtrados;
+
+  if (modoStatusGlobal) {
+    // Status pendente/ok mostra TODOS os dias, ignora filtro de data
+    filtrados = processos.filter(function(p) {
+      return filtroPCStatus === 'ok' ? p.pcOk === true : !p.pcOk;
+    });
+  } else if (modoIA && filtrosIA) {
+    filtrados = processos.filter(function(p) {
+      var ok = true;
+      if (filtrosIA.servidor) ok = ok && p.servidor && p.servidor.toLowerCase().indexOf(filtrosIA.servidor.toLowerCase()) !== -1;
+      if (filtrosIA.cidade) ok = ok && p.cidade && p.cidade.toLowerCase().indexOf(filtrosIA.cidade.toLowerCase()) !== -1;
+      if (filtrosIA.placa) ok = ok && p.placa && p.placa.toLowerCase().indexOf(filtrosIA.placa.toLowerCase()) !== -1;
+      if (filtrosIA.numProcesso) ok = ok && p.numProcesso && p.numProcesso.toLowerCase().indexOf(filtrosIA.numProcesso.toLowerCase()) !== -1;
+      if (filtrosIA.empenho) ok = ok && p.empenho && p.empenho.toLowerCase().indexOf(filtrosIA.empenho.toLowerCase()) !== -1;
+      if (filtrosIA.dataSaida) ok = ok && p.dataSaida && p.dataSaida.indexOf(filtrosIA.dataSaida) !== -1;
+      if (filtrosIA.dataChegada) ok = ok && p.dataChegada && p.dataChegada.indexOf(filtrosIA.dataChegada) !== -1;
+      if (filtrosIA.diaRef) ok = ok && (p.diaRef || hojeISO()) === filtrosIA.diaRef;
+      return ok;
+    });
+  } else if (modoGlobal) {
+    var termo = termoBusca.toLowerCase();
+    filtrados = processos.filter(function(p) {
+      return [p.servidor,p.numProcesso,p.empenho,p.valor,p.cidade,p.dataSaida,p.dataChegada,p.placa]
+        .some(function(v){ return v && v.toLowerCase().indexOf(termo) !== -1; });
+    });
+  } else {
+    filtrados = processos.filter(function(p) {
+      return (p.diaRef || hojeISO()) === filtroAtivo;
+    });
+  }
+
+  var wrap = document.getElementById('tabelaWrap');
+  var diaInfo = document.getElementById('diaInfo');
+  var buscaInfo = document.getElementById('buscaInfo');
+
+  if (processos.length === 0) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'none';
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Nenhum processo registrado ainda.<br>Gere uma descrição na aba <strong>⚡ Gerador</strong> e ela aparecerá aqui.</p></div>';
+    return;
+  }
+
+  if (!modoGlobal && !modoStatusGlobal && filtrados.length === 0) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'none';
+    var keys = Object.keys(dias).sort().reverse();
+    var sugestao = keys.length > 0 ? '<br>Dias com processos: <strong>'+keys.map(function(d){ return isoParaBR(d); }).join(', ')+'</strong>' : '';
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Nenhum processo encontrado para <strong>'+isoParaBR(filtroAtivo)+'</strong>.'+sugestao+'</p></div>';
+    return;
+  }
+  if (modoStatusGlobal && filtrados.length === 0) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'none';
+    var icone = filtroPCStatus === 'ok' ? '✅' : '⏳';
+    var label = filtroPCStatus === 'ok' ? 'concluídos' : 'pendentes';
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">'+icone+'</div><p>Nenhum processo <strong>'+label+'</strong> encontrado.</p></div>';
+    return;
+  }
+
+  if (modoGlobal && filtrados.length === 0) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'none';
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Nenhum resultado para <strong>"'+termoBusca+'"</strong>.<br>Tente outro termo.</p></div>';
+    return;
+  }
+
+  // Info
+  if (modoStatusGlobal) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'block';
+    var labelStatus = filtroPCStatus === 'ok' ? '✅ concluídos' : '⏳ pendentes';
+    buscaInfo.innerHTML = '<strong>'+filtrados.length+'</strong> processo'+(filtrados.length!==1?'s':'')+' '+labelStatus+' em todos os dias';
+  } else if (modoIA) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'block';
+    buscaInfo.innerHTML = '✨ IA encontrou <strong>'+filtrados.length+'</strong> resultado'+(filtrados.length!==1?'s':'')+' para sua consulta';
+  } else if (modoGlobal) {
+    diaInfo.style.display = 'none';
+    buscaInfo.style.display = 'block';
+    buscaInfo.innerHTML = 'Encontrado <strong>'+filtrados.length+'</strong> resultado'+(filtrados.length!==1?'s':'')+' para <strong>"'+termoBusca+'"</strong> em todos os dias';
+  } else {
+    buscaInfo.style.display = 'none';
+    diaInfo.style.display = 'flex';
+    document.getElementById('diaInfoDate').textContent = '📅 '+isoParaBR(filtroAtivo);
+    document.getElementById('diaInfoCount').textContent = filtrados.length+' processo'+(filtrados.length!==1?'s':'');
+    var totalValor = filtrados.reduce(function(acc,p) {
+      var v = parseFloat((p.valor||'0').replace(',','.')) || 0; return acc+v;
+    }, 0);
+    document.getElementById('diaInfoTotal').textContent = totalValor > 0 ? 'Total: R$ '+totalValor.toFixed(2).replace('.',',') : '';
+  }
+
+  function hl(val, campo) {
+    if (!val) return '<span class="td-empty">—</span>';
+    if (modoIA && filtrosIA && filtrosIA[campo]) {
+      var escaped = filtrosIA[campo].replace(/[.*+?^${}()|\[\]\\]/g,'\\$&');
+      var re = new RegExp('('+escaped+')','gi');
+      return val.replace(re,'<span class="highlight-ia">$1</span>');
+    }
+    if (!modoGlobal || !termoBusca) return val;
+    var escaped2 = termoBusca.replace(/[.*+?^${}()|\[\]\\]/g,'\\$&');
+    var re2 = new RegExp('('+escaped2+')','gi');
+    return val.replace(re2,'<span class="highlight">$1</span>');
+  }
+
+  var rows = filtrados.map(function(p, i) {
+    var trClass = p.pcOk ? ' class="pc-ok"' : ' class="pc-pendente"';
+    var badgePC = p.pcOk
+      ? '<span class="badge-pc-ok">✅ Concluído</span>'
+      : '<span class="badge-pc-pendente">⏳ Pendente</span>';
+    return '<tr'+trClass+'>'+ 
+      '<td class="td-num">'+(i+1)+'</td>'+
+      '<td>'+hl(p.servidor,'servidor')+'</td>'+
+      '<td class="td-num">'+hl(p.numProcesso,'numProcesso')+'</td>'+
+      '<td class="td-num">'+hl(p.empenho,'empenho')+'</td>'+
+      '<td class="'+(p.valor?'td-valor':'td-num')+'">'+hl(p.valor?'R$ '+p.valor:'','valor')+'</td>'+
+      '<td>'+hl(p.cidade,'cidade')+'</td>'+
+      '<td class="td-num">'+hl(p.dataSaida,'dataSaida')+'</td>'+
+      '<td class="td-num">'+hl(p.dataChegada,'dataChegada')+'</td>'+
+      '<td class="td-num">'+hl(p.placa,'placa')+'</td>'+
+      '<td>'+badgePC+'</td>'+
+      '<td><button class="btn-pc" data-id="'+p.id+'" title="Gerar Prestação de Contas">📄 PC</button></td>'+
+      '<td><button class="btn-del-row" data-id="'+p.id+'" title="Remover">✕</button></td>'+
+      '</tr>';
+  }).join('');
+
+  wrap.innerHTML =
+    '<div class="table-wrap"><table>'+
+    '<thead><tr>'+
+    '<th>#</th><th>Nome do Credor</th><th>Nº Processo</th><th>Nº Empenho</th>'+
+    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>Status PC</th><th>Prest. Contas</th><th></th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENTOS DA ABA TABELA
+// ═══════════════════════════════════════════════════════
+
+// Filtro por data
+document.getElementById('filtroData').addEventListener('change', function() {
+  filtroAtivo = this.value || hojeISO();
+  renderTabela();
+});
+
+// Botão Hoje
+document.getElementById('btnHoje').addEventListener('click', function() {
+  filtroAtivo = hojeISO();
+  document.getElementById('filtroData').value = filtroAtivo;
+  renderTabela();
+});
+
+// Pills de dias (delegação)
+document.getElementById('diasDisponiveis').addEventListener('click', function(e) {
+  var pill = e.target.closest('.dia-pill');
+  if (!pill) return;
+  filtroAtivo = pill.getAttribute('data-dia');
+  document.getElementById('filtroData').value = filtroAtivo;
+  renderTabela();
+});
+
+// Botão ✕ (delegação global)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-del-row');
+  if (!btn) return;
+  var id = Number(btn.getAttribute('data-id'));
+  if (!confirm('Remover este processo da tabela?')) return;
+  processos = processos.filter(function(p){ return p.id !== id; });
+  salvar(); atualizarBadge(); renderTabela();
+});
+
+// Limpar dia
+document.getElementById('btnLimparDia').addEventListener('click', function() {
+  var qtd = processos.filter(function(p){ return (p.diaRef||hojeISO())===filtroAtivo; }).length;
+  if (qtd===0){ alert('Nenhum processo nesta data.'); return; }
+  if (!confirm('Limpar todos os '+qtd+' processos do dia '+isoParaBR(filtroAtivo)+'?')) return;
+  processos = processos.filter(function(p){ return (p.diaRef||hojeISO())!==filtroAtivo; });
+  salvar(); atualizarBadge(); renderTabela();
+});
+
+// Exportar MD (dia atual)
+document.getElementById('btnExportarMD').addEventListener('click', function() {
+  var filtrados = processos.filter(function(p){ return (p.diaRef||hojeISO())===filtroAtivo; });
+  if (filtrados.length===0){ alert('Nenhum processo nesta data.'); return; }
+  var dataBR = isoParaBR(filtroAtivo);
+  var md = '---\ntitulo: Tabela de Controle de Diárias\ndata: '+dataBR+'\ntotal: '+filtrados.length+'\n---\n\n';
+  md += '| # | Nome do Credor | Nº Processo | Nº Empenho | Valor (R$) | Cidade Destino | Data de Ida | Data de Volta | Placa |\n';
+  md += '|---|---|---|---|---|---|---|---|---|\n';
+  filtrados.forEach(function(p,i){
+    md += '| '+(i+1)+' | '+(p.servidor||'')+' | '+(p.numProcesso||'')+' | '+(p.empenho||'')+' | '+(p.valor||'')+' | '+(p.cidade||'')+' | '+(p.dataSaida||'')+' | '+(p.dataChegada||'')+' | '+(p.placa||'')+' |\n';
+  });
+  baixar(md, 'diarias_'+filtroAtivo+'.md', 'text/markdown');
+});
+
+// Exportar CSV (dia atual)
+document.getElementById('btnExportarCSV').addEventListener('click', function() {
+  var filtrados = processos.filter(function(p){ return (p.diaRef||hojeISO())===filtroAtivo; });
+  if (filtrados.length===0){ alert('Nenhum processo nesta data.'); return; }
+  var csv = '#,Nome do Credor,Nº Processo,Nº Empenho,Valor (R$),Cidade Destino,Data de Ida,Data de Volta,Placa\n';
+  filtrados.forEach(function(p,i){
+    csv += (i+1)+',"'+(p.servidor||'')+'","'+(p.numProcesso||'')+'","'+(p.empenho||'')+'","'+(p.valor||'')+'","'+(p.cidade||'')+'","'+(p.dataSaida||'')+'","'+(p.dataChegada||'')+'","'+(p.placa||'')+'"\n';
+  });
+  baixar(csv, 'diarias_'+filtroAtivo+'.csv', 'text/csv');
+});
+
+// ═══════════════════════════════════════════════════════
+// DOWNLOAD
+// ═══════════════════════════════════════════════════════
+function baixar(conteudo, nome, tipo) {
+  try {
+    var blob = new Blob([conteudo], {type:tipo});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href=url; a.download=nome;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  } catch(e) {
+    try {
+      var encoded = 'data:'+tipo+';charset=utf-8,'+encodeURIComponent(conteudo);
+      var a2 = document.createElement('a');
+      a2.href=encoded; a2.download=nome;
+      document.body.appendChild(a2); a2.click();
+      document.body.removeChild(a2);
+    } catch(e2) {
+      var win = window.open('','_blank');
+      if (win) {
+        win.document.write('<pre style="font-family:monospace;white-space:pre-wrap;padding:20px;">'+conteudo.replace(/</g,'&lt;')+'</pre>');
+        win.document.title=nome;
+        alert('Aberto em nova aba. Use Ctrl+S para salvar como "'+nome+'".');
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// COPIAR
+// ═══════════════════════════════════════════════════════
+document.getElementById('btnCopy').addEventListener('click', function() {
+  copiar();
+  setTimeout(abrirModal, 400);
+});
+function copiar() {
+  var texto = document.getElementById('outputText').textContent;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(feedbackCopiar).catch(function(){ copiarFallback(texto); });
+  } else { copiarFallback(texto); }
+}
+function copiarFallback(texto) {
+  var ta = document.createElement('textarea');
+  ta.value=texto; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); feedbackCopiar(); }
+  catch(e){ alert('Selecione o texto manualmente e pressione Ctrl+C.'); }
+  document.body.removeChild(ta);
+}
+function feedbackCopiar() {
+  var btn = document.getElementById('btnCopy');
+  btn.className='btn-copy copied';
+  document.getElementById('copyIcon').textContent='✅';
+  document.getElementById('copyText').textContent='Copiado!';
+  setTimeout(function(){
+    btn.className='btn-copy';
+    document.getElementById('copyIcon').textContent='📋';
+    document.getElementById('copyText').textContent='Copiar';
+  }, 2500);
+}
+
+// ═══════════════════════════════════════════════════════
+// RESETAR
+// ═══════════════════════════════════════════════════════
+document.getElementById('btnResetar').addEventListener('click', resetar);
+function resetar() {
+  ['pasteInput','servidor','cidade','uf','motivo','placa','num_processo','outra_desc'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  ['data_saida','data_chegada','hora_saida','hora_chegada'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.querySelectorAll('input.autofilled').forEach(function(el){ el.classList.remove('autofilled'); });
+  document.getElementById('parsedTags').classList.remove('visible');
+  document.getElementById('parsedTags').innerHTML='';
+  document.getElementById('outputCard').classList.remove('visible');
+  document.getElementById('tipBox').style.display='none';
+  document.getElementById('t3').checked=true;
+  document.getElementById('d1').checked=true;
+  document.getElementById('campo_outra').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('mapaCard').classList.remove('visible');
+  document.getElementById('mapaIframe').src = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+// Abre IndexedDB, migra localStorage se necessário, carrega dados e inicia UI
+// Verifica se extensao enviou dados via hash na URL
+function lerDadosExtensao() {
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('dados=') === -1) return;
+  try {
+    var encoded = hash.replace('#dados=', '').replace(/^.*dados=/, '');
+    var decoded = decodeURIComponent(escape(atob(encoded)));
+    if (!decoded) return;
+    history.replaceState(null, '', window.location.pathname);
+    document.getElementById('pasteInput').value = decoded;
+    document.getElementById('tabGerador').click();
+    document.getElementById('pasteInput').scrollIntoView({behavior:'smooth'});
+    setTimeout(function() { parsear(); }, 300);
+  } catch(e) { console.error('Erro ao ler dados da extensao:', e); }
+}
+setTimeout(lerDadosExtensao, 800);
+window.addEventListener('hashchange', lerDadosExtensao);
+
+// Carrega dados do KV na nuvem
+fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
+.then(function(r){ return r.json(); })
+.then(function(data) {
+  processos = data.processos || [];
+})
+.catch(function() {
+  processos = [];
+  console.log('KV indisponivel, iniciando vazio.');
+})
+.finally(function() {
+  document.getElementById('filtroData').value = filtroAtivo;
+  atualizarBadge();
+  atualizarBackupInfo();
+});
+
+
+// ═══════════════════════════════════════════════════════
+// PRESTAÇÃO DE CONTAS
+// ═══════════════════════════════════════════════════════
+var VALORES_PC = [
+  { valor: 148.02, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE' },
+  { valor: 581.52, texto: 'VALOR REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE' },
+  { valor: 52.87,  texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO MUNICIPIO SEM PERNOITE' },
+  { valor: 243.18, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE' }
+];
+
+function gerarTextoPC(p) {
+  var proc = p.numProcesso || '___';
+  var valorNum = parseFloat((p.valor||'0').replace(',','.')) || 0;
+  var textoValor = null;
+  var aviso = false;
+
+  VALORES_PC.forEach(function(v) {
+    if (Math.abs(valorNum - v.valor) < 0.01) textoValor = v.texto;
+  });
+
+  if (!textoValor) {
+    if (valorNum > 0) {
+      textoValor = 'VALOR R$ ' + (p.valor||'');
+      aviso = true;
+    } else {
+      textoValor = '(VALOR NAO INFORMADO)';
+      aviso = true;
+    }
+  }
+
+  var texto = 'NOTAS SE ENCONTRAM NO PROC ADM ' + proc + ' 1DOC, ' +
+    '(' + textoValor + '). ' +
+    'CONFORME DECRETO 7160 DE 26 DE NOVEMBRO DE 2024.';
+
+  return { texto: texto, aviso: aviso, valorNum: valorNum };
+}
+
+// Clique no botão PC (delegação global)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-pc');
+  if (!btn) return;
+  var id = Number(btn.getAttribute('data-id'));
+  var p = processos.find(function(x){ return x.id === id; });
+  if (!p) return;
+
+  var resultado = gerarTextoPC(p);
+
+  document.getElementById('pcSub').textContent = (p.servidor||'') + (p.numProcesso ? ' — Proc. ' + p.numProcesso : '');
+  document.getElementById('pcTexto').textContent = resultado.texto;
+
+  var aviso = document.getElementById('pcAviso');
+  if (resultado.aviso) {
+    aviso.classList.add('visible');
+    aviso.textContent = resultado.valorNum > 0
+      ? '⚠️ Valor R$ ' + (p.valor||'') + ' não corresponde a nenhum valor fixo de diária. Verifique antes de usar.'
+      : '⚠️ Valor não informado neste processo. Preencha o valor na tabela antes de gerar a prestação de contas.';
+  } else {
+    aviso.classList.remove('visible');
+  }
+
+  // Reset botão copiar
+  var btnCop = document.getElementById('btnPCCopiar');
+  btnCop.className = 'btn-pc-copiar';
+  btnCop.textContent = '📋 Copiar texto';
+
+  // Marcar processo como concluído
+  p.pcOk = true;
+  salvar();
+  renderTabela();
+
+  document.getElementById('modalPC').classList.add('open');
+});
+
+document.getElementById('btnPCFechar').addEventListener('click', function() {
+  document.getElementById('modalPC').classList.remove('open');
+});
+document.getElementById('modalPC').addEventListener('click', function(e) {
+  if (e.target === document.getElementById('modalPC'))
+    document.getElementById('modalPC').classList.remove('open');
+});
+document.getElementById('btnPCCopiar').addEventListener('click', function() {
+  var texto = document.getElementById('pcTexto').textContent;
+  var btn = this;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(function(){ feedbackPC(btn); }).catch(function(){ pcCopiarFallback(texto, btn); });
+  } else { pcCopiarFallback(texto, btn); }
+});
+function pcCopiarFallback(texto, btn) {
+  var ta = document.createElement('textarea');
+  ta.value = texto;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); feedbackPC(btn); }
+  catch(e){ alert('Selecione o texto manualmente e pressione Ctrl+C.'); }
+  document.body.removeChild(ta);
+}
+function feedbackPC(btn) {
+  btn.className = 'btn-pc-copiar copied';
+  btn.textContent = '✅ Copiado!';
+  setTimeout(function(){
+    btn.className = 'btn-pc-copiar';
+    btn.textContent = '📋 Copiar texto';
+  }, 2500);
+}
+
+// Busca simples (input)
+document.getElementById('campoBusca').addEventListener('input', function() {
+  termoBusca = this.value.trim();
+  modoIA = false;
+  filtrosIA = null;
+  document.getElementById('buscaIAResultado').classList.remove('visible');
+  document.getElementById('btnLimparBusca').classList.toggle('visible', termoBusca.length > 0);
+  renderTabela();
+});
+
+// Limpar busca
+document.getElementById('btnLimparBusca').addEventListener('click', function() {
+  document.getElementById('campoBusca').value = '';
+  termoBusca = '';
+  modoIA = false;
+  filtrosIA = null;
+  this.classList.remove('visible');
+  document.getElementById('campoBusca').classList.remove('ia-ativa');
+  document.getElementById('buscaIAResultado').classList.remove('visible');
+  renderTabela();
+});
+
+// Busca com IA
+document.getElementById('btnBuscaIA').addEventListener('click', function() {
+  var consulta = document.getElementById('campoBusca').value.trim();
+  if (!consulta) { alert('Digite uma consulta antes de usar a busca com IA.'); return; }
+
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = '⏳ Buscando...';
+  document.getElementById('buscaLoading').classList.add('visible');
+  document.getElementById('buscaIAResultado').classList.remove('visible');
+
+  // Monta contexto dos processos para a IA
+  var hoje = hojeISO();
+  var contexto = processos.map(function(p, i) {
+    return (i+1)+'. Credor: '+(p.servidor||'?')+' | Processo: '+(p.numProcesso||'?')+
+      ' | Empenho: '+(p.empenho||'?')+' | Cidade: '+(p.cidade||'?')+
+      ' | Ida: '+(p.dataSaida||'?')+' | Volta: '+(p.dataChegada||'?')+
+      ' | Placa: '+(p.placa||'?')+' | Inserido em: '+isoParaBR(p.diaRef||hoje);
+  }).join('\n');
+
+  var prompt = 'Voce e um assistente de filtro de dados administrativos.' +
+    ' O usuario tem uma tabela de diarias com os seguintes registros:\n\n' +
+    contexto +
+    '\n\nA consulta do usuario e: "' + consulta + '"\n\n' +
+    'Extraia os filtros e retorne SOMENTE JSON valido sem markdown com os campos:' +
+    ' {"servidor":null,"cidade":null,"placa":null,"numProcesso":null,"empenho":null,' +
+    '"dataSaida":null,"dataChegada":null,"diaRef":null,"interpretacao":"..."}' +
+    ' Use null para campos nao mencionados.' +
+    ' Datas parciais ex dia 16/03 use formato DD/MM para dataSaida ou dataChegada.' +
+    ' Seja flexivel: Santa Maria vira SANTA MARIA, placas parciais tambem valem.';
+
+  // Parser local de linguagem natural (sem API)
+  try {
+    var q = consulta.toLowerCase();
+    filtrosIA = {};
+    var interpretacao = [];
+
+    // Extrair datas no formato DD/MM ou DD/MM/AAAA
+    var datas = q.match(/\b(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)\b/g) || [];
+    if (datas.length >= 1) { filtrosIA.dataSaida = datas[0].replace(/-/g,'/'); interpretacao.push('data: '+datas[0]); }
+    if (datas.length >= 2) { filtrosIA.dataChegada = datas[1].replace(/-/g,'/'); }
+
+    // Extrair placa (padrão ABC-1234 ou ABC1D23 Mercosul)
+    var placa = q.match(/\b([a-z]{2,3}[\-\s]?[0-9][a-z0-9][0-9]{2,3})\b/i);
+    if (placa) { filtrosIA.placa = placa[1].toUpperCase().replace(' ','-'); interpretacao.push('placa: '+filtrosIA.placa); }
+
+    // Extrair número de processo (padrão X.XXX/AAAA)
+    var proc = q.match(/\b(\d{1,2}\.\d{3}\/\d{4})\b/);
+    if (proc) { filtrosIA.numProcesso = proc[1]; interpretacao.push('processo: '+filtrosIA.numProcesso); }
+
+    // Extrair empenho (sequência longa de números ou com letras tipo NE)
+    var emp = q.match(/\b([a-z]*ne[a-z]*\d{4,}|\d{4}ne\d+)\b/i);
+    if (emp) { filtrosIA.empenho = emp[1].toUpperCase(); interpretacao.push('empenho: '+filtrosIA.empenho); }
+
+    // Extrair cidades conhecidas dos próprios processos
+    var cidades = [];
+    processos.forEach(function(p){ if(p.cidade && cidades.indexOf(p.cidade)<0) cidades.push(p.cidade); });
+    cidades.forEach(function(c) {
+      // Pega só o nome da cidade sem /UF
+      var nomeCidade = c.split('/')[0].trim();
+      if (nomeCidade.length > 3 && q.indexOf(nomeCidade.toLowerCase()) !== -1) {
+        filtrosIA.cidade = nomeCidade;
+        interpretacao.push('cidade: '+nomeCidade);
+      }
+    });
+
+    // Extrair nomes de credores conhecidos
+    var credores = [];
+    processos.forEach(function(p){ if(p.servidor && credores.indexOf(p.servidor)<0) credores.push(p.servidor); });
+    credores.forEach(function(c) {
+      var partes = c.split(' ');
+      partes.forEach(function(parte) {
+        if (parte.length > 3 && q.indexOf(parte.toLowerCase()) !== -1 && !filtrosIA.servidor) {
+          filtrosIA.servidor = parte;
+          interpretacao.push('credor contém: '+parte);
+        }
+      });
+    });
+
+    // Se nenhum filtro específico, usa termo geral
+    if (Object.keys(filtrosIA).length === 0) {
+      // Fallback: busca simples
+      modoIA = false;
+      termoBusca = consulta;
+      document.getElementById('campoBusca').classList.remove('ia-ativa');
+      var iaRes2 = document.getElementById('buscaIAResultado');
+      iaRes2.textContent = '🔍 Nenhum filtro específico encontrado. Realizando busca simples.';
+      iaRes2.classList.add('visible');
+      renderTabela();
+      return;
+    }
+
+    modoIA = true;
+    document.getElementById('campoBusca').classList.add('ia-ativa');
+    var iaRes = document.getElementById('buscaIAResultado');
+    var msg = interpretacao.length > 0 ? interpretacao.join(' | ') : consulta;
+    iaRes.textContent = '✨ Entendido: ' + msg;
+    iaRes.classList.add('visible');
+    renderTabela();
+
+  } catch(err) {
+    console.error(err);
+    modoIA = false;
+    termoBusca = consulta;
+    renderTabela();
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✨ Buscar com IA';
+  document.getElementById('buscaLoading').classList.remove('visible');
+});
+
+// Filtros de status PC
+document.getElementById('filtroPCWrap').addEventListener('click', function(e) {
+  var btn = e.target.closest('.filtro-pc-btn');
+  if (!btn) return;
+  filtroPCStatus = btn.getAttribute('data-pc');
+  document.querySelectorAll('.filtro-pc-btn').forEach(function(b){
+    b.classList.remove('ativo');
+  });
+  btn.classList.add('ativo');
+  renderTabela();
+});
+
+// ═══════════════════════════════════════════════════════
+// BACKUP E IMPORTAÇÃO
+// ═══════════════════════════════════════════════════════
+function atualizarBackupInfo() {
+  var el = document.getElementById('backupInfo');
+  if (!el) return;
+  var total = processos.length;
+  var dias = {};
+  processos.forEach(function(p){ var d=p.diaRef||hojeISO(); dias[d]=(dias[d]||0)+1; });
+  var numDias = Object.keys(dias).length;
+  el.textContent = total + ' processo' + (total!==1?'s':'') + ' em ' + numDias + ' dia' + (numDias!==1?'s':'');
+}
+
+document.getElementById('btnBackupExport').addEventListener('click', function() {
+  if (processos.length === 0) { alert('Nenhum processo para exportar.'); return; }
+  var backup = {
+    versao: '1.0',
+    exportadoEm: new Date().toISOString(),
+    total: processos.length,
+    processos: processos
+  };
+  var json = JSON.stringify(backup, null, 2);
+  var hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+  baixar(json, 'backup_diarias_' + hoje + '.json', 'application/json');
+});
+
+document.getElementById('btnBackupImport').addEventListener('click', function() {
+  document.getElementById('importFileInput').click();
+});
+
+document.getElementById('importFileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var backup = JSON.parse(ev.target.result);
+
+      // Validar estrutura
+      if (!backup.processos || !Array.isArray(backup.processos)) {
+        alert('Arquivo inválido. Certifique-se de usar um backup gerado por este app.'); return;
+      }
+
+      var importados = backup.processos.length;
+      var existentes = processos.length;
+
+      if (existentes > 0) {
+        var opcao = confirm('Backup: ' + importados + ' processo(s). Voce tem ' + existentes + ' existente(s). OK = Mesclar / Cancelar = Substituir');
+        if (opcao) {
+          // Mesclar — evitar duplicatas pelo id
+          var idsExistentes = processos.map(function(p){ return p.id; });
+          var novos = backup.processos.filter(function(p){ return idsExistentes.indexOf(p.id) === -1; });
+          processos = processos.concat(novos);
+          alert('Mesclado! ' + novos.length + ' novo(s) processo(s) adicionado(s).');
+        } else {
+          processos = backup.processos;
+          alert('Substituido com sucesso! ' + importados + ' processo(s) carregado(s).');
+        }
+      } else {
+        processos = backup.processos;
+        alert('Importado com sucesso! ' + importados + ' processo(s) carregado(s).');
+      }
+
+      salvar();
+      atualizarBadge();
+      atualizarBackupInfo();
+      renderTabela();
+
+    } catch(err) {
+      alert('Erro ao ler o arquivo. Verifique se e um backup valido.');
+    }
+  };
+  reader.readAsText(file);
+  // Limpar input para permitir reimportar o mesmo arquivo
+  this.value = '';
+});
+
+// Inicializar info de backup
+atualizarBackupInfo();
+
+
+
+}); // DOMContentLoaded
+</script>
+
+<!-- MODAL PRESTAÇÃO DE CONTAS -->
+<div class="modal-pc-overlay" id="modalPC">
+  <div class="modal-pc">
+    <h2>📄 Prestação de Contas</h2>
+    <div class="pc-sub" id="pcSub"></div>
+    <div class="pc-aviso" id="pcAviso"></div>
+    <div class="pc-texto" id="pcTexto"></div>
+    <div class="modal-pc-actions">
+      <button class="btn-pc-fechar" id="btnPCFechar">Fechar</button>
+      <button class="btn-pc-copiar" id="btnPCCopiar">📋 Copiar texto</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
