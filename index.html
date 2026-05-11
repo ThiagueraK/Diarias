@@ -264,7 +264,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.71</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.72</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -832,6 +832,31 @@ function preencherCampos(found) {
   if (found.cidade) {
     var ufMapa = found.uf || 'RS';
     gerarMapa(found.cidade, ufMapa);
+  }
+
+  // Verifica duplicata logo após IA extrair os dados
+  if (found.servidor && found.data_saida && found.cidade) {
+    var dataSaidaBR = found.data_saida.indexOf('/') !== -1 ? found.data_saida : isoParaBR(found.data_saida);
+    var cidadeCheck = (found.cidade + (found.uf ? '/' + found.uf : '')).toUpperCase();
+    var duplicata = processos.find(function(p) {
+      var mesmoCred = p.servidor && p.servidor.trim().toUpperCase() === found.servidor.trim().toUpperCase();
+      var mesmaData = p.dataSaida && p.dataSaida === dataSaidaBR;
+      var mesmaCid = p.cidade && p.cidade.trim().toUpperCase().indexOf(found.cidade.trim().toUpperCase()) !== -1;
+      return mesmoCred && mesmaData && mesmaCid;
+    });
+    if (duplicata) {
+      // Adiciona tag de aviso de duplicata nas tags
+      var tDup = document.createElement('div');
+      tDup.className = 'tag warn';
+      tDup.style.cssText = 'background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#ef4444;font-weight:600;width:100%;';
+      tDup.innerHTML = '<span class="dot" style="background:#ef4444"></span>'
+        + '⚠️ POSSÍVEL DUPLICATA — '
+        + (duplicata.servidor || '') + ' já viajou para '
+        + (duplicata.cidade || '') + ' em '
+        + (duplicata.dataSaida || '')
+        + (duplicata.numProcesso ? ' (Proc. ' + duplicata.numProcesso + ')' : '');
+      tagsEl.appendChild(tDup);
+    }
   }
 }
 
