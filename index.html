@@ -29,7 +29,24 @@
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
   .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
 
+  /* BANNER DUPLICATA */
+  #bannerDuplicata{
+    display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
+    background:#7f1d1d;border-bottom:2px solid #ef4444;
+    padding:14px 20px;color:#fff;font-family:var(--mono);font-size:13px;
+    box-shadow:0 4px 24px rgba(239,68,68,.4);
+    animation:slideBanner .3s ease;
+  }
+  @keyframes slideBanner{from{transform:translateY(-100%);}to{transform:translateY(0);}}
+  #bannerDuplicata.visible{display:flex;align-items:center;gap:12px;}
+  #bannerDuplicata .banner-icon{font-size:20px;flex-shrink:0;}
+  #bannerDuplicata .banner-texto{flex:1;line-height:1.5;}
+  #bannerDuplicata .banner-titulo{font-weight:700;font-size:14px;color:#fca5a5;display:block;margin-bottom:2px;}
+  #bannerDuplicata .banner-fechar{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;color:#fff;cursor:pointer;padding:6px 12px;font-family:var(--mono);font-size:12px;white-space:nowrap;transition:background .15s;}
+  #bannerDuplicata .banner-fechar:hover{background:rgba(255,255,255,.25);}
+
   /* HEADER */
+
   header{margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--border);padding-bottom:20px;}
   .logo-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
   h1{font-size:22px;font-weight:600;letter-spacing:-.3px;line-height:1.2;}
@@ -259,12 +276,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
+<!-- BANNER DUPLICATA -->
+<div id="bannerDuplicata">
+  <span class="banner-icon">⚠️</span>
+  <div class="banner-texto">
+    <span class="banner-titulo">POSSÍVEL DUPLICATA DETECTADA</span>
+    <span id="bannerDuplicataMsg"></span>
+  </div>
+  <button class="banner-fechar" onclick="fecharBannerDuplicata()">✕ Fechar</button>
+</div>
+
 <div class="container">
 
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.72</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.73</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -845,17 +872,13 @@ function preencherCampos(found) {
       return mesmoCred && mesmaData && mesmaCid;
     });
     if (duplicata) {
-      // Adiciona tag de aviso de duplicata nas tags
-      var tDup = document.createElement('div');
-      tDup.className = 'tag warn';
-      tDup.style.cssText = 'background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#ef4444;font-weight:600;width:100%;';
-      tDup.innerHTML = '<span class="dot" style="background:#ef4444"></span>'
-        + '⚠️ POSSÍVEL DUPLICATA — '
-        + (duplicata.servidor || '') + ' já viajou para '
+      var msgDup = (duplicata.servidor || '') + ' já viajou para '
         + (duplicata.cidade || '') + ' em '
         + (duplicata.dataSaida || '')
-        + (duplicata.numProcesso ? ' (Proc. ' + duplicata.numProcesso + ')' : '');
-      tagsEl.appendChild(tDup);
+        + (duplicata.numProcesso ? ' — Proc. ' + duplicata.numProcesso : '');
+      mostrarBannerDuplicata(msgDup);
+    } else {
+      fecharBannerDuplicata();
     }
   }
 }
@@ -1399,7 +1422,18 @@ function feedbackCopiar() {
 // ═══════════════════════════════════════════════════════
 // RESETAR
 // ═══════════════════════════════════════════════════════
+// Banner duplicata
+function mostrarBannerDuplicata(msg) {
+  document.getElementById('bannerDuplicataMsg').textContent = msg;
+  document.getElementById('bannerDuplicata').classList.add('visible');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function fecharBannerDuplicata() {
+  document.getElementById('bannerDuplicata').classList.remove('visible');
+}
+
 document.getElementById('btnResetar').addEventListener('click', resetar);
+
 function resetar() {
   ['pasteInput','servidor','cidade','uf','motivo','placa','num_processo','outra_desc'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.value='';
@@ -1418,6 +1452,7 @@ function resetar() {
   window.scrollTo({top:0,behavior:'smooth'});
   document.getElementById('mapaCard').classList.remove('visible');
   document.getElementById('mapaIframe').src = '';
+  fecharBannerDuplicata();
 }
 
 // ═══════════════════════════════════════════════════════
