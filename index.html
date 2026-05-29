@@ -157,7 +157,21 @@
 
   .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);font-family:var(--mono);font-size:13px;border:1px dashed var(--border);border-radius:12px;}
   .empty-state .icon{font-size:32px;margin-bottom:12px;}
-  .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+  .table-wrap{
+    overflow-x:auto;
+    overflow-y:auto;
+    max-height:65vh;
+    border-radius:12px;
+    border:1px solid var(--border);
+    position:relative;
+  }
+  .table-wrap table thead th{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:var(--surface);
+  }
+
 
   /* SCROLL FLUTUANTE */
   #scrollFlutuante{
@@ -309,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.74</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.75</span>
   </header>
 
   <!-- Modal de configuração -->
