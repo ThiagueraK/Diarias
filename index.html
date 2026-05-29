@@ -158,6 +158,24 @@
   .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted);font-family:var(--mono);font-size:13px;border:1px dashed var(--border);border-radius:12px;}
   .empty-state .icon{font-size:32px;margin-bottom:12px;}
   .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+
+  /* SCROLL FLUTUANTE */
+  #scrollFlutuante{
+    display:none;position:fixed;bottom:0;left:0;right:0;z-index:888;
+    background:var(--card);border-top:2px solid var(--border);
+    box-shadow:0 -4px 16px rgba(0,0,0,.08);
+    padding:6px 16px;
+  }
+  #scrollFlutuante.visible{display:block;}
+  #scrollFlutuanteInner{
+    overflow-x:auto;overflow-y:hidden;height:14px;
+    cursor:pointer;
+  }
+  #scrollFlutuanteInner::-webkit-scrollbar{height:8px;}
+  #scrollFlutuanteInner::-webkit-scrollbar-track{background:var(--bg);border-radius:4px;}
+  #scrollFlutuanteInner::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px;}
+  #scrollFlutuanteDiv{height:1px;}
+
   table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;}
   thead{background:var(--surface2);}
   th{padding:12px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border);white-space:nowrap;}
@@ -291,7 +309,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.73</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.74</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1432,7 +1450,64 @@ function fecharBannerDuplicata() {
   document.getElementById('bannerDuplicata').classList.remove('visible');
 }
 
+// Scroll flutuante da tabela
+(function() {
+  var sf = document.getElementById('scrollFlutuante');
+  var sfi = document.getElementById('scrollFlutuanteInner');
+  var sfd = document.getElementById('scrollFlutuanteDiv');
+  var wrap = null;
+  var syncing = false;
+
+  function sincronizarLargura() {
+    wrap = document.querySelector('.table-wrap table') ? document.querySelector('.table-wrap') : null;
+    if (!wrap) return;
+    sfd.style.width = wrap.scrollWidth + 'px';
+  }
+
+  function verificarVisibilidade() {
+    wrap = document.querySelector('.table-wrap') || null;
+    if (!wrap) { sf.classList.remove('visible'); return; }
+    sincronizarLargura();
+    var rect = wrap.getBoundingClientRect();
+    var dentroTela = rect.top < window.innerHeight && rect.bottom > 60;
+    var temScroll = wrap.scrollWidth > wrap.clientWidth;
+    if (dentroTela && temScroll) {
+      sf.classList.add('visible');
+    } else {
+      sf.classList.remove('visible');
+    }
+  }
+
+  // Sincronizar scroll bidirecional
+  sfi.addEventListener('scroll', function() {
+    if (syncing) return;
+    syncing = true;
+    if (wrap) wrap.scrollLeft = sfi.scrollLeft;
+    syncing = false;
+  });
+
+  document.addEventListener('scroll', function() {
+    if (!wrap || syncing) return;
+    syncing = true;
+    sfi.scrollLeft = wrap.scrollLeft;
+    syncing = false;
+    verificarVisibilidade();
+  });
+
+  // Observar mudanças na tabela (novos processos adicionados)
+  var observer = new MutationObserver(function() {
+    sincronizarLargura();
+    verificarVisibilidade();
+  });
+  observer.observe(document.getElementById('tabelaWrap'), { childList: true, subtree: true });
+
+  window.addEventListener('resize', verificarVisibilidade);
+  window.addEventListener('scroll', verificarVisibilidade);
+  verificarVisibilidade();
+})();
+
 document.getElementById('btnResetar').addEventListener('click', resetar);
+
 
 function resetar() {
   ['pasteInput','servidor','cidade','uf','motivo','placa','num_processo','outra_desc'].forEach(function(id){
@@ -1843,5 +1918,12 @@ atualizarBackupInfo();
     </div>
   </div>
 </div>
+<!-- SCROLL FLUTUANTE TABELA -->
+<div id="scrollFlutuante">
+  <div id="scrollFlutuanteInner">
+    <div id="scrollFlutuanteDiv"></div>
+  </div>
+</div>
+
 </body>
 </html>
