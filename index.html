@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.75</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.76</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1651,7 +1651,18 @@ document.addEventListener('click', function(e) {
   // Marcar processo como concluído
   p.pcOk = true;
   salvar();
+
+  // Salva posição do scroll antes de rerenderizar
+  var wrap = document.querySelector('.table-wrap');
+  var scrollTopAntes = wrap ? wrap.scrollTop : 0;
+  var scrollLeftAntes = wrap ? wrap.scrollLeft : 0;
   renderTabela();
+  // Restaura posição após renderizar
+  var wrapNovo = document.querySelector('.table-wrap');
+  if (wrapNovo) {
+    wrapNovo.scrollTop = scrollTopAntes;
+    wrapNovo.scrollLeft = scrollLeftAntes;
+  }
 
   document.getElementById('modalPC').classList.add('open');
 });
