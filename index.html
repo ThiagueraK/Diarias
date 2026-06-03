@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.77</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.78</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -628,25 +628,32 @@ function parsear() {
     + '- horas: formato HH:MM\n'
     + '- cidade: apenas a cidade principal de destino, sem UF\n'
     + '- motivo: descreva o objetivo da viagem em MAIUSCULAS seguindo estas regras:\n'
-    + '  REGRA 1 - DESTINO E HOSPITAL/CLINICA: Se o destino for hospital, clinica, UPA, pronto-socorro, oncologia, quimioterapia, hemodiálise, reabilitação ou qualquer unidade de saúde (incluindo siglas como HUSM, HGU, HCI, HCAA, HCOS, HCBT, UPA, ONCO, HRSM), entao envolve pacientes. Use:\n'
-    + '    - 1 paciente: TRANSPORTE DE PACIENTE A [LOCAL EXPANDIDO]\n'
-    + '    - 2+ pacientes: TRANSPORTE DE PACIENTES LISTADOS EM ANEXO A [LOCAL EXPANDIDO]\n'
-    + '    - buscar paciente: BUSCAR PACIENTE NO [LOCAL EXPANDIDO]\n'
-    + '  REGRA 2 - DESTINO NAO E SAUDE: Se o destino for oficina, tribunal, prefeitura, secretaria, reuniao, treinamento, curso, evento, banco, cartório ou qualquer local nao relacionado a saúde, NAO mencione pacientes. Descreva o objetivo real. Exemplos:\n'
-    + '    - LEVAR AMBULANCIA PARA CONSERTO NA OFICINA MIRON\n'
-    + '    - PARTICIPAR DE REUNIAO NA SECRETARIA ESTADUAL DE SAUDE\n'
-    + '    - BUSCAR MEDICAMENTOS NA SECRETARIA DE SAUDE\n'
-    + '  REGRA 3 - SIGLAS: Sempre expanda siglas no nome do local:\n'
-    + '    HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA\n'
-    + '    HGU=HOSPITAL GERAL UNIVERSITARIO\n'
-    + '    HCI=HOSPITAL DE CARIDADE IJUI\n'
-    + '    HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO\n'
-    + '    HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA\n'
-    + '    HCBT=HOSPITAL DE CARIDADE BOA TERRA\n'
-    + '    UPA=UNIDADE DE PRONTO ATENDIMENTO\n'
-    + '    ONCO=ONCOLOGIA\n'
-    + '    HRSM=HOSPITAL REGIONAL DE SANTA MARIA\n'
-    + '  REGRA 4 - NUNCA cite nomes de pacientes no motivo.\n\n'
+    + '\n'
+    + '  PASSO 1 - ANALISE O DESTINO (ignore a lista de pacientes por enquanto):\n'
+    + '  Pergunta-chave: o campo Clinica de destino e um estabelecimento de SAUDE?\n'
+    + '  - SIM (hospital, clinica, UPA, pronto-socorro, oncologia, quimioterapia, hemodialise, reabilitacao, HUSM, HGU, HCI, HCAA, HCOS, HCBT, ONCO, HRSM, UPA): va para PASSO 2A\n'
+    + '  - NAO (auditorio, ministerio, tribunal, prefeitura, secretaria, reuniao, treinamento, curso, oficina, banco, cartorio, qualquer outro): va para PASSO 2B\n'
+    + '\n'
+    + '  PASSO 2A - DESTINO DE SAUDE (usa pacientes):\n'
+    + '  - 1 pessoa na lista: TRANSPORTE DE PACIENTE A [DESTINO EXPANDIDO]\n'
+    + '  - 2+ pessoas na lista: TRANSPORTE DE PACIENTES LISTADOS EM ANEXO A [DESTINO EXPANDIDO]\n'
+    + '  - motivo menciona buscar: BUSCAR PACIENTE NO [DESTINO EXPANDIDO]\n'
+    + '\n'
+    + '  PASSO 2B - DESTINO NAO E SAUDE (IGNORE a lista de pacientes completamente):\n'
+    + '  As pessoas listadas sao SERVIDORES/FUNCIONARIOS, nao pacientes. NAO use a palavra paciente.\n'
+    + '  Descreva o objetivo real da viagem com base no destino e no motivo informado. Exemplos:\n'
+    + '  - Auditorio do Ministerio Publico: PARTICIPAR DE REUNIAO NO MINISTERIO PUBLICO DO RS\n'
+    + '  - Oficina: LEVAR VEICULO PARA MANUTENCAO EM OFICINA\n'
+    + '  - Secretaria: PARTICIPAR DE REUNIAO NA SECRETARIA ESTADUAL DE SAUDE\n'
+    + '  - Tribunal: ATENDER DEMANDA NO TRIBUNAL DE JUSTICA\n'
+    + '\n'
+    + '  PASSO 3 - SIGLAS: Sempre expanda siglas:\n'
+    + '  HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HGU=HOSPITAL GERAL UNIVERSITARIO\n'
+    + '  HCI=HOSPITAL DE CARIDADE IJUI, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO\n'
+    + '  HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA, HCBT=HOSPITAL DE CARIDADE BOA TERRA\n'
+    + '  UPA=UNIDADE DE PRONTO ATENDIMENTO, ONCO=ONCOLOGIA, HRSM=HOSPITAL REGIONAL DE SANTA MARIA\n'
+    + '\n'
+    + '  REGRA FINAL: NUNCA cite nomes de pessoas no motivo, seja paciente ou servidor.\n\n'
     + 'Processo:\n' + rawIA;
 
 
