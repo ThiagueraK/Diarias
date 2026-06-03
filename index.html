@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.76</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.77</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -627,12 +627,26 @@ function parsear() {
     + '- datas: formato DD/MM/AAAA\n'
     + '- horas: formato HH:MM\n'
     + '- cidade: apenas a cidade principal de destino, sem UF\n'
-    + '- motivo: descreva o objetivo da viagem em MAIUSCULAS. NUNCA cite nomes de pacientes.'
-    + ' Se houver 1 paciente use PACIENTE, se houver mais de 1 use PACIENTES LISTADOS EM ANEXO.'
-    + ' Exemplos: TRANSPORTE DE PACIENTE PARA QUIMIOTERAPIA NO HOSPITAL UNIVERSITARIO DE SANTA MARIA,'
-    + ' TRANSPORTE DE PACIENTES LISTADOS EM ANEXO PARA CONSULTA NA CLINICA DE OLHOS,'
-    + ' BUSCAR PACIENTE NO HOSPITAL UNIVERSITARIO DE SANTA MARIA.'
-    + ' Expanda siglas: HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO, ONCO=ONCOLOGIA\n\n'
+    + '- motivo: descreva o objetivo da viagem em MAIUSCULAS seguindo estas regras:\n'
+    + '  REGRA 1 - DESTINO E HOSPITAL/CLINICA: Se o destino for hospital, clinica, UPA, pronto-socorro, oncologia, quimioterapia, hemodiálise, reabilitação ou qualquer unidade de saúde (incluindo siglas como HUSM, HGU, HCI, HCAA, HCOS, HCBT, UPA, ONCO, HRSM), entao envolve pacientes. Use:\n'
+    + '    - 1 paciente: TRANSPORTE DE PACIENTE A [LOCAL EXPANDIDO]\n'
+    + '    - 2+ pacientes: TRANSPORTE DE PACIENTES LISTADOS EM ANEXO A [LOCAL EXPANDIDO]\n'
+    + '    - buscar paciente: BUSCAR PACIENTE NO [LOCAL EXPANDIDO]\n'
+    + '  REGRA 2 - DESTINO NAO E SAUDE: Se o destino for oficina, tribunal, prefeitura, secretaria, reuniao, treinamento, curso, evento, banco, cartório ou qualquer local nao relacionado a saúde, NAO mencione pacientes. Descreva o objetivo real. Exemplos:\n'
+    + '    - LEVAR AMBULANCIA PARA CONSERTO NA OFICINA MIRON\n'
+    + '    - PARTICIPAR DE REUNIAO NA SECRETARIA ESTADUAL DE SAUDE\n'
+    + '    - BUSCAR MEDICAMENTOS NA SECRETARIA DE SAUDE\n'
+    + '  REGRA 3 - SIGLAS: Sempre expanda siglas no nome do local:\n'
+    + '    HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA\n'
+    + '    HGU=HOSPITAL GERAL UNIVERSITARIO\n'
+    + '    HCI=HOSPITAL DE CARIDADE IJUI\n'
+    + '    HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO\n'
+    + '    HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA\n'
+    + '    HCBT=HOSPITAL DE CARIDADE BOA TERRA\n'
+    + '    UPA=UNIDADE DE PRONTO ATENDIMENTO\n'
+    + '    ONCO=ONCOLOGIA\n'
+    + '    HRSM=HOSPITAL REGIONAL DE SANTA MARIA\n'
+    + '  REGRA 4 - NUNCA cite nomes de pacientes no motivo.\n\n'
     + 'Processo:\n' + rawIA;
 
 
