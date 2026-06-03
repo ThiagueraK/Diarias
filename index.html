@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.81</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.82</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -652,11 +652,23 @@ function parsear() {
     + '  - Oficina, motorista Joao Silva: LEVAR VEICULO PARA MANUTENCAO - JOAO SILVA\n'
     + '  - Secretaria, servidor Carlos: PARTICIPAR DE REUNIAO NA SECRETARIA DE SAUDE - CARLOS\n'
     + '\n'
-    + '  PASSO 3 - SIGLAS: Sempre expanda siglas:\n'
-    + '  HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA, HGU=HOSPITAL GERAL UNIVERSITARIO\n'
-    + '  HCI=HOSPITAL DE CARIDADE IJUI, HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO\n'
-    + '  HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA, HCBT=HOSPITAL DE CARIDADE BOA TERRA\n'
-    + '  UPA=UNIDADE DE PRONTO ATENDIMENTO, ONCO=ONCOLOGIA, HRSM=HOSPITAL REGIONAL DE SANTA MARIA\n'
+    + '  PASSO 3 - SIGLAS E MULTIPLOS DESTINOS:\n'
+    + '  Quando houver multiplos destinos separados por / ou virgula, expanda todos e junte com E ou /.\n'
+    + '  Exemplo: HSVPaulo/HCI/Hospital Santo Angelo → HOSPITAL SAO VICENTE DE PAULA / HOSPITAL DE CARIDADE DE IJUI / HOSPITAL SANTO ANGELO\n'
+    + '\n'
+    + '  Dicionario de siglas (expanda SEMPRE que encontrar):\n'
+    + '  HUSM=HOSPITAL UNIVERSITARIO DE SANTA MARIA\n'
+    + '  HSVP=HOSPITAL SAO VICENTE DE PAULA EM CRUZ ALTA\n'
+    + '  HSVPaulo=HOSPITAL SAO VICENTE DE PAULA EM CRUZ ALTA\n'
+    + '  HCI=HOSPITAL DE CARIDADE DE IJUI\n'
+    + '  HCAA=HOSPITAL DE CARIDADE ASTROGILDO DE AZEVEDO\n'
+    + '  HCOS=HOSPITAL DE CARIDADE DE SANTA MARIA\n'
+    + '  HCBT=HOSPITAL DE CARIDADE BOA TERRA\n'
+    + '  HGU=HOSPITAL GERAL UNIVERSITARIO\n'
+    + '  HRSM=HOSPITAL REGIONAL DE SANTA MARIA\n'
+    + '  UPA=UNIDADE DE PRONTO ATENDIMENTO\n'
+    + '  ONCO=ONCOLOGIA\n'
+    + '  HSA=HOSPITAL SANTO ANGELO\n'
     + '\n'
     + '  REGRA FINAL: Em destinos de SAUDE NUNCA cite nomes de pacientes. Em destinos fora de saude PODE citar nomes dos servidores.\n\n'
     + 'Processo:\n' + rawIA;
