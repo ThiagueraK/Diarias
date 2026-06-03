@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.80</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.81</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -389,7 +389,10 @@
       <div class="field">
         <label>Tipo de Deslocamento</label>
         <div class="radio-group">
-          <div class="radio-btn"><input type="radio" name="distancia" id="d1" value="interior" checked><label for="d1">Interior do Estado (até 350km — Sem Pernoite)</label></div>
+          <div class="radio-btn"><input type="radio" name="distancia" id="d1" value="interior_sp" checked><label for="d1">Interior do Estado até 350km — Sem Pernoite</label></div>
+          <div class="radio-btn"><input type="radio" name="distancia" id="d5" value="interior_cp"><label for="d5">Interior do Estado até 350km — Com Pernoite</label></div>
+          <div class="radio-btn"><input type="radio" name="distancia" id="d3" value="capital"><label for="d3">Capital de Estado</label></div>
+          <div class="radio-btn"><input type="radio" name="distancia" id="d4" value="municipio"><label for="d4">Interior do Município</label></div>
           <div class="radio-btn"><input type="radio" name="distancia" id="d2" value="outra"><label for="d2">Outra Classificação</label></div>
         </div>
       </div>
@@ -970,13 +973,21 @@ function gerar() {
   if (!servidor||!cidade||!uf||!motivo||!dataSaida||!dataChegada||!horaSaida||!horaChegada) {
     alert('Preencha todos os campos obrigatórios antes de gerar.'); return;
   }
-  var fechamento = distancia==='interior'
-    ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE'
-    : (outraDesc||'VALOR REFERENTE A VIAGEM');
+  var fechamento = '';
+  if (distancia === 'interior_sp') {
+    fechamento = 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE';
+  } else if (distancia === 'interior_cp') {
+    fechamento = 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE';
+  } else if (distancia === 'capital' || distancia === 'municipio') {
+    fechamento = ''; // Capital e interior do município não têm fechamento
+  } else {
+    fechamento = outraDesc || '';
+  }
 
   var desc = 'DIÁRIA '+tipo+' VIAGEM '+cidade+'/'+uf+', '+servidor+' '+motivo+
     '. DATA DE SAÍDA: '+dataSaida+', DATA DE CHEGADA: '+dataChegada+
-    ', HORA DE SAÍDA: '+horaSaida+', HORA DE CHEGADA: '+horaChegada+'. '+fechamento+'.';
+    ', HORA DE SAÍDA: '+horaSaida+', HORA DE CHEGADA: '+horaChegada+'.';
+  if (fechamento) desc += ' ' + fechamento + '.';
 
   document.getElementById('outputText').textContent = desc;
   document.getElementById('outputCard').classList.add('visible');
