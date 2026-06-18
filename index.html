@@ -29,7 +29,22 @@
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
   .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
 
+  /* RELATÓRIO */
+  .rel-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .rel-card-valor{font-size:24px;font-weight:700;color:var(--accent);margin:4px 0;}
+  .rel-card-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+  .rel-bar-wrap{margin:6px 0;}
+  .rel-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;}
+  .rel-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .rel-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;}
+  .rel-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .rel-table th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;}
+  .rel-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+  .rel-table tr:hover td{background:var(--surface2);}
+  .rel-alerta{color:#ef4444;font-weight:700;}
+
   /* BANNER DUPLICATA */
+
   #bannerDuplicata{
     display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
     background:#7f1d1d;border-bottom:2px solid #ef4444;
@@ -323,7 +338,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.87</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.88</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -331,6 +346,7 @@
   <div class="tabs">
     <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
+    <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
   </div>
 
   <!-- ══════════════════════════════════════ -->
@@ -508,6 +524,94 @@
 
   </div>
 
+  <!-- ══════════════════════════════════════ -->
+  <!-- ABA RELATÓRIOS                          -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-relatorio">
+
+    <!-- Filtros do relatório -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">🔍 Filtros</div>
+      <div class="field-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>Período</label>
+          <select id="rel-periodo" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="mes_atual">Mês atual</option>
+            <option value="mes_anterior">Mês anterior</option>
+            <option value="ano_atual">Ano atual</option>
+            <option value="personalizado">Personalizado</option>
+            <option value="todos">Todos os registros</option>
+          </select>
+        </div>
+        <div class="field" id="rel-data-inicio-wrap">
+          <label>Data início</label>
+          <input type="date" id="rel-data-inicio" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+        </div>
+        <div class="field" id="rel-data-fim-wrap">
+          <label>Data fim</label>
+          <input type="date" id="rel-data-fim" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+        </div>
+        <div class="field">
+          <label>Servidor</label>
+          <select id="rel-servidor" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;">
+        <div class="field">
+          <label>Cidade</label>
+          <select id="rel-cidade" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status PC</label>
+          <select id="rel-status-pc" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="">Todos</option>
+            <option value="pendente">⏳ Pendentes</option>
+            <option value="ok">✅ Concluídos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Busca livre</label>
+          <input type="text" id="rel-busca" placeholder="Nome, processo, cidade..." style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="rel-btn-aplicar" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🔍 Aplicar Filtros</button>
+        <button id="rel-btn-limpar" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">✕ Limpar</button>
+        <button id="rel-btn-exportar-md" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar .MD</button>
+        <button id="rel-btn-exportar-csv" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- Cards de resumo -->
+    <div id="rel-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+
+    <!-- Ranking servidores -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">👤 Por Servidor</div>
+        <div id="rel-ranking-servidores"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 Por Cidade</div>
+        <div id="rel-ranking-cidades"></div>
+      </div>
+    </div>
+
+    <!-- Tabela detalhada -->
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📋 Processos Filtrados</span>
+        <span id="rel-count" style="font-size:12px;color:var(--text-muted);font-weight:400;"></span>
+      </div>
+      <div id="rel-tabela" style="overflow-x:auto;max-height:50vh;overflow-y:auto;"></div>
+    </div>
+
+  </div>
+
 </div>
 
 <!-- MODAL -->
@@ -571,19 +675,17 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-document.getElementById('tabGerador').addEventListener('click', function() {
-  document.getElementById('panel-gerador').classList.add('active');
-  document.getElementById('panel-tabela').classList.remove('active');
-  this.classList.add('active');
-  document.getElementById('tabTabela').classList.remove('active');
-});
-document.getElementById('tabTabela').addEventListener('click', function() {
-  document.getElementById('panel-tabela').classList.add('active');
-  document.getElementById('panel-gerador').classList.remove('active');
-  this.classList.add('active');
-  document.getElementById('tabGerador').classList.remove('active');
-  renderTabela();
-});
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio'];
+function switchTab(panelId, tabId) {
+  allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
+  allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
+  document.getElementById(panelId).classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
+document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
+document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
 
 // ═══════════════════════════════════════════════════════
 // RADIO DISTÂNCIA
@@ -2177,7 +2279,151 @@ atualizarBackupInfo();
 
 
 
+
+// ABA RELATORIOS
+function getProcessosFiltradosRelatorio() {
+  var periodo = document.getElementById('rel-periodo').value;
+  var servidor = document.getElementById('rel-servidor').value;
+  var cidade = document.getElementById('rel-cidade').value;
+  var statusPC = document.getElementById('rel-status-pc').value;
+  var busca = (document.getElementById('rel-busca').value||'').toLowerCase().trim();
+  var dataInicio = document.getElementById('rel-data-inicio').value;
+  var dataFim = document.getElementById('rel-data-fim').value;
+  var hoje = hojeISO();
+  var mesAtual = hoje.substring(0,7);
+  var dAnt = new Date(); dAnt.setMonth(dAnt.getMonth()-1);
+  var mesAnterior = dAnt.getFullYear()+'-'+String(dAnt.getMonth()+1).padStart(2,'0');
+  var anoAtual = hoje.substring(0,4);
+  return processos.filter(function(p) {
+    var dia = p.diaRef || hojeISO();
+    if (periodo === 'mes_atual' && dia.substring(0,7) !== mesAtual) return false;
+    if (periodo === 'mes_anterior' && dia.substring(0,7) !== mesAnterior) return false;
+    if (periodo === 'ano_atual' && dia.substring(0,4) !== anoAtual) return false;
+    if (periodo === 'personalizado') {
+      if (dataInicio && dia < dataInicio) return false;
+      if (dataFim && dia > dataFim) return false;
+    }
+    if (servidor && (!p.servidor || p.servidor.trim() !== servidor)) return false;
+    if (cidade && (!p.cidade || p.cidade.trim().toUpperCase() !== cidade)) return false;
+    if (statusPC === 'ok' && !p.pcOk) return false;
+    if (statusPC === 'pendente' && p.pcOk) return false;
+    if (busca) {
+      var campos = [p.servidor,p.numProcesso,p.empenho,p.cidade,p.dataSaida,p.placa,p.valor].join(' ').toLowerCase();
+      if (campos.indexOf(busca) === -1) return false;
+    }
+    return true;
+  });
+}
+function renderRelatorio() {
+  var servs = {}, cids = {};
+  processos.forEach(function(p){
+    if (p.servidor) servs[p.servidor.trim()] = true;
+    if (p.cidade) cids[p.cidade.trim().toUpperCase()] = true;
+  });
+  var selServ = document.getElementById('rel-servidor');
+  var selCid = document.getElementById('rel-cidade');
+  var curServ = selServ.value, curCid = selCid.value;
+  selServ.innerHTML = '<option value="">Todos</option>' + Object.keys(servs).sort().map(function(s){
+    return '<option value="'+s+'"'+(s===curServ?' selected':'')+'>'+s+'</option>';
+  }).join('');
+  selCid.innerHTML = '<option value="">Todas</option>' + Object.keys(cids).sort().map(function(c){
+    return '<option value="'+c+'"'+(c===curCid?' selected':'')+'>'+c+'</option>';
+  }).join('');
+  var filtrados = getProcessosFiltradosRelatorio();
+  var totalValor = filtrados.reduce(function(a,p){ return a+parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var totalKm = filtrados.reduce(function(a,p){ return a+parseFloat(p.km||0); },0);
+  var pendentes = filtrados.filter(function(p){ return !p.pcOk; }).length;
+  document.getElementById('rel-cards').innerHTML = [
+    {l:'Total de Processos', v:filtrados.length, c:''},
+    {l:'Valor Total', v:'R$ '+totalValor.toFixed(2).replace('.',','), c:''},
+    {l:'KM Total', v:totalKm.toFixed(1)+' km', c:''},
+    {l:'PC Pendentes', v:pendentes, c:pendentes>0?' style="color:#ef4444"':''}
+  ].map(function(x){ return '<div class="rel-card"><div class="rel-card-label">'+x.l+'</div><div class="rel-card-valor"'+x.c+'>'+x.v+'</div></div>'; }).join('');
+  var porServ = {};
+  filtrados.forEach(function(p){
+    var s = p.servidor||'Sem nome';
+    if (!porServ[s]) porServ[s]={viagens:0,valor:0};
+    porServ[s].viagens++;
+    porServ[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+  });
+  var maxV = Math.max.apply(null, Object.values(porServ).map(function(x){return x.viagens;}).concat([1]));
+  document.getElementById('rel-ranking-servidores').innerHTML = Object.keys(porServ)
+    .sort(function(a,b){ return porServ[b].viagens-porServ[a].viagens; })
+    .map(function(s){
+      var d = porServ[s];
+      return '<div class="rel-bar-wrap">'
+        +'<div class="rel-bar-label"><span>'+s+'</span><span>'+d.viagens+' viagens &middot; R$ '+d.valor.toFixed(2).replace('.',',')+'</span></div>'
+        +'<div class="rel-bar"><div class="rel-bar-fill" style="width:'+(d.viagens/maxV*100)+'%"></div></div></div>';
+    }).join('') || '<p style="color:var(--text-muted)">Nenhum dado.</p>';
+  var porCid = {};
+  filtrados.forEach(function(p){
+    var c = (p.cidade||'Sem cidade').toUpperCase();
+    if (!porCid[c]) porCid[c]={viagens:0,km:null};
+    porCid[c].viagens++;
+    if (p.km && !porCid[c].km) porCid[c].km = p.km;
+  });
+  var maxC = Math.max.apply(null, Object.values(porCid).map(function(x){return x.viagens;}).concat([1]));
+  document.getElementById('rel-ranking-cidades').innerHTML = Object.keys(porCid)
+    .sort(function(a,b){ return porCid[b].viagens-porCid[a].viagens; }).slice(0,10)
+    .map(function(c){
+      var d = porCid[c];
+      var kmStr = d.km ? ' &middot; '+d.km+' km' : '';
+      return '<div class="rel-bar-wrap">'
+        +'<div class="rel-bar-label"><span>'+c+'</span><span>'+d.viagens+kmStr+'</span></div>'
+        +'<div class="rel-bar"><div class="rel-bar-fill" style="width:'+(d.viagens/maxC*100)+'%"></div></div></div>';
+    }).join('') || '<p style="color:var(--text-muted)">Nenhum dado.</p>';
+  document.getElementById('rel-count').textContent = filtrados.length+' processo'+(filtrados.length!==1?'s':'')+' encontrado'+(filtrados.length!==1?'s':'');
+  if (!filtrados.length) {
+    document.getElementById('rel-tabela').innerHTML = '<div class="empty-state"><div class="icon">&#128269;</div><p>Nenhum processo encontrado.</p></div>';
+    return;
+  }
+  var rows = filtrados.map(function(p,i){
+    var pc = p.pcOk ? '&#9989;' : '&#9203;';
+    return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
+      +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
+      +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td></tr>';
+  }).join('');
+  document.getElementById('rel-tabela').innerHTML =
+    '<table class="rel-table"><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
+    +'<th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+document.getElementById('rel-btn-aplicar').addEventListener('click', renderRelatorio);
+document.getElementById('rel-busca').addEventListener('input', renderRelatorio);
+document.getElementById('rel-btn-limpar').addEventListener('click', function(){
+  ['rel-periodo','rel-servidor','rel-cidade','rel-status-pc','rel-busca','rel-data-inicio','rel-data-fim'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el.tagName==='SELECT') el.value=''; else el.value='';
+  });
+  document.getElementById('rel-periodo').value='mes_atual';
+  renderRelatorio();
+});
+document.getElementById('rel-periodo').addEventListener('change', function(){
+  var pers = this.value==='personalizado';
+  document.getElementById('rel-data-inicio-wrap').style.display = pers?'':'none';
+  document.getElementById('rel-data-fim-wrap').style.display = pers?'':'none';
+  if (!pers) renderRelatorio();
+});
+document.getElementById('rel-btn-exportar-md').addEventListener('click', function(){
+  var filtrados = getProcessosFiltradosRelatorio();
+  if (!filtrados.length){alert('Nenhum processo para exportar.');return;}
+  var md = '# Relatorio de Diarias\n\n| # | Servidor | Processo | Empenho | Valor | Cidade | Data Ida | Data Volta | Placa | KM | PC |\n|---|---|---|---|---|---|---|---|---|---|---|\n';
+  filtrados.forEach(function(p,i){ md+='| '+(i+1)+' | '+(p.servidor||'')+' | '+(p.numProcesso||'')+' | '+(p.empenho||'')+' | '+(p.valor||'')+' | '+(p.cidade||'')+' | '+(p.dataSaida||'')+' | '+(p.dataChegada||'')+' | '+(p.placa||'')+' | '+(p.km||'')+' | '+(p.pcOk?'OK':'Pendente')+' |\n'; });
+  baixar(md,'relatorio_'+hojeISO()+'.md','text/markdown');
+});
+document.getElementById('rel-btn-exportar-csv').addEventListener('click', function(){
+  var filtrados = getProcessosFiltradosRelatorio();
+  if (!filtrados.length){alert('Nenhum processo para exportar.');return;}
+  var csv = '#,Servidor,Processo,Empenho,Valor,Cidade,Data Ida,Data Volta,Placa,KM,PC\n';
+  filtrados.forEach(function(p,i){ csv+=(i+1)+',"'+(p.servidor||'')+'","'+(p.numProcesso||'')+'","'+(p.empenho||'')+'","'+(p.valor||'')+'","'+(p.cidade||'')+'","'+(p.dataSaida||'')+'","'+(p.dataChegada||'')+'","'+(p.placa||'')+'","'+(p.km||'')+'","'+(p.pcOk?'Concluido':'Pendente')+'"\n'; });
+  baixar(csv,'relatorio_'+hojeISO()+'.csv','text/csv');
+});
+document.getElementById('rel-data-inicio-wrap').style.display='none';
+document.getElementById('rel-data-fim-wrap').style.display='none';
+
 }); // DOMContentLoaded
+
 </script>
 
 <!-- MODAL PRESTAÇÃO DE CONTAS -->
