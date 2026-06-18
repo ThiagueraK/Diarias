@@ -346,6 +346,11 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     .tabela-header{flex-direction:column;align-items:flex-start;}
     .tabela-controls{width:100%;}
   }
+  @media print {
+    body * { visibility: hidden !important; }
+    #dashboard-print, #dashboard-print * { visibility: visible !important; }
+    #dashboard-print { position: fixed; top: 0; left: 0; width: 100%; }
+  }
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -365,7 +370,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.90</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.91</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -611,6 +616,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button id="rel-btn-limpar" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">✕ Limpar</button>
         <button id="rel-btn-exportar-md" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar .MD</button>
         <button id="rel-btn-exportar-csv" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar CSV</button>
+        <button id="rel-btn-imprimir" style="padding:8px 20px;background:#1a1a2e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Imprimir Dashboard</button>
       </div>
     </div>
 
@@ -2694,7 +2700,112 @@ document.getElementById('modalUnificar').addEventListener('click', function(e){
 var _adicionarOriginal = adicionarProcesso;
 
 
+
+
+// DASHBOARD DE IMPRESSÃO
+document.getElementById('rel-btn-imprimir').addEventListener('click', function(){
+  var filtrados = getProcessosFiltradosRelatorio();
+  if (!filtrados.length) { alert('Nenhum processo para imprimir.'); return; }
+
+  var totalValor = filtrados.reduce(function(a,p){ return a+parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var totalKm = filtrados.reduce(function(a,p){ return a+parseFloat(p.km||0); },0);
+  var pendentes = filtrados.filter(function(p){ return !p.pcOk; }).length;
+
+  var porServ = {};
+  filtrados.forEach(function(p){
+    var s = p.servidor||'Sem nome';
+    if (!porServ[s]) porServ[s]={viagens:0,valor:0,km:0};
+    porServ[s].viagens++;
+    porServ[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+    porServ[s].km += parseFloat(p.km||0);
+  });
+  var servOrd = Object.keys(porServ).sort(function(a,b){ return porServ[b].viagens-porServ[a].viagens; });
+  var maxServ = Math.max.apply(null, servOrd.map(function(s){ return porServ[s].viagens; }).concat([1]));
+
+  var porCid = {};
+  filtrados.forEach(function(p){
+    var c = (p.cidade||'Sem cidade').toUpperCase();
+    if (!porCid[c]) porCid[c]={viagens:0,km:null};
+    porCid[c].viagens++;
+    if (p.km && !porCid[c].km) porCid[c].km = p.km;
+  });
+  var cidOrd = Object.keys(porCid).sort(function(a,b){ return porCid[b].viagens-porCid[a].viagens; }).slice(0,8);
+  var maxCid = Math.max.apply(null, cidOrd.map(function(c){ return porCid[c].viagens; }).concat([1]));
+
+  var periodo = document.getElementById('rel-periodo');
+  var periodoLabel = periodo.options[periodo.selectedIndex].text;
+  var dataGeracao = new Date().toLocaleString('pt-BR');
+
+  var barrasServ = servOrd.map(function(s){
+    var d = porServ[s];
+    var pct = (d.viagens/maxServ*100).toFixed(1);
+    return '<div class="bw"><div class="bl"><span>'+s+'</span><span>'+d.viagens+' viag. &middot; R$ '+d.valor.toFixed(2).replace('.',',')+'</span></div>'
+      +'<div class="bar"><div class="bf" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+
+  var barrasCid = cidOrd.map(function(c){
+    var d = porCid[c];
+    var pct = (d.viagens/maxCid*100).toFixed(1);
+    var kmStr = d.km ? ' &middot; '+d.km+' km' : '';
+    return '<div class="bw"><div class="bl"><span>'+c+'</span><span>'+d.viagens+kmStr+'</span></div>'
+      +'<div class="bar"><div class="bf" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+
+  var linhasTabela = filtrados.map(function(p,i){
+    var pc = p.pcOk ? '<b style="color:#16a34a">OK</b>' : '<span style="color:#d97706">Pend.</span>';
+    return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
+      +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
+      +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td></tr>';
+  }).join('');
+
+  var css = '<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0;}'
+    +'body{font-family:Arial,sans-serif;background:#f5f5f5;color:#1a1a1a;padding:20px;font-size:12px;}'
+    +'.hdr{background:linear-gradient(135deg,#2d5016,#4a8a28);color:white;border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}'
+    +'.hdr h1{font-size:18px;} .hdr .sub{font-size:11px;opacity:.8;margin-top:3px;} .hdr .meta{text-align:right;font-size:10px;opacity:.8;line-height:1.6;}'
+    +'.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}'
+    +'.card{background:white;border-radius:8px;padding:14px;text-align:center;border:1px solid #e5e5e5;}'
+    +'.cv{font-size:22px;font-weight:700;color:#2d5016;margin:4px 0 2px;} .cl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.08em;}'
+    +'.danger .cv{color:#dc2626;}'
+    +'.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}'
+    +'.sec{background:white;border-radius:8px;padding:14px;border:1px solid #e5e5e5;}'
+    +'.sec h2{font-size:12px;font-weight:700;color:#444;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;}'
+    +'.bw{margin-bottom:8px;} .bl{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;color:#333;} .bl span:last-child{color:#888;}'
+    +'.bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;} .bf{height:100%;background:linear-gradient(90deg,#2d5016,#4a8a28);border-radius:4px;}'
+    +'table{width:100%;border-collapse:collapse;font-size:10px;}'
+    +'th{background:#f5f5f5;padding:6px 7px;text-align:left;font-size:9px;color:#888;text-transform:uppercase;border-bottom:1px solid #e0e0e0;}'
+    +'td{padding:6px 7px;border-bottom:1px solid #f0f0f0;}'
+    +'@media print{body{background:white;padding:8px;} .sec,.card{border:1px solid #ddd;} @page{margin:10mm;}}'
+    +'</style>';
+
+  var doc = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Dashboard de Diarias</title>'+css+'</head><body>'
+    +'<div class="hdr"><div><h1>&#128202; Dashboard de Di&aacute;rias</h1><div class="sub">Prefeitura de Tupanciret&atilde; &mdash; SGD</div></div>'
+    +'<div class="meta">Per&iacute;odo: '+periodoLabel+'<br>Gerado em: '+dataGeracao+'<br>'+filtrados.length+' processos</div></div>'
+    +'<div class="cards">'
+    +'<div class="card"><div class="cl">Total de Processos</div><div class="cv">'+filtrados.length+'</div></div>'
+    +'<div class="card"><div class="cl">Valor Total</div><div class="cv" style="font-size:16px;">R$ '+totalValor.toFixed(2).replace('.',',')+'</div></div>'
+    +'<div class="card"><div class="cl">KM Total</div><div class="cv">'+totalKm.toFixed(1)+' km</div></div>'
+    +'<div class="card '+(pendentes>0?'danger':'')+'""><div class="cl">PC Pendentes</div><div class="cv">'+pendentes+'</div></div>'
+    +'</div>'
+    +'<div class="grid2">'
+    +'<div class="sec"><h2>&#128100; Por Servidor</h2>'+barrasServ+'</div>'
+    +'<div class="sec"><h2>&#128205; Por Cidade (Top 8)</h2>'+barrasCid+'</div>'
+    +'</div>'
+    +'<div class="sec"><h2>&#128203; Processos Detalhados</h2>'
+    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th></tr></thead>'
+    +'<tbody>'+linhasTabela+'</tbody></table></div>'
+    +'<div style="text-align:center;font-size:9px;color:#aaa;margin-top:12px;">SGD &mdash; Setor de Gest&atilde;o de Di&aacute;rias &middot; Prefeitura Municipal de Tupanciret&atilde;/RS</div>'
+    +'<script>window.onload=function(){window.print();};<\/script>'
+    +'</body></html>';
+
+  var win = window.open('','_blank','width=1100,height=800');
+  if (win) { win.document.write(doc); win.document.close(); }
+  else { alert('Permita popups para este site para imprimir o dashboard.'); }
+});
+
 }); // DOMContentLoaded
+
 
 
 </script>
@@ -2719,5 +2830,6 @@ var _adicionarOriginal = adicionarProcesso;
   </div>
 </div>
 
+<div id="dashboard-print" style="display:none;"></div>
 </body>
 </html>
