@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.83</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.84</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -943,6 +943,8 @@ function preencherCampos(found) {
   if (found.cidade) {
     var ufMapa = found.uf || 'RS';
     gerarMapa(found.cidade, ufMapa);
+    // Calcula KM automaticamente
+    calcularKmAuto(found.cidade);
   }
 
   // Verifica duplicata logo após IA extrair os dados
@@ -1583,6 +1585,54 @@ function fecharBannerDuplicata() {
 // Calcular KM via OpenRouteService
 var ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhN2NlZjFhNWFmNTQ0MzdiMjJhOTM0N2E1ZmY5NTI3IiwiaCI6Im11cm11cjY0In0=';
 var ORIGEM = 'Tupanciretã, RS, Brasil';
+var kmCache = {}; // cache por cidade para nao recalcular
+
+function calcularKm(cidade, callback) {
+  var kmResult = document.getElementById('kmResult');
+  var cidadeNorm = cidade.trim().toUpperCase();
+
+  // Cache: evita chamar API duas vezes para a mesma cidade
+  if (kmCache[cidadeNorm]) {
+    var km = kmCache[cidadeNorm];
+    kmResult.textContent = '📍 ' + km + ' km de Tupanciretã';
+    kmResult.style.color = 'var(--success, #2d5016)';
+    if (callback) callback(km);
+    return;
+  }
+
+  kmResult.textContent = 'Calculando...';
+  kmResult.style.color = 'var(--text-muted)';
+
+  Promise.all([
+    geocodificar(ORIGEM),
+    geocodificar(cidade + ', RS, Brasil')
+  ]).then(function(coords) {
+    var orig = coords[0], dest = coords[1];
+    if (!orig || !dest) throw new Error('Cidade não encontrada');
+    return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+      body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+    });
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.routes || !data.routes[0]) throw new Error('Rota não encontrada');
+    var km = (data.routes[0].summary.distance / 1000).toFixed(1);
+    kmCache[cidadeNorm] = km;
+    kmResult.textContent = '📍 ' + km + ' km de Tupanciretã';
+    kmResult.style.color = 'var(--success, #2d5016)';
+    if (callback) callback(km);
+  })
+  .catch(function(e) {
+    kmResult.textContent = '❌ ' + e.message;
+    kmResult.style.color = 'var(--danger)';
+  });
+}
+
+function calcularKmAuto(cidade) {
+  if (!cidade) return;
+  calcularKm(cidade, null);
+}
 
 document.getElementById('btnKm').addEventListener('click', function() {
   var cidade = document.getElementById('cidade').value.trim();
@@ -1590,44 +1640,7 @@ document.getElementById('btnKm').addEventListener('click', function() {
     document.getElementById('kmResult').textContent = '⚠️ Informe a cidade primeiro.';
     return;
   }
-  var kmResult = document.getElementById('kmResult');
-  kmResult.textContent = 'Calculando...';
-  kmResult.style.color = 'var(--text-muted)';
-
-  var destino = cidade + ', RS, Brasil';
-
-  // Geocodifica origem e destino
-  Promise.all([
-    geocodificar(ORIGEM),
-    geocodificar(destino)
-  ]).then(function(coords) {
-    var orig = coords[0];
-    var dest = coords[1];
-    if (!orig || !dest) throw new Error('Cidade não encontrada');
-
-    return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': ORS_KEY
-      },
-      body: JSON.stringify({
-        coordinates: [orig, dest],
-        preference: 'recommended'
-      })
-    });
-  }).then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.routes || !data.routes[0]) throw new Error('Rota não encontrada');
-    var distM = data.routes[0].summary.distance;
-    var km = (distM / 1000).toFixed(1);
-    kmResult.textContent = '📍 ' + km + ' km de Tupanciretã';
-    kmResult.style.color = 'var(--success, #2d5016)';
-  })
-  .catch(function(e) {
-    kmResult.textContent = '❌ ' + e.message;
-    kmResult.style.color = 'var(--danger)';
-  });
+  calcularKm(cidade, null);
 });
 
 function geocodificar(lugar) {
@@ -1638,7 +1651,7 @@ function geocodificar(lugar) {
   .then(function(data) {
     if (!data.features || !data.features[0]) return null;
     var coords = data.features[0].geometry.coordinates;
-    return [coords[0], coords[1]]; // [lng, lat]
+    return [coords[0], coords[1]];
   });
 }
 
