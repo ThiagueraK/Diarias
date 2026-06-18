@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.84</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.87</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -455,6 +455,7 @@
         <button class="btn-exportar md" id="btnExportarMD">⬇ Exportar .MD</button>
         <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
         <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
+        <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
       </div>
     </div>
 
@@ -477,6 +478,11 @@
       <button class="btn-busca-ia" id="btnBuscaIA">✨ Buscar com IA</button>
     </div>
     <div class="busca-hint">💡 Digite normalmente para busca rápida, ou clique em <strong>✨ Buscar com IA</strong> para pesquisa em linguagem natural: <em>"João que foi para Santa Maria dia 16/03 com placa TQU"</em></div>
+    <div style="margin:8px 0;">
+      <select id="filtroServidor" style="font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;width:100%;">
+        <option value="">👤 Todos os servidores</option>
+      </select>
+    </div>
     <div class="busca-loading" id="buscaLoading"><div class="spinner"></div> Interpretando sua consulta com IA...</div>
     <div class="busca-ia-resultado" id="buscaIAResultado"></div>
     <div class="busca-info" id="buscaInfo" style="display:none;"></div>
@@ -1200,6 +1206,12 @@ function adicionarProcesso(dados) {
     if (!confirm(msg)) return;
   }
 
+  // Captura KM calculado se disponível
+  var kmEl = document.getElementById('kmResult');
+  if (kmEl && kmEl.textContent.indexOf('km') !== -1) {
+    var kmMatch = kmEl.textContent.match(/([\d\.]+)\s*km/);
+    if (kmMatch) dados.km = kmMatch[1];
+  }
   processos.push(Object.assign({id: Date.now()}, dados));
   salvar(); atualizarBadge();
 }
@@ -1275,6 +1287,26 @@ function renderTabela() {
   } else {
     filtrados = processos.filter(function(p) {
       return (p.diaRef || hojeISO()) === filtroAtivo;
+    });
+  }
+
+  // Filtro por servidor (aplicado em todos os modos)
+  var selectServ = document.getElementById('filtroServidor');
+  var selectedServ = selectServ ? selectServ.value : '';
+
+  // Atualiza lista de servidores no select
+  var todosServs = {};
+  processos.forEach(function(p){ if(p.servidor) todosServs[p.servidor.trim()] = true; });
+  if (selectServ) {
+    selectServ.innerHTML = '<option value="">👤 Todos os servidores</option>' +
+      Object.keys(todosServs).sort().map(function(s){
+        return '<option value="'+s+'"'+(s===selectedServ?' selected':'')+'>'+s+'</option>';
+      }).join('');
+  }
+
+  if (selectedServ) {
+    filtrados = filtrados.filter(function(p){
+      return p.servidor && p.servidor.trim() === selectedServ;
     });
   }
 
@@ -1366,23 +1398,46 @@ function renderTabela() {
       '<td class="td-num">'+hl(p.dataSaida,'dataSaida')+'</td>'+
       '<td class="td-num">'+hl(p.dataChegada,'dataChegada')+'</td>'+
       '<td class="td-num">'+hl(p.placa,'placa')+'</td>'+
+      '<td class="td-num">'+(p.km ? p.km+' km' : '<span style="color:var(--text-muted)">—</span>')+'</td>'+
       '<td>'+badgePC+'</td>'+
       '<td><button class="btn-pc" data-id="'+p.id+'" title="Gerar Prestação de Contas">📄 PC</button></td>'+
       '<td><button class="btn-del-row" data-id="'+p.id+'" title="Remover">✕</button></td>'+
       '</tr>';
   }).join('');
 
+  // Item 3: Total de valores
+  var total = filtrados.reduce(function(acc, p) {
+    var v = parseFloat((p.valor||'0').replace(',','.'));
+    return acc + (isNaN(v) ? 0 : v);
+  }, 0);
+  var totalStr = total > 0 ? 'R$ ' + total.toFixed(2).replace('.',',') : '';
+  var totalPendente = filtrados.filter(function(p){ return !p.pcOk; }).reduce(function(acc,p){
+    var v = parseFloat((p.valor||'0').replace(',','.'));
+    return acc + (isNaN(v) ? 0 : v);
+  }, 0);
+
   wrap.innerHTML =
     '<div class="table-wrap"><table>'+
     '<thead><tr>'+
     '<th>#</th><th>Nome do Credor</th><th>Nº Processo</th><th>Nº Empenho</th>'+
-    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>Status PC</th><th>Prest. Contas</th><th></th>'+
-    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Prest. Contas</th><th></th>'+
+    '</tr></thead><tbody>'+rows+'</tbody>'+
+    (totalStr ? '<tfoot><tr><td colspan="4" style="text-align:right;font-weight:700;padding:10px;color:var(--text-muted);font-size:12px;">TOTAL DO DIA:</td>'+
+    '<td style="font-weight:700;color:var(--accent);padding:10px;">'+totalStr+'</td>'+
+    '<td colspan="3"></td>'+
+    '<td style="font-size:11px;color:var(--text-muted);padding:10px;">Pendente: R$ '+totalPendente.toFixed(2).replace('.',',')+'</td>'+
+    '<td colspan="4"></td></tr></tfoot>' : '')+
+    '</table></div>';
 }
 
 // ═══════════════════════════════════════════════════════
 // EVENTOS DA ABA TABELA
 // ═══════════════════════════════════════════════════════
+
+// Filtro por servidor
+document.getElementById('filtroServidor').addEventListener('change', function() {
+  renderTabela();
+});
 
 // Filtro por data
 document.getElementById('filtroData').addEventListener('change', function() {
@@ -1434,12 +1489,55 @@ document.getElementById('btnExportarMD').addEventListener('click', function() {
   md += '| # | Nome do Credor | Nº Processo | Nº Empenho | Valor (R$) | Cidade Destino | Data de Ida | Data de Volta | Placa |\n';
   md += '|---|---|---|---|---|---|---|---|---|\n';
   filtrados.forEach(function(p,i){
-    md += '| '+(i+1)+' | '+(p.servidor||'')+' | '+(p.numProcesso||'')+' | '+(p.empenho||'')+' | '+(p.valor||'')+' | '+(p.cidade||'')+' | '+(p.dataSaida||'')+' | '+(p.dataChegada||'')+' | '+(p.placa||'')+' |\n';
+    md += '| '+(i+1)+' | '+(p.servidor||'')+' | '+(p.numProcesso||'')+' | '+(p.empenho||'')+' | '+(p.valor||'')+' | '+(p.cidade||'')+' | '+(p.dataSaida||'')+' | '+(p.dataChegada||'')+' | '+(p.placa||'')+' | '+(p.km ? p.km+' km' : '')+' |\n';
   });
   baixar(md, 'diarias_'+filtroAtivo+'.md', 'text/markdown');
 });
 
+// Relatório mensal
+document.getElementById('btnRelatorio') && document.getElementById('btnRelatorio').addEventListener('click', function() {
+  if (processos.length === 0) { alert('Nenhum processo cadastrado.'); return; }
+  var mes = filtroAtivo.substring(0,7); // YYYY-MM
+  var doMes = processos.filter(function(p){ return (p.diaRef||hojeISO()).substring(0,7) === mes; });
+  if (doMes.length === 0) { alert('Nenhum processo no mês selecionado.'); return; }
+
+  var total = doMes.reduce(function(a,p){ return a + parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var porServidor = {};
+  var porCidade = {};
+  doMes.forEach(function(p){
+    var s = p.servidor||'Sem nome';
+    var c = p.cidade||'Sem cidade';
+    if (!porServidor[s]) porServidor[s] = { viagens:0, valor:0, km:0 };
+    porServidor[s].viagens++;
+    porServidor[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+    porServidor[s].km += parseFloat(p.km||0);
+    porCidade[c] = (porCidade[c]||0)+1;
+  });
+
+  var mesBR = mes.split('-').reverse().join('/');
+  var md = '# Relatório de Diárias — ' + mesBR + '\n\n';
+  md += '**Total de processos:** ' + doMes.length + '\n';
+  md += '**Valor total:** R$ ' + total.toFixed(2).replace('.',',') + '\n';
+  md += '**Pendentes PC:** ' + doMes.filter(function(p){return !p.pcOk;}).length + '\n\n';
+
+  md += '## Por Servidor\n\n';
+  md += '| Servidor | Viagens | Valor Total | KM Total |\n|---|---|---|---|\n';
+  Object.keys(porServidor).sort().forEach(function(s){
+    var d = porServidor[s];
+    md += '| '+s+' | '+d.viagens+' | R$ '+d.valor.toFixed(2).replace('.',',')+' | '+d.km.toFixed(1)+' km |\n';
+  });
+
+  md += '\n## Por Cidade\n\n';
+  md += '| Cidade | Viagens |\n|---|---|\n';
+  Object.keys(porCidade).sort(function(a,b){ return porCidade[b]-porCidade[a]; }).forEach(function(c){
+    md += '| '+c+' | '+porCidade[c]+' |\n';
+  });
+
+  baixar(md, 'relatorio_'+mes+'.md', 'text/markdown');
+});
+
 // Exportar CSV (dia atual)
+
 document.getElementById('btnExportarCSV').addEventListener('click', function() {
   var filtrados = processos.filter(function(p){ return (p.diaRef||hojeISO())===filtroAtivo; });
   if (filtrados.length===0){ alert('Nenhum processo nesta data.'); return; }
@@ -1631,7 +1729,23 @@ function calcularKm(cidade, callback) {
 
 function calcularKmAuto(cidade) {
   if (!cidade) return;
-  calcularKm(cidade, null);
+  calcularKm(cidade, function(km) {
+    // Item 2: sugerir tipo de diária automaticamente
+    var kmNum = parseFloat(km);
+    var distEl = document.querySelector('input[name="distancia"]');
+    if (!distEl) return;
+    var dataSaida = document.getElementById('dataSaida') ? document.getElementById('dataSaida').value : '';
+    var dataChegada = document.getElementById('dataChegada') ? document.getElementById('dataChegada').value : '';
+    var pernoite = dataSaida && dataChegada && dataSaida !== dataChegada;
+    if (kmNum <= 350) {
+      var val = pernoite ? 'interior_cp' : 'interior_sp';
+      var radio = document.querySelector('input[name="distancia"][value="'+val+'"]');
+      if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+    } else if (kmNum > 350) {
+      var radioCapital = document.querySelector('input[name="distancia"][value="capital"]');
+      if (radioCapital) { radioCapital.checked = true; radioCapital.dispatchEvent(new Event('change')); }
+    }
+  });
 }
 
 document.getElementById('btnKm').addEventListener('click', function() {
