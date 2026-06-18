@@ -370,7 +370,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.91</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.92</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -503,7 +503,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button class="btn-exportar md" id="btnExportarMD">⬇ Exportar .MD</button>
         <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
         <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
-        <button class="btn-exportar md" id="btnUnificarNomes">🔗 Unificar Nomes</button>
+        <button class="btn-exportar md" id="btnKmMassa">📍 Calcular KM em Massa</button>
         <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
       </div>
     </div>
@@ -2620,80 +2620,83 @@ function detectarGruposSimilares() {
   return Object.values(grupos).filter(function(g){ return g.length > 1; });
 }
 
-document.getElementById('btnUnificarNomes').addEventListener('click', function(){
-  var grupos = detectarGruposSimilares();
-  var el = document.getElementById('unificar-grupos');
-  if (grupos.length === 0) {
-    alert('Nenhum nome similar encontrado no banco. Todos os credores estão unificados!');
+document.getElementById('btnKmMassa').addEventListener('click', function(){
+  // Encontra cidades sem KM
+  var cidadesSemKm = {};
+  processos.forEach(function(p){
+    if (!p.km && p.cidade) cidadesSemKm[p.cidade.trim().toUpperCase()] = true;
+  });
+  var lista = Object.keys(cidadesSemKm);
+  if (lista.length === 0) {
+    alert('Todos os processos já têm KM calculado!');
     return;
   }
-  el.innerHTML = grupos.map(function(g, gi){
-    var opcoes = g.map(function(item, ii){
-      var sel = ii === 0 ? ' selecionada' : '';
-      return '<span class="unif-opcao'+sel+'" data-grupo="'+gi+'" data-nome="'+item.nome+'">'
-        +item.nome+' <span class="unif-count">('+item.count+')</span></span>';
-    }).join('');
-    return '<div class="unif-grupo">'
-      +'<div class="unif-grupo-title">Grupo '+gi+' — '+g.length+' variações</div>'
-      +'<div class="unif-opcoes" id="grupo-opcoes-'+gi+'">'+opcoes+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;">'
-      +'<span style="font-size:11px;color:var(--text-muted);">Ou digitar:</span>'
-      +'<input class="unif-opcao-custom" type="text" data-grupo="'+gi+'" placeholder="Nome personalizado" style="text-transform:uppercase">'
-      +'</div></div>';
-  }).join('');
-  document.getElementById('modalUnificar').classList.add('open');
-});
+  if (!confirm('Calcular KM para ' + lista.length + ' cidade(s) sem KM?\n\n' + lista.join(', '))) return;
 
-// Seleção de opção no grupo
-document.getElementById('unificar-grupos').addEventListener('click', function(e){
-  var opcao = e.target.closest('.unif-opcao');
-  if (!opcao) return;
-  var gi = opcao.getAttribute('data-grupo');
-  document.querySelectorAll('.unif-opcao[data-grupo="'+gi+'"]').forEach(function(o){
-    o.classList.remove('selecionada');
-  });
-  opcao.classList.add('selecionada');
-  // Limpa input personalizado do grupo
-  var input = document.querySelector('.unif-opcao-custom[data-grupo="'+gi+'"]');
-  if (input) input.value = '';
-});
+  var btnKmM = document.getElementById('btnKmMassa');
+  btnKmM.textContent = '⏳ Calculando...';
+  btnKmM.disabled = true;
 
-// Aplicar unificação em massa
-document.getElementById('unificar-btn-aplicar').addEventListener('click', function(){
-  var grupos = detectarGruposSimilares();
-  var alteracoes = 0;
-  grupos.forEach(function(g, gi){
-    // Verifica se há input personalizado preenchido
-    var input = document.querySelector('.unif-opcao-custom[data-grupo="'+gi+'"]');
-    var nomeEscolhido = input && input.value.trim().toUpperCase();
-    if (!nomeEscolhido) {
-      // Pega a opção selecionada
-      var sel = document.querySelector('.unif-opcao.selecionada[data-grupo="'+gi+'"]');
-      if (sel) nomeEscolhido = sel.getAttribute('data-nome');
-    }
-    if (!nomeEscolhido) return;
-    // Aplica em todos os processos do grupo
-    g.forEach(function(item){
-      if (item.nome === nomeEscolhido) return;
+  // Calcula sequencialmente para não sobrecarregar a API
+  var kmPorCidade = {};
+  var idx = 0;
+
+  function proximaCidade() {
+    if (idx >= lista.length) {
+      // Aplica KM em todos os processos
+      var atualizados = 0;
       processos.forEach(function(p){
-        if (p.servidor && p.servidor.trim() === item.nome) {
-          p.servidor = nomeEscolhido;
-          alteracoes++;
+        if (!p.km && p.cidade) {
+          var c = p.cidade.trim().toUpperCase();
+          if (kmPorCidade[c]) { p.km = kmPorCidade[c]; atualizados++; }
         }
       });
-    });
-  });
-  salvar();
-  document.getElementById('modalUnificar').classList.remove('open');
-  renderTabela();
-  alert('Unificação concluída! '+alteracoes+' processo'+(alteracoes!==1?'s':'')+' atualizado'+(alteracoes!==1?'s':'')+'.');
-});
+      salvar();
+      renderTabela();
+      btnKmM.textContent = '📍 Calcular KM em Massa';
+      btnKmM.disabled = false;
+      alert('KM calculado! ' + atualizados + ' processo' + (atualizados!==1?'s':'') + ' atualizado' + (atualizados!==1?'s':'') + '.');
+      return;
+    }
+    var cidade = lista[idx];
+    btnKmM.textContent = '⏳ ' + (idx+1) + '/' + lista.length + ' — ' + cidade;
 
-document.getElementById('unificar-btn-cancelar').addEventListener('click', function(){
-  document.getElementById('modalUnificar').classList.remove('open');
-});
-document.getElementById('modalUnificar').addEventListener('click', function(e){
-  if (e.target === this) this.classList.remove('open');
+    // Verifica cache primeiro
+    if (kmCache[cidade]) {
+      kmPorCidade[cidade] = kmCache[cidade];
+      idx++;
+      proximaCidade();
+      return;
+    }
+
+    Promise.all([
+      geocodificar(ORIGEM),
+      geocodificar(cidade + ', RS, Brasil')
+    ]).then(function(coords){
+      var orig = coords[0], dest = coords[1];
+      if (!orig || !dest) throw new Error('Cidade nao encontrada');
+      return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+        body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+      });
+    }).then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.routes && data.routes[0]) {
+        var km = (data.routes[0].summary.distance / 1000).toFixed(1);
+        kmPorCidade[cidade] = km;
+        kmCache[cidade] = km;
+      }
+      idx++;
+      setTimeout(proximaCidade, 300); // pequeno delay entre requisições
+    })
+    .catch(function(){
+      idx++;
+      setTimeout(proximaCidade, 300);
+    });
+  }
+
+  proximaCidade();
 });
 
 // Detecção de nomes similares ao salvar processo novo
