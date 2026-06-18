@@ -323,7 +323,7 @@
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.82</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.83</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -368,7 +368,14 @@
       <div class="grid-2">
         <div class="field span-2"><label>Nome do Servidor / Credor</label><input type="text" autocomplete="off" id="servidor" placeholder="Nome completo em maiúsculas"></div>
         <div class="field"><label>Nº do Processo</label><input type="text" autocomplete="off" id="num_processo" placeholder="Ex: 2.263/2026"></div>
-        <div class="field"><label>Cidade de Destino</label><input type="text" autocomplete="off" id="cidade" placeholder="Ex: SANTA MARIA"></div>
+        <div class="field">
+          <label>Cidade de Destino</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" autocomplete="off" id="cidade" placeholder="Ex: SANTA MARIA" style="flex:1">
+            <button id="btnKm" type="button" title="Calcular distância de Tupanciretã" style="white-space:nowrap;padding:8px 12px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0;">📍 KM</button>
+          </div>
+          <div id="kmResult" style="font-size:12px;margin-top:4px;color:var(--text-muted);min-height:16px;"></div>
+        </div>
         <div class="field"><label>UF</label><input type="text" autocomplete="off" id="uf" placeholder="RS" maxlength="2"></div>
         <div class="field span-2"><label>Motivo da Viagem</label><input type="text" autocomplete="off" id="motivo" placeholder="Ex: TRANSPORTE DE PACIENTE"></div>
       </div>
@@ -1573,7 +1580,70 @@ function fecharBannerDuplicata() {
   verificarVisibilidade();
 })();
 
+// Calcular KM via OpenRouteService
+var ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhN2NlZjFhNWFmNTQ0MzdiMjJhOTM0N2E1ZmY5NTI3IiwiaCI6Im11cm11cjY0In0=';
+var ORIGEM = 'Tupanciretã, RS, Brasil';
+
+document.getElementById('btnKm').addEventListener('click', function() {
+  var cidade = document.getElementById('cidade').value.trim();
+  if (!cidade) {
+    document.getElementById('kmResult').textContent = '⚠️ Informe a cidade primeiro.';
+    return;
+  }
+  var kmResult = document.getElementById('kmResult');
+  kmResult.textContent = 'Calculando...';
+  kmResult.style.color = 'var(--text-muted)';
+
+  var destino = cidade + ', RS, Brasil';
+
+  // Geocodifica origem e destino
+  Promise.all([
+    geocodificar(ORIGEM),
+    geocodificar(destino)
+  ]).then(function(coords) {
+    var orig = coords[0];
+    var dest = coords[1];
+    if (!orig || !dest) throw new Error('Cidade não encontrada');
+
+    return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ORS_KEY
+      },
+      body: JSON.stringify({
+        coordinates: [orig, dest],
+        preference: 'recommended'
+      })
+    });
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.routes || !data.routes[0]) throw new Error('Rota não encontrada');
+    var distM = data.routes[0].summary.distance;
+    var km = (distM / 1000).toFixed(1);
+    kmResult.textContent = '📍 ' + km + ' km de Tupanciretã';
+    kmResult.style.color = 'var(--success, #2d5016)';
+  })
+  .catch(function(e) {
+    kmResult.textContent = '❌ ' + e.message;
+    kmResult.style.color = 'var(--danger)';
+  });
+});
+
+function geocodificar(lugar) {
+  return fetch('https://api.openrouteservice.org/geocode/search?api_key=' + ORS_KEY
+    + '&text=' + encodeURIComponent(lugar)
+    + '&boundary.country=BR&size=1')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.features || !data.features[0]) return null;
+    var coords = data.features[0].geometry.coordinates;
+    return [coords[0], coords[1]]; // [lng, lat]
+  });
+}
+
 document.getElementById('btnResetar').addEventListener('click', resetar);
+
 
 
 function resetar() {
