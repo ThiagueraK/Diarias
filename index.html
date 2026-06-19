@@ -381,6 +381,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <span class="banner-titulo">POSSÍVEL DUPLICATA DETECTADA</span>
     <span id="bannerDuplicataMsg"></span>
   </div>
+  <button id="bannerDuplicataBtnIr" class="banner-fechar" style="display:none;background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.5);">🔍 Ver processo</button>
   <button class="banner-fechar" onclick="fecharBannerDuplicata()">✕ Fechar</button>
 </div>
 
@@ -389,7 +390,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.102</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.104</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1214,7 +1215,7 @@ function preencherCampos(found) {
         + (duplicata.cidade || '') + ' em '
         + (duplicata.dataSaida || '')
         + (duplicata.numProcesso ? ' — Proc. ' + duplicata.numProcesso : '');
-      mostrarBannerDuplicata(msgDup);
+      mostrarBannerDuplicata(msgDup, duplicata.id);
     } else {
       fecharBannerDuplicata();
     }
@@ -1637,7 +1638,7 @@ function renderTabela() {
     var badgePC = p.pcOk
       ? '<span class="badge-pc-ok">✅ Concluído</span>'
       : '<span class="badge-pc-pendente">⏳ Pendente</span>';
-    return '<tr'+trClass+'>'+ 
+    return '<tr'+trClass+' data-id="'+p.id+'">'+ 
       '<td class="td-num">'+(i+1)+'</td>'+
       '<td>'+hl(p.servidor,'servidor')+'</td>'+
       '<td class="td-num">'+hl(p.numProcesso,'numProcesso')+'</td>'+
@@ -1867,9 +1868,19 @@ function feedbackCopiar() {
 // ═══════════════════════════════════════════════════════
 // RESETAR
 // ═══════════════════════════════════════════════════════
-// Banner duplicata
-function mostrarBannerDuplicata(msg) {
+// Banner duplicata — escopo global para funcionar com onclick inline
+function mostrarBannerDuplicata(msg, dupId) {
   document.getElementById('bannerDuplicataMsg').textContent = msg;
+  var btnIr = document.getElementById('bannerDuplicataBtnIr');
+  var dup = processos.find(function(p){ return p.id === dupId; });
+  if (dup && dup.hash1doc) {
+    btnIr.style.display = 'inline-block';
+    btnIr.onclick = function() {
+      window.open('https://tupancireta.1doc.com.br/?pg=doc/ver&hash='+dup.hash1doc+'&itd=7', '_blank');
+    };
+  } else {
+    btnIr.style.display = 'none';
+  }
   document.getElementById('bannerDuplicata').classList.add('visible');
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
