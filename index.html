@@ -385,7 +385,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.100</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.101</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2930,12 +2930,25 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       +'<div class="bar"><div class="bf" style="width:'+pct+'%"></div></div></div>';
   }).join('');
 
+  var temPagamentosImp = Object.keys(empenhosPagesPorNumero).length > 0;
   var linhasTabela = filtrados.map(function(p,i){
     var pc = p.pcOk ? '<b style="color:#16a34a">OK</b>' : '<span style="color:#d97706">Pend.</span>';
+    var statusPago, dataPag;
+    if (p.pago) {
+      statusPago = '<b style="color:#16a34a">&#10004; Pago</b>';
+      dataPag = p.dataPagamento || '—';
+    } else if (temPagamentosImp) {
+      statusPago = '<span style="color:#d97706">&#9203; Pend.</span>';
+      dataPag = '—';
+    } else {
+      statusPago = '—';
+      dataPag = '—';
+    }
     return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
       +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
       +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
-      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td></tr>';
+      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td>'
+      +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td></tr>';
   }).join('');
 
   var css = '<style>'
@@ -2958,6 +2971,14 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     +'@media print{body{background:white;padding:8px;} .sec,.card{border:1px solid #ddd;} @page{margin:10mm;}}'
     +'</style>';
 
+  var cardsPagamento = '';
+  if (temPagamentosImp) {
+    var pagosCnt = filtrados.filter(function(p){ return p.pago; }).length;
+    var nPagosCnt = filtrados.filter(function(p){ return !p.pago; }).length;
+    cardsPagamento = '<div class="card"><div class="cl">&#128176; Pagos</div><div class="cv" style="color:#16a34a;">'+pagosCnt+'</div></div>'
+      +'<div class="card '+(nPagosCnt>0?'danger':'')+'""><div class="cl">&#9203; N&atilde;o Pagos</div><div class="cv">'+nPagosCnt+'</div></div>';
+  }
+
   var doc = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Dashboard de Diarias</title>'+css+'</head><body>'
     +'<div class="hdr"><div><h1>&#128202; Dashboard de Di&aacute;rias</h1><div class="sub">Prefeitura de Tupanciret&atilde; &mdash; SGD</div></div>'
     +'<div class="meta">Per&iacute;odo: '+periodoLabel+'<br>Gerado em: '+dataGeracao+'<br>'+filtrados.length+' processos</div></div>'
@@ -2966,13 +2987,14 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     +'<div class="card"><div class="cl">Valor Total</div><div class="cv" style="font-size:16px;">R$ '+totalValor.toFixed(2).replace('.',',')+'</div></div>'
     +'<div class="card"><div class="cl">KM Total</div><div class="cv">'+totalKm.toFixed(1)+' km</div></div>'
     +'<div class="card '+(pendentes>0?'danger':'')+'""><div class="cl">PC Pendentes</div><div class="cv">'+pendentes+'</div></div>'
+    +cardsPagamento
     +'</div>'
     +'<div class="grid2">'
     +'<div class="sec"><h2>&#128100; Por Servidor</h2>'+barrasServ+'</div>'
     +'<div class="sec"><h2>&#128205; Por Cidade (Top 8)</h2>'+barrasCid+'</div>'
     +'</div>'
     +'<div class="sec"><h2>&#128203; Processos Detalhados</h2>'
-    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th></tr></thead>'
+    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th></tr></thead>'
     +'<tbody>'+linhasTabela+'</tbody></table></div>'
     +'<div style="text-align:center;font-size:9px;color:#aaa;margin-top:12px;">SGD &mdash; Setor de Gest&atilde;o de Di&aacute;rias &middot; Prefeitura Municipal de Tupanciret&atilde;/RS</div>'
     +'<script>window.onload=function(){window.print();};<\/script>'
