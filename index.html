@@ -379,7 +379,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.95</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.96</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -621,6 +621,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <input type="text" id="rel-busca" placeholder="Nome, processo, cidade..." style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
         </div>
       </div>
+      <div class="field-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+        <div class="field">
+          <label>Status Pagamento</label>
+          <select id="rel-status-pago" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;">
+            <option value="">Todos</option>
+            <option value="pago">💰 Pago</option>
+            <option value="nao_pago">⏳ Não Pago / Sem info</option>
+          </select>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button id="rel-btn-aplicar" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🔍 Aplicar Filtros</button>
         <button id="rel-btn-limpar" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">✕ Limpar</button>
@@ -628,6 +638,22 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button id="rel-btn-exportar-csv" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar CSV</button>
         <button id="rel-btn-imprimir" style="padding:8px 20px;background:#1a1a2e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Imprimir Dashboard</button>
       </div>
+    </div>
+
+    <!-- Importar pagamentos do AppController -->
+    <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(45,80,22,.08),rgba(45,80,22,.03));border-color:rgba(45,80,22,.2);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="card-title" style="margin:0 0 4px;">💰 Importar Pagamentos do AppController</div>
+          <div style="font-size:12px;color:var(--text-muted);">Selecione o PDF de Empenhos Pagos gerado pelo AppController. O sistema cruza automaticamente com os processos do banco.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <button id="rel-btn-importar-pdf" style="padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap;">📥 Selecionar PDF</button>
+          <input type="file" id="rel-input-pdf" accept=".pdf" style="display:none">
+          <div id="rel-import-status" style="font-size:12px;color:var(--text-muted);max-width:200px;"></div>
+        </div>
+      </div>
+      <div id="rel-import-resultado" style="display:none;margin-top:12px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;"></div>
     </div>
 
     <!-- Cards de resumo -->
@@ -3048,7 +3074,172 @@ document.getElementById('modalRevisaoKm').addEventListener('click', function(e){
   if (e.target === this) this.classList.remove('open');
 });
 
+
+// ═══════════════════════════════════════════════════════
+// IMPORTAR PAGAMENTOS DO APPCONTROLLER
+// ═══════════════════════════════════════════════════════
+
+// Armazena mapa de empenhos pagos: { '81': { credor, valor, dataPagamento } }
+var empenhosPagesPorNumero = {};
+
+document.getElementById('rel-btn-importar-pdf').addEventListener('click', function(){
+  document.getElementById('rel-input-pdf').click();
+});
+
+document.getElementById('rel-input-pdf').addEventListener('change', function(e){
+  var file = e.target.files[0];
+  if (!file) return;
+  var status = document.getElementById('rel-import-status');
+  var resultado = document.getElementById('rel-import-resultado');
+  status.textContent = 'Lendo PDF...';
+  status.style.color = 'var(--text-muted)';
+  resultado.style.display = 'none';
+
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument({ data: ev.target.result }).promise.then(function(pdf){
+      var totalPages = pdf.numPages;
+      var textoTotal = '';
+      var pagePromises = [];
+      for (var i = 1; i <= totalPages; i++) {
+        pagePromises.push(
+          pdf.getPage(i).then(function(page){
+            return page.getTextContent().then(function(tc){
+              return tc.items.map(function(x){ return x.str; }).join(' ');
+            });
+          })
+        );
+      }
+      return Promise.all(pagePromises).then(function(paginas){
+        return paginas.join(' ');
+      });
+    }).then(function(texto){
+      // Parser do relatório AppController
+      // Padrão: 2026/000081   3049   5861   CASSIANO MACHADO DE SOUZA   1.459,08   2   36
+      var novosMapa = {};
+      var dataAtual = '';
+      var linhas = texto.split('  ');
+
+      linhas.forEach(function(linha){
+        // Detecta data: padrão DD.MM.AAAA no início da linha
+        var dataM = linha.match(/^\s*(\d{2}\.\d{2}\.\d{4})\s*$/);
+        if (dataM) {
+          dataAtual = dataM[1];
+          return;
+        }
+        // Detecta linha de empenho: 2026/NNNNNN DESP PCOMPRA CREDOR VALOR...
+        var empM = linha.match(/2026\/0*(\d+)\s+\d+\s+\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+\d+/);
+        if (empM) {
+          var num = String(parseInt(empM[1], 10));
+          var credor = empM[2].trim();
+          var valor = empM[3];
+          novosMapa[num] = { credor: credor, valor: valor, dataPagamento: dataAtual };
+        }
+      });
+
+      var totalEncontrados = Object.keys(novosMapa).length;
+      if (totalEncontrados === 0) {
+        status.textContent = '⚠️ Nenhum empenho encontrado no PDF.';
+        status.style.color = 'orange';
+        return;
+      }
+
+      // Mescla com mapa existente
+      Object.assign(empenhosPagesPorNumero, novosMapa);
+
+      // Cruza com processos do banco e marca como pago
+      var atualizados = 0;
+      var naoEncontrados = 0;
+      processos.forEach(function(p){
+        if (!p.empenho) return;
+        var numEmp = String(parseInt(p.empenho.replace(/[^\d]/g,''), 10));
+        if (empenhosPagesPorNumero[numEmp]) {
+          var info = empenhosPagesPorNumero[numEmp];
+          p.pago = true;
+          p.dataPagamento = info.dataPagamento;
+          atualizados++;
+        }
+      });
+
+      naoEncontrados = processos.filter(function(p){ return p.empenho && !p.pago; }).length;
+
+      salvar();
+      status.textContent = '✅ ' + totalEncontrados + ' empenhos lidos!';
+      status.style.color = 'var(--success,#2d5016)';
+
+      resultado.style.display = 'block';
+      resultado.innerHTML = 
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">'+totalEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Empenhos no PDF</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#16a34a;">'+atualizados+'</div><div style="font-size:11px;color:var(--text-muted);">Marcados como Pagos</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#d97706;">'+naoEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Sem empenho ou não encontrado</div></div>'
+        +'</div>';
+
+      // Atualiza relatório se estiver na aba
+      renderRelatorio();
+    }).catch(function(err){
+      status.textContent = '❌ Erro: ' + err.message;
+      status.style.color = 'var(--danger)';
+    });
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+});
+
+// Atualizar getProcessosFiltradosRelatorio para filtrar por status de pagamento
+var _getProcessosFiltradosOriginal = getProcessosFiltradosRelatorio;
+getProcessosFiltradosRelatorio = function() {
+  var filtrados = _getProcessosFiltradosOriginal();
+  var statusPago = document.getElementById('rel-status-pago');
+  if (!statusPago) return filtrados;
+  var val = statusPago.value;
+  if (val === 'pago') return filtrados.filter(function(p){ return p.pago; });
+  if (val === 'nao_pago') return filtrados.filter(function(p){ return !p.pago; });
+  return filtrados;
+};
+
+document.getElementById('rel-status-pago').addEventListener('change', renderRelatorio);
+
+// Adicionar coluna "Pago" na tabela do relatório
+var _renderRelatorioOriginal = renderRelatorio;
+renderRelatorio = function() {
+  _renderRelatorioOriginal();
+  // Substitui a tabela com coluna de pagamento
+  var filtrados = getProcessosFiltradosRelatorio();
+  if (!filtrados.length) return;
+  
+  // Reconta pagos para cards extras
+  var pagos = filtrados.filter(function(p){ return p.pago; }).length;
+  var naoPagos = filtrados.filter(function(p){ return !p.pago; }).length;
+  
+  // Adiciona card de pagamentos se houver dados
+  if (Object.keys(empenhosPagesPorNumero).length > 0) {
+    var cardsEl = document.getElementById('rel-cards');
+    cardsEl.innerHTML += 
+      '<div class="rel-card"><div class="rel-card-label">💰 Pagos</div><div class="rel-card-valor" style="color:#16a34a;">'+pagos+'</div></div>'
+      +'<div class="rel-card"><div class="rel-card-label">⏳ Não Pagos</div><div class="rel-card-valor" style="color:#d97706;">'+naoPagos+'</div></div>';
+  }
+
+  // Atualiza tabela com coluna pago
+  var rows = filtrados.map(function(p,i){
+    var pc = p.pcOk ? '&#9989;' : '&#9203;';
+    var pago = p.pago 
+      ? '<span style="color:#16a34a;font-weight:600;">💰 ' + (p.dataPagamento||'') + '</span>' 
+      : (Object.keys(empenhosPagesPorNumero).length > 0 ? '<span style="color:#d97706;">⏳</span>' : '—');
+    return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
+      +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
+      +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td><td>'+pago+'</td></tr>';
+  }).join('');
+  document.getElementById('rel-tabela').innerHTML =
+    '<table class="rel-table"><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
+    +'<th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Pagamento</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>';
+};
+
 }); // DOMContentLoaded
+
 
 
 
