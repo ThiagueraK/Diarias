@@ -3118,25 +3118,23 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
       // Parser do relatório AppController
       // Padrão: 2026/000081   3049   5861   CASSIANO MACHADO DE SOUZA   1.459,08   2   36
       var novosMapa = {};
-      var dataAtual = '';
-      var linhas = texto.split('  ');
 
-      linhas.forEach(function(linha){
-        // Detecta data: padrão DD.MM.AAAA no início da linha
-        var dataM = linha.match(/^\s*(\d{2}\.\d{2}\.\d{4})\s*$/);
-        if (dataM) {
-          dataAtual = dataM[1];
-          return;
+      // Padrão com data: DATA 2026/NNN DESP PCOMPRA CREDOR VALOR CAT CC
+      var reComData = /(\d{2}\.\d{2}\.\d{4})\s+2026\/0*(\d+)\s+\d+\s+\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+\d+/g;
+      var m;
+      while ((m = reComData.exec(texto)) !== null) {
+        var num = String(parseInt(m[2], 10));
+        novosMapa[num] = { credor: m[3].trim(), valor: m[4], dataPagamento: m[1] };
+      }
+
+      // Empenhos sem data na mesma captura
+      var reSemData = /2026\/0*(\d+)\s+\d+\s+\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+\d+/g;
+      while ((m = reSemData.exec(texto)) !== null) {
+        var num2 = String(parseInt(m[1], 10));
+        if (!novosMapa[num2]) {
+          novosMapa[num2] = { credor: m[2].trim(), valor: m[3], dataPagamento: '' };
         }
-        // Detecta linha de empenho: 2026/NNNNNN DESP PCOMPRA CREDOR VALOR...
-        var empM = linha.match(/2026\/0*(\d+)\s+\d+\s+\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+\d+/);
-        if (empM) {
-          var num = String(parseInt(empM[1], 10));
-          var credor = empM[2].trim();
-          var valor = empM[3];
-          novosMapa[num] = { credor: credor, valor: valor, dataPagamento: dataAtual };
-        }
-      });
+      }
 
       var totalEncontrados = Object.keys(novosMapa).length;
       if (totalEncontrados === 0) {
