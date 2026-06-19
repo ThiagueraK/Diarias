@@ -379,7 +379,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.94</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.95</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1888,7 +1888,69 @@ var ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhN2NlZjFhN
 var ORIGEM = 'Tupanciretã, RS, Brasil';
 var kmCache = {}; // cache por cidade para nao recalcular
 
+// Separa múltiplas cidades: 'SANTA MARIA / CRUZ ALTA' -> ['SANTA MARIA', 'CRUZ ALTA']
+function splitCidades(cidade) {
+  if (!cidade) return [];
+  // Separa por / ou + ou e (entre palavras) — normaliza espaços
+  var partes = cidade.split(/\s*[\/\+]\s*|\s+E\s+/i);
+  return partes
+    .map(function(c){ return c.trim().toUpperCase(); })
+    .filter(function(c){ return c.length > 2; });
+}
+
+// Calcula KM para múltiplas cidades e soma
+function calcularKmMultiplo(cidade, callback) {
+  var cidades = splitCidades(cidade);
+  if (cidades.length <= 1) {
+    // Cidade única — usa função normal
+    calcularKm(cidade, callback);
+    return;
+  }
+  // Múltiplas cidades — calcula cada uma e soma
+  var kmResult = document.getElementById('kmResult');
+  kmResult.textContent = 'Calculando ' + cidades.length + ' cidades...';
+  kmResult.style.color = 'var(--text-muted)';
+
+  var promises = cidades.map(function(c) {
+    // Verifica cache
+    if (kmCache[c]) return Promise.resolve(parseFloat(kmCache[c]));
+    return Promise.all([
+      geocodificar(ORIGEM),
+      geocodificar(c + ', RS, Brasil')
+    ]).then(function(coords) {
+      var orig = coords[0], dest = coords[1];
+      if (!orig || !dest) return 0;
+      return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+        body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+      }).then(function(r){ return r.json(); })
+      .then(function(data) {
+        if (!data.routes || !data.routes[0]) return 0;
+        var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
+        kmCache[c] = String(km);
+        return km;
+      });
+    }).catch(function(){ return 0; });
+  });
+
+  Promise.all(promises).then(function(kms) {
+    var total = kms.reduce(function(a,b){ return a+b; }, 0);
+    var kmStr = total.toFixed(1);
+    // Salva no cache com a chave da cidade composta
+    var cidNorm = cidade.trim().toUpperCase();
+    kmCache[cidNorm] = kmStr;
+    kmResult.textContent = '📍 ' + kmStr + ' km de Tupanciretã (' + cidades.join(' + ') + ')';
+    kmResult.style.color = 'var(--success, #2d5016)';
+    if (callback) callback(kmStr);
+  }).catch(function(e) {
+    kmResult.textContent = '❌ Erro: ' + e.message;
+    kmResult.style.color = 'var(--danger)';
+  });
+}
+
 function calcularKm(cidade, callback) {
+
   var kmResult = document.getElementById('kmResult');
   var cidadeNorm = cidade.trim().toUpperCase();
 
@@ -1932,7 +1994,7 @@ function calcularKm(cidade, callback) {
 
 function calcularKmAuto(cidade) {
   if (!cidade) return;
-  calcularKm(cidade, function(km) {
+  calcularKmMultiplo(cidade, function(km) {
     // Item 2: sugerir tipo de diária automaticamente
     var kmNum = parseFloat(km);
     var distEl = document.querySelector('input[name="distancia"]');
@@ -1957,7 +2019,7 @@ document.getElementById('btnKm').addEventListener('click', function() {
     document.getElementById('kmResult').textContent = '⚠️ Informe a cidade primeiro.';
     return;
   }
-  calcularKm(cidade, null);
+  calcularKmMultiplo(cidade, null);
 });
 
 function geocodificar(lugar) {
@@ -2654,10 +2716,18 @@ function detectarGruposSimilares() {
 }
 
 document.getElementById('btnKmMassa').addEventListener('click', function(){
-  // Encontra cidades sem KM
+  // Encontra cidades sem KM — expande múltiplas cidades
   var cidadesSemKm = {};
   processos.forEach(function(p){
-    if (!p.km && p.cidade) cidadesSemKm[p.cidade.trim().toUpperCase()] = true;
+    if (!p.km && p.cidade) {
+      var partes = splitCidades(p.cidade);
+      if (partes.length > 1) {
+        // Cidade composta — trata como uma só chave
+        cidadesSemKm[p.cidade.trim().toUpperCase()] = 'multipla';
+      } else {
+        cidadesSemKm[p.cidade.trim().toUpperCase()] = 'simples';
+      }
+    }
   });
   var lista = Object.keys(cidadesSemKm);
   if (lista.length === 0) {
@@ -2702,28 +2772,36 @@ document.getElementById('btnKmMassa').addEventListener('click', function(){
       return;
     }
 
-    Promise.all([
-      geocodificar(ORIGEM),
-      geocodificar(cidade + ', RS, Brasil')
-    ]).then(function(coords){
-      var orig = coords[0], dest = coords[1];
-      if (!orig || !dest) throw new Error('Cidade nao encontrada');
-      return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
-        body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
-      });
-    }).then(function(r){ return r.json(); })
-    .then(function(data){
-      if (data.routes && data.routes[0]) {
-        var km = (data.routes[0].summary.distance / 1000).toFixed(1);
-        kmPorCidade[cidade] = km;
-        kmCache[cidade] = km;
+    // Verifica se é cidade múltipla
+    var partesCidade = splitCidades(cidade);
+    var promises = partesCidade.map(function(c) {
+      if (kmCache[c]) return Promise.resolve(parseFloat(kmCache[c]));
+      return Promise.all([geocodificar(ORIGEM), geocodificar(c + ', RS, Brasil')])
+        .then(function(coords) {
+          var orig = coords[0], dest = coords[1];
+          if (!orig || !dest) return 0;
+          return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+            body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+          }).then(function(r){ return r.json(); })
+          .then(function(data) {
+            if (!data.routes || !data.routes[0]) return 0;
+            var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
+            kmCache[c] = String(km);
+            return km;
+          });
+        }).catch(function(){ return 0; });
+    });
+    Promise.all(promises).then(function(kms) {
+      var total = kms.reduce(function(a,b){ return a+b; }, 0);
+      if (total > 0) {
+        kmPorCidade[cidade] = total.toFixed(1);
+        kmCache[cidade] = total.toFixed(1);
       }
       idx++;
-      setTimeout(proximaCidade, 300); // pequeno delay entre requisições
-    })
-    .catch(function(){
+      setTimeout(proximaCidade, 300);
+    }).catch(function(){
       idx++;
       setTimeout(proximaCidade, 300);
     });
