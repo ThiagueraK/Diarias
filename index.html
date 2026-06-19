@@ -48,6 +48,10 @@
   .rel-badge-pendente{display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:2px 8px;color:#d97706;font-size:11px;}
   .rel-badge-sem{color:var(--text-muted);font-size:11px;}
   .rel-alerta{color:#ef4444;font-weight:700;}
+  .rel-desc-row td{background:var(--surface2);padding:0;border-bottom:1px solid var(--border);}
+  .rel-desc-inner{padding:10px 16px 12px 32px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--accent);margin:8px 12px;}
+  .rel-btn-desc{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:13px;padding:2px 4px;line-height:1;transition:transform .2s;}
+  .rel-btn-desc.open{transform:rotate(90deg);}
 
   #modalRevisaoKm.open{display:flex!important;}
   .km-cidade-row{display:grid;grid-template-columns:1fr 120px 80px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
@@ -385,7 +389,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.101</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.102</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -776,6 +780,19 @@ var filtroPCStatus = 'todos'; // 'todos' | 'pendente' | 'ok'
 // ═══════════════════════════════════════════════════════
 // UTILITÁRIOS DE DATA
 // ═══════════════════════════════════════════════════════
+function toggleDesc(id) {
+  var row = document.getElementById(id);
+  if (!row) return;
+  var btn = row.previousElementSibling && row.previousElementSibling.querySelector('.rel-btn-desc');
+  if (row.style.display === 'none') {
+    row.style.display = '';
+    if (btn) btn.classList.add('open');
+  } else {
+    row.style.display = 'none';
+    if (btn) btn.classList.remove('open');
+  }
+}
+
 function hojeISO() {
   var d = new Date();
   var mm = String(d.getMonth()+1).padStart(2,'0');
@@ -1344,7 +1361,8 @@ function fecharModal(salvar) {
   if (!pendente) return;
   var empenho = salvar ? document.getElementById('modal_empenho').value.trim() : '';
   var valor = salvar ? document.getElementById('modal_valor').value.trim() : '';
-  adicionarProcesso(Object.assign({}, pendente, {empenho:empenho, valor:valor}));
+  var descricao = document.getElementById('outputText').textContent.trim();
+  adicionarProcesso(Object.assign({}, pendente, {empenho:empenho, valor:valor, descricao:descricao}));
   pendente = null;
 }
 document.getElementById('btnModalOk').addEventListener('click', function(){ fecharModal(true); });
@@ -2598,6 +2616,14 @@ function renderRelatorio() {
       statusPago = '<span class="rel-badge-sem">—</span>';
       dataPag = '—';
     }
+    var descId = 'desc-row-'+i;
+    var temDesc = p.descricao && p.descricao.trim();
+    var btnDesc = temDesc
+      ? '<button class="rel-btn-desc" onclick="toggleDesc(\''+descId+'\')" title="Ver descrição">▶</button>'
+      : '<span style="color:var(--border);font-size:11px;">—</span>';
+    var descRow = temDesc
+      ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="14"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
+      : '';
     return '<tr>'
       +'<td class="col-num">'+(i+1)+'</td>'
       +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
@@ -2612,13 +2638,15 @@ function renderRelatorio() {
       +'<td>'+pc+'</td>'
       +'<td>'+statusPago+'</td>'
       +'<td>'+dataPag+'</td>'
-      +'</tr>';
+      +'<td>'+btnDesc+'</td>'
+      +'</tr>'
+      +descRow;
   }).join('');
   document.getElementById('rel-tabela').innerHTML =
     '<table class="rel-table"><thead><tr>'
     +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
     +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
-    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>📄</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 document.getElementById('rel-btn-aplicar').addEventListener('click', renderRelatorio);
@@ -2944,11 +2972,15 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       statusPago = '—';
       dataPag = '—';
     }
+    var descRow = (p.descricao && p.descricao.trim())
+      ? '<tr><td colspan="13" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
+      : '';
     return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
       +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
       +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
       +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td>'
-      +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td></tr>';
+      +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td></tr>'
+      +descRow;
   }).join('');
 
   var css = '<style>'
