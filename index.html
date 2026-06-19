@@ -385,7 +385,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.98</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.100</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2576,8 +2576,28 @@ function renderRelatorio() {
     document.getElementById('rel-tabela').innerHTML = '<div class="empty-state"><div class="icon">&#128269;</div><p>Nenhum processo encontrado.</p></div>';
     return;
   }
+  // Cards de pagamento (sempre recalculados junto com os filtros)
+  var temPagamentos = Object.keys(empenhosPagesPorNumero).length > 0;
+  if (temPagamentos) {
+    var pagos   = filtrados.filter(function(p){ return p.pago; }).length;
+    var naoPagos = filtrados.filter(function(p){ return !p.pago; }).length;
+    document.getElementById('rel-cards').innerHTML +=
+      '<div class="rel-card"><div class="rel-card-label">💰 Pagos</div><div class="rel-card-valor" style="color:#16a34a;">'+pagos+'</div></div>'
+      +'<div class="rel-card"><div class="rel-card-label">⏳ Não Pagos</div><div class="rel-card-valor" style="color:#d97706;">'+naoPagos+'</div></div>';
+  }
   var rows = filtrados.map(function(p,i){
     var pc = p.pcOk ? '&#9989;' : '&#9203;';
+    var statusPago, dataPag;
+    if (p.pago) {
+      statusPago = '<span class="rel-badge-pago">💰 Pago</span>';
+      dataPag = p.dataPagamento || '—';
+    } else if (temPagamentos) {
+      statusPago = '<span class="rel-badge-pendente">⏳ Pendente</span>';
+      dataPag = '—';
+    } else {
+      statusPago = '<span class="rel-badge-sem">—</span>';
+      dataPag = '—';
+    }
     return '<tr>'
       +'<td class="col-num">'+(i+1)+'</td>'
       +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
@@ -2590,13 +2610,15 @@ function renderRelatorio() {
       +'<td>'+(p.placa||'—')+'</td>'
       +'<td>'+(p.km?p.km+'&nbsp;km':'—')+'</td>'
       +'<td>'+pc+'</td>'
+      +'<td>'+statusPago+'</td>'
+      +'<td>'+dataPag+'</td>'
       +'</tr>';
   }).join('');
   document.getElementById('rel-tabela').innerHTML =
     '<table class="rel-table"><thead><tr>'
     +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
     +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
-    +'<th>Placa</th><th>KM</th><th>PC</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 document.getElementById('rel-btn-aplicar').addEventListener('click', renderRelatorio);
@@ -3236,65 +3258,6 @@ getProcessosFiltradosRelatorio = function() {
 };
 
 document.getElementById('rel-status-pago').addEventListener('change', renderRelatorio);
-
-// Adicionar coluna "Pago" na tabela do relatório
-var _renderRelatorioOriginal = renderRelatorio;
-renderRelatorio = function() {
-  _renderRelatorioOriginal();
-  // Substitui a tabela com coluna de pagamento
-  var filtrados = getProcessosFiltradosRelatorio();
-  if (!filtrados.length) return;
-  
-  // Reconta pagos para cards extras
-  var pagos = filtrados.filter(function(p){ return p.pago; }).length;
-  var naoPagos = filtrados.filter(function(p){ return !p.pago; }).length;
-  
-  // Adiciona card de pagamentos se houver dados
-  if (Object.keys(empenhosPagesPorNumero).length > 0) {
-    var cardsEl = document.getElementById('rel-cards');
-    cardsEl.innerHTML += 
-      '<div class="rel-card"><div class="rel-card-label">💰 Pagos</div><div class="rel-card-valor" style="color:#16a34a;">'+pagos+'</div></div>'
-      +'<div class="rel-card"><div class="rel-card-label">⏳ Não Pagos</div><div class="rel-card-valor" style="color:#d97706;">'+naoPagos+'</div></div>';
-  }
-
-  // Atualiza tabela com coluna Data Pagamento
-  var temPagamentos = Object.keys(empenhosPagesPorNumero).length > 0;
-  var rows = filtrados.map(function(p,i){
-    var pc = p.pcOk ? '&#9989;' : '&#9203;';
-    var statusPago, dataPag;
-    if (p.pago) {
-      statusPago = '<span class="rel-badge-pago">💰 Pago</span>';
-      dataPag = p.dataPagamento || '—';
-    } else if (temPagamentos) {
-      statusPago = '<span class="rel-badge-pendente">⏳ Pendente</span>';
-      dataPag = '—';
-    } else {
-      statusPago = '<span class="rel-badge-sem">—</span>';
-      dataPag = '—';
-    }
-    return '<tr>'
-      +'<td class="col-num">'+(i+1)+'</td>'
-      +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
-      +'<td>'+(p.numProcesso||'')+'</td>'
-      +'<td>'+(p.empenho||'')+'</td>'
-      +'<td>'+(p.valor?'R$&nbsp;'+p.valor:'')+'</td>'
-      +'<td class="col-cidade">'+(p.cidade||'')+'</td>'
-      +'<td>'+(p.dataSaida||'')+'</td>'
-      +'<td>'+(p.dataChegada||'')+'</td>'
-      +'<td>'+(p.placa||'—')+'</td>'
-      +'<td>'+(p.km?p.km+'&nbsp;km':'—')+'</td>'
-      +'<td>'+pc+'</td>'
-      +'<td>'+statusPago+'</td>'
-      +'<td>'+dataPag+'</td>'
-      +'</tr>';
-  }).join('');
-  document.getElementById('rel-tabela').innerHTML =
-    '<table class="rel-table"><thead><tr>'
-    +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
-    +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
-    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th>'
-    +'</tr></thead><tbody>'+rows+'</tbody></table>';
-};
 
 }); // DOMContentLoaded
 
