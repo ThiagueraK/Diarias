@@ -37,10 +37,16 @@
   .rel-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;}
   .rel-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
   .rel-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;}
-  .rel-table{width:100%;border-collapse:collapse;font-size:12px;}
-  .rel-table th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;}
-  .rel-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+  .rel-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto;}
+  .rel-table th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;white-space:nowrap;}
+  .rel-table td{padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .rel-table td.col-servidor{white-space:normal;min-width:140px;max-width:200px;}
+  .rel-table td.col-cidade{white-space:normal;min-width:100px;}
   .rel-table tr:hover td{background:var(--surface2);}
+  .rel-table td.col-num{text-align:center;color:var(--text-muted);font-size:11px;}
+  .rel-badge-pago{display:inline-flex;align-items:center;gap:4px;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);border-radius:6px;padding:2px 8px;color:#16a34a;font-weight:600;font-size:11px;}
+  .rel-badge-pendente{display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:2px 8px;color:#d97706;font-size:11px;}
+  .rel-badge-sem{color:var(--text-muted);font-size:11px;}
   .rel-alerta{color:#ef4444;font-weight:700;}
 
   #modalRevisaoKm.open{display:flex!important;}
@@ -379,7 +385,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.96</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.97</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2572,14 +2578,25 @@ function renderRelatorio() {
   }
   var rows = filtrados.map(function(p,i){
     var pc = p.pcOk ? '&#9989;' : '&#9203;';
-    return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
-      +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
-      +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
-      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td></tr>';
+    return '<tr>'
+      +'<td class="col-num">'+(i+1)+'</td>'
+      +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
+      +'<td>'+(p.numProcesso||'')+'</td>'
+      +'<td>'+(p.empenho||'')+'</td>'
+      +'<td>'+(p.valor?'R$&nbsp;'+p.valor:'')+'</td>'
+      +'<td class="col-cidade">'+(p.cidade||'')+'</td>'
+      +'<td>'+(p.dataSaida||'')+'</td>'
+      +'<td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+(p.placa||'—')+'</td>'
+      +'<td>'+(p.km?p.km+'&nbsp;km':'—')+'</td>'
+      +'<td>'+pc+'</td>'
+      +'</tr>';
   }).join('');
   document.getElementById('rel-tabela').innerHTML =
-    '<table class="rel-table"><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
-    +'<th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th>'
+    '<table class="rel-table"><thead><tr>'
+    +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
+    +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 document.getElementById('rel-btn-aplicar').addEventListener('click', renderRelatorio);
@@ -3219,20 +3236,42 @@ renderRelatorio = function() {
       +'<div class="rel-card"><div class="rel-card-label">⏳ Não Pagos</div><div class="rel-card-valor" style="color:#d97706;">'+naoPagos+'</div></div>';
   }
 
-  // Atualiza tabela com coluna pago
+  // Atualiza tabela com coluna Data Pagamento
+  var temPagamentos = Object.keys(empenhosPagesPorNumero).length > 0;
   var rows = filtrados.map(function(p,i){
     var pc = p.pcOk ? '&#9989;' : '&#9203;';
-    var pago = p.pago 
-      ? '<span style="color:#16a34a;font-weight:600;">💰 ' + (p.dataPagamento||'') + '</span>' 
-      : (Object.keys(empenhosPagesPorNumero).length > 0 ? '<span style="color:#d97706;">⏳</span>' : '—');
-    return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
-      +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
-      +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
-      +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td><td>'+pc+'</td><td>'+pago+'</td></tr>';
+    var statusPago, dataPag;
+    if (p.pago) {
+      statusPago = '<span class="rel-badge-pago">💰 Pago</span>';
+      dataPag = p.dataPagamento || '—';
+    } else if (temPagamentos) {
+      statusPago = '<span class="rel-badge-pendente">⏳ Pendente</span>';
+      dataPag = '—';
+    } else {
+      statusPago = '<span class="rel-badge-sem">—</span>';
+      dataPag = '—';
+    }
+    return '<tr>'
+      +'<td class="col-num">'+(i+1)+'</td>'
+      +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
+      +'<td>'+(p.numProcesso||'')+'</td>'
+      +'<td>'+(p.empenho||'')+'</td>'
+      +'<td>'+(p.valor?'R$&nbsp;'+p.valor:'')+'</td>'
+      +'<td class="col-cidade">'+(p.cidade||'')+'</td>'
+      +'<td>'+(p.dataSaida||'')+'</td>'
+      +'<td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+(p.placa||'—')+'</td>'
+      +'<td>'+(p.km?p.km+'&nbsp;km':'—')+'</td>'
+      +'<td>'+pc+'</td>'
+      +'<td>'+statusPago+'</td>'
+      +'<td>'+dataPag+'</td>'
+      +'</tr>';
   }).join('');
   document.getElementById('rel-tabela').innerHTML =
-    '<table class="rel-table"><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
-    +'<th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Pagamento</th>'
+    '<table class="rel-table"><thead><tr>'
+    +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
+    +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 };
 
