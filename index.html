@@ -43,7 +43,16 @@
   .rel-table tr:hover td{background:var(--surface2);}
   .rel-alerta{color:#ef4444;font-weight:700;}
 
-  #modalUnificar{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;overflow-y:auto;padding:20px;}
+  #modalRevisaoKm.open{display:flex!important;}
+  .km-cidade-row{display:grid;grid-template-columns:1fr 120px 80px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+  .km-cidade-row:last-child{border-bottom:none;}
+  .km-cidade-nome{font-size:13px;font-weight:500;}
+  .km-cidade-processos{font-size:11px;color:var(--text-muted);}
+  .km-input{padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;width:100%;text-align:center;}
+  .km-input.editado{border-color:var(--accent);background:var(--accent-light);}
+  .km-check{width:18px;height:18px;cursor:pointer;}
+  #modalUnificar{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;overflow-y:auto;padding:20px;}
   #modalUnificar.open{display:flex;}
   #modalUnificar .modal-inner{background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:80vh;overflow-y:auto;}
   #modalUnificar h3{margin:0 0 8px;font-size:16px;}
@@ -370,7 +379,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.93</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.94</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -504,6 +513,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
         <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
         <button class="btn-exportar md" id="btnKmMassa">📍 Calcular KM em Massa</button>
+        <button class="btn-exportar md" id="btnRevisarKm">🗺️ Revisar KMs</button>
         <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
       </div>
     </div>
@@ -648,7 +658,23 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
 </div>
 
+<!-- MODAL REVISAO KM -->
+<div id="modalRevisaoKm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9996;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <h3 style="margin:0 0 6px;font-size:16px;">📍 Revisar Quilometragens</h3>
+    <p style="font-size:12px;color:var(--text-muted);margin:0 0 16px;">Verifique e corrija os KMs calculados. Clique em Salvar para aplicar em todos os processos.</p>
+    <div id="km-revisao-lista"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="km-revisao-salvar" style="flex:1;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✅ Salvar Correções</button>
+      <button id="km-revisao-recalcular" style="padding:10px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">🔄 Recalcular Selecionadas</button>
+      <button id="km-revisao-cancelar" style="padding:10px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;">Fechar</button>
+    </div>
+    <div id="km-revisao-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);text-align:center;min-height:16px;"></div>
+  </div>
+</div>
+
 <!-- MODAL UNIFICAR NOMES -->
+
 <div id="modalUnificar">
   <div class="modal-inner" style="max-width:560px;">
     <h3>🔗 Unificar Nomes Similares</h3>
@@ -2814,7 +2840,138 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
   else { alert('Permita popups para este site para imprimir o dashboard.'); }
 });
 
+
+// ═══════════════════════════════════════════════════════
+// REVISÃO DE KM
+// ═══════════════════════════════════════════════════════
+
+document.getElementById('btnRevisarKm').addEventListener('click', function(){
+  // Coleta todas as cidades únicas com seus KMs e contagem de processos
+  var cidades = {};
+  processos.forEach(function(p){
+    if (!p.cidade) return;
+    var c = p.cidade.trim().toUpperCase();
+    if (!cidades[c]) cidades[c] = { km: p.km || '', count: 0 };
+    cidades[c].count++;
+    // Usa o primeiro KM encontrado para a cidade
+    if (!cidades[c].km && p.km) cidades[c].km = p.km;
+  });
+
+  var lista = Object.keys(cidades).sort();
+  if (lista.length === 0) {
+    alert('Nenhum processo com cidade cadastrada.');
+    return;
+  }
+
+  var html = '<div style="display:grid;grid-template-columns:1fr 120px 80px;gap:8px;padding:0 0 8px;border-bottom:2px solid var(--border);margin-bottom:4px;">'
+    +'<span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Cidade</span>'
+    +'<span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;text-align:center;">KM</span>'
+    +'<span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;text-align:center;">Recalc.</span>'
+    +'</div>';
+
+  html += lista.map(function(c){
+    var d = cidades[c];
+    var semKm = !d.km ? ' style="border-color:#ef4444"' : '';
+    return '<div class="km-cidade-row">'
+      +'<div><div class="km-cidade-nome">'+c+'</div>'
+      +'<div class="km-cidade-processos">'+d.count+' processo'+(d.count!==1?'s':'')+'</div></div>'
+      +'<input class="km-input" type="text" data-cidade="'+c+'" value="'+(d.km||'')+'" placeholder="KM"'+semKm+' oninput="this.classList.add(\'editado\')" >'
+      +'<div style="text-align:center;"><input type="checkbox" class="km-check" data-cidade="'+c+'" title="Recalcular esta cidade"'+((!d.km)?'checked':'')+'>'
+      +'</div></div>';
+  }).join('');
+
+  document.getElementById('km-revisao-lista').innerHTML = html;
+  document.getElementById('km-revisao-status').textContent = '';
+  document.getElementById('modalRevisaoKm').classList.add('open');
+});
+
+// Recalcular cidades selecionadas
+document.getElementById('km-revisao-recalcular').addEventListener('click', function(){
+  var checks = document.querySelectorAll('.km-check:checked');
+  if (checks.length === 0) { alert('Marque as cidades que deseja recalcular.'); return; }
+  var btn = this;
+  btn.disabled = true;
+  var status = document.getElementById('km-revisao-status');
+  var lista = Array.from(checks).map(function(c){ return c.getAttribute('data-cidade'); });
+  var idx = 0;
+
+  function proxima() {
+    if (idx >= lista.length) {
+      btn.disabled = false;
+      status.textContent = '✅ Recálculo concluído! Revise os valores e clique em Salvar.';
+      status.style.color = 'var(--success, #2d5016)';
+      return;
+    }
+    var cidade = lista[idx];
+    status.textContent = '⏳ Calculando ' + (idx+1) + '/' + lista.length + ': ' + cidade;
+
+    Promise.all([
+      geocodificar(ORIGEM),
+      geocodificar(cidade + ', RS, Brasil')
+    ]).then(function(coords){
+      var orig = coords[0], dest = coords[1];
+      if (!orig || !dest) throw new Error('não encontrada');
+      return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+        body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+      });
+    }).then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.routes && data.routes[0]) {
+        var km = (data.routes[0].summary.distance / 1000).toFixed(1);
+        // Atualiza o input na tela
+        var input = document.querySelector('.km-input[data-cidade="'+cidade+'"]');
+        if (input) { input.value = km; input.classList.add('editado'); }
+        kmCache[cidade] = km;
+      }
+      idx++;
+      setTimeout(proxima, 400);
+    })
+    .catch(function(){
+      status.textContent = '⚠️ ' + cidade + ' não encontrada, pulando...';
+      idx++;
+      setTimeout(proxima, 400);
+    });
+  }
+  proxima();
+});
+
+// Salvar correções
+document.getElementById('km-revisao-salvar').addEventListener('click', function(){
+  var inputs = document.querySelectorAll('.km-input');
+  var mapaKm = {};
+  inputs.forEach(function(inp){
+    var c = inp.getAttribute('data-cidade');
+    var v = inp.value.trim().replace(',','.');
+    if (c && v) mapaKm[c] = v;
+  });
+
+  var atualizados = 0;
+  processos.forEach(function(p){
+    if (!p.cidade) return;
+    var c = p.cidade.trim().toUpperCase();
+    if (mapaKm[c]) { p.km = mapaKm[c]; atualizados++; }
+  });
+
+  // Atualiza cache
+  Object.keys(mapaKm).forEach(function(c){ kmCache[c] = mapaKm[c]; });
+
+  salvar();
+  renderTabela();
+  document.getElementById('modalRevisaoKm').classList.remove('open');
+  alert('✅ ' + atualizados + ' processo' + (atualizados!==1?'s':'') + ' atualizado' + (atualizados!==1?'s':'') + '!');
+});
+
+document.getElementById('km-revisao-cancelar').addEventListener('click', function(){
+  document.getElementById('modalRevisaoKm').classList.remove('open');
+});
+document.getElementById('modalRevisaoKm').addEventListener('click', function(e){
+  if (e.target === this) this.classList.remove('open');
+});
+
 }); // DOMContentLoaded
+
 
 
 
