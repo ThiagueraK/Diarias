@@ -370,7 +370,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.92</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.93</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1383,6 +1383,8 @@ function adicionarProcesso(dados) {
     var kmMatch = kmEl.textContent.match(/([\d\.]+)\s*km/);
     if (kmMatch) dados.km = kmMatch[1];
   }
+  // Salva hash do processo no 1Doc para link direto
+  if (window._hash1doc) { dados.hash1doc = window._hash1doc; }
   processos.push(Object.assign({id: Date.now()}, dados));
   salvar(); atualizarBadge();
 }
@@ -1573,7 +1575,8 @@ function renderTabela() {
       '<td>'+badgePC+'</td>'+
       '<td><button class="btn-pc" data-id="'+p.id+'" title="Gerar Prestação de Contas">📄 PC</button></td>'+
       '<td style="display:flex;gap:4px;">'
-        +'<button class="btn-edit-row" data-id="'+p.id+'" title="Editar servidor">✏️</button>'
+        +(p.hash1doc ? '<a class="btn-edit-row" href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash='+p.hash1doc+'&itd=7" target="_blank" title="Abrir no 1Doc" style="text-decoration:none;">🔗</a>' : '')
+        +'<button class="btn-edit-row" data-id="'+p.id+'" title="Editar">✏️</button>'
         +'<button class="btn-del-row" data-id="'+p.id+'" title="Remover">✕</button>'
         +'</td>'+
       '</tr>';
@@ -1977,7 +1980,11 @@ function lerDadosExtensao() {
   var hash = window.location.hash;
   if (!hash || hash.indexOf('dados=') === -1) return;
   try {
-    var encoded = hash.replace('#dados=', '').replace(/^.*dados=/, '');
+    // Extrai hash1doc se presente: #dados=BASE64&hash1doc=HASH
+    var hashRaw = hash.replace('#dados=', '').replace(/^.*dados=/, '');
+    var hashParts = hashRaw.split('&hash1doc=');
+    var encoded = hashParts[0];
+    if (hashParts[1]) window._hash1doc = hashParts[1];
     var decoded = decodeURIComponent(escape(atob(encoded)));
     if (!decoded) return;
     history.replaceState(null, '', window.location.pathname);
