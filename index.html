@@ -413,7 +413,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.0</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.1</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -3354,7 +3354,9 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
       // Coleta datas de pagamento com suas posições
       // Exclui datas no formato DT.EMISSAO (que aparecem logo após o nº do empenho)
       var reDatas   = /\b(\d{2}\.\d{2}\.\d{4})\b/g;
-      var reEmpenho = /2026\/0*(\d+)\s+\d+\s+\d{2}\/\d{2}\/\d{4}\s+\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+Ordem/g;
+      // Dt.Emissao é opcional: formato antigo tem (DD/MM/AAAA) entre Desp. e
+      // o código do credor; formato novo (com coluna "P.Compra Ano") não tem.
+      var reEmpenho = /2026\/0*(\d+)\s+\d+\s+(?:\d{2}\/\d{2}\/\d{4}\s+)?\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+Ordem/g;
 
       // Coleta todas as posições de datas
       var datas = [];
