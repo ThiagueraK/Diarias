@@ -43,6 +43,7 @@
   .rel-table td.col-servidor{white-space:normal;min-width:140px;max-width:200px;}
   .rel-table td.col-cidade{white-space:normal;min-width:100px;}
   .rel-table tr:hover td{background:var(--surface2);}
+  .rel-row-clicavel{cursor:pointer;}
   .rel-table td.col-num{text-align:center;color:var(--text-muted);font-size:11px;}
   .rel-badge-pago{display:inline-flex;align-items:center;gap:4px;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);border-radius:6px;padding:2px 8px;color:#16a34a;font-weight:600;font-size:11px;}
   .rel-badge-pendente{display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:2px 8px;color:#d97706;font-size:11px;}
@@ -391,7 +392,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <span id="bannerDuplicataMsg"></span>
   </div>
   <button id="bannerDuplicataBtnIr" class="banner-fechar" style="display:none;background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.5);">🔍 Ver processo</button>
-  <button class="banner-fechar" onclick="fecharBannerDuplicata()">✕ Fechar</button>
+  <button id="bannerDuplicataBtnFechar" class="banner-fechar">✕ Fechar</button>
 </div>
 
 <!-- LOGIN -->
@@ -413,7 +414,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.2</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.3</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1992,6 +1993,7 @@ function feedbackCopiar() {
 // ═══════════════════════════════════════════════════════
 // Banner duplicata — escopo global para funcionar com onclick inline
 function mostrarBannerDuplicata(msg, dupId) {
+  var banner = document.getElementById('bannerDuplicata');
   document.getElementById('bannerDuplicataMsg').textContent = msg;
   var btnIr = document.getElementById('bannerDuplicataBtnIr');
   var dup = processos.find(function(p){ return p.id === dupId; });
@@ -2003,12 +2005,14 @@ function mostrarBannerDuplicata(msg, dupId) {
   } else {
     btnIr.style.display = 'none';
   }
-  document.getElementById('bannerDuplicata').classList.add('visible');
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  banner.classList.add('visible');
 }
 function fecharBannerDuplicata() {
   document.getElementById('bannerDuplicata').classList.remove('visible');
 }
+// Listener fixo no botão Fechar — não depende de onclick inline, evitando
+// qualquer perda de clique por re-render ou timing de animação.
+document.getElementById('bannerDuplicataBtnFechar').addEventListener('click', fecharBannerDuplicata);
 
 // Scroll flutuante da tabela
 (function() {
@@ -2757,7 +2761,7 @@ function renderRelatorio() {
     var descRow = temDesc
       ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="14"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
       : '';
-    return '<tr>'
+    return '<tr data-id="'+p.id+'" class="rel-row-clicavel" title="Duplo clique para ver na Tabela de Controle">'
       +'<td class="col-num">'+(i+1)+'</td>'
       +'<td class="col-servidor">'+(p.servidor||'')+'</td>'
       +'<td>'+(p.numProcesso||'')+'</td>'
@@ -2781,6 +2785,48 @@ function renderRelatorio() {
     +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
     +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>📄</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
+
+  // Duplo clique numa linha (exceto no botão de descrição) abre o mesmo
+  // processo na Tabela de Controle, com destaque visual e scroll até ele.
+  document.querySelectorAll('#rel-tabela .rel-row-clicavel').forEach(function(tr){
+    tr.addEventListener('dblclick', function(e){
+      if (e.target.closest('.rel-btn-desc')) return;
+      var id = Number(tr.getAttribute('data-id'));
+      abrirProcessoNaTabela(id);
+    });
+  });
+}
+
+// Leva o usuário até um processo específico na aba Tabela de Controle,
+// usando a busca global (que ignora o filtro de dia) para garantir que o
+// processo apareça mesmo se estiver fora do dia/filtro atualmente selecionado.
+function abrirProcessoNaTabela(id) {
+  var p = processos.find(function(x){ return x.id === id; });
+  if (!p) return;
+
+  // Usa um termo que identifique o processo de forma única o suficiente
+  // (número de processo, ou empenho como alternativa)
+  var termo = p.numProcesso || p.empenho || p.servidor || '';
+  modoIA = false;
+  filtrosIA = null;
+  termoBusca = termo;
+  var campoBusca = document.getElementById('campoBusca');
+  if (campoBusca) {
+    campoBusca.value = termo;
+    document.getElementById('btnLimparBusca').classList.toggle('visible', termo.length > 0);
+  }
+
+  switchTab('panel-tabela', 'tabTabela');
+  renderTabela();
+  setTimeout(function() {
+    var row = document.querySelector('#panel-tabela tr[data-id="'+id+'"]');
+    if (row) {
+      row.scrollIntoView({behavior:'smooth', block:'center'});
+      row.style.outline = '2px solid #ef4444';
+      row.style.outlineOffset = '-2px';
+      setTimeout(function(){ row.style.outline = ''; }, 3000);
+    }
+  }, 150);
 }
 document.getElementById('rel-btn-aplicar').addEventListener('click', renderRelatorio);
 document.getElementById('rel-busca').addEventListener('input', renderRelatorio);
