@@ -48,6 +48,15 @@
   .rel-badge-pendente{display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:2px 8px;color:#d97706;font-size:11px;}
   .rel-badge-sem{color:var(--text-muted);font-size:11px;}
   .rel-alerta{color:#ef4444;font-weight:700;}
+  #loginOverlay{position:fixed;inset:0;background:var(--bg, #0f0f17);display:flex;align-items:center;justify-content:center;z-index:9999;}
+  #loginOverlay.hidden{display:none;}
+  .login-box{background:var(--surface, #1a1a2e);border:1px solid var(--border, #2a2a3e);border-radius:16px;padding:36px 32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+  .login-box h2{margin:0 0 4px;font-size:18px;color:var(--text, #fff);}
+  .login-box .sub{margin:0 0 24px;font-size:12px;color:var(--text-muted, #888);}
+  .login-box label{display:block;font-size:12px;color:var(--text-muted, #888);margin-bottom:6px;margin-top:14px;}
+  .login-box input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border, #2a2a3e);background:var(--surface2, #22223a);color:var(--text, #fff);font-size:14px;box-sizing:border-box;}
+  .login-box button{width:100%;margin-top:22px;padding:11px;border:none;border-radius:8px;background:#1a1a2e;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
+  .login-box .erro{color:#ef4444;font-size:12px;margin-top:10px;min-height:14px;}
   .rel-desc-row td{background:var(--surface2);padding:0;border-bottom:1px solid var(--border);}
   .rel-desc-inner{padding:10px 16px 12px 32px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--accent);margin:8px 12px;}
   .rel-btn-desc{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:13px;padding:2px 4px;line-height:1;transition:transform .2s;}
@@ -385,12 +394,26 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <button class="banner-fechar" onclick="fecharBannerDuplicata()">✕ Fechar</button>
 </div>
 
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>🔒 SGD Diárias</h2>
+    <p class="sub">Acesso restrito — informe suas credenciais.</p>
+    <label>Usuário</label>
+    <input type="text" id="login_usuario" autocomplete="username">
+    <label>Senha</label>
+    <input type="password" id="login_senha" autocomplete="current-password">
+    <button id="btnLogin">Entrar</button>
+    <div class="erro" id="loginErro"></div>
+  </div>
+</div>
+
 <div class="container">
 
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.0.104</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.0</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -766,7 +789,106 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+// AUTENTICAÇÃO
+// ═══════════════════════════════════════════════════════
+var SGD_WORKER_URL = 'https://diarias.aceitacoes.workers.dev';
+var SGD_TOKEN_KEY = 'sgd_token';
+
+function sgdGetToken() {
+  return localStorage.getItem(SGD_TOKEN_KEY) || '';
+}
+function sgdSetToken(token) {
+  localStorage.setItem(SGD_TOKEN_KEY, token);
+}
+function sgdClearToken() {
+  localStorage.removeItem(SGD_TOKEN_KEY);
+}
+
+// Wrapper de fetch que injeta o token em toda chamada ao Worker.
+// Se a resposta vier 401 (token ausente/expirado), desloga e mostra o login.
+function sgdFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers, { 'Authorization': 'Bearer ' + sgdGetToken() });
+  return fetch(url, opts).then(function(r) {
+    if (r.status === 401) {
+      sgdClearToken();
+      sgdMostrarLogin('Sessão expirada. Faça login novamente.');
+      throw new Error('Não autenticado');
+    }
+    return r;
+  });
+}
+
+function sgdMostrarLogin(msg) {
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('loginErro').textContent = msg || '';
+  document.getElementById('login_usuario').focus();
+}
+function sgdEsconderLogin() {
+  document.getElementById('loginOverlay').classList.add('hidden');
+}
+
+function sgdFazerLogin() {
+  var usuario = document.getElementById('login_usuario').value.trim();
+  var senha = document.getElementById('login_senha').value;
+  var erroEl = document.getElementById('loginErro');
+  var btn = document.getElementById('btnLogin');
+  if (!usuario || !senha) { erroEl.textContent = 'Preencha usuário e senha.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+  fetch(SGD_WORKER_URL + '?action=login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario: usuario, senha: senha })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok && data.token) {
+      sgdSetToken(data.token);
+      sgdEsconderLogin();
+      sgdIniciarApp();
+    } else {
+      erroEl.textContent = data.error || 'Usuário ou senha inválidos.';
+    }
+  })
+  .catch(function() {
+    erroEl.textContent = 'Falha ao conectar. Verifique sua internet.';
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  });
+}
+
+// Ponto de entrada: só inicia o app de fato (DOMContentLoaded original)
+// depois de confirmar que existe um token salvo. O token só é validado
+// de verdade na primeira chamada real (carregar) — se tiver expirado,
+// o 401 dispara sgdMostrarLogin novamente.
+function sgdIniciarApp() {
+  if (window._sgdAppIniciado) return;
+  window._sgdAppIniciado = true;
+  sgdAppMain();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btnLogin').addEventListener('click', sgdFazerLogin);
+  document.getElementById('login_senha').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') sgdFazerLogin();
+  });
+  document.getElementById('login_usuario').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('login_senha').focus();
+  });
+
+  if (sgdGetToken()) {
+    sgdEsconderLogin();
+    sgdIniciarApp();
+  } else {
+    sgdMostrarLogin('');
+  }
+});
+
+function sgdAppMain() {
 // ═══════════════════════════════════════════════════════
 // ESTADO
 // ═══════════════════════════════════════════════════════
@@ -934,7 +1056,7 @@ function parsear() {
     + 'Processo:\n' + rawIA;
 
 
-  fetch('https://diarias.aceitacoes.workers.dev?action=ia', {
+  sgdFetch('https://diarias.aceitacoes.workers.dev?action=ia', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: prompt })
@@ -1468,7 +1590,7 @@ function adicionarProcesso(dados) {
 function salvar() {
   atualizarBackupInfo();
   // Salva no KV na nuvem
-  fetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
+  sgdFetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ processos: processos })
@@ -2147,7 +2269,7 @@ setTimeout(lerDadosExtensao, 800);
 window.addEventListener('hashchange', lerDadosExtensao);
 
 // Carrega dados do KV na nuvem
-fetch('https://diarias.aceitacoes.workers.dev?action=carregar')
+sgdFetch('https://diarias.aceitacoes.workers.dev?action=carregar')
 .then(function(r){ return r.json(); })
 .then(function(data) {
   processos = data.processos || [];
@@ -3324,7 +3446,7 @@ getProcessosFiltradosRelatorio = function() {
 
 document.getElementById('rel-status-pago').addEventListener('change', renderRelatorio);
 
-}); // DOMContentLoaded
+} // fim sgdAppMain
 
 
 
