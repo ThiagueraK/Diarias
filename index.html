@@ -413,7 +413,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.1</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.2</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -546,7 +546,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button class="btn-exportar md" id="btnExportarMD">⬇ Exportar .MD</button>
         <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
         <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
-        <button class="btn-exportar md" id="btnKmMassa">📍 Calcular KM em Massa</button>
+        <button class="btn-exportar md" id="btnNormalizarEmpenho">🔧 Normalizar Empenhos</button>
         <button class="btn-exportar md" id="btnRevisarKm">🗺️ Revisar KMs</button>
         <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
       </div>
@@ -2941,99 +2941,47 @@ function detectarGruposSimilares() {
   return Object.values(grupos).filter(function(g){ return g.length > 1; });
 }
 
-document.getElementById('btnKmMassa').addEventListener('click', function(){
-  // Encontra cidades sem KM — expande múltiplas cidades
-  var cidadesSemKm = {};
+// Normaliza um número de empenho para o formato padrão: só dígitos,
+// sem zeros à esquerda, sem pontos/barras/espaços. Ex: "3.831" -> "3831",
+// "003831" -> "3831", "2026/003831" -> "3831" (pega o último grupo numérico).
+function normalizarEmpenho(valor) {
+  if (!valor) return valor;
+  var limpo = String(valor).trim();
+  // Se tiver barra (ex: 2026/003831), usa só a parte depois da última barra
+  var partes = limpo.split('/');
+  limpo = partes[partes.length - 1];
+  // Remove tudo que não é dígito (pontos, espaços, traços, etc.)
+  var digitos = limpo.replace(/\D/g, '');
+  if (!digitos) return valor; // não conseguiu extrair número — mantém original
+  return String(parseInt(digitos, 10));
+}
+
+document.getElementById('btnNormalizarEmpenho').addEventListener('click', function(){
+  var mudancas = [];
   processos.forEach(function(p){
-    if (!p.km && p.cidade) {
-      var partes = splitCidades(p.cidade);
-      if (partes.length > 1) {
-        // Cidade composta — trata como uma só chave
-        cidadesSemKm[p.cidade.trim().toUpperCase()] = 'multipla';
-      } else {
-        cidadesSemKm[p.cidade.trim().toUpperCase()] = 'simples';
-      }
+    if (!p.empenho) return;
+    var normalizado = normalizarEmpenho(p.empenho);
+    if (normalizado !== p.empenho) {
+      mudancas.push({ p: p, de: p.empenho, para: normalizado });
     }
   });
-  var lista = Object.keys(cidadesSemKm);
-  if (lista.length === 0) {
-    alert('Todos os processos já têm KM calculado!');
+
+  if (!mudancas.length) {
+    alert('Todos os números de empenho já estão no formato padrão!');
     return;
   }
-  if (!confirm('Calcular KM para ' + lista.length + ' cidade(s) sem KM?\n\n' + lista.join(', '))) return;
 
-  var btnKmM = document.getElementById('btnKmMassa');
-  btnKmM.textContent = '⏳ Calculando...';
-  btnKmM.disabled = true;
+  var preview = mudancas.slice(0, 15).map(function(m){
+    return (m.p.servidor || '?') + ': "' + m.de + '" → "' + m.para + '"';
+  }).join('\n');
+  var resto = mudancas.length > 15 ? '\n... e mais ' + (mudancas.length - 15) + ' processo(s).' : '';
 
-  // Calcula sequencialmente para não sobrecarregar a API
-  var kmPorCidade = {};
-  var idx = 0;
+  if (!confirm('Normalizar ' + mudancas.length + ' número(s) de empenho?\n\n' + preview + resto)) return;
 
-  function proximaCidade() {
-    if (idx >= lista.length) {
-      // Aplica KM em todos os processos
-      var atualizados = 0;
-      processos.forEach(function(p){
-        if (!p.km && p.cidade) {
-          var c = p.cidade.trim().toUpperCase();
-          if (kmPorCidade[c]) { p.km = kmPorCidade[c]; atualizados++; }
-        }
-      });
-      salvar();
-      renderTabela();
-      btnKmM.textContent = '📍 Calcular KM em Massa';
-      btnKmM.disabled = false;
-      alert('KM calculado! ' + atualizados + ' processo' + (atualizados!==1?'s':'') + ' atualizado' + (atualizados!==1?'s':'') + '.');
-      return;
-    }
-    var cidade = lista[idx];
-    btnKmM.textContent = '⏳ ' + (idx+1) + '/' + lista.length + ' — ' + cidade;
-
-    // Verifica cache primeiro
-    if (kmCache[cidade]) {
-      kmPorCidade[cidade] = kmCache[cidade];
-      idx++;
-      proximaCidade();
-      return;
-    }
-
-    // Verifica se é cidade múltipla
-    var partesCidade = splitCidades(cidade);
-    var promises = partesCidade.map(function(c) {
-      if (kmCache[c]) return Promise.resolve(parseFloat(kmCache[c]));
-      return Promise.all([geocodificar(ORIGEM), geocodificar(c + ', RS, Brasil')])
-        .then(function(coords) {
-          var orig = coords[0], dest = coords[1];
-          if (!orig || !dest) return 0;
-          return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
-            body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
-          }).then(function(r){ return r.json(); })
-          .then(function(data) {
-            if (!data.routes || !data.routes[0]) return 0;
-            var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
-            kmCache[c] = String(km);
-            return km;
-          });
-        }).catch(function(){ return 0; });
-    });
-    Promise.all(promises).then(function(kms) {
-      var total = kms.reduce(function(a,b){ return a+b; }, 0);
-      if (total > 0) {
-        kmPorCidade[cidade] = total.toFixed(1);
-        kmCache[cidade] = total.toFixed(1);
-      }
-      idx++;
-      setTimeout(proximaCidade, 300);
-    }).catch(function(){
-      idx++;
-      setTimeout(proximaCidade, 300);
-    });
-  }
-
-  proximaCidade();
+  mudancas.forEach(function(m){ m.p.empenho = m.para; });
+  salvar();
+  renderTabela();
+  alert(mudancas.length + ' empenho(s) normalizado(s) com sucesso!');
 });
 
 // Detecção de nomes similares ao salvar processo novo
