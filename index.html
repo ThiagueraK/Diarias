@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.6</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.7</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -3495,7 +3495,6 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     pdfjsLib.getDocument({ data: ev.target.result }).promise.then(function(pdf){
       var totalPages = pdf.numPages;
-      var textoTotal = '';
       var pagePromises = [];
       for (var i = 1; i <= totalPages; i++) {
         pagePromises.push(
@@ -3510,89 +3509,21 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
         return paginas.join(' ');
       });
     }).then(function(texto){
-      // Parser do relatório "Relacao de Pagamentos" do AppController
-      // O PDF.js entrega o texto como fluxo contínuo (items joined por espaço).
-      // Estratégia: mapear posições de datas de pagamento (DD.MM.AAAA) e empenhos
-      // no texto, depois associar cada empenho à última data que o precede.
-      //
-      // Linha de empenho no texto contínuo:
-      //   2026/000081  3049  15/01/2026  5861  NOME CREDOR  1.459,08  3858  Ordem ...
-      //   ^empenho     ^desp ^dt.emissao ^cod  ^credor       ^valor
-      var novosMapa = {};
-
-      // Coleta datas de pagamento com suas posições
-      // Exclui datas no formato DT.EMISSAO (que aparecem logo após o nº do empenho)
-      var reDatas   = /\b(\d{2}\.\d{2}\.\d{4})\b/g;
-      // Dt.Emissao é opcional: formato antigo tem (DD/MM/AAAA) entre Desp. e
-      // o código do credor; formato novo (com coluna "P.Compra Ano") não tem.
-      var reEmpenho = /2026\/0*(\d+)\s+\d+\s+(?:\d{2}\/\d{2}\/\d{4}\s+)?\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+Ordem/g;
-
-      // Coleta todas as posições de datas
-      var datas = [];
-      var md;
-      while ((md = reDatas.exec(texto)) !== null) {
-        datas.push({ pos: md.index, data: md[1] });
-      }
-
-      // Associa cada empenho à última data de pagamento que o precede
-      var me;
-      var di = 0;
-      while ((me = reEmpenho.exec(texto)) !== null) {
-        var posEmp = me.index;
-        // Avança ponteiro enquanto a próxima data ainda é anterior ao empenho
-        while (di + 1 < datas.length && datas[di + 1].pos < posEmp) {
-          di++;
-        }
-        var dataPag = (datas.length && datas[di].pos < posEmp) ? datas[di].data : '';
-        var num = String(parseInt(me[1], 10));
-        if (!novosMapa[num]) {
-          novosMapa[num] = {
-            credor: me[2].trim(),
-            valor: me[3],
-            dataPagamento: dataPag
-          };
-        }
-      }
-
-      var totalEncontrados = Object.keys(novosMapa).length;
-      if (totalEncontrados === 0) {
+      var res = processarTextoPagamentos(texto);
+      if (res.totalEncontrados === 0) {
         status.textContent = '⚠️ Nenhum empenho encontrado no PDF.';
         status.style.color = 'orange';
         return;
       }
-
-      // Mescla com mapa existente
-      Object.assign(empenhosPagesPorNumero, novosMapa);
-
-      // Cruza com processos do banco e marca como pago
-      var atualizados = 0;
-      var naoEncontrados = 0;
-      processos.forEach(function(p){
-        if (!p.empenho) return;
-        var numEmp = String(parseInt(p.empenho.replace(/[^\d]/g,''), 10));
-        if (empenhosPagesPorNumero[numEmp]) {
-          var info = empenhosPagesPorNumero[numEmp];
-          p.pago = true;
-          p.dataPagamento = info.dataPagamento;
-          atualizados++;
-        }
-      });
-
-      naoEncontrados = processos.filter(function(p){ return p.empenho && !p.pago; }).length;
-
-      salvar();
-      status.textContent = '✅ ' + totalEncontrados + ' empenhos lidos!';
+      status.textContent = '✅ ' + res.totalEncontrados + ' empenhos lidos!';
       status.style.color = 'var(--success,#2d5016)';
-
       resultado.style.display = 'block';
-      resultado.innerHTML = 
+      resultado.innerHTML =
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'
-        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">'+totalEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Empenhos no PDF</div></div>'
-        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#16a34a;">'+atualizados+'</div><div style="font-size:11px;color:var(--text-muted);">Marcados como Pagos</div></div>'
-        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#d97706;">'+naoEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Sem empenho ou não encontrado</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">'+res.totalEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Empenhos no PDF</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#16a34a;">'+res.atualizados+'</div><div style="font-size:11px;color:var(--text-muted);">Marcados como Pagos</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#d97706;">'+res.naoEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Sem empenho ou não encontrado</div></div>'
         +'</div>';
-
-      // Atualiza relatório se estiver na aba
       renderRelatorio();
     }).catch(function(err){
       status.textContent = '❌ Erro: ' + err.message;
@@ -3602,6 +3533,70 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
   reader.readAsArrayBuffer(file);
   e.target.value = '';
 });
+
+// Parser do relatório "Relacao de Pagamentos" do AppController, a partir do TEXTO.
+// Reutilizável: chamado pelo botão de importar (acima) e pela extensão (via window.sgdImportarPagamentosTexto).
+// Retorna { totalEncontrados, atualizados, naoEncontrados }.
+function processarTextoPagamentos(texto) {
+  var novosMapa = {};
+  var reDatas   = /\b(\d{2}\.\d{2}\.\d{4})\b/g;
+  var reEmpenho = /2026\/0*(\d+)\s+\d+\s+(?:\d{2}\/\d{2}\/\d{4}\s+)?\d+\s+(.+?)\s+([\d\.]+,\d{2})\s+\d+\s+Ordem/g;
+
+  var datas = [];
+  var md;
+  while ((md = reDatas.exec(texto)) !== null) {
+    datas.push({ pos: md.index, data: md[1] });
+  }
+
+  var me;
+  var di = 0;
+  while ((me = reEmpenho.exec(texto)) !== null) {
+    var posEmp = me.index;
+    while (di + 1 < datas.length && datas[di + 1].pos < posEmp) {
+      di++;
+    }
+    var dataPag = (datas.length && datas[di].pos < posEmp) ? datas[di].data : '';
+    var num = String(parseInt(me[1], 10));
+    if (!novosMapa[num]) {
+      novosMapa[num] = { credor: me[2].trim(), valor: me[3], dataPagamento: dataPag };
+    }
+  }
+
+  var totalEncontrados = Object.keys(novosMapa).length;
+  if (totalEncontrados === 0) {
+    return { totalEncontrados: 0, atualizados: 0, naoEncontrados: 0 };
+  }
+
+  Object.assign(empenhosPagesPorNumero, novosMapa);
+
+  var atualizados = 0;
+  processos.forEach(function(p){
+    if (!p.empenho) return;
+    var numEmp = String(parseInt(p.empenho.replace(/[^\d]/g,''), 10));
+    if (empenhosPagesPorNumero[numEmp]) {
+      var info = empenhosPagesPorNumero[numEmp];
+      p.pago = true;
+      p.dataPagamento = info.dataPagamento;
+      atualizados++;
+    }
+  });
+  var naoEncontrados = processos.filter(function(p){ return p.empenho && !p.pago; }).length;
+
+  salvar();
+  return { totalEncontrados: totalEncontrados, atualizados: atualizados, naoEncontrados: naoEncontrados };
+}
+
+// Ponte para a extensão: recebe o texto do relatório já extraído, processa e devolve um resumo.
+// A extensão chama isto via chrome.scripting.executeScript no app aberto.
+window.sgdImportarPagamentosTexto = function(texto) {
+  try {
+    var res = processarTextoPagamentos(texto);
+    if (typeof renderRelatorio === 'function') renderRelatorio();
+    return { ok: true, resultado: res };
+  } catch (e) {
+    return { ok: false, erro: e.message };
+  }
+};
 
 // Atualizar getProcessosFiltradosRelatorio para filtrar por status de pagamento
 var _getProcessosFiltradosOriginal = getProcessosFiltradosRelatorio;
