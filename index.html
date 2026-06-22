@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.7</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.8</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -821,6 +821,17 @@ function sgdFetch(url, opts) {
     return r;
   });
 }
+
+// Ponte global para a extensão importar o relatório de pagamentos.
+// Existe desde o carregamento da página (escopo global), e delega para a
+// implementação interna (registrada quando o app inicializa via sgdAppMain).
+// Se o app ainda não tiver inicializado, retorna um aviso claro.
+window.sgdImportarPagamentosTexto = function(texto) {
+  if (typeof window._sgdImportarPagamentosImpl === 'function') {
+    return window._sgdImportarPagamentosImpl(texto);
+  }
+  return { ok: false, motivo: 'app-nao-inicializado', erro: 'O app ainda não terminou de carregar. Faça login e tente novamente.' };
+};
 
 function sgdMostrarLogin(msg) {
   document.getElementById('loginOverlay').classList.remove('hidden');
@@ -3586,9 +3597,9 @@ function processarTextoPagamentos(texto) {
   return { totalEncontrados: totalEncontrados, atualizados: atualizados, naoEncontrados: naoEncontrados };
 }
 
-// Ponte para a extensão: recebe o texto do relatório já extraído, processa e devolve um resumo.
-// A extensão chama isto via chrome.scripting.executeScript no app aberto.
-window.sgdImportarPagamentosTexto = function(texto) {
+// Ponte para a extensão: registra a implementação interna para o stub global.
+// (a definição do stub global está no topo do script, fora de sgdAppMain)
+window._sgdImportarPagamentosImpl = function(texto) {
   try {
     var res = processarTextoPagamentos(texto);
     if (typeof renderRelatorio === 'function') renderRelatorio();
