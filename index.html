@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.3</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.4</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -552,6 +552,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button class="btn-exportar md" id="btnNormalizarEmpenho">🔧 Normalizar Empenhos</button>
         <button class="btn-exportar md" id="btnRevisarKm">🗺️ Revisar KMs</button>
         <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
+        <button class="btn-exportar md" id="btnNotificarEmpenhos">📲 Notificar Empenhos</button>
       </div>
     </div>
 
@@ -1488,7 +1489,10 @@ function fecharModal(salvar) {
   var empenho = salvar ? document.getElementById('modal_empenho').value.trim() : '';
   var valor = salvar ? document.getElementById('modal_valor').value.trim() : '';
   var descricao = document.getElementById('outputText').textContent.trim();
-  adicionarProcesso(Object.assign({}, pendente, {empenho:empenho, valor:valor, descricao:descricao}));
+  var extra = {empenho:empenho, valor:valor, descricao:descricao};
+  // Marca quando o empenho foi lançado (para a notificação de empenho do dia)
+  if (empenho) extra.empenhadoEm = Date.now();
+  adicionarProcesso(Object.assign({}, pendente, extra));
   pendente = null;
 }
 document.getElementById('btnModalOk').addEventListener('click', function(){ fecharModal(true); });
@@ -1874,9 +1878,82 @@ document.getElementById('btnExportarMD').addEventListener('click', function() {
 });
 
 // Relatório mensal
-document.getElementById('btnRelatorio') && document.getElementById('btnRelatorio').addEventListener('click', function() {
+document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnNotificarEmpenhos').addEventListener('click', function() {
   if (processos.length === 0) { alert('Nenhum processo cadastrado.'); return; }
-  var mes = filtroAtivo.substring(0,7); // YYYY-MM
+
+  // 1) Escolher a data (default: hoje), no formato DD/MM/AAAA
+  var hoje = new Date();
+  var defaultBR = String(hoje.getDate()).padStart(2,'0') + '/' + String(hoje.getMonth()+1).padStart(2,'0') + '/' + hoje.getFullYear();
+  var dataStr = prompt('Notificar empenhos lançados em qual data?\n(formato DD/MM/AAAA)', defaultBR);
+  if (!dataStr) return;
+  var partes = dataStr.trim().split('/');
+  if (partes.length !== 3) { alert('Data inválida. Use o formato DD/MM/AAAA.'); return; }
+  var dia = parseInt(partes[0],10), mes = parseInt(partes[1],10)-1, ano = parseInt(partes[2],10);
+  var inicio = new Date(ano, mes, dia, 0,0,0,0).getTime();
+  var fim = new Date(ano, mes, dia, 23,59,59,999).getTime();
+  if (isNaN(inicio)) { alert('Data inválida.'); return; }
+
+  // 2) Filtrar processos com empenho lançado naquela data
+  var doDia = processos.filter(function(p){
+    return p.empenho && p.empenhadoEm && p.empenhadoEm >= inicio && p.empenhadoEm <= fim;
+  });
+
+  if (doDia.length === 0) {
+    alert('Nenhum empenho com data de ' + dataStr + ' encontrado.\n\n(Lembrando: só contam empenhos lançados após a atualização que adicionou o registro de data.)');
+    return;
+  }
+
+  // 3) Agrupar por servidor e montar resumo
+  var porServidor = {};
+  doDia.forEach(function(p){
+    var s = (p.servidor||'SEM NOME').trim().toUpperCase();
+    if (!porServidor[s]) porServidor[s] = [];
+    porServidor[s].push(p);
+  });
+  var nomes = Object.keys(porServidor).sort();
+  var resumo = 'Empenhos de ' + dataStr + ':\n\n';
+  nomes.forEach(function(s){
+    resumo += '• ' + s + ': ' + porServidor[s].length + (porServidor[s].length===1?' empenho':' empenhos') + '\n';
+  });
+  resumo += '\nTotal: ' + doDia.length + ' empenhos, ' + nomes.length + ' motorista(s).\n\n';
+  resumo += 'O sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
+
+  if (!confirm(resumo)) return;
+
+  // 4) Enviar ao Worker
+  var btn = document.getElementById('btnNotificarEmpenhos');
+  var textoOrig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '📲 Enviando...';
+
+  sgdFetch(SGD_WORKER_URL + '?action=notificar-empenhos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: dataStr, processos: doDia })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.ok) {
+      var msg = 'Notificações enviadas!\n\n';
+      msg += 'Enviados: ' + (res.enviados||0) + ' motorista(s) com cadastro.\n';
+      if (res.semCadastro && res.semCadastro.length) {
+        msg += '\nSem cadastro no bot (não receberam):\n• ' + res.semCadastro.join('\n• ');
+      }
+      alert(msg);
+    } else {
+      alert('Erro ao enviar: ' + (res.error || 'desconhecido'));
+    }
+  })
+  .catch(function(e){
+    alert('Falha ao enviar notificações: ' + e.message);
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.textContent = textoOrig;
+  });
+});
+
+
   var doMes = processos.filter(function(p){ return (p.diaRef||hojeISO()).substring(0,7) === mes; });
   if (doMes.length === 0) { alert('Nenhum processo no mês selecionado.'); return; }
 
@@ -2940,11 +3017,14 @@ document.getElementById('edit-servidor').addEventListener('input', function() {
 document.getElementById('edit-btn-salvar').addEventListener('click', function() {
   var p = processos.find(function(x){ return x.id === editandoId; });
   if (!p) return;
+  var empenhoAntigo = p.empenho || '';
   p.servidor = document.getElementById('edit-servidor').value.trim().toUpperCase();
   p.empenho = document.getElementById('edit-empenho').value.trim();
   p.valor = document.getElementById('edit-valor').value.trim();
   p.cidade = document.getElementById('edit-cidade').value.trim().toUpperCase();
   p.placa = document.getElementById('edit-placa').value.trim().toUpperCase();
+  // Marca a data de empenho se ele passou de vazio para preenchido
+  if (!empenhoAntigo && p.empenho) p.empenhadoEm = Date.now();
   salvar();
   document.getElementById('modalEditar').classList.remove('open');
   renderTabela();
