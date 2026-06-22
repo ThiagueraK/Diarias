@@ -400,11 +400,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <div class="login-box">
     <h2>🔒 SGD Diárias</h2>
     <p class="sub">Acesso restrito — informe suas credenciais.</p>
-    <label>Usuário</label>
-    <input type="text" id="login_usuario" autocomplete="username">
-    <label>Senha</label>
-    <input type="password" id="login_senha" autocomplete="current-password">
-    <button id="btnLogin">Entrar</button>
+    <form id="loginForm">
+      <label>Usuário</label>
+      <input type="text" id="login_usuario" name="username" autocomplete="username">
+      <label>Senha</label>
+      <input type="password" id="login_senha" name="password" autocomplete="current-password">
+      <button type="submit" id="btnLogin">Entrar</button>
+    </form>
     <div class="erro" id="loginErro"></div>
   </div>
 </div>
@@ -873,12 +875,12 @@ function sgdIniciarApp() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('btnLogin').addEventListener('click', sgdFazerLogin);
-  document.getElementById('login_senha').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') sgdFazerLogin();
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    sgdFazerLogin();
   });
   document.getElementById('login_usuario').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') document.getElementById('login_senha').focus();
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('login_senha').focus(); }
   });
 
   if (sgdGetToken()) {
