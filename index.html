@@ -1953,7 +1953,9 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   });
 });
 
-
+document.getElementById('btnRelatorio') && document.getElementById('btnRelatorio').addEventListener('click', function() {
+  if (processos.length === 0) { alert('Nenhum processo cadastrado.'); return; }
+  var mes = filtroAtivo.substring(0,7); // YYYY-MM
   var doMes = processos.filter(function(p){ return (p.diaRef||hojeISO()).substring(0,7) === mes; });
   if (doMes.length === 0) { alert('Nenhum processo no mês selecionado.'); return; }
 
