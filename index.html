@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.4</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.5</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -549,10 +549,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button class="btn-exportar md" id="btnExportarMD">⬇ Exportar .MD</button>
         <button class="btn-exportar" id="btnExportarCSV">⬇ Exportar CSV</button>
         <button class="btn-exportar danger" id="btnLimparDia">🗑 Limpar Dia</button>
-        <button class="btn-exportar md" id="btnNormalizarEmpenho">🔧 Normalizar Empenhos</button>
-        <button class="btn-exportar md" id="btnRevisarKm">🗺️ Revisar KMs</button>
-        <button class="btn-exportar md" id="btnRelatorio">📈 Relatório Mensal</button>
         <button class="btn-exportar md" id="btnNotificarEmpenhos">📲 Notificar Empenhos</button>
+        <button class="btn-exportar md" id="btnNotificarPagamentos">💰 Notificar Pagamentos</button>
       </div>
     </div>
 
@@ -1878,6 +1876,82 @@ document.getElementById('btnExportarMD').addEventListener('click', function() {
 });
 
 // Relatório mensal
+document.getElementById('btnNotificarPagamentos') && document.getElementById('btnNotificarPagamentos').addEventListener('click', function() {
+  if (processos.length === 0) { alert('Nenhum processo cadastrado.'); return; }
+
+  // 1) Escolher a data de pagamento (default: hoje), formato DD/MM/AAAA
+  var hoje = new Date();
+  var defaultBR = String(hoje.getDate()).padStart(2,'0') + '/' + String(hoje.getMonth()+1).padStart(2,'0') + '/' + hoje.getFullYear();
+  var dataStr = prompt('Notificar pagamentos com qual data de pagamento?\n(formato DD/MM/AAAA)', defaultBR);
+  if (!dataStr) return;
+  var partes = dataStr.trim().split('/');
+  if (partes.length !== 3) { alert('Data inválida. Use o formato DD/MM/AAAA.'); return; }
+  // A dataPagamento no sistema usa pontos (DD.MM.AAAA) — monta as duas formas para comparar
+  var dataPonto = partes[0].padStart(2,'0') + '.' + partes[1].padStart(2,'0') + '.' + partes[2];
+  var dataBarra = partes[0].padStart(2,'0') + '/' + partes[1].padStart(2,'0') + '/' + partes[2];
+
+  // 2) Filtrar processos pagos naquela data de pagamento
+  var doDia = processos.filter(function(p){
+    if (!p.pago || !p.dataPagamento) return false;
+    var dp = String(p.dataPagamento).trim();
+    return dp === dataPonto || dp === dataBarra;
+  });
+
+  if (doDia.length === 0) {
+    alert('Nenhum pagamento com data de ' + dataStr + ' encontrado.\n\n(A data deve bater com a data de pagamento que veio no relatório importado.)');
+    return;
+  }
+
+  // 3) Agrupar por servidor e montar resumo
+  var porServidor = {};
+  doDia.forEach(function(p){
+    var s = (p.servidor||'SEM NOME').trim().toUpperCase();
+    if (!porServidor[s]) porServidor[s] = [];
+    porServidor[s].push(p);
+  });
+  var nomes = Object.keys(porServidor).sort();
+  var resumo = 'Pagamentos de ' + dataStr + ':\n\n';
+  nomes.forEach(function(s){
+    resumo += '• ' + s + ': ' + porServidor[s].length + (porServidor[s].length===1?' diária':' diárias') + '\n';
+  });
+  resumo += '\nTotal: ' + doDia.length + ' diárias pagas, ' + nomes.length + ' motorista(s).\n\n';
+  resumo += 'O sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
+
+  if (!confirm(resumo)) return;
+
+  // 4) Enviar ao Worker
+  var btn = document.getElementById('btnNotificarPagamentos');
+  var textoOrig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '💰 Enviando...';
+
+  sgdFetch(SGD_WORKER_URL + '?action=notificar-pagamentos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: dataStr, processos: doDia })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.ok) {
+      var msg = 'Notificações enviadas!\n\n';
+      msg += 'Enviados: ' + (res.enviados||0) + ' motorista(s) com cadastro.\n';
+      if (res.semCadastro && res.semCadastro.length) {
+        msg += '\nSem cadastro no bot (não receberam):\n• ' + res.semCadastro.join('\n• ');
+      }
+      alert(msg);
+    } else {
+      alert('Erro ao enviar: ' + (res.error || 'desconhecido'));
+    }
+  })
+  .catch(function(e){
+    alert('Falha ao enviar notificações: ' + e.message);
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.textContent = textoOrig;
+  });
+});
+
 document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnNotificarEmpenhos').addEventListener('click', function() {
   if (processos.length === 0) { alert('Nenhum processo cadastrado.'); return; }
 
@@ -3086,7 +3160,7 @@ function normalizarEmpenho(valor) {
   return String(parseInt(digitos, 10));
 }
 
-document.getElementById('btnNormalizarEmpenho').addEventListener('click', function(){
+document.getElementById('btnNormalizarEmpenho') && document.getElementById('btnNormalizarEmpenho').addEventListener('click', function(){
   var mudancas = [];
   processos.forEach(function(p){
     if (!p.empenho) return;
@@ -3253,7 +3327,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
 // REVISÃO DE KM
 // ═══════════════════════════════════════════════════════
 
-document.getElementById('btnRevisarKm').addEventListener('click', function(){
+document.getElementById('btnRevisarKm') && document.getElementById('btnRevisarKm').addEventListener('click', function(){
   // Coleta todas as cidades únicas com seus KMs e contagem de processos
   var cidades = {};
   processos.forEach(function(p){
