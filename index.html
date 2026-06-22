@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.5</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.6</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1915,6 +1915,15 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
     resumo += '• ' + s + ': ' + porServidor[s].length + (porServidor[s].length===1?' diária':' diárias') + '\n';
   });
   resumo += '\nTotal: ' + doDia.length + ' diárias pagas, ' + nomes.length + ' motorista(s).\n\n';
+
+  // Verifica se essa data de pagamento já foi notificada antes
+  var jaNotificados = doDia.filter(function(p){
+    return p.pagamentoNotificadoEm && p.pagamentoNotificadoEm.indexOf(dataStr) !== -1;
+  });
+  if (jaNotificados.length > 0) {
+    resumo += '⚠️ ATENÇÃO: ' + jaNotificados.length + ' dessas diárias JÁ FORAM notificadas para esta data antes. '
+      + 'Se continuar, os motoristas vão receber o aviso NOVAMENTE.\n\n';
+  }
   resumo += 'O sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
 
   if (!confirm(resumo)) return;
@@ -1933,6 +1942,14 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (res.ok) {
+      // Marca esses processos como já notificados para esta data (evita reenvio acidental)
+      doDia.forEach(function(p){
+        var marca = p.pagamentoNotificadoEm || '';
+        if (marca.indexOf(dataStr) === -1) {
+          p.pagamentoNotificadoEm = marca ? (marca + ';' + dataStr) : dataStr;
+        }
+      });
+      salvar();
       var msg = 'Notificações enviadas!\n\n';
       msg += 'Enviados: ' + (res.enviados||0) + ' motorista(s) com cadastro.\n';
       if (res.semCadastro && res.semCadastro.length) {
