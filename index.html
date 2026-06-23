@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.1.9</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.0</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -559,8 +559,23 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <span class="backup-label">💾 Dados</span>
       <button class="btn-backup export" id="btnBackupExport">⬇ Exportar Backup</button>
       <button class="btn-backup import" id="btnBackupImport">⬆ Importar Backup</button>
+      <button class="btn-backup import" id="btnBackupNuvem">🛡️ Restaurar da Nuvem</button>
       <input type="file" id="importFileInput" accept=".json">
       <span class="backup-info" id="backupInfo"></span>
+    </div>
+
+    <!-- Modal de restauração de backup da nuvem -->
+    <div id="modalRestaurar" class="modal-overlay">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;">
+        <h3 style="margin-top:0;">🛡️ Restaurar Backup da Nuvem</h3>
+        <p style="font-size:13px;color:var(--text-muted);">Backups automáticos gerados todo dia às 17h. Selecione um para restaurar.</p>
+        <div id="listaBackups" style="max-height:320px;overflow-y:auto;margin:12px 0;">
+          <p style="color:var(--text-muted);">Carregando...</p>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn-backup" id="btnFecharRestaurar">Fechar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Campo de busca -->
@@ -2817,6 +2832,66 @@ document.getElementById('importFileInput').addEventListener('change', function(e
 // Inicializar info de backup
 atualizarBackupInfo();
 
+// ===================== Restaurar backup da nuvem =====================
+document.getElementById('btnBackupNuvem') && document.getElementById('btnBackupNuvem').addEventListener('click', function() {
+  var modal = document.getElementById('modalRestaurar');
+  var lista = document.getElementById('listaBackups');
+  modal.classList.add('open');
+  lista.innerHTML = '<p style="color:var(--text-muted);">Carregando backups...</p>';
+
+  sgdFetch(SGD_WORKER_URL + '?action=backup-listar')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok || !res.backups || res.backups.length === 0) {
+      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum backup disponível ainda. O primeiro será gerado no próximo backup automático (17h).</p>';
+      return;
+    }
+    lista.innerHTML = res.backups.map(function(b){
+      var dataBR = b.data.split('-').reverse().join('/');
+      var hora = '';
+      if (b.criadoEm) {
+        var d = new Date(b.criadoEm);
+        hora = ' às ' + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      }
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">'
+        +'<div><div style="font-weight:600;">'+dataBR+hora+'</div><div style="font-size:12px;color:var(--text-muted);">'+b.qtd+' processo'+(b.qtd!==1?'s':'')+'</div></div>'
+        +'<button class="btn-backup import" onclick="restaurarBackup(\''+b.chave+'\',\''+dataBR+'\','+b.qtd+')">Restaurar</button>'
+        +'</div>';
+    }).join('');
+  })
+  .catch(function(e){
+    lista.innerHTML = '<p style="color:var(--danger);">Erro ao listar backups: '+e.message+'</p>';
+  });
+});
+
+document.getElementById('btnFecharRestaurar') && document.getElementById('btnFecharRestaurar').addEventListener('click', function() {
+  document.getElementById('modalRestaurar').classList.remove('open');
+});
+
+function restaurarBackup(chave, dataBR, qtd) {
+  if (!confirm('Restaurar o backup de ' + dataBR + ' (' + qtd + ' processos)?\n\n⚠️ ATENÇÃO: isso vai SUBSTITUIR todos os dados atuais (' + processos.length + ' processos) por este backup. Esta ação não pode ser desfeita.')) {
+    return;
+  }
+  sgdFetch(SGD_WORKER_URL + '?action=backup-restaurar&chave=' + encodeURIComponent(chave))
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) { alert('Erro: ' + (res.error||'desconhecido')); return; }
+    processos = res.processos || [];
+    if (res.meta) sgdMeta = res.meta;
+    salvar();
+    atualizarBadge();
+    atualizarBackupInfo();
+    if (typeof renderTabela === 'function') renderTabela();
+    if (typeof renderRelatorio === 'function') renderRelatorio();
+    document.getElementById('modalRestaurar').classList.remove('open');
+    alert('✅ Backup de ' + dataBR + ' restaurado! ' + processos.length + ' processos carregados.');
+  })
+  .catch(function(e){
+    alert('Falha ao restaurar: ' + e.message);
+  });
+}
+window.restaurarBackup = restaurarBackup;
+
 
 
 
@@ -2934,6 +3009,15 @@ function renderRelatorio() {
     document.getElementById('rel-cards').innerHTML +=
       '<div class="rel-card"><div class="rel-card-label">📥 Último relatório lido</div>'
       +'<div class="rel-card-valor" style="font-size:15px;line-height:1.3;">'+dataFmt+'<br><span style="font-size:13px;color:var(--text-muted);">'+horaFmt+'</span></div></div>';
+  }
+  // Card: último backup automático
+  if (sgdMeta && sgdMeta.ultimoBackup) {
+    var db = new Date(sgdMeta.ultimoBackup);
+    var dataB = String(db.getDate()).padStart(2,'0')+'/'+String(db.getMonth()+1).padStart(2,'0')+'/'+db.getFullYear();
+    var horaB = String(db.getHours()).padStart(2,'0')+':'+String(db.getMinutes()).padStart(2,'0');
+    document.getElementById('rel-cards').innerHTML +=
+      '<div class="rel-card"><div class="rel-card-label">🛡️ Último backup</div>'
+      +'<div class="rel-card-valor" style="font-size:15px;line-height:1.3;color:#16a34a;">'+dataB+'<br><span style="font-size:13px;color:var(--text-muted);">'+horaB+'</span></div></div>';
   }
   var rows = filtrados.map(function(p,i){
     var pc = p.pcOk ? '&#9989;' : '&#9203;';
