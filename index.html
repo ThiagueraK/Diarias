@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.0</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.1</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1426,6 +1426,11 @@ function gerar() {
 
   pendente = {servidor:servidor, numProcesso:numProcesso, cidade:cidade+'/'+uf,
     dataSaida:dataSaida, dataChegada:dataChegada, placa:placa, diaRef:diaRef};
+  // Grava a hash do 1Doc no próprio processo pendente (viaja junto até salvar)
+  if (window._hash1doc) {
+    pendente.hash1doc = window._hash1doc;
+    window._hash1doc = null; // limpa para não grudar em processos seguintes
+  }
 
   // Gerar mapa
   gerarMapa(cidade, uf);
@@ -1614,8 +1619,9 @@ function adicionarProcesso(dados) {
     var kmMatch = kmEl.textContent.match(/([\d\.]+)\s*km/);
     if (kmMatch) dados.km = kmMatch[1];
   }
-  // Salva hash do processo no 1Doc para link direto
-  if (window._hash1doc) { dados.hash1doc = window._hash1doc; }
+  // Salva hash do processo no 1Doc para link direto.
+  // Prioriza a hash que já veio no objeto (gravada no pendente); a global é fallback.
+  if (!dados.hash1doc && window._hash1doc) { dados.hash1doc = window._hash1doc; }
   processos.push(Object.assign({id: Date.now()}, dados));
   salvar(); atualizarBadge();
 }
