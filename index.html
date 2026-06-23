@@ -416,7 +416,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.1</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.2</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -425,6 +425,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
+    <button class="tab-btn" id="tabAtividade">📱 Atividade do Bot</button>
   </div>
 
   <!-- ══════════════════════════════════════ -->
@@ -733,6 +734,19 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
   </div>
 
+  <div class="tab-panel" id="panel-atividade">
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📱 Atividade dos motoristas no bot</span>
+        <button id="atv-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Últimas ações dos motoristas (consultas e solicitações). Mostra as 100 mais recentes.</p>
+      <div id="atv-lista" style="max-height:60vh;overflow-y:auto;">
+        <p style="color:var(--text-muted);">Clique em 🔄 Atualizar para carregar.</p>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL REVISAO KM -->
@@ -971,8 +985,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio'];
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -982,6 +996,33 @@ function switchTab(panelId, tabId) {
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
+document.getElementById('tabAtividade').addEventListener('click', function() { switchTab('panel-atividade','tabAtividade'); carregarAtividade(); });
+
+function carregarAtividade() {
+  var lista = document.getElementById('atv-lista');
+  lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
+  sgdFetch(SGD_WORKER_URL + '?action=atividade-motoristas')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok || !res.atividade || res.atividade.length === 0) {
+      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma atividade registrada ainda.</p>';
+      return;
+    }
+    lista.innerHTML = res.atividade.map(function(a){
+      var d = new Date(a.em);
+      var quando = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()
+        + ' ' + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px solid var(--border);">'
+        +'<div><span style="font-weight:600;">'+a.nome+'</span> <span style="color:var(--text-muted);">'+a.acao+'</span></div>'
+        +'<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;margin-left:10px;">'+quando+'</div>'
+        +'</div>';
+    }).join('');
+  })
+  .catch(function(e){
+    lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>';
+  });
+}
+document.getElementById('atv-atualizar') && document.getElementById('atv-atualizar').addEventListener('click', carregarAtividade);
 
 // ═══════════════════════════════════════════════════════
 // RADIO DISTÂNCIA
