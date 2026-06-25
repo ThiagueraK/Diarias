@@ -380,10 +380,31 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .btn-pc-fechar:hover{border-color:var(--text-muted);color:var(--text);}
 
   @media(max-width:580px){
+    body{padding:14px 10px 40px;}
     .grid-2{grid-template-columns:1fr;} .span-2{grid-column:span 1;}
     .radio-group{flex-wrap:wrap;} .radio-btn{flex:1 1 45%;}
     .tabela-header{flex-direction:column;align-items:flex-start;}
     .tabela-controls{width:100%;}
+    /* Cabeçalho compacto */
+    header{padding:14px 16px;gap:11px;}
+    .logo-badge{width:38px;height:38px;font-size:13px;}
+    .header-text h1{font-size:15px;}
+    .header-text p{font-size:11.5px;}
+    .header-version{font-size:11px;padding:4px 9px;}
+    /* Abas roláveis na horizontal em vez de quebrar/espremer */
+    .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;}
+    .tab-btn{flex:0 0 auto;white-space:nowrap;}
+    /* Cards de métrica: 2 colunas no celular */
+    #rel-cards{grid-template-columns:1fr 1fr !important;}
+    /* Tabela rola horizontalmente (não espreme as colunas) */
+    #tabelaWrap, .table-wrap, #rel-tabela{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    /* Dropdown de dias ocupa a largura toda */
+    .dias-dropdown{min-width:0;width:100%;}
+    .dias-dropdown-wrap{width:100%;}
+    /* Modais com margem segura */
+    .modal, .modal-inner, .login-box{max-width:94vw;}
+    /* Botões de ação em coluna quando apertados */
+    .btn-row{flex-wrap:wrap;}
   }
   @media print {
     body * { visibility: hidden !important; }
@@ -429,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.3.2</span>
+    <span class="header-version">v1.3.3</span>
   </header>
 
   <!-- Modal de configuração -->
