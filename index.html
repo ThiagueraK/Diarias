@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.0</span>
+    <span class="header-version">v1.4.1</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1096,9 +1096,23 @@ function parsear() {
   }
 
   // ===== Busca solicitação do bot (nome + data de saída) ANTES de chamar a IA =====
-  // Extrai a data de saída do texto sem IA (formato do formulário: "Data de Saída*: DD/MM/AAAA")
-  var dataSaidaMatch = raw.match(/Data de Sa[ií]da\*?:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i);
-  var dataSaidaExtraida = dataSaidaMatch ? dataSaidaMatch[1] : '';
+  // Extrai a data de saída do texto sem IA. No 1Doc pode vir SEM ano (ex: "Data de Saída*: 21/06")
+  // ou com ano. Normaliza para DD/MM/AAAA para casar com o que o bot guardou.
+  var dataSaidaMatch = raw.match(/Data de Sa[ií]da\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{4})?)/i);
+  var dataSaidaExtraida = '';
+  if (dataSaidaMatch) {
+    var dpart = dataSaidaMatch[1];
+    if (/\/\d{4}$/.test(dpart)) {
+      // já tem ano
+      var pd = dpart.split('/');
+      dataSaidaExtraida = pd[0].padStart(2, '0') + '/' + pd[1].padStart(2, '0') + '/' + pd[2];
+    } else {
+      // sem ano: completa com o ano atual
+      var pd2 = dpart.split('/');
+      var anoAtual = new Date().getFullYear();
+      dataSaidaExtraida = pd2[0].padStart(2, '0') + '/' + pd2[1].padStart(2, '0') + '/' + anoAtual;
+    }
+  }
 
   if (servidorAncorado && dataSaidaExtraida) {
     btn.textContent = 'Verificando solicitação do bot...';
@@ -1417,9 +1431,10 @@ function preencherDadosDoBot(solic, raw, servidorAncorado) {
   var mUf = cidade.match(/^(.*?)[\/,]\s*([A-Za-z]{2})\s*$/);
   if (mUf) { cidade = mUf[1].trim(); uf = mUf[2].toUpperCase(); }
 
-  // Tenta extrair o número do processo do texto do 1Doc (o bot não tem isso)
+  // Tenta extrair o número do processo do texto do 1Doc (o bot não tem isso).
+  // Formato real: "Proc. Administrativo 5.556/2026" (sem dois-pontos)
   var numProcesso = '';
-  var mProc = (raw || '').match(/Proc\.?\s*Administrativo\*?:?\s*([\d.\/-]+)/i);
+  var mProc = (raw || '').match(/Proc\.?\s*Administrativo\s*(\d[\d.]*\/\d{4})/i);
   if (mProc) numProcesso = mProc[1].trim();
 
   var found = {
