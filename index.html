@@ -18,10 +18,13 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   :root {
-    --bg:#0f1117; --surface:#181c27; --surface2:#1e2335; --border:#2a3050;
-    --accent:#4f8ef7; --accent2:#7c3aed; --success:#22c55e;
-    --warning:#f59e0b; --danger:#ef4444;
-    --text:#e2e8f0; --text-muted:#64748b; --text-dim:#94a3b8;
+    /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
+    --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
+    --accent:#2f7d5d; --accent2:#2563eb; --success:#1f9d57;
+    --warning:#c77d18; --danger:#d64545;
+    --text:#1a2230; --text-muted:#5b6675; --text-dim:#97a1b0;
+    /* variáveis auxiliares usadas em vários pontos do app */
+    --card:#ffffff; --accent-light:#e7f2ec; --border-strong:#d4dae3;
     --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -51,12 +54,12 @@
   .rel-alerta{color:#ef4444;font-weight:700;}
   #loginOverlay{position:fixed;inset:0;background:var(--bg, #0f0f17);display:flex;align-items:center;justify-content:center;z-index:9999;}
   #loginOverlay.hidden{display:none;}
-  .login-box{background:var(--surface, #1a1a2e);border:1px solid var(--border, #2a2a3e);border-radius:16px;padding:36px 32px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+  .login-box{background:var(--surface, #1a1a2e);border:1px solid var(--border, #2a2a3e);border-radius:16px;padding:36px 32px;width:100%;max-width:340px;box-shadow:0 12px 32px rgba(20,30,48,.10);}
   .login-box h2{margin:0 0 4px;font-size:18px;color:var(--text, #fff);}
   .login-box .sub{margin:0 0 24px;font-size:12px;color:var(--text-muted, #888);}
   .login-box label{display:block;font-size:12px;color:var(--text-muted, #888);margin-bottom:6px;margin-top:14px;}
   .login-box input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border, #2a2a3e);background:var(--surface2, #22223a);color:var(--text, #fff);font-size:14px;box-sizing:border-box;}
-  .login-box button{width:100%;margin-top:22px;padding:11px;border:none;border-radius:8px;background:#1a1a2e;color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
+  .login-box button{width:100%;margin-top:22px;padding:11px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;}
   .login-box .erro{color:#ef4444;font-size:12px;margin-top:10px;min-height:14px;}
   .rel-desc-row td{background:var(--surface2);padding:0;border-bottom:1px solid var(--border);}
   .rel-desc-inner{padding:10px 16px 12px 32px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--accent);margin:8px 12px;}
@@ -119,7 +122,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   /* HEADER */
 
   header{margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--border);padding-bottom:20px;}
-  .logo-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .logo-badge{background:var(--accent);border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
   h1{font-size:22px;font-weight:600;letter-spacing:-.3px;line-height:1.2;}
   h1 span{display:block;font-size:12px;font-weight:400;color:var(--text-muted);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;}
 
@@ -127,7 +130,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
   .tab-btn{flex:1;padding:10px 16px;background:transparent;border:none;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--text-muted);transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .tab-btn:hover{color:var(--text);background:var(--surface2);}
-  .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;}
+  .tab-btn.active{background:var(--accent);color:#fff;font-weight:600;}
   .tab-badge{background:rgba(255,255,255,.25);border-radius:20px;padding:1px 7px;font-size:11px;font-family:var(--mono);font-weight:600;}
   .tab-btn:not(.active) .tab-badge{background:rgba(79,142,247,.15);color:var(--accent);}
   .tab-panel{display:none;} .tab-panel.active{display:block;}
@@ -140,7 +143,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   textarea#pasteInput{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.6;resize:vertical;min-height:80px;max-height:180px;outline:none;transition:border-color .15s;}
   textarea#pasteInput:focus{border-color:var(--accent);}
   textarea#pasteInput::placeholder{color:var(--text-muted);}
-  .btn-parse{margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-parse{margin-top:10px;width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-parse:hover{opacity:.88;}
 
   /* TAGS */
@@ -177,7 +180,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .radio-btn input[type="radio"]:checked+label{background:rgba(79,142,247,.15);border-color:var(--accent);color:var(--accent);font-weight:500;}
 
   /* BUTTONS */
-  .btn-generate{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:8px;}
+  .btn-generate{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:8px;}
   .btn-generate:hover{opacity:.9;} .btn-generate:active{transform:scale(.99);}
   .btn-reset{margin-top:10px;width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s;letter-spacing:.5px;}
   .btn-reset:hover{border-color:var(--danger);color:var(--danger);}
@@ -281,7 +284,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .modal p{font-size:13px;color:var(--text-muted);font-family:var(--mono);margin-bottom:20px;}
   .modal .field{margin-bottom:14px;}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
-  .btn-modal-ok{flex:1;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-modal-ok{flex:1;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;}
   .btn-modal-skip{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
   .btn-modal-skip:hover{border-color:var(--text-muted);color:var(--text);}
 
@@ -296,7 +299,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .busca-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:none;transition:color .15s;}
   .busca-clear:hover{color:var(--danger);}
   .busca-clear.visible{display:block;}
-  .btn-busca-ia{padding:10px 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;display:flex;align-items:center;gap:6px;}
+  .btn-busca-ia{padding:10px 14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;display:flex;align-items:center;gap:6px;}
   .btn-busca-ia:hover{opacity:.88;}
   .btn-busca-ia:disabled{opacity:.5;cursor:not-allowed;}
   .busca-hint{font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-bottom:14px;padding:8px 12px;background:rgba(124,58,237,.06);border-left:2px solid var(--accent2);border-radius:0 6px 6px 0;}
@@ -416,7 +419,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.2.2</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.3.0</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -688,7 +691,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button id="rel-btn-limpar" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">✕ Limpar</button>
         <button id="rel-btn-exportar-md" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar .MD</button>
         <button id="rel-btn-exportar-csv" style="padding:8px 20px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;">⬇ Exportar CSV</button>
-        <button id="rel-btn-imprimir" style="padding:8px 20px;background:#1a1a2e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Imprimir Dashboard</button>
+        <button id="rel-btn-imprimir" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Imprimir Dashboard</button>
       </div>
     </div>
 
