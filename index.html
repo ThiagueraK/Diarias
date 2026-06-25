@@ -24,7 +24,7 @@
     --warning:#c77d18; --danger:#d64545;
     --text:#1a2230; --text-muted:#5b6675; --text-dim:#97a1b0;
     /* variáveis auxiliares usadas em vários pontos do app */
-    --card:#ffffff; --accent-light:#e7f2ec; --border-strong:#d4dae3;
+    --card:#ffffff; --accent-light:#e7f2ec; --border-strong:#d4dae3; --brand-deep:#245f47;
     --ok-soft:#e6f6ee; --warn-soft:#fbf2e3; --accent-soft:#eaf1fe;
     --shadow-sm:0 1px 2px rgba(20,30,48,.06), 0 1px 3px rgba(20,30,48,.04);
     --shadow-md:0 4px 12px rgba(20,30,48,.08), 0 2px 4px rgba(20,30,48,.04);
@@ -125,10 +125,11 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
   /* HEADER */
 
-  header{margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--border);padding-bottom:20px;}
-  .logo-badge{background:var(--accent);border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-  h1{font-size:22px;font-weight:600;letter-spacing:-.3px;line-height:1.2;}
-  h1 span{display:block;font-size:12px;font-weight:400;color:var(--text-muted);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;}
+  header{margin-bottom:24px;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow-sm);}
+  .logo-badge{background:linear-gradient(135deg,var(--accent) 0%,var(--brand-deep,#245f47) 100%);border-radius:11px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;letter-spacing:.02em;flex-shrink:0;box-shadow:0 4px 10px rgba(47,125,93,.28);}
+  .header-text h1{font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.2;margin:0;}
+  .header-text p{margin:1px 0 0;font-size:12.5px;color:var(--text-muted);}
+  .header-version{margin-left:auto;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2);border:1px solid var(--border);padding:5px 11px;border-radius:999px;align-self:center;}
 
   /* TABS */
   .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
@@ -423,9 +424,12 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 <div class="container">
 
   <header>
-    <div class="logo-badge">📋</div>
-    <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.3.2</span>
+    <div class="logo-badge">SGD</div>
+    <div class="header-text">
+      <h1>Gestão de Diárias</h1>
+      <p>Prefeitura de Tupanciretã · RS</p>
+    </div>
+    <span class="header-version">v1.3.2</span>
   </header>
 
   <!-- Modal de configuração -->
