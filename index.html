@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.3.3</span>
+    <span class="header-version">v1.4.0</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1095,6 +1095,38 @@ function parsear() {
       .replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
+  // ===== Busca solicitação do bot (nome + data de saída) ANTES de chamar a IA =====
+  // Extrai a data de saída do texto sem IA (formato do formulário: "Data de Saída*: DD/MM/AAAA")
+  var dataSaidaMatch = raw.match(/Data de Sa[ií]da\*?:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i);
+  var dataSaidaExtraida = dataSaidaMatch ? dataSaidaMatch[1] : '';
+
+  if (servidorAncorado && dataSaidaExtraida) {
+    btn.textContent = 'Verificando solicitação do bot...';
+    sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar&nome=' + encodeURIComponent(servidorAncorado) + '&data=' + encodeURIComponent(dataSaidaExtraida))
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (res && res.encontrada && res.solicitacao) {
+          // Achou no bot: preenche direto, sem IA
+          preencherDadosDoBot(res.solicitacao, raw, servidorAncorado);
+          btn.disabled = false;
+          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+        } else {
+          // Não achou: segue para a IA
+          executarParseIA();
+        }
+      })
+      .catch(function(){
+        executarParseIA(); // falha na busca não trava o fluxo
+      });
+  } else {
+    // Sem nome ou data extraíveis: vai direto pra IA
+    executarParseIA();
+  }
+
+  // Toda a lógica da IA fica encapsulada aqui, chamada só quando não há dados do bot
+  function executarParseIA() {
+  btn.textContent = 'Analisando com Claude...';
+
   // Extrai trecho relevante para economizar tokens
   function extrairTrechoRelevante(texto) {
     var inicio = texto.search(/Motorista ou Servidor\*?:/i);
@@ -1201,6 +1233,7 @@ function parsear() {
     btn.textContent = '\uD83D\uDD0D Reconhecer Dados Automaticamente';
     document.getElementById('pasteInput').value = '';
   });
+  } // fim de executarParseIA
 }
 
 
@@ -1374,6 +1407,46 @@ function parsearLocal(raw) {
   return found;
 }
 
+
+// Preenche os campos a partir de uma solicitação vinda do bot (sem usar IA).
+// O bot tem: placa, cidade, datas, horas, motivo. O num_processo vem do 1Doc (não do bot).
+function preencherDadosDoBot(solic, raw, servidorAncorado) {
+  // Separa cidade e UF se vier como "Cidade/UF" ou "Cidade / RS"
+  var cidade = solic.cidade || '';
+  var uf = '';
+  var mUf = cidade.match(/^(.*?)[\/,]\s*([A-Za-z]{2})\s*$/);
+  if (mUf) { cidade = mUf[1].trim(); uf = mUf[2].toUpperCase(); }
+
+  // Tenta extrair o número do processo do texto do 1Doc (o bot não tem isso)
+  var numProcesso = '';
+  var mProc = (raw || '').match(/Proc\.?\s*Administrativo\*?:?\s*([\d.\/-]+)/i);
+  if (mProc) numProcesso = mProc[1].trim();
+
+  var found = {
+    servidor: servidorAncorado || solic.nome || '',
+    placa: solic.placa || '',
+    cidade: cidade,
+    uf: uf,
+    motivo: solic.motivo || '',
+    data_saida: solic.dataSaida || '',
+    data_chegada: solic.dataChegada || '',
+    hora_saida: solic.horaSaida || '',
+    hora_chegada: solic.horaChegada || '',
+    num_processo: numProcesso
+  };
+
+  preencherCampos(found);
+
+  // Avisa claramente que os dados vieram do bot (transparência)
+  var tagsEl = document.getElementById('parsedTags');
+  if (tagsEl) {
+    var aviso = document.createElement('div');
+    aviso.className = 'tag ok';
+    aviso.style.cssText = 'background:var(--accent-light);color:var(--brand-deep);font-weight:600;width:100%;justify-content:center;margin-top:4px;';
+    aviso.innerHTML = '🤖 Dados carregados da solicitação do bot (sem IA)';
+    tagsEl.appendChild(aviso);
+  }
+}
 
 function preencherCampos(found) {
   // Converter datas para ISO se vierem no formato BR
