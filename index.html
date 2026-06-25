@@ -25,6 +25,9 @@
     --text:#1a2230; --text-muted:#5b6675; --text-dim:#97a1b0;
     /* variáveis auxiliares usadas em vários pontos do app */
     --card:#ffffff; --accent-light:#e7f2ec; --border-strong:#d4dae3;
+    --ok-soft:#e6f6ee; --warn-soft:#fbf2e3; --accent-soft:#eaf1fe;
+    --shadow-sm:0 1px 2px rgba(20,30,48,.06), 0 1px 3px rgba(20,30,48,.04);
+    --shadow-md:0 4px 12px rgba(20,30,48,.08), 0 2px 4px rgba(20,30,48,.04);
     --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -33,9 +36,10 @@
   .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
 
   /* RELATÓRIO */
-  .rel-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
-  .rel-card-valor{font-size:24px;font-weight:700;color:var(--accent);margin:4px 0;}
-  .rel-card-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+  .rel-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:left;position:relative;overflow:hidden;box-shadow:var(--shadow-sm,0 1px 3px rgba(20,30,48,.06));}
+  .rel-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
+  .rel-card-valor{font-size:26px;font-weight:750;letter-spacing:-.02em;color:var(--text);margin:6px 0 2px;}
+  .rel-card-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
   .rel-bar-wrap{margin:6px 0;}
   .rel-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;}
   .rel-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
@@ -161,7 +165,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
 
   /* CARD */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
   .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .card-title::after{content:'';flex:1;height:1px;background:var(--border);}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -345,8 +349,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   tr.pc-ok td:first-child { border-left: 3px solid var(--success); }
   tr.pc-pendente td { background: rgba(245,158,11,.04) !important; }
   tr.pc-pendente td:first-child { border-left: 3px solid var(--warning); }
-  .badge-pc-ok { display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);font-weight:600;color:var(--success);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:2px 8px; }
-  .badge-pc-pendente { display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);font-weight:600;color:var(--warning);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:2px 8px; }
+  .badge-pc-ok { display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-family:var(--sans);font-weight:600;color:var(--success);background:var(--ok-soft,#e6f6ee);border:none;border-radius:999px;padding:3px 11px; }
+  .badge-pc-ok::before { content:'';width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block; }
+  .badge-pc-pendente { display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-family:var(--sans);font-weight:600;color:var(--warning);background:var(--warn-soft,#fbf2e3);border:none;border-radius:999px;padding:3px 11px; }
+  .badge-pc-pendente::before { content:'';width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block; }
   .filtro-pc-wrap { display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap; }
   .filtro-pc-btn { padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--mono);font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);transition:all .15s; }
   .filtro-pc-btn:hover { border-color:var(--accent);color:var(--accent); }
@@ -419,7 +425,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <header>
     <div class="logo-badge">📋</div>
     <h1><span>Prefeitura de Tupanciretã — SGD</span>Gerador de Descrições — Diárias</h1>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.3.1</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:auto;align-self:flex-end;padding-bottom:4px;">v1.3.2</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1842,8 +1848,8 @@ function renderTabela() {
   var rows = filtrados.map(function(p, i) {
     var trClass = p.pcOk ? ' class="pc-ok"' : ' class="pc-pendente"';
     var badgePC = p.pcOk
-      ? '<span class="badge-pc-ok">✅ Concluído</span>'
-      : '<span class="badge-pc-pendente">⏳ Pendente</span>';
+      ? '<span class="badge-pc-ok">Concluído</span>'
+      : '<span class="badge-pc-pendente">Pendente</span>';
     return '<tr'+trClass+' data-id="'+p.id+'">'+ 
       '<td class="td-num">'+(i+1)+'</td>'+
       '<td>'+hl(p.servidor,'servidor')+'</td>'+
