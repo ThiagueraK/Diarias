@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.6</span>
+    <span class="header-version">v1.4.7</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1105,22 +1105,20 @@ function parsear() {
   }
 
   // ===== Busca solicitação do bot (nome + data de saída) ANTES de chamar a IA =====
-  // Extrai a data de saída do texto sem IA. No 1Doc pode vir SEM ano (ex: "Data de Saída*: 21/06")
-  // ou com ano. Normaliza para DD/MM/AAAA para casar com o que o bot guardou.
-  var dataSaidaMatch = raw.match(/Data de Sa[ií]da\*?:\s*(\d{1,2}\/\d{1,2}(?:\/\d{4})?)/i);
+  // Extrai a data de saída do texto sem IA. No 1Doc pode vir: sem ano ("21/06"),
+  // com ano de 2 dígitos ("13/06/26") ou de 4 dígitos ("13/06/2026"). Normaliza para DD/MM/AAAA.
+  var dataSaidaMatch = raw.match(/Data de Sa[ií]da\*?:\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/i);
   var dataSaidaExtraida = '';
   if (dataSaidaMatch) {
-    var dpart = dataSaidaMatch[1];
-    if (/\/\d{4}$/.test(dpart)) {
-      // já tem ano
-      var pd = dpart.split('/');
-      dataSaidaExtraida = pd[0].padStart(2, '0') + '/' + pd[1].padStart(2, '0') + '/' + pd[2];
-    } else {
-      // sem ano: completa com o ano atual
-      var pd2 = dpart.split('/');
-      var anoAtual = new Date().getFullYear();
-      dataSaidaExtraida = pd2[0].padStart(2, '0') + '/' + pd2[1].padStart(2, '0') + '/' + anoAtual;
+    var dia = dataSaidaMatch[1].padStart(2, '0');
+    var mes = dataSaidaMatch[2].padStart(2, '0');
+    var ano = dataSaidaMatch[3];
+    if (!ano) {
+      ano = String(new Date().getFullYear());           // sem ano -> ano atual
+    } else if (ano.length === 2) {
+      ano = '20' + ano;                                  // 2 dígitos -> 20XX
     }
+    dataSaidaExtraida = dia + '/' + mes + '/' + ano;
   }
 
   // Detecta se o servidor extraído é válido (não vazio, não "xxx", nome de verdade)
