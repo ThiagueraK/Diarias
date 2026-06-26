@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.1</span>
+    <span class="header-version">v1.4.2</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1114,27 +1114,68 @@ function parsear() {
     }
   }
 
-  if (servidorAncorado && dataSaidaExtraida) {
+  // Detecta se o servidor extraído é válido (não vazio, não "xxx", nome de verdade)
+  var servidorValido = servidorAncorado && servidorAncorado.replace(/[^A-ZÀ-Ú]/gi,'').length >= 5
+    && !/^X+$/i.test(servidorAncorado.replace(/[^A-Za-z]/g,''));
+
+  // Extrai a data do TÍTULO do processo (ex: "Viagem 24/06/02026" -> 24/06).
+  // Usado quando os campos do formulário vêm vazios (motorista só anexou o PDF do bot).
+  // Pega só dia/mês e completa com o ano atual (robusto contra ano digitado errado).
+  function dataDoTitulo(texto) {
+    var linhas = (texto || '').split('\n');
+    // Primeiro tenta linhas com palavras específicas de título de viagem
+    for (var i = 0; i < linhas.length; i++) {
+      var mt = linhas[i].match(/(\d{1,2})\/(\d{1,2})(?:\/\d{1,6})?/);
+      if (mt && /viagem|ajuda de custo|custo/i.test(linhas[i])
+            && !/profissionais|secretaria/i.test(linhas[i])) {
+        return mt[1].padStart(2,'0') + '/' + mt[2].padStart(2,'0') + '/' + new Date().getFullYear();
+      }
+    }
+    return '';
+  }
+
+  if (servidorValido && dataSaidaExtraida) {
+    // Caso normal: campo preenchido -> casa por nome + data
     btn.textContent = 'Verificando solicitação do bot...';
     sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar&nome=' + encodeURIComponent(servidorAncorado) + '&data=' + encodeURIComponent(dataSaidaExtraida))
       .then(function(r){ return r.json(); })
       .then(function(res){
         if (res && res.encontrada && res.solicitacao) {
-          // Achou no bot: preenche direto, sem IA
           preencherDadosDoBot(res.solicitacao, raw, servidorAncorado);
           btn.disabled = false;
           btn.textContent = '🔍 Reconhecer Dados Automaticamente';
         } else {
-          // Não achou: segue para a IA
           executarParseIA();
         }
       })
-      .catch(function(){
-        executarParseIA(); // falha na busca não trava o fluxo
-      });
+      .catch(function(){ executarParseIA(); });
   } else {
-    // Sem nome ou data extraíveis: vai direto pra IA
-    executarParseIA();
+    // Campo vazio/xxx: tenta achar pela DATA DO TÍTULO e deixa você escolher
+    var dataTit = dataDoTitulo(raw);
+    if (dataTit) {
+      btn.textContent = 'Buscando solicitações do dia...';
+      sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataTit))
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          var lista = (res && res.solicitacoes) || [];
+          if (lista.length === 1) {
+            // Só uma solicitação nesse dia: usa direto
+            preencherDadosDoBot(lista[0], raw, lista[0].nome);
+            btn.disabled = false;
+            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+          } else if (lista.length > 1) {
+            // Várias: você escolhe qual
+            mostrarEscolhaSolicitacao(lista, raw);
+            btn.disabled = false;
+            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+          } else {
+            executarParseIA();
+          }
+        })
+        .catch(function(){ executarParseIA(); });
+    } else {
+      executarParseIA();
+    }
   }
 
   // Toda a lógica da IA fica encapsulada aqui, chamada só quando não há dados do bot
@@ -1421,6 +1462,29 @@ function parsearLocal(raw) {
   return found;
 }
 
+
+// Quando há mais de uma solicitação no mesmo dia, mostra as opções para você escolher
+function mostrarEscolhaSolicitacao(lista, raw) {
+  var tagsEl = document.getElementById('parsedTags');
+  if (!tagsEl) return;
+  var box = document.createElement('div');
+  box.style.cssText = 'width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;';
+  var titulo = document.createElement('div');
+  titulo.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:8px;color:var(--text);';
+  titulo.textContent = '🤖 Encontrei ' + lista.length + ' solicitações do bot neste dia. Qual é a deste processo?';
+  box.appendChild(titulo);
+  lista.forEach(function(solic) {
+    var b = document.createElement('button');
+    b.style.cssText = 'display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;font-size:13px;color:var(--text);';
+    b.innerHTML = '<strong>' + solic.nome + '</strong> · ' + (solic.cidade||'') + ' · ' + (solic.dataSaida||'');
+    b.onclick = function() {
+      preencherDadosDoBot(solic, raw, solic.nome);
+      box.remove();
+    };
+    box.appendChild(b);
+  });
+  tagsEl.appendChild(box);
+}
 
 // Preenche os campos a partir de uma solicitação vinda do bot (sem usar IA).
 // O bot tem: placa, cidade, datas, horas, motivo. O num_processo vem do 1Doc (não do bot).
