@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.2</span>
+    <span class="header-version">v1.4.6</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -896,6 +896,15 @@ window.sgdImportarPagamentosTexto = function(texto) {
   return { ok: false, motivo: 'app-nao-inicializado', erro: 'O app ainda não terminou de carregar. Faça login e tente novamente.' };
 };
 
+// Ponte global para a extensão puxar uma diária pela data (lida do nome do PDF do bot).
+// Delega para a implementação interna registrada no sgdAppMain.
+window.sgdPuxarDiariaPorData = function(data) {
+  if (typeof window._sgdPuxarDiariaPorDataImpl === 'function') {
+    return window._sgdPuxarDiariaPorDataImpl(data);
+  }
+  return { ok: false, motivo: 'app-nao-inicializado' };
+};
+
 function sgdMostrarLogin(msg) {
   document.getElementById('loginOverlay').classList.remove('hidden');
   document.getElementById('loginErro').textContent = msg || '';
@@ -1134,6 +1143,30 @@ function parsear() {
     return '';
   }
 
+  // Detecta se os DADOS DA VIAGEM no processo estão vazios/xxx (motorista preencheu com xx).
+  // Nesse caso não vale chamar a IA (não há o que ler) — pedimos o PDF.
+  function viagemVazia(texto) {
+    var campos = ['Motorista ou Servidor', 'Cidade de destino', 'Data de Sa[ií]da'];
+    var vazios = 0;
+    campos.forEach(function(c) {
+      var m = texto.match(new RegExp(c + '\\*?:\\s*([^\\n]*)', 'i'));
+      var v = m ? m[1].trim() : '';
+      // considera vazio se: nada, ou só "x"/"xx"/"xxx", ou muito curto
+      if (!v || /^x+$/i.test(v.replace(/[^a-z]/gi,'')) || v.replace(/[^a-z0-9]/gi,'').length < 2) vazios++;
+    });
+    return vazios >= 2; // 2+ campos vazios = viagem não preenchida
+  }
+
+  // Captura número do processo e hash (sempre existem, mesmo com viagem vazia)
+  function capturarNumeroEHash(texto) {
+    var mProc = texto.match(/Proc\.?\s*Administrativo\s*(\d[\d.]*\/\d{4})/i);
+    if (mProc) {
+      var campoProc = document.getElementById('num_processo');
+      if (campoProc) { campoProc.value = mProc[1].trim(); campoProc.classList.add('autofilled'); }
+    }
+    // o hash já é capturado pela extensão em window._hash1doc (preservado até salvar)
+  }
+
   if (servidorValido && dataSaidaExtraida) {
     // Caso normal: campo preenchido -> casa por nome + data
     btn.textContent = 'Verificando solicitação do bot...';
@@ -1159,22 +1192,51 @@ function parsear() {
         .then(function(res){
           var lista = (res && res.solicitacoes) || [];
           if (lista.length === 1) {
-            // Só uma solicitação nesse dia: usa direto
             preencherDadosDoBot(lista[0], raw, lista[0].nome);
             btn.disabled = false;
             btn.textContent = '🔍 Reconhecer Dados Automaticamente';
           } else if (lista.length > 1) {
-            // Várias: você escolhe qual
             mostrarEscolhaSolicitacao(lista, raw);
             btn.disabled = false;
             btn.textContent = '🔍 Reconhecer Dados Automaticamente';
           } else {
-            executarParseIA();
+            // Não achou no bot. Se a viagem está vazia, pede o PDF (não chama IA).
+            if (viagemVazia(raw)) {
+              capturarNumeroEHash(raw);
+              pedirPDF();
+              btn.disabled = false;
+              btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+            } else {
+              executarParseIA();
+            }
           }
         })
         .catch(function(){ executarParseIA(); });
     } else {
-      executarParseIA();
+      // Sem data no título. Se a viagem está vazia, pede o PDF; senão, IA.
+      if (viagemVazia(raw)) {
+        capturarNumeroEHash(raw);
+        pedirPDF();
+        btn.disabled = false;
+        btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+      } else {
+        executarParseIA();
+      }
+    }
+  }
+
+  // Mostra o aviso pedindo para abrir o PDF da diária
+  function pedirPDF() {
+    var tagsEl = document.getElementById('parsedTags');
+    if (tagsEl) tagsEl.innerHTML = '';
+    var box = document.getElementById('outputCard');
+    if (box) box.classList.remove('visible');
+    if (tagsEl) {
+      var aviso = document.createElement('div');
+      aviso.style.cssText = 'width:100%;background:var(--warn-soft);border:1px solid #e9d4a8;border-radius:10px;padding:14px 16px;margin-top:8px;color:var(--warning);font-weight:600;line-height:1.5;';
+      aviso.innerHTML = '📎 Este processo está sem os dados da viagem preenchidos.<br>'
+        + '<span style="font-weight:500;color:var(--text-muted);">Abra o PDF da diária (anexo do processo) para puxar os dados do bot automaticamente. O número do processo e o link já foram capturados.</span>';
+      tagsEl.appendChild(aviso);
     }
   }
 
@@ -1278,10 +1340,12 @@ function parsear() {
     // motivo: usa sempre o da IA, parser local só como fallback se IA não gerou nada
     if (!parsed.motivo && localResult.motivo) parsed.motivo = localResult.motivo;
     preencherCampos(parsed);
+    marcarOrigemIA();
   })
   .catch(function(e) {
     console.error('IA erro:', e.message);
     preencherCampos(parsearLocal(raw));
+    marcarOrigemIA();
   })
   .finally(function() {
     btn.disabled = false;
@@ -1463,6 +1527,27 @@ function parsearLocal(raw) {
 }
 
 
+// Implementação (registrada globalmente) que a extensão chama ao abrir o PDF do bot.
+// Recebe a data (do nome do PDF), busca as solicitações desse dia e preenche.
+window._sgdPuxarDiariaPorDataImpl = function(dataBR) {
+  try {
+    sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataBR))
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        var lista = (res && res.solicitacoes) || [];
+        if (lista.length === 1) {
+          preencherDadosDoBot(lista[0], '', lista[0].nome);
+        } else if (lista.length > 1) {
+          mostrarEscolhaSolicitacao(lista, '');
+        }
+      })
+      .catch(function(){});
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, motivo: 'erro' };
+  }
+};
+
 // Quando há mais de uma solicitação no mesmo dia, mostra as opções para você escolher
 function mostrarEscolhaSolicitacao(lista, raw) {
   var tagsEl = document.getElementById('parsedTags');
@@ -1501,6 +1586,13 @@ function preencherDadosDoBot(solic, raw, servidorAncorado) {
   var mProc = (raw || '').match(/Proc\.?\s*Administrativo\s*(\d[\d.]*\/\d{4})/i);
   if (mProc) numProcesso = mProc[1].trim();
 
+  // Se não veio número do texto (ex: fluxo do PDF), preserva o que já está no campo
+  // (capturado quando você abriu o processo no 1Doc antes do PDF).
+  if (!numProcesso) {
+    var campoProc = document.getElementById('num_processo');
+    if (campoProc && campoProc.value.trim()) numProcesso = campoProc.value.trim();
+  }
+
   var found = {
     servidor: servidorAncorado || solic.nome || '',
     placa: solic.placa || '',
@@ -1525,6 +1617,17 @@ function preencherDadosDoBot(solic, raw, servidorAncorado) {
     aviso.innerHTML = '🤖 Dados carregados da solicitação do bot (sem IA)';
     tagsEl.appendChild(aviso);
   }
+}
+
+// Mostra um aviso de que os dados vieram da IA (porque não foi achada solicitação no bot)
+function marcarOrigemIA() {
+  var tagsEl = document.getElementById('parsedTags');
+  if (!tagsEl) return;
+  var aviso = document.createElement('div');
+  aviso.className = 'tag';
+  aviso.style.cssText = 'background:var(--warn-soft);color:var(--warning);font-weight:600;width:100%;justify-content:center;margin-top:4px;';
+  aviso.innerHTML = '✨ Preenchido pela IA (sem solicitação do bot para este processo)';
+  tagsEl.appendChild(aviso);
 }
 
 function preencherCampos(found) {
