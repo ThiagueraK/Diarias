@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.8</span>
+    <span class="header-version">v1.4.9</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2274,7 +2274,7 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   // 3) Agrupar por servidor e montar resumo
   var porServidor = {};
   doDia.forEach(function(p){
-    var s = (p.servidor||'SEM NOME').trim().toUpperCase();
+    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
     if (!porServidor[s]) porServidor[s] = [];
     porServidor[s].push(p);
   });
@@ -2366,7 +2366,7 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   // 3) Agrupar por servidor e montar resumo
   var porServidor = {};
   doDia.forEach(function(p){
-    var s = (p.servidor||'SEM NOME').trim().toUpperCase();
+    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
     if (!porServidor[s]) porServidor[s] = [];
     porServidor[s].push(p);
   });
