@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.7</span>
+    <span class="header-version">v1.4.8</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2034,9 +2034,15 @@ function renderTabela() {
   var selectServ = document.getElementById('filtroServidor');
   var selectedServ = selectServ ? selectServ.value : '';
 
-  // Atualiza lista de servidores no select
+  // Atualiza lista de servidores no select.
+  // Agrupa pela versão normalizada (sem acento/caixa) para não duplicar o mesmo motorista.
   var todosServs = {};
-  processos.forEach(function(p){ if(p.servidor) todosServs[p.servidor.trim()] = true; });
+  processos.forEach(function(p){
+    if (p.servidor) {
+      var chave = normalizarNome(p.servidor);
+      if (chave && !todosServs[chave]) todosServs[chave] = chave; // exibe a versão normalizada (padronizada)
+    }
+  });
   if (selectServ) {
     selectServ.innerHTML = '<option value="">👤 Todos os servidores</option>' +
       Object.keys(todosServs).sort().map(function(s){
@@ -2046,7 +2052,7 @@ function renderTabela() {
 
   if (selectedServ) {
     filtrados = filtrados.filter(function(p){
-      return p.servidor && p.servidor.trim() === selectedServ;
+      return p.servidor && normalizarNome(p.servidor) === selectedServ;
     });
   }
 
@@ -3254,7 +3260,7 @@ function getProcessosFiltradosRelatorio() {
       if (dataInicio && dia < dataInicio) return false;
       if (dataFim && dia > dataFim) return false;
     }
-    if (servidor && (!p.servidor || p.servidor.trim() !== servidor)) return false;
+    if (servidor && (!p.servidor || normalizarNome(p.servidor) !== servidor)) return false;
     if (cidade && (!p.cidade || p.cidade.trim().toUpperCase() !== cidade)) return false;
     if (statusPC === 'ok' && !p.pcOk) return false;
     if (statusPC === 'pendente' && p.pcOk) return false;
@@ -3268,7 +3274,7 @@ function getProcessosFiltradosRelatorio() {
 function renderRelatorio() {
   var servs = {}, cids = {};
   processos.forEach(function(p){
-    if (p.servidor) servs[p.servidor.trim()] = true;
+    if (p.servidor) servs[normalizarNome(p.servidor)] = true;
     if (p.cidade) cids[p.cidade.trim().toUpperCase()] = true;
   });
   var selServ = document.getElementById('rel-servidor');
@@ -3292,7 +3298,7 @@ function renderRelatorio() {
   ].map(function(x){ return '<div class="rel-card"><div class="rel-card-label">'+x.l+'</div><div class="rel-card-valor"'+x.c+'>'+x.v+'</div></div>'; }).join('');
   var porServ = {};
   filtrados.forEach(function(p){
-    var s = p.servidor||'Sem nome';
+    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
     if (!porServ[s]) porServ[s]={viagens:0,valor:0};
     porServ[s].viagens++;
     porServ[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
