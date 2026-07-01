@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.11</span>
+    <span class="header-version">v1.5.0</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -2371,12 +2371,25 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   if (isNaN(inicio)) { alert('Data inválida.'); return; }
 
   // 2) Filtrar processos com empenho lançado naquela data
-  var doDia = processos.filter(function(p){
+  var doDiaTodos = processos.filter(function(p){
     return p.empenho && p.empenhadoEm && p.empenhadoEm >= inicio && p.empenhadoEm <= fim;
   });
 
-  if (doDia.length === 0) {
+  // Remove os que JÁ foram notificados (evita reenvio na segunda leva do mesmo dia)
+  var jaNotificados = 0;
+  var doDia = doDiaTodos.filter(function(p){
+    var marca = p.empenhoNotificadoEm || '';
+    if (marca.indexOf(dataStr) !== -1) { jaNotificados++; return false; }
+    return true;
+  });
+
+  if (doDiaTodos.length === 0) {
     alert('Nenhum empenho com data de ' + dataStr + ' encontrado.\n\n(Lembrando: só contam empenhos lançados após a atualização que adicionou o registro de data.)');
+    return;
+  }
+
+  if (doDia.length === 0) {
+    alert('Todos os ' + doDiaTodos.length + ' empenho(s) de ' + dataStr + ' já foram notificados antes.\n\nNinguém será notificado de novo.');
     return;
   }
 
@@ -2392,8 +2405,11 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   nomes.forEach(function(s){
     resumo += '• ' + s + ': ' + porServidor[s].length + (porServidor[s].length===1?' empenho':' empenhos') + '\n';
   });
-  resumo += '\nTotal: ' + doDia.length + ' empenhos, ' + nomes.length + ' motorista(s).\n\n';
-  resumo += 'O sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
+  resumo += '\nTotal: ' + doDia.length + ' empenhos, ' + nomes.length + ' motorista(s).\n';
+  if (jaNotificados > 0) {
+    resumo += '(' + jaNotificados + ' empenho(s) já notificado(s) antes foram pulados.)\n';
+  }
+  resumo += '\nO sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
 
   if (!confirm(resumo)) return;
 
@@ -2411,6 +2427,13 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (res.ok) {
+      // Marca os empenhos enviados como notificados nesta data (evita reenvio futuro)
+      doDia.forEach(function(p){
+        var marca = p.empenhoNotificadoEm || '';
+        p.empenhoNotificadoEm = marca ? (marca + ';' + dataStr) : dataStr;
+      });
+      salvar();
+
       var msg = 'Notificações enviadas!\n\n';
       msg += 'Enviados: ' + (res.enviados||0) + ' motorista(s) com cadastro.\n';
       if (res.semCadastro && res.semCadastro.length) {
