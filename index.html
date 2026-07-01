@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.4.9</span>
+    <span class="header-version">v1.4.11</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1130,18 +1130,29 @@ function parsear() {
   // Pega só dia/mês e completa com o ano atual (robusto contra ano digitado errado).
   function dataDoTitulo(texto) {
     var linhas = (texto || '').split('\n');
-    // Primeiro tenta linhas com palavras específicas de título de viagem
     for (var i = 0; i < linhas.length; i++) {
-      var mt = linhas[i].match(/(\d{1,2})\/(\d{1,2})(?:\/\d{1,6})?/);
-      if (mt && /viagem|ajuda de custo|custo/i.test(linhas[i])
-            && !/profissionais|secretaria/i.test(linhas[i])) {
+      var linha = linhas[i];
+      // Ignora a linha genérica do quadro ("Diária Profissionais da Secretaria de Saúde")
+      if (/profissionais|secretaria de sa[úu]de/i.test(linha)) continue;
+      var mt = linha.match(/(\d{1,2})\/(\d{1,2})/);
+      // Aceita linha de título com data: "Viagem DD/MM", "Ajuda de custo DD/MM", "Diária DD/MM"
+      if (mt && /viagem|ajuda de custo|custo|di[áa]ria/i.test(linha)) {
+        // Pega só dia/mês e completa com o ano atual (robusto contra ano digitado errado)
         return mt[1].padStart(2,'0') + '/' + mt[2].padStart(2,'0') + '/' + new Date().getFullYear();
       }
     }
     return '';
   }
 
-  // Detecta se os DADOS DA VIAGEM no processo estão vazios/xxx (motorista preencheu com xx).
+  // Extrai a data do NOME DO ARQUIVO anexo que aparece no texto do 1Doc.
+  // Ex: "Diaria_dia_02_07_2026_260630_161700.pdf" -> 02/07/2026.
+  // Fonte muito confiável: o nome é gerado pelo nosso bot, sempre no mesmo padrão.
+  function dataDoNomeArquivo(texto) {
+    var m = (texto || '').match(/Di[áa]ria[_ ]dia[_ ](\d{1,2})[_-](\d{1,2})[_-](\d{4})/i);
+    if (m) return m[1].padStart(2,'0') + '/' + m[2].padStart(2,'0') + '/' + m[3];
+    return '';
+  }
+
   // Nesse caso não vale chamar a IA (não há o que ler) — pedimos o PDF.
   function viagemVazia(texto) {
     var campos = ['Motorista ou Servidor', 'Cidade de destino', 'Data de Sa[ií]da'];
@@ -1165,6 +1176,12 @@ function parsear() {
     // o hash já é capturado pela extensão em window._hash1doc (preservado até salvar)
   }
 
+  // Se o servidor é válido mas a data do campo veio quebrada (ex: "02"),
+  // tenta completar com a data do nome do arquivo ou do título (caso Ariane).
+  if (servidorValido && !dataSaidaExtraida) {
+    dataSaidaExtraida = dataDoNomeArquivo(raw) || dataDoTitulo(raw);
+  }
+
   if (servidorValido && dataSaidaExtraida) {
     // Caso normal: campo preenchido -> casa por nome + data
     btn.textContent = 'Verificando solicitação do bot...';
@@ -1181,8 +1198,8 @@ function parsear() {
       })
       .catch(function(){ executarParseIA(); });
   } else {
-    // Campo vazio/xxx: tenta achar pela DATA DO TÍTULO e deixa você escolher
-    var dataTit = dataDoTitulo(raw);
+    // Campo vazio/xxx: tenta a data pelo NOME DO ARQUIVO (mais confiável) ou pelo TÍTULO
+    var dataTit = dataDoNomeArquivo(raw) || dataDoTitulo(raw);
     if (dataTit) {
       btn.textContent = 'Buscando solicitações do dia...';
       sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataTit))
