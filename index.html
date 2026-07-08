@@ -2,6 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<!-- Cache meio-termo: o navegador revalida se o HTML mudou antes de usar a cópia guardada.
+     Assim as atualizações do app aparecem sem precisar limpar cache manualmente. -->
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -450,7 +454,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.1</span>
+    <span class="header-version">v1.5.2</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -957,6 +961,30 @@ function sgdIniciarApp() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Verificador de versão (meio-termo anti-cache): checa se há versão nova no servidor.
+  // Se a versão do arquivo no servidor for diferente da que está rodando, recarrega
+  // uma única vez furando o cache. A trava evita loop de recarga.
+  (function verificarVersao() {
+    try {
+      var versaoAtual = (document.querySelector('.header-version') || {}).textContent || '';
+      fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })
+        .then(function(r){ return r.text(); })
+        .then(function(t){
+          var m = t.match(/header-version">([^<]+)</);
+          var versaoServidor = m ? m[1] : '';
+          if (versaoServidor && versaoAtual && versaoServidor !== versaoAtual) {
+            if (!sessionStorage.getItem('sgd_recarregou')) {
+              sessionStorage.setItem('sgd_recarregou', '1');
+              location.reload(true);
+            }
+          } else {
+            sessionStorage.removeItem('sgd_recarregou');
+          }
+        })
+        .catch(function(){});
+    } catch (e) {}
+  })();
+
   document.getElementById('loginForm').addEventListener('submit', function(e){
     e.preventDefault();
     sgdFazerLogin();
