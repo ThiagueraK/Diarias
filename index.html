@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.4</span>
+    <span class="header-version">v1.5.5</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -957,7 +957,7 @@ function sgdFazerLogin() {
     erroEl.textContent = 'Falha ao conectar. Verifique sua internet.';
   })
   .finally(function() {
-    btn.disabled = false;
+    btn.disabled = false; window._sgdParseando = false;
     btn.textContent = 'Entrar';
   });
 }
@@ -1124,6 +1124,14 @@ document.getElementById('btnParsear').addEventListener('click', parsear);
 function parsear() {
   var raw = document.getElementById('pasteInput').value;
   if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
+
+  // Trava anti-execução dupla: a extensão pode disparar parsear() mais de uma vez
+  // (setTimeout + hashchange). Sem isso, a segunda execução apaga a caixa de escolha
+  // criada pela primeira, e o processo parece "não fazer nada".
+  if (window._sgdParseando) return;
+  window._sgdParseando = true;
+  setTimeout(function(){ window._sgdParseando = false; }, 4000);
+
   raw = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   raw = raw.replace(/[ \t]+/g,' ');
   raw = raw.replace(/\n[ \t]+/g,'\n');
@@ -1254,7 +1262,7 @@ function parsear() {
       .then(function(res){
         if (res && res.encontrada && res.solicitacao) {
           preencherDadosDoBot(res.solicitacao, raw, servidorAncorado);
-          btn.disabled = false;
+          btn.disabled = false; window._sgdParseando = false;
           btn.textContent = '🔍 Reconhecer Dados Automaticamente';
         } else {
           executarParseIA();
@@ -1275,7 +1283,7 @@ function parsear() {
         .then(function(res){
           if (res && res.encontrada && res.solicitacao) {
             preencherDadosDoBot(res.solicitacao, raw, nomeAssinatura);
-            btn.disabled = false;
+            btn.disabled = false; window._sgdParseando = false;
             btn.textContent = '🔍 Reconhecer Dados Automaticamente';
           } else {
             // Nome+data não casou: cai na busca por data (pode ter escolha) como reforço
@@ -1291,7 +1299,7 @@ function parsear() {
       if (viagemVazia(raw)) {
         capturarNumeroEHash(raw);
         pedirPDF();
-        btn.disabled = false;
+        btn.disabled = false; window._sgdParseando = false;
         btn.textContent = '🔍 Reconhecer Dados Automaticamente';
       } else {
         executarParseIA();
@@ -1308,17 +1316,17 @@ function parsear() {
         var lista = (res && res.solicitacoes) || [];
         if (lista.length === 1) {
           preencherDadosDoBot(lista[0], raw, lista[0].nome);
-          btn.disabled = false;
+          btn.disabled = false; window._sgdParseando = false;
           btn.textContent = '🔍 Reconhecer Dados Automaticamente';
         } else if (lista.length > 1) {
           mostrarEscolhaSolicitacao(lista, raw);
-          btn.disabled = false;
+          btn.disabled = false; window._sgdParseando = false;
           btn.textContent = '🔍 Reconhecer Dados Automaticamente';
         } else {
           if (viagemVazia(raw)) {
             capturarNumeroEHash(raw);
             pedirPDF();
-            btn.disabled = false;
+            btn.disabled = false; window._sgdParseando = false;
             btn.textContent = '🔍 Reconhecer Dados Automaticamente';
           } else {
             executarParseIA();
@@ -1451,7 +1459,7 @@ function parsear() {
     marcarOrigemIA();
   })
   .finally(function() {
-    btn.disabled = false;
+    btn.disabled = false; window._sgdParseando = false;
     btn.textContent = '\uD83D\uDD0D Reconhecer Dados Automaticamente';
     document.getElementById('pasteInput').value = '';
   });
@@ -1655,7 +1663,12 @@ window._sgdPuxarDiariaPorDataImpl = function(dataBR) {
 function mostrarEscolhaSolicitacao(lista, raw) {
   var tagsEl = document.getElementById('parsedTags');
   if (!tagsEl) return;
+  // Remove uma caixa de escolha anterior, se houver (evita duplicar)
+  var antiga = document.getElementById('sgdEscolhaBox');
+  if (antiga) antiga.remove();
   var box = document.createElement('div');
+  box.id = 'sgdEscolhaBox';
+  box.dataset.aguardando = '1';
   box.style.cssText = 'width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;';
   var titulo = document.createElement('div');
   titulo.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:8px;color:var(--text);';
@@ -1666,6 +1679,7 @@ function mostrarEscolhaSolicitacao(lista, raw) {
     b.style.cssText = 'display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;font-size:13px;color:var(--text);';
     b.innerHTML = '<strong>' + solic.nome + '</strong> · ' + (solic.cidade||'') + ' · ' + (solic.dataSaida||'');
     b.onclick = function() {
+      box.dataset.aguardando = '0';
       preencherDadosDoBot(solic, raw, solic.nome);
       box.remove();
     };
@@ -1742,7 +1756,17 @@ function preencherCampos(found) {
     data_saida:'Data Saida',data_chegada:'Data Chegada',hora_saida:'Hora Saida',hora_chegada:'Hora Chegada',num_processo:'Nr Processo'};
 
   var tagsEl = document.getElementById('parsedTags');
-  tagsEl.innerHTML = '';
+  // Preserva a caixa de escolha se ela estiver na tela esperando você escolher.
+  // (Sem isso, uma segunda execução da IA apagaria a caixa e o app pareceria travado.)
+  var escolhaPendente = document.getElementById('sgdEscolhaBox');
+  if (escolhaPendente && escolhaPendente.dataset.aguardando === '1') {
+    // Remove só as tags, mantendo a caixa de escolha
+    Array.prototype.slice.call(tagsEl.children).forEach(function(el){
+      if (el.id !== 'sgdEscolhaBox') el.remove();
+    });
+  } else {
+    tagsEl.innerHTML = '';
+  }
 
   ['servidor','cidade','uf','motivo','placa','num_processo'].forEach(function(id) {
     var el = document.getElementById(id);
@@ -2438,7 +2462,7 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
     alert('Falha ao enviar notificações: ' + e.message);
   })
   .finally(function(){
-    btn.disabled = false;
+    btn.disabled = false; window._sgdParseando = false;
     btn.textContent = textoOrig;
   });
 });
@@ -2536,7 +2560,7 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
     alert('Falha ao enviar notificações: ' + e.message);
   })
   .finally(function(){
-    btn.disabled = false;
+    btn.disabled = false; window._sgdParseando = false;
     btn.textContent = textoOrig;
   });
 });
@@ -3205,7 +3229,7 @@ document.getElementById('btnBuscaIA').addEventListener('click', function() {
     renderTabela();
   }
 
-  btn.disabled = false;
+  btn.disabled = false; window._sgdParseando = false;
   btn.textContent = '✨ Buscar com IA';
   document.getElementById('buscaLoading').classList.remove('visible');
 });
@@ -3973,7 +3997,7 @@ document.getElementById('km-revisao-recalcular').addEventListener('click', funct
 
   function proxima() {
     if (idx >= lista.length) {
-      btn.disabled = false;
+      btn.disabled = false; window._sgdParseando = false;
       status.textContent = '✅ Recálculo concluído! Revise os valores e clique em Salvar.';
       status.style.color = 'var(--success, #2d5016)';
       return;
