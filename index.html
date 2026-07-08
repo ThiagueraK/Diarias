@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.5</span>
+    <span class="header-version">v1.5.6</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1125,12 +1125,10 @@ function parsear() {
   var raw = document.getElementById('pasteInput').value;
   if (!raw.trim()) { alert('Cole o conteudo do processo primeiro.'); return; }
 
-  // Trava anti-execução dupla: a extensão pode disparar parsear() mais de uma vez
-  // (setTimeout + hashchange). Sem isso, a segunda execução apaga a caixa de escolha
-  // criada pela primeira, e o processo parece "não fazer nada".
+  // Evita execução dupla imediata (extensão pode disparar 2x). Libera rápido.
   if (window._sgdParseando) return;
   window._sgdParseando = true;
-  setTimeout(function(){ window._sgdParseando = false; }, 4000);
+  setTimeout(function(){ window._sgdParseando = false; }, 1500);
 
   raw = raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   raw = raw.replace(/[ \t]+/g,' ');
@@ -2947,20 +2945,32 @@ function resetar() {
 function lerDadosExtensao() {
   var hash = window.location.hash;
   if (!hash || hash.indexOf('dados=') === -1) return;
+  var decoded = '';
   try {
     // Extrai hash1doc se presente: #dados=BASE64&hash1doc=HASH
     var hashRaw = hash.replace('#dados=', '').replace(/^.*dados=/, '');
     var hashParts = hashRaw.split('&hash1doc=');
     var encoded = hashParts[0];
     if (hashParts[1]) window._hash1doc = hashParts[1];
-    var decoded = decodeURIComponent(escape(atob(encoded)));
-    if (!decoded) return;
-    history.replaceState(null, '', window.location.pathname);
-    document.getElementById('pasteInput').value = decoded;
-    document.getElementById('tabGerador').click();
-    document.getElementById('pasteInput').scrollIntoView({behavior:'smooth'});
-    setTimeout(function() { parsear(); }, 300);
-  } catch(e) { console.error('Erro ao ler dados da extensao:', e); }
+    decoded = decodeURIComponent(escape(atob(encoded)));
+  } catch(e) {
+    console.error('Erro ao decodificar dados da extensao:', e);
+    return;
+  }
+  if (!decoded) return;
+
+  // Cola o texto (essencial)
+  try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
+  document.getElementById('pasteInput').value = decoded;
+
+  // Cosméticos: se falharem, NÃO devem impedir o processamento
+  try { document.getElementById('tabGerador').click(); } catch(e) { console.error('tabGerador:', e); }
+  try { document.getElementById('pasteInput').scrollIntoView({behavior:'smooth'}); } catch(e) {}
+
+  // Processa (isolado, sempre roda)
+  setTimeout(function() {
+    try { parsear(); } catch(e) { console.error('Erro em parsear via extensao:', e); alert('Erro ao processar: ' + e.message); }
+  }, 300);
 }
 setTimeout(lerDadosExtensao, 800);
 window.addEventListener('hashchange', lerDadosExtensao);
