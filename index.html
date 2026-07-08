@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.3</span>
+    <span class="header-version">v1.5.4</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1198,15 +1198,20 @@ function parsear() {
   // Ex: "_\nSabrina Varoni de Oliveira" -> "SABRINA VARONI DE OLIVEIRA".
   function nomeDaAssinatura(texto) {
     var linhas = (texto || '').split('\n').map(function(l){ return l.trim(); });
-    // Palavras que NÃO são nome (cargos, setores) para descartar
     var naoNome = /^(nutricionista|motorista|coordenador|servidor|agente|secret|enfermeir|t[ée]cnic|m[ée]dic|assinou|arquivou|despacho|encaminhado|em lista|em galeria|anexos?|revisar|baixar|tabela)/i;
+    function ehNome(cand) {
+      return /^[A-ZÀ-Ú][A-Za-zÀ-ú]+(\s+[A-Za-zÀ-ú]+){1,}$/.test(cand) && !naoNome.test(cand);
+    }
     for (var i = 0; i < linhas.length; i++) {
-      if (linhas[i] === '_' && linhas[i+1]) {
-        var cand = linhas[i+1].trim();
-        // Nome válido: 2+ palavras, começa maiúscula, só letras/espaços
-        if (/^[A-ZÀ-Ú][A-Za-zÀ-ú]+(\s+[A-Za-zÀ-ú]+){1,}$/.test(cand) && !naoNome.test(cand)) {
-          return cand.toUpperCase();
-        }
+      var l = linhas[i];
+      // Caso 1: linha é exatamente "_", nome vem na linha seguinte
+      if (l === '_' && linhas[i+1] && ehNome(linhas[i+1].trim())) {
+        return linhas[i+1].trim().toUpperCase();
+      }
+      // Caso 2: "_" grudado com o nome na mesma linha ("_ Sabrina Varoni de Oliveira")
+      if (/^_\s+/.test(l)) {
+        var cand = l.replace(/^_\s+/, '').trim();
+        if (ehNome(cand)) return cand.toUpperCase();
       }
     }
     return '';
