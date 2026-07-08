@@ -134,6 +134,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .header-text h1{font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.2;margin:0;}
   .header-text p{margin:1px 0 0;font-size:12.5px;color:var(--text-muted);}
   .header-version{margin-left:auto;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2);border:1px solid var(--border);padding:5px 11px;border-radius:999px;align-self:center;}
+  .header-sair{margin-left:8px;font-size:12px;font-weight:600;color:var(--danger);background:var(--surface);border:1.5px solid var(--border-strong);padding:5px 13px;border-radius:999px;align-self:center;cursor:pointer;transition:all .15s;font-family:var(--sans);}
+  .header-sair:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
 
   /* TABS */
   .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
@@ -454,7 +456,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.2</span>
+    <span class="header-version">v1.5.3</span>
+    <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
   <!-- Modal de configuração -->
@@ -917,6 +920,15 @@ function sgdMostrarLogin(msg) {
 function sgdEsconderLogin() {
   document.getElementById('loginOverlay').classList.add('hidden');
 }
+
+// Sair da sessão: limpa o token, limpa a trava de cache e recarrega furando o cache.
+function sgdLogout() {
+  if (!confirm('Deseja sair da sessão? Você precisará fazer login novamente.')) return;
+  sgdClearToken();
+  try { sessionStorage.removeItem('sgd_recarregou'); } catch (e) {}
+  location.reload(true);
+}
+window.sgdLogout = sgdLogout;
 
 function sgdFazerLogin() {
   var usuario = document.getElementById('login_usuario').value.trim();
