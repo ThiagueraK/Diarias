@@ -450,7 +450,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.0</span>
+    <span class="header-version">v1.5.1</span>
   </header>
 
   <!-- Modal de configuração -->
@@ -1153,6 +1153,25 @@ function parsear() {
     return '';
   }
 
+  // Extrai o nome do motorista da ASSINATURA do processo (quando o campo veio vazio/X).
+  // No 1Doc, quem cria o processo assina embaixo, após uma linha "_".
+  // Ex: "_\nSabrina Varoni de Oliveira" -> "SABRINA VARONI DE OLIVEIRA".
+  function nomeDaAssinatura(texto) {
+    var linhas = (texto || '').split('\n').map(function(l){ return l.trim(); });
+    // Palavras que NÃO são nome (cargos, setores) para descartar
+    var naoNome = /^(nutricionista|motorista|coordenador|servidor|agente|secret|enfermeir|t[ée]cnic|m[ée]dic|assinou|arquivou|despacho|encaminhado|em lista|em galeria|anexos?|revisar|baixar|tabela)/i;
+    for (var i = 0; i < linhas.length; i++) {
+      if (linhas[i] === '_' && linhas[i+1]) {
+        var cand = linhas[i+1].trim();
+        // Nome válido: 2+ palavras, começa maiúscula, só letras/espaços
+        if (/^[A-ZÀ-Ú][A-Za-zÀ-ú]+(\s+[A-Za-zÀ-ú]+){1,}$/.test(cand) && !naoNome.test(cand)) {
+          return cand.toUpperCase();
+        }
+      }
+    }
+    return '';
+  }
+
   // Nesse caso não vale chamar a IA (não há o que ler) — pedimos o PDF.
   function viagemVazia(texto) {
     var campos = ['Motorista ou Servidor', 'Cidade de destino', 'Data de Sa[ií]da'];
@@ -1200,35 +1219,30 @@ function parsear() {
   } else {
     // Campo vazio/xxx: tenta a data pelo NOME DO ARQUIVO (mais confiável) ou pelo TÍTULO
     var dataTit = dataDoNomeArquivo(raw) || dataDoTitulo(raw);
-    if (dataTit) {
-      btn.textContent = 'Buscando solicitações do dia...';
-      sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataTit))
+    // Tenta o nome da ASSINATURA (quem criou/assinou o processo é o motorista)
+    var nomeAssinatura = nomeDaAssinatura(raw);
+
+    if (dataTit && nomeAssinatura) {
+      // Tem nome (assinatura) + data -> casa DIRETO por nome+data, sem escolha
+      btn.textContent = 'Verificando solicitação do bot...';
+      sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar&nome=' + encodeURIComponent(nomeAssinatura) + '&data=' + encodeURIComponent(dataTit))
         .then(function(r){ return r.json(); })
         .then(function(res){
-          var lista = (res && res.solicitacoes) || [];
-          if (lista.length === 1) {
-            preencherDadosDoBot(lista[0], raw, lista[0].nome);
-            btn.disabled = false;
-            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-          } else if (lista.length > 1) {
-            mostrarEscolhaSolicitacao(lista, raw);
+          if (res && res.encontrada && res.solicitacao) {
+            preencherDadosDoBot(res.solicitacao, raw, nomeAssinatura);
             btn.disabled = false;
             btn.textContent = '🔍 Reconhecer Dados Automaticamente';
           } else {
-            // Não achou no bot. Se a viagem está vazia, pede o PDF (não chama IA).
-            if (viagemVazia(raw)) {
-              capturarNumeroEHash(raw);
-              pedirPDF();
-              btn.disabled = false;
-              btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-            } else {
-              executarParseIA();
-            }
+            // Nome+data não casou: cai na busca por data (pode ter escolha) como reforço
+            buscarPorData(dataTit);
           }
         })
-        .catch(function(){ executarParseIA(); });
+        .catch(function(){ buscarPorData(dataTit); });
+    } else if (dataTit) {
+      // Tem data mas não achou nome na assinatura -> busca por data
+      buscarPorData(dataTit);
     } else {
-      // Sem data no título. Se a viagem está vazia, pede o PDF; senão, IA.
+      // Sem data. Se a viagem está vazia, pede o PDF; senão, IA.
       if (viagemVazia(raw)) {
         capturarNumeroEHash(raw);
         pedirPDF();
@@ -1238,6 +1252,35 @@ function parsear() {
         executarParseIA();
       }
     }
+  }
+
+  // Busca solicitações por data (fallback quando não há nome). Pode acionar a escolha.
+  function buscarPorData(dataTit) {
+    btn.textContent = 'Buscando solicitações do dia...';
+    sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataTit))
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        var lista = (res && res.solicitacoes) || [];
+        if (lista.length === 1) {
+          preencherDadosDoBot(lista[0], raw, lista[0].nome);
+          btn.disabled = false;
+          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+        } else if (lista.length > 1) {
+          mostrarEscolhaSolicitacao(lista, raw);
+          btn.disabled = false;
+          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+        } else {
+          if (viagemVazia(raw)) {
+            capturarNumeroEHash(raw);
+            pedirPDF();
+            btn.disabled = false;
+            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+          } else {
+            executarParseIA();
+          }
+        }
+      })
+      .catch(function(){ executarParseIA(); });
   }
 
   // Mostra o aviso pedindo para abrir o PDF da diária
