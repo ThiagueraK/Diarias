@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.7</span>
+    <span class="header-version">v1.5.8</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2234,7 +2234,7 @@ function renderTabela() {
     document.getElementById('diaInfoDate').textContent = '📅 '+isoParaBR(filtroAtivo);
     document.getElementById('diaInfoCount').textContent = filtrados.length+' processo'+(filtrados.length!==1?'s':'');
     var totalValor = filtrados.reduce(function(acc,p) {
-      var v = parseFloat((p.valor||'0').replace(',','.')) || 0; return acc+v;
+      var v = sgdValorNum(p.valor); return acc+v;
     }, 0);
     document.getElementById('diaInfoTotal').textContent = totalValor > 0 ? 'Total: R$ '+totalValor.toFixed(2).replace('.',',') : '';
   }
@@ -2280,12 +2280,12 @@ function renderTabela() {
 
   // Item 3: Total de valores
   var total = filtrados.reduce(function(acc, p) {
-    var v = parseFloat((p.valor||'0').replace(',','.'));
+    var v = sgdValorNum(p.valor);
     return acc + (isNaN(v) ? 0 : v);
   }, 0);
   var totalStr = total > 0 ? 'R$ ' + total.toFixed(2).replace('.',',') : '';
   var totalPendente = filtrados.filter(function(p){ return !p.pcOk; }).reduce(function(acc,p){
-    var v = parseFloat((p.valor||'0').replace(',','.'));
+    var v = sgdValorNum(p.valor);
     return acc + (isNaN(v) ? 0 : v);
   }, 0);
 
@@ -2565,7 +2565,7 @@ document.getElementById('btnRelatorio') && document.getElementById('btnRelatorio
   var doMes = processos.filter(function(p){ return (p.diaRef||hojeISO()).substring(0,7) === mes; });
   if (doMes.length === 0) { alert('Nenhum processo no mês selecionado.'); return; }
 
-  var total = doMes.reduce(function(a,p){ return a + parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var total = doMes.reduce(function(a,p){ return a + sgdValorNum(p.valor); },0);
   var porServidor = {};
   var porCidade = {};
   doMes.forEach(function(p){
@@ -2573,7 +2573,7 @@ document.getElementById('btnRelatorio') && document.getElementById('btnRelatorio
     var c = p.cidade||'Sem cidade';
     if (!porServidor[s]) porServidor[s] = { viagens:0, valor:0, km:0 };
     porServidor[s].viagens++;
-    porServidor[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+    porServidor[s].valor += sgdValorNum(p.valor);
     porServidor[s].km += parseFloat(p.km||0);
     porCidade[c] = (porCidade[c]||0)+1;
   });
@@ -3002,7 +3002,7 @@ var VALORES_PC = [
 
 function gerarTextoPC(p) {
   var proc = p.numProcesso || '___';
-  var valorNum = parseFloat((p.valor||'0').replace(',','.')) || 0;
+  var valorNum = sgdValorNum(p.valor);
   var textoValor = null;
   var aviso = false;
 
@@ -3445,7 +3445,7 @@ function renderRelatorio() {
     return '<option value="'+c+'"'+(c===curCid?' selected':'')+'>'+c+'</option>';
   }).join('');
   var filtrados = getProcessosFiltradosRelatorio();
-  var totalValor = filtrados.reduce(function(a,p){ return a+parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var totalValor = filtrados.reduce(function(a,p){ return a+sgdValorNum(p.valor); },0);
   var totalKm = filtrados.reduce(function(a,p){ return a+parseFloat(p.km||0); },0);
   var pendentes = filtrados.filter(function(p){ return !p.pcOk; }).length;
   document.getElementById('rel-cards').innerHTML = [
@@ -3459,7 +3459,7 @@ function renderRelatorio() {
     var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
     if (!porServ[s]) porServ[s]={viagens:0,valor:0};
     porServ[s].viagens++;
-    porServ[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+    porServ[s].valor += sgdValorNum(p.valor);
   });
   var maxV = Math.max.apply(null, Object.values(porServ).map(function(x){return x.viagens;}).concat([1]));
   document.getElementById('rel-ranking-servidores').innerHTML = Object.keys(porServ)
@@ -3655,6 +3655,18 @@ function normalizarNome(nome) {
     .replace(/\s+/g,' ').trim();
 }
 
+// Converte valor em texto para número, aceitando formato brasileiro.
+// "2.622,12" -> 2622.12 | "2622,12" -> 2622.12 | "2622.12" -> 2622.12
+// Se há vírgula, ela é o decimal e os pontos são separadores de milhar.
+function sgdValorNum(v) {
+  if (v === null || v === undefined) return 0;
+  var s = String(v).trim().replace(/[^0-9.,-]/g, '');
+  if (!s) return 0;
+  if (s.indexOf(',') !== -1) s = s.replace(/\./g, '').replace(',', '.');
+  var n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
 // Similaridade por primeiro nome igual
 function nomesSimilares(a, b) {
   var na = normalizarNome(a).split(' ');
@@ -3823,7 +3835,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
   var filtrados = getProcessosFiltradosRelatorio();
   if (!filtrados.length) { alert('Nenhum processo para imprimir.'); return; }
 
-  var totalValor = filtrados.reduce(function(a,p){ return a+parseFloat((p.valor||'0').replace(',','.')||0); },0);
+  var totalValor = filtrados.reduce(function(a,p){ return a+sgdValorNum(p.valor); },0);
   var totalKm = filtrados.reduce(function(a,p){ return a+parseFloat(p.km||0); },0);
   var pendentes = filtrados.filter(function(p){ return !p.pcOk; }).length;
 
@@ -3832,7 +3844,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     var s = p.servidor||'Sem nome';
     if (!porServ[s]) porServ[s]={viagens:0,valor:0,km:0};
     porServ[s].viagens++;
-    porServ[s].valor += parseFloat((p.valor||'0').replace(',','.')||0);
+    porServ[s].valor += sgdValorNum(p.valor);
     porServ[s].km += parseFloat(p.km||0);
   });
   var servOrd = Object.keys(porServ).sort(function(a,b){ return porServ[b].viagens-porServ[a].viagens; });
