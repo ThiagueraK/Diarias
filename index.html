@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.6</span>
+    <span class="header-version">v1.5.7</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1268,67 +1268,63 @@ function parsear() {
       })
       .catch(function(){ executarParseIA(); });
   } else {
-    // Campo vazio/xxx: tenta a data pelo NOME DO ARQUIVO (mais confiável) ou pelo TÍTULO
+    // Campo vazio/xxx. A data vem do nome do arquivo anexo (gerado pelo bot) ou do título.
     var dataTit = dataDoNomeArquivo(raw) || dataDoTitulo(raw);
-    // Tenta o nome da ASSINATURA (quem criou/assinou o processo é o motorista)
-    var nomeAssinatura = nomeDaAssinatura(raw);
 
-    if (dataTit && nomeAssinatura) {
-      // Tem nome (assinatura) + data -> casa DIRETO por nome+data, sem escolha
-      btn.textContent = 'Verificando solicitação do bot...';
-      sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar&nome=' + encodeURIComponent(nomeAssinatura) + '&data=' + encodeURIComponent(dataTit))
-        .then(function(r){ return r.json(); })
-        .then(function(res){
-          if (res && res.encontrada && res.solicitacao) {
-            preencherDadosDoBot(res.solicitacao, raw, nomeAssinatura);
-            btn.disabled = false; window._sgdParseando = false;
-            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-          } else {
-            // Nome+data não casou: cai na busca por data (pode ter escolha) como reforço
-            buscarPorData(dataTit);
-          }
-        })
-        .catch(function(){ buscarPorData(dataTit); });
-    } else if (dataTit) {
-      // Tem data mas não achou nome na assinatura -> busca por data
-      buscarPorData(dataTit);
-    } else {
-      // Sem data. Se a viagem está vazia, pede o PDF; senão, IA.
+    if (!dataTit) {
+      // Sem data: nada a casar. Pede o PDF se a viagem está vazia, senão IA.
       if (viagemVazia(raw)) {
         capturarNumeroEHash(raw);
         pedirPDF();
-        btn.disabled = false; window._sgdParseando = false;
-        btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+        liberarBotao();
       } else {
         executarParseIA();
       }
+    } else {
+      buscarPorData(dataTit);
     }
   }
 
-  // Busca solicitações por data (fallback quando não há nome). Pode acionar a escolha.
+  function liberarBotao() {
+    btn.disabled = false;
+    window._sgdParseando = false;
+    btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+  }
+
+  // Busca as solicitações do bot naquela data e descobre qual delas é a deste processo,
+  // verificando qual nome aparece no texto. Não depende de assinatura, "_" nem regex frágil.
   function buscarPorData(dataTit) {
     btn.textContent = 'Buscando solicitações do dia...';
     sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar-data&data=' + encodeURIComponent(dataTit))
       .then(function(r){ return r.json(); })
       .then(function(res){
         var lista = (res && res.solicitacoes) || [];
+
+        if (lista.length === 0) {
+          if (viagemVazia(raw)) { capturarNumeroEHash(raw); pedirPDF(); liberarBotao(); }
+          else { executarParseIA(); }
+          return;
+        }
+
         if (lista.length === 1) {
           preencherDadosDoBot(lista[0], raw, lista[0].nome);
-          btn.disabled = false; window._sgdParseando = false;
-          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-        } else if (lista.length > 1) {
-          mostrarEscolhaSolicitacao(lista, raw);
-          btn.disabled = false; window._sgdParseando = false;
-          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
+          liberarBotao();
+          return;
+        }
+
+        // Mais de uma solicitação no dia: identifica pelo nome presente no texto.
+        var textoNorm = normalizarNome(raw);
+        var candidatas = lista.filter(function(s){
+          return s.nome && textoNorm.indexOf(normalizarNome(s.nome)) !== -1;
+        });
+
+        if (candidatas.length === 1) {
+          preencherDadosDoBot(candidatas[0], raw, candidatas[0].nome);
+          liberarBotao();
         } else {
-          if (viagemVazia(raw)) {
-            capturarNumeroEHash(raw);
-            pedirPDF();
-            btn.disabled = false; window._sgdParseando = false;
-            btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-          } else {
-            executarParseIA();
-          }
+          // Nenhum nome bateu, ou mais de um: aí sim você escolhe.
+          mostrarEscolhaSolicitacao(candidatas.length ? candidatas : lista, raw);
+          liberarBotao();
         }
       })
       .catch(function(){ executarParseIA(); });
