@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.9</span>
+    <span class="header-version">v1.6.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2385,6 +2385,8 @@ function renderTabela() {
       '<td class="td-num">'+hl(p.placa,'placa')+'</td>'+
       '<td class="td-num">'+(p.km ? p.km+' km' : '<span style="color:var(--text-muted)">—</span>')+'</td>'+
       '<td>'+badgePC+'</td>'+
+      '<td>'+badgePagamentoAvisado(p)+'</td>'+
+      '<td class="td-num">'+dataAdicaoBR(p.id)+'</td>'+
       '<td><button class="btn-pc" data-id="'+p.id+'" title="Gerar Prestação de Contas">📄 PC</button></td>'+
       '<td style="display:flex;gap:4px;">'
         +(p.hash1doc ? '<a class="btn-edit-row" href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash='+p.hash1doc+'&itd=7" target="_blank" title="Abrir no 1Doc" style="text-decoration:none;">🔗</a>' : '')
@@ -2409,7 +2411,7 @@ function renderTabela() {
     '<div class="table-wrap"><table>'+
     '<thead><tr>'+
     '<th>#</th><th>Nome do Credor</th><th>Nº Processo</th><th>Nº Empenho</th>'+
-    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Prest. Contas</th><th></th>'+
+    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Pagto Avisado</th><th>Adicionado</th><th>Prest. Contas</th><th></th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
     (totalStr ? '<tfoot><tr><td colspan="4" style="text-align:right;font-weight:700;padding:10px;color:var(--text-muted);font-size:12px;">TOTAL DO DIA:</td>'+
     '<td style="font-weight:700;color:var(--accent);padding:10px;">'+totalStr+'</td>'+
@@ -2499,14 +2501,29 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   var dataBarra = partes[0].padStart(2,'0') + '/' + partes[1].padStart(2,'0') + '/' + partes[2];
 
   // 2) Filtrar processos pagos naquela data de pagamento
-  var doDia = processos.filter(function(p){
+  var doDiaTodos = processos.filter(function(p){
     if (!p.pago || !p.dataPagamento) return false;
     var dp = String(p.dataPagamento).trim();
     return dp === dataPonto || dp === dataBarra;
   });
 
-  if (doDia.length === 0) {
+  if (doDiaTodos.length === 0) {
     alert('Nenhum pagamento com data de ' + dataStr + ' encontrado.\n\n(A data deve bater com a data de pagamento que veio no relatório importado.)');
+    return;
+  }
+
+  // Remove os que JÁ foram notificados (evita o motorista receber o mesmo pagamento 2x).
+  // Usa a data normalizada (dataBarra), não o texto digitado — assim "26/6/2026" e "26/06/2026"
+  // são reconhecidos como a mesma data e não escapam da checagem.
+  var jaNotificados = 0;
+  var doDia = doDiaTodos.filter(function(p){
+    var marca = p.pagamentoNotificadoEm || '';
+    if (marca.indexOf(dataBarra) !== -1) { jaNotificados++; return false; }
+    return true;
+  });
+
+  if (doDia.length === 0) {
+    alert('Todos os ' + doDiaTodos.length + ' pagamento(s) de ' + dataStr + ' já foram notificados antes.\n\nNinguém será notificado de novo.');
     return;
   }
 
@@ -2522,17 +2539,11 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   nomes.forEach(function(s){
     resumo += '• ' + s + ': ' + porServidor[s].length + (porServidor[s].length===1?' diária':' diárias') + '\n';
   });
-  resumo += '\nTotal: ' + doDia.length + ' diárias pagas, ' + nomes.length + ' motorista(s).\n\n';
-
-  // Verifica se essa data de pagamento já foi notificada antes
-  var jaNotificados = doDia.filter(function(p){
-    return p.pagamentoNotificadoEm && p.pagamentoNotificadoEm.indexOf(dataStr) !== -1;
-  });
-  if (jaNotificados.length > 0) {
-    resumo += '⚠️ ATENÇÃO: ' + jaNotificados.length + ' dessas diárias JÁ FORAM notificadas para esta data antes. '
-      + 'Se continuar, os motoristas vão receber o aviso NOVAMENTE.\n\n';
+  resumo += '\nTotal: ' + doDia.length + ' diárias pagas, ' + nomes.length + ' motorista(s).\n';
+  if (jaNotificados > 0) {
+    resumo += '(' + jaNotificados + ' já notificado(s) antes foram pulados — não recebem de novo.)\n';
   }
-  resumo += 'O sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
+  resumo += '\nO sistema vai enviar um PDF no Telegram para cada motorista QUE TIVER CADASTRO no bot. Quem não tem cadastro é ignorado.\n\nConfirmar envio?';
 
   if (!confirm(resumo)) return;
 
@@ -2550,11 +2561,12 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (res.ok) {
-      // Marca esses processos como já notificados para esta data (evita reenvio acidental)
+      // Marca esses processos como já notificados para esta data (evita reenvio acidental).
+      // Grava dataBarra (normalizada), a mesma forma usada na checagem acima.
       doDia.forEach(function(p){
         var marca = p.pagamentoNotificadoEm || '';
-        if (marca.indexOf(dataStr) === -1) {
-          p.pagamentoNotificadoEm = marca ? (marca + ';' + dataStr) : dataStr;
+        if (marca.indexOf(dataBarra) === -1) {
+          p.pagamentoNotificadoEm = marca ? (marca + ';' + dataBarra) : dataBarra;
         }
       });
       salvar();
@@ -3654,7 +3666,7 @@ function renderRelatorio() {
       ? '<button class="rel-btn-desc" onclick="toggleDesc(\''+descId+'\')" title="Ver descrição">▶</button>'
       : '<span style="color:var(--border);font-size:11px;">—</span>';
     var descRow = temDesc
-      ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="14"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
+      ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="16"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
       : '';
     return '<tr data-id="'+p.id+'" class="rel-row-clicavel" title="Duplo clique para ver na Tabela de Controle">'
       +'<td class="col-num">'+(i+1)+'</td>'
@@ -3670,6 +3682,8 @@ function renderRelatorio() {
       +'<td>'+pc+'</td>'
       +'<td>'+statusPago+'</td>'
       +'<td>'+dataPag+'</td>'
+      +'<td>'+badgePagamentoAvisado(p)+'</td>'
+      +'<td>'+dataAdicaoBR(p.id)+'</td>'
       +'<td>'+btnDesc+'</td>'
       +'</tr>'
       +descRow;
@@ -3678,7 +3692,7 @@ function renderRelatorio() {
     '<table class="rel-table"><thead><tr>'
     +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
     +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
-    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>📄</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th><th>📄</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 
   // Duplo clique numa linha (exceto no botão de descrição) abre o mesmo
@@ -3781,6 +3795,25 @@ function sgdValorNum(v) {
   if (s.indexOf(',') !== -1) s = s.replace(/\./g, '').replace(',', '.');
   var n = parseFloat(s);
   return isNaN(n) ? 0 : n;
+}
+
+// Data em que o processo foi ADICIONADO na tabela. O id de cada processo já é
+// um timestamp (Date.now() no momento da criação) — não precisa de campo novo.
+function dataAdicaoBR(id) {
+  var ts = Number(id);
+  if (!ts || isNaN(ts) || ts < 1000000000000) return '—'; // id inválido / formato antigo
+  var d = new Date(ts);
+  if (isNaN(d.getTime())) return '—';
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+}
+
+// Selo mostrando se o pagamento já foi notificado ao motorista (e quando).
+function badgePagamentoAvisado(p) {
+  if (!p.pagamentoNotificadoEm) return '<span class="td-empty">—</span>';
+  var datas = p.pagamentoNotificadoEm.split(';').filter(Boolean);
+  var ultima = datas[datas.length - 1] || '';
+  var titulo = datas.length > 1 ? 'Avisado em: ' + datas.join(', ') : 'Avisado em ' + ultima;
+  return '<span class="badge-pc-ok" title="'+titulo+'">💰 '+ultima+'</span>';
 }
 
 // Similaridade por primeiro nome igual
@@ -4009,14 +4042,18 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       statusPago = '—';
       dataPag = '—';
     }
+    var pagAvisado = p.pagamentoNotificadoEm
+      ? '<b style="color:#16a34a">&#128176; '+p.pagamentoNotificadoEm.split(';').pop()+'</b>'
+      : '—';
     var descRow = (p.descricao && p.descricao.trim())
-      ? '<tr><td colspan="13" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
+      ? '<tr><td colspan="15" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
       : '';
     return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
       +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
       +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
       +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td>'
-      +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td></tr>'
+      +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td>'
+      +'<td>'+pagAvisado+'</td><td>'+dataAdicaoBR(p.id)+'</td></tr>'
       +descRow;
   }).join('');
 
@@ -4063,7 +4100,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     +'<div class="sec"><h2>&#128205; Por Cidade (Top 8)</h2>'+barrasCid+'</div>'
     +'</div>'
     +'<div class="sec"><h2>&#128203; Processos Detalhados</h2>'
-    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th></tr></thead>'
+    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th></tr></thead>'
     +'<tbody>'+linhasTabela+'</tbody></table></div>'
     +'<div style="text-align:center;font-size:9px;color:#aaa;margin-top:12px;">SGD &mdash; Setor de Gest&atilde;o de Di&aacute;rias &middot; Prefeitura Municipal de Tupanciret&atilde;/RS</div>'
     +'<script>window.onload=function(){window.print();};<\/script>'
