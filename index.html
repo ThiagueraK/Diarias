@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.5.8</span>
+    <span class="header-version">v1.5.9</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -467,6 +467,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabAtividade">📱 Atividade do Bot</button>
+    <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot</button>
   </div>
 
   <!-- ══════════════════════════════════════ -->
@@ -788,6 +789,30 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     </div>
   </div>
 
+  <div class="tab-panel" id="panel-solicitacoes">
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>🎫 Solicitações geradas pelo bot</span>
+        <button id="sol-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Todas as diárias solicitadas pelos motoristas no Telegram, com ou sem comprovante anexado.</p>
+      <div id="sol-lista" style="max-height:65vh;overflow-y:auto;">
+        <p style="color:var(--text-muted);">Clique em 🔄 Atualizar para carregar.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL DETALHE DA SOLICITAÇÃO (PDF + fotos) -->
+<div id="modalSolicitacao" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:16px;">🎫 Detalhe da solicitação</h3>
+      <button onclick="document.getElementById('modalSolicitacao').style.display='none';" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">✕</button>
+    </div>
+    <div id="sol-detalhe-corpo">Carregando...</div>
+  </div>
 </div>
 
 <!-- MODAL REVISAO KM -->
@@ -1068,8 +1093,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade'];
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade','panel-solicitacoes'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade','tabSolicitacoes'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1106,6 +1131,97 @@ function carregarAtividade() {
   });
 }
 document.getElementById('atv-atualizar') && document.getElementById('atv-atualizar').addEventListener('click', carregarAtividade);
+
+document.getElementById('tabSolicitacoes').addEventListener('click', function() { switchTab('panel-solicitacoes','tabSolicitacoes'); carregarSolicitacoesBot(); });
+
+function carregarSolicitacoesBot() {
+  var lista = document.getElementById('sol-lista');
+  lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
+  sgdFetch(SGD_WORKER_URL + '?action=solicitacoes-listar')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok || !res.solicitacoes || res.solicitacoes.length === 0) {
+      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma solicitação registrada ainda.</p>';
+      return;
+    }
+    lista.innerHTML = res.solicitacoes.map(function(s){
+      var comprovanteTag = s.qtdComprovantes > 0
+        ? '<span style="background:var(--accent-light);color:var(--brand-deep);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;">📎 '+s.qtdComprovantes+'</span>'
+        : '<span style="color:var(--text-dim);font-size:11px;">sem comprovante</span>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);">'
+        +'<div style="min-width:0;">'
+          +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.nome+'</div>'
+          +'<div style="font-size:12px;color:var(--text-muted);">'+s.dataSaida+' · '+(s.cidade||'')+' · '+(s.placa||'')+'</div>'
+          +'<div style="margin-top:3px;">'+comprovanteTag+'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px;flex-shrink:0;">'
+          +'<button onclick="verSolicitacaoBot(\''+s.chave+'\')" style="padding:6px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">👁️ Ver</button>'
+          +'<button onclick="apagarSolicitacaoBot(\''+s.chave+'\',\''+s.nome.replace(/'/g,"\\'")+'\')" style="padding:6px 10px;background:var(--surface2);color:var(--danger);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  })
+  .catch(function(e){
+    lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>';
+  });
+}
+document.getElementById('sol-atualizar') && document.getElementById('sol-atualizar').addEventListener('click', carregarSolicitacoesBot);
+
+function verSolicitacaoBot(chave) {
+  var modal = document.getElementById('modalSolicitacao');
+  var corpo = document.getElementById('sol-detalhe-corpo');
+  corpo.innerHTML = 'Carregando...';
+  modal.style.display = 'flex';
+  sgdFetch(SGD_WORKER_URL + '?action=solicitacao-detalhe&chave=' + encodeURIComponent(chave))
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) { corpo.innerHTML = '<p style="color:var(--danger);">Não encontrada.</p>'; return; }
+    var s = res.solicitacao;
+    var html = '<div style="font-size:14px;line-height:1.8;">'
+      +'<div><strong>Motorista:</strong> '+s.nome+'</div>'
+      +'<div><strong>Placa:</strong> '+(s.placa||'—')+'</div>'
+      +'<div><strong>Cidade:</strong> '+(s.cidade||'—')+'</div>'
+      +'<div><strong>Saída:</strong> '+s.dataSaida+' às '+(s.horaSaida||'—')+'</div>'
+      +'<div><strong>Chegada:</strong> '+(s.dataChegada||'—')+' às '+(s.horaChegada||'—')+'</div>'
+      +'<div><strong>Motivo:</strong> '+(s.motivo||'—')+'</div>'
+      +'</div>';
+    var comprovantes = s.comprovantes || [];
+    if (comprovantes.length > 0) {
+      html += '<div style="margin-top:14px;font-weight:600;">📎 Comprovantes ('+comprovantes.length+')</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">'
+        + comprovantes.map(function(b64,i){
+            return '<a href="data:image/jpeg;base64,'+b64+'" target="_blank" style="display:block;">'
+              + '<img src="data:image/jpeg;base64,'+b64+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Comprovante '+(i+1)+'">'
+              + '</a>';
+          }).join('')
+        + '</div>'
+        + '<p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Toque na imagem para abrir em tamanho maior.</p>';
+    } else {
+      html += '<p style="margin-top:14px;color:var(--text-muted);font-size:13px;">Sem comprovantes anexados.</p>';
+    }
+    corpo.innerHTML = html;
+  })
+  .catch(function(e){
+    corpo.innerHTML = '<p style="color:var(--danger);">Erro: '+e.message+'</p>';
+  });
+}
+
+function apagarSolicitacaoBot(chave, nome) {
+  if (!confirm('Apagar a solicitação de "'+nome+'"?\n\nIsso não afeta processos já lançados na tabela — só remove o registro do bot.')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=solicitacao-apagar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chave: chave })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.ok) { carregarSolicitacoesBot(); }
+    else { alert('Erro ao apagar: ' + (res.error||'desconhecido')); }
+  })
+  .catch(function(e){ alert('Erro ao apagar: ' + e.message); });
+}
+window.verSolicitacaoBot = verSolicitacaoBot;
+window.apagarSolicitacaoBot = apagarSolicitacaoBot;
 
 // ═══════════════════════════════════════════════════════
 // RADIO DISTÂNCIA
