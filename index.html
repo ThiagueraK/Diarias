@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.1</span>
+    <span class="header-version">v1.6.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1144,6 +1144,7 @@ function carregarSolicitacoesBot() {
       lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma solicitação registrada ainda.</p>';
       return;
     }
+    window._solBotCache = res.solicitacoes; // usado por usarSolicitacaoNoGerador
     lista.innerHTML = res.solicitacoes.map(function(s){
       var comprovanteTag = s.qtdComprovantes > 0
         ? '<span style="background:var(--accent-light);color:var(--brand-deep);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;">📎 '+s.qtdComprovantes+'</span>'
@@ -1155,6 +1156,7 @@ function carregarSolicitacoesBot() {
           +'<div style="margin-top:3px;">'+comprovanteTag+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;flex-shrink:0;">'
+          +'<button onclick="usarSolicitacaoNoGerador(\''+s.chave+'\')" title="Puxar estes dados para o Gerador" style="padding:6px 10px;background:var(--accent-light);color:var(--brand-deep);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">📋 Usar no Gerador</button>'
           +'<button onclick="verSolicitacaoBot(\''+s.chave+'\')" style="padding:6px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">👁️ Ver</button>'
           +'<button onclick="apagarSolicitacaoBot(\''+s.chave+'\',\''+s.nome.replace(/'/g,"\\'")+'\')" style="padding:6px 10px;background:var(--surface2);color:var(--danger);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>'
         +'</div>'
@@ -1220,8 +1222,23 @@ function apagarSolicitacaoBot(chave, nome) {
   })
   .catch(function(e){ alert('Erro ao apagar: ' + e.message); });
 }
+// Puxa os dados de uma solicitação do bot direto para o Gerador — útil quando
+// a diária precisa ser lançada com urgência, antes do processo chegar no 1Doc.
+// O número do processo fica em branco; é completado manualmente depois.
+function usarSolicitacaoNoGerador(chave) {
+  var s = (window._solBotCache || []).find(function(x){ return x.chave === chave; });
+  if (!s) { alert('Não encontrei essa solicitação. Atualize a lista e tente de novo.'); return; }
+  window._hash1doc = null; // evita herdar o hash de uma ação anterior não relacionada
+  switchTab('panel-gerador', 'tabGerador');
+  var pi = document.getElementById('pasteInput');
+  if (pi) pi.value = '';
+  preencherDadosDoBot(s, '', s.nome);
+  var painel = document.getElementById('panel-gerador');
+  if (painel) painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 window.verSolicitacaoBot = verSolicitacaoBot;
 window.apagarSolicitacaoBot = apagarSolicitacaoBot;
+window.usarSolicitacaoNoGerador = usarSolicitacaoNoGerador;
 
 // ═══════════════════════════════════════════════════════
 // RADIO DISTÂNCIA
@@ -1936,6 +1953,45 @@ function preencherCampos(found) {
       mostrarBannerDuplicata(msgDup, duplicata.id);
     } else {
       fecharBannerDuplicata();
+    }
+  }
+
+  // Detecta se este Nº de processo já existe numa diária lançada sem link do 1Doc —
+  // caso típico: diária lançada com urgência (via "Usar no Gerador"), antes do
+  // processo aparecer no 1Doc. Em vez de deixar criar um segundo lançamento
+  // duplicado, cola o hash capturado agora na diária já existente.
+  if (found.num_processo && window._hash1doc) {
+    var existenteSemHash = processos.find(function(p) {
+      return p.numProcesso && p.numProcesso.trim() === found.num_processo.trim() && !p.hash1doc;
+    });
+    if (existenteSemHash) {
+      existenteSemHash.hash1doc = window._hash1doc;
+      window._hash1doc = null;
+      salvar();
+      alert('🔗 O processo Nº ' + found.num_processo + ' já tinha sido lançado antes '
+        + '(provavelmente com urgência, sem o processo no 1Doc ainda).\n\n'
+        + 'Servidor: ' + (existenteSemHash.servidor || '—') + '\n\n'
+        + 'Vinculei o link do 1Doc a essa diária automaticamente — não é preciso lançar de novo.');
+      modoIA = false;
+      filtrosIA = null;
+      termoBusca = found.num_processo;
+      var campoBuscaDup = document.getElementById('campoBusca');
+      if (campoBuscaDup) {
+        campoBuscaDup.value = termoBusca;
+        document.getElementById('btnLimparBusca').classList.toggle('visible', true);
+      }
+      switchTab('panel-tabela', 'tabTabela');
+      renderTabela();
+      setTimeout(function() {
+        var row = document.querySelector('#panel-tabela tr[data-id="'+existenteSemHash.id+'"]');
+        if (row) {
+          row.scrollIntoView({behavior:'smooth', block:'center'});
+          row.style.outline = '2px solid #ef4444';
+          row.style.outlineOffset = '-2px';
+          setTimeout(function(){ row.style.outline = ''; }, 3000);
+        }
+      }, 150);
+      return;
     }
   }
 }
