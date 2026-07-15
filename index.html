@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.2</span>
+    <span class="header-version">v1.6.3</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -854,6 +854,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <input type="text" id="edit-servidor" style="text-transform:uppercase">
       <div class="sugestoes-similares" id="edit-sugestoes"></div>
     </div>
+    <div class="field"><label>Nº do Processo</label><input type="text" id="edit-numprocesso"></div>
     <div class="field"><label>Nº do Empenho</label><input type="text" id="edit-empenho"></div>
     <div class="field"><label>Valor (R$)</label><input type="text" id="edit-valor"></div>
     <div class="field"><label>Cidade</label><input type="text" id="edit-cidade" style="text-transform:uppercase"></div>
@@ -3890,6 +3891,7 @@ document.addEventListener('click', function(e) {
   if (!p) return;
   editandoId = id;
   document.getElementById('edit-servidor').value = p.servidor || '';
+  document.getElementById('edit-numprocesso').value = p.numProcesso || '';
   document.getElementById('edit-empenho').value = p.empenho || '';
   document.getElementById('edit-valor').value = p.valor || '';
   document.getElementById('edit-cidade').value = p.cidade || '';
@@ -3936,6 +3938,7 @@ document.getElementById('edit-btn-salvar').addEventListener('click', function() 
   if (!p) return;
   var empenhoAntigo = p.empenho || '';
   p.servidor = document.getElementById('edit-servidor').value.trim().toUpperCase();
+  p.numProcesso = document.getElementById('edit-numprocesso').value.trim();
   p.empenho = document.getElementById('edit-empenho').value.trim();
   p.valor = document.getElementById('edit-valor').value.trim();
   p.cidade = document.getElementById('edit-cidade').value.trim().toUpperCase();
