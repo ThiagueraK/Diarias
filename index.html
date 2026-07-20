@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.3</span>
+    <span class="header-version">v1.6.4</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1269,6 +1269,29 @@ function parsear() {
   raw = raw.replace(/\n[ \t]+/g,'\n');
   raw = raw.replace(/[ \t]+\n/g,'\n');
   raw = raw.replace(/\n{3,}/g,'\n\n');
+
+  // Detecção de agente de saúde: processo de "Indenização Financeira de Transporte".
+  // Não é viagem — não preenche campos nem salva na tabela; só gera o texto da lei
+  // pronto para copiar e colar no 1Doc.
+  var rawNorm = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var ehAgenteSaude = /indenizacao financeira de transporte/.test(rawNorm)
+    || /agente (comunitario )?de saude|agente de combate a endemias/.test(rawNorm);
+  if (ehAgenteSaude) {
+    window._sgdParseando = false;
+    var descAgente = 'VALOR REFERENTE A INDENIZACAO FINANCEIRA DE TRANSPORTE AOS AGENTES COMUNITARIOS DE SAUDE E AGENTES DE COMBATE A ENDEMIAS, CONFORME LEI FEDERAL N 13595 DE 05 DE JANEIRO DE 2018 E LEI COMPLEMENTAR N 4795 DE 15 DE AGOSTO DE 2024.';
+    document.getElementById('outputText').textContent = descAgente;
+    document.getElementById('outputCard').classList.add('visible');
+    document.getElementById('tipBox').style.display = 'block';
+    document.getElementById('btnCopy').className = 'btn-copy';
+    document.getElementById('copyIcon').textContent = '📋';
+    document.getElementById('copyText').textContent = 'Copiar';
+    // Seleciona o botão "Agentes de Saúde" para deixar claro o tipo detectado
+    var radioAgente = document.querySelector('input[name="distancia"][value="agentes_saude"]');
+    if (radioAgente) radioAgente.checked = true;
+    document.getElementById('pasteInput').value = '';
+    document.getElementById('outputCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+    return;
+  }
 
   var btn = document.getElementById('btnParsear');
   btn.disabled = true;
