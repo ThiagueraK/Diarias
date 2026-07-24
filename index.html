@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.7</span>
+    <span class="header-version">v1.6.9</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -875,6 +875,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <div class="field"><label>Valor (R$)</label><input type="text" id="edit-valor"></div>
     <div class="field"><label>Cidade</label><input type="text" id="edit-cidade" style="text-transform:uppercase"></div>
     <div class="field"><label>Placa</label><input type="text" id="edit-placa" style="text-transform:uppercase"></div>
+    <div style="display:flex;gap:8px;">
+      <div class="field" style="flex:1;"><label>Data de Saída</label><input type="text" id="edit-datasaida" placeholder="DD/MM/AAAA"></div>
+      <div class="field" style="flex:1;"><label>Data de Chegada</label><input type="text" id="edit-datachegada" placeholder="DD/MM/AAAA"></div>
+    </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button id="edit-btn-salvar" style="flex:1;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✅ Salvar</button>
       <button id="edit-btn-cancelar" style="padding:10px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;">Cancelar</button>
@@ -1324,6 +1328,7 @@ function buscarMulta() {
   var alvoFim = alvoISO ? alvoISO + 'T' + (horaAlvo || '23:59') : '';
 
   var semHorario = 0;
+  var datasSuspeitas = 0;
   var achados = processos.filter(function(p) {
     if (placa && normalizarPlaca(p.placa).indexOf(placa) === -1) return false;
     if (!alvoISO) return true;
@@ -1331,6 +1336,13 @@ function buscarMulta() {
     if (!iniD) return false;
     var fimD = p.dataChegada ? brParaISO(p.dataChegada) : iniD;
     if (fimD < iniD) fimD = iniD; // proteção contra data de chegada digitada errada
+
+    // Diária não dura meses. Intervalo absurdo = erro de digitação (ex: ano 2027
+    // no lugar de 2026), o que faria a viagem "cobrir" qualquer data pesquisada.
+    // Nesses casos considera só o dia da saída e sinaliza para correção.
+    var dias = (new Date(fimD + 'T00:00') - new Date(iniD + 'T00:00')) / 86400000;
+    if (dias > 30) { fimD = iniD; p._dataSuspeita = true; datasSuspeitas++; }
+    else { p._dataSuspeita = false; }
 
     // Horários da viagem (vêm da descrição). Faltando, assume o dia todo.
     var hp = horasDoProcesso(p);
@@ -1363,16 +1375,25 @@ function buscarMulta() {
   box.innerHTML = titulo
     + achados.map(function(p) {
         var periodo = (p.dataSaida || '?') + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' até ' + p.dataChegada : '');
+        var avisoData = p._dataSuspeita
+          ? '<div style="font-size:12px;color:var(--danger);">⚠️ Data de chegada parece errada — considerei só o dia da saída. Vale corrigir no cadastro.</div>'
+          : '';
         var hpr = horasDoProcesso(p);
         var horas = (hpr.saida || hpr.chegada)
           ? '<div style="font-size:12px;color:var(--text-muted);">🕐 ' + (hpr.saida||'?') + ' → ' + (hpr.chegada||'?') + '</div>'
           : '<div style="font-size:12px;color:var(--warning);">🕐 sem horário na descrição</div>';
-        return '<div style="padding:10px 4px;border-bottom:1px solid var(--border);">'
+        return '<div style="padding:10px 4px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">'
+          + '<div style="min-width:0;">'
           + '<div style="font-weight:600;">' + (p.servidor || '(sem nome)') + '</div>'
           + '<div style="font-size:12px;color:var(--text-muted);">🚗 ' + (p.placa||'—') + ' · 📍 ' + (p.cidade||'—') + '</div>'
           + '<div style="font-size:12px;color:var(--text-muted);">📅 ' + periodo + '</div>'
+          + avisoData
           + horas
           + (p.numProcesso ? '<div style="font-size:12px;color:var(--text-muted);">📄 Processo ' + p.numProcesso + '</div>' : '')
+          + '</div>'
+          + '<button onclick="corrigirDaMulta(' + p.id + ')" title="Editar este processo" style="flex-shrink:0;padding:6px 10px;background:'
+          + (p._dataSuspeita ? 'var(--danger);color:#fff;border:none' : 'var(--surface2);color:var(--text);border:1.5px solid var(--border)')
+          + ';border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">✏️ Corrigir</button>'
           + '</div>';
       }).join('')
     + (achados.length > 1 && !horaAlvo
@@ -1385,6 +1406,19 @@ function buscarMulta() {
         ? '<p style="font-size:12px;color:var(--warning);margin-top:6px;">⚠️ ' + semHorario + ' viagem(ns) sem horário completo — foram consideradas o dia inteiro.</p>'
         : '');
 }
+// Vai do resultado da multa direto para a edição do processo.
+// Guarda os dados da consulta para poder refazer a busca depois de corrigir.
+function corrigirDaMulta(id) {
+  window._multaUltimaBusca = {
+    placa: document.getElementById('multa-placa').value,
+    data: document.getElementById('multa-data').value,
+    hora: document.getElementById('multa-hora').value
+  };
+  document.getElementById('modalMulta').style.display = 'none';
+  abrirEdicaoProcesso(id);
+}
+window.corrigirDaMulta = corrigirDaMulta;
+
 document.getElementById('btnConsultaMulta').addEventListener('click', abrirConsultaMulta);
 document.getElementById('btnBuscarMulta').addEventListener('click', buscarMulta);
 document.getElementById('multa-data').addEventListener('keydown', function(e){ if (e.key === 'Enter') buscarMulta(); });
@@ -4056,23 +4090,29 @@ function nomesSimilares(a, b) {
 }
 
 // Abre modal de edição
-document.addEventListener('click', function(e) {
-  var btn = e.target.closest('.btn-edit-row');
-  if (!btn) return;
-  var id = Number(btn.getAttribute('data-id'));
-  var p = processos.find(function(x){ return x.id === id; });
+function abrirEdicaoProcesso(id) {
+  var p = processos.find(function(x){ return x.id === Number(id); });
   if (!p) return;
-  editandoId = id;
+  editandoId = Number(id);
   document.getElementById('edit-servidor').value = p.servidor || '';
   document.getElementById('edit-numprocesso').value = p.numProcesso || '';
   document.getElementById('edit-empenho').value = p.empenho || '';
   document.getElementById('edit-valor').value = p.valor || '';
   document.getElementById('edit-cidade').value = p.cidade || '';
   document.getElementById('edit-placa').value = p.placa || '';
+  document.getElementById('edit-datasaida').value = p.dataSaida || '';
+  document.getElementById('edit-datachegada').value = p.dataChegada || '';
   document.getElementById('edit-unificar-info').textContent = '';
   mostrarSugestoesSimilares(p.servidor || '');
   document.getElementById('modalEditar').classList.add('open');
   document.getElementById('edit-servidor').focus();
+}
+window.abrirEdicaoProcesso = abrirEdicaoProcesso;
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-edit-row');
+  if (!btn) return;
+  abrirEdicaoProcesso(btn.getAttribute('data-id'));
 });
 
 // Mostra sugestões de nomes similares já no banco
@@ -4116,18 +4156,45 @@ document.getElementById('edit-btn-salvar').addEventListener('click', function() 
   p.valor = document.getElementById('edit-valor').value.trim();
   p.cidade = document.getElementById('edit-cidade').value.trim().toUpperCase();
   p.placa = document.getElementById('edit-placa').value.trim().toUpperCase();
+  var dsNovo = document.getElementById('edit-datasaida').value.trim();
+  var dcNovo = document.getElementById('edit-datachegada').value.trim();
+  var formatoData = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+  if (dsNovo && !formatoData.test(dsNovo)) { alert('Data de saída inválida. Use DD/MM/AAAA.'); return; }
+  if (dcNovo && !formatoData.test(dcNovo)) { alert('Data de chegada inválida. Use DD/MM/AAAA.'); return; }
+  p.dataSaida = dsNovo;
+  p.dataChegada = dcNovo;
   // Marca a data de empenho se ele passou de vazio para preenchido
   if (!empenhoAntigo && p.empenho) p.empenhadoEm = Date.now();
   salvar();
   document.getElementById('modalEditar').classList.remove('open');
   renderTabela();
   editandoId = null;
+
+  // Se veio da consulta de multa, volta para ela já com a busca refeita
+  if (window._multaUltimaBusca) {
+    var b = window._multaUltimaBusca;
+    window._multaUltimaBusca = null;
+    document.getElementById('modalMulta').style.display = 'flex';
+    document.getElementById('multa-placa').value = b.placa || '';
+    document.getElementById('multa-data').value = b.data || '';
+    document.getElementById('multa-hora').value = b.hora || '';
+    buscarMulta();
+  }
 });
 
 // Cancelar edição
 document.getElementById('edit-btn-cancelar').addEventListener('click', function() {
   document.getElementById('modalEditar').classList.remove('open');
   editandoId = null;
+  if (window._multaUltimaBusca) {
+    var b = window._multaUltimaBusca;
+    window._multaUltimaBusca = null;
+    document.getElementById('modalMulta').style.display = 'flex';
+    document.getElementById('multa-placa').value = b.placa || '';
+    document.getElementById('multa-data').value = b.data || '';
+    document.getElementById('multa-hora').value = b.hora || '';
+    buscarMulta();
+  }
 });
 
 // Fechar clicando fora
