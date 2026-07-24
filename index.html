@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.9</span>
+    <span class="header-version">v1.7.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -878,6 +878,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <div style="display:flex;gap:8px;">
       <div class="field" style="flex:1;"><label>Data de Saída</label><input type="text" id="edit-datasaida" placeholder="DD/MM/AAAA"></div>
       <div class="field" style="flex:1;"><label>Data de Chegada</label><input type="text" id="edit-datachegada" placeholder="DD/MM/AAAA"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <div class="field" style="flex:1;"><label>Hora de Saída</label><input type="time" id="edit-horasaida"></div>
+      <div class="field" style="flex:1;"><label>Hora de Chegada</label><input type="time" id="edit-horachegada"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button id="edit-btn-salvar" style="flex:1;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✅ Salvar</button>
@@ -2256,7 +2260,8 @@ function gerar() {
   var diaRef = hojeISO();
 
   pendente = {servidor:servidor, numProcesso:numProcesso, cidade:cidade+'/'+uf,
-    dataSaida:dataSaida, dataChegada:dataChegada, placa:placa, diaRef:diaRef};
+    dataSaida:dataSaida, dataChegada:dataChegada, placa:placa, diaRef:diaRef,
+    horaSaida:horaSaida || '', horaChegada:horaChegada || ''};
   // Grava a hash do 1Doc no próprio processo pendente (viaja junto até salvar)
   if (window._hash1doc) {
     pendente.hash1doc = window._hash1doc;
@@ -4102,6 +4107,9 @@ function abrirEdicaoProcesso(id) {
   document.getElementById('edit-placa').value = p.placa || '';
   document.getElementById('edit-datasaida').value = p.dataSaida || '';
   document.getElementById('edit-datachegada').value = p.dataChegada || '';
+  var hEdit = horasDoProcesso(p);
+  document.getElementById('edit-horasaida').value = hEdit.saida || '';
+  document.getElementById('edit-horachegada').value = hEdit.chegada || '';
   document.getElementById('edit-unificar-info').textContent = '';
   mostrarSugestoesSimilares(p.servidor || '');
   document.getElementById('modalEditar').classList.add('open');
@@ -4163,6 +4171,8 @@ document.getElementById('edit-btn-salvar').addEventListener('click', function() 
   if (dcNovo && !formatoData.test(dcNovo)) { alert('Data de chegada inválida. Use DD/MM/AAAA.'); return; }
   p.dataSaida = dsNovo;
   p.dataChegada = dcNovo;
+  p.horaSaida = document.getElementById('edit-horasaida').value || '';
+  p.horaChegada = document.getElementById('edit-horachegada').value || '';
   // Marca a data de empenho se ele passou de vazio para preenchido
   if (!empenhoAntigo && p.empenho) p.empenhadoEm = Date.now();
   salvar();
