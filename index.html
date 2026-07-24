@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.6.4</span>
+    <span class="header-version">v1.6.7</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -631,10 +631,11 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <button class="btn-busca-ia" id="btnBuscaIA">✨ Buscar com IA</button>
     </div>
     <div class="busca-hint">💡 Digite normalmente para busca rápida, ou clique em <strong>✨ Buscar com IA</strong> para pesquisa em linguagem natural: <em>"João que foi para Santa Maria dia 16/03 com placa TQU"</em></div>
-    <div style="margin:8px 0;">
-      <select id="filtroServidor" style="font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;width:100%;">
+    <div style="margin:8px 0;display:flex;gap:8px;align-items:center;">
+      <select id="filtroServidor" style="font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;flex:1;">
         <option value="">👤 Todos os servidores</option>
       </select>
+      <button id="btnConsultaMulta" title="Descobrir quem dirigia na data da multa" style="font-size:13px;padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap;">🚨 Multa</button>
     </div>
     <div class="busca-loading" id="buscaLoading"><div class="spinner"></div> Interpretando sua consulta com IA...</div>
     <div class="busca-ia-resultado" id="buscaIAResultado"></div>
@@ -805,6 +806,21 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 </div>
 
 <!-- MODAL DETALHE DA SOLICITAÇÃO (PDF + fotos) -->
+<div id="modalMulta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <h3 style="margin:0;font-size:16px;">🚨 Quem dirigia na data da multa</h3>
+      <button onclick="document.getElementById('modalMulta').style.display='none';" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin:0 0 14px;">Considera todo o período da viagem (saída até a chegada), não só o dia de saída.</p>
+    <div class="field"><label>Placa</label><input type="text" id="multa-placa" placeholder="Ex: TQU3F45" style="text-transform:uppercase"></div>
+    <div class="field"><label>Data da multa</label><input type="text" id="multa-data" placeholder="DD/MM/AAAA"></div>
+    <div class="field"><label>Hora da multa <span style="font-weight:400;color:var(--text-muted);">(opcional, mas ajuda muito)</span></label><input type="text" id="multa-hora" placeholder="HH:MM"></div>
+    <button id="btnBuscarMulta" style="width:100%;margin-top:12px;padding:11px;background:var(--brand-deep,#0f5132);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">🔍 Buscar</button>
+    <div id="multa-resultado" style="margin-top:16px;"></div>
+  </div>
+</div>
+
 <div id="modalSolicitacao" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1240,6 +1256,140 @@ function usarSolicitacaoNoGerador(chave) {
 window.verSolicitacaoBot = verSolicitacaoBot;
 window.apagarSolicitacaoBot = apagarSolicitacaoBot;
 window.usarSolicitacaoNoGerador = usarSolicitacaoNoGerador;
+
+// ═══ CONSULTA DE MULTA ═══
+// Descobre quem estava com o veículo na data da infração. A comparação usa o
+// PERÍODO da viagem (saída até chegada), não só a data de saída — senão uma multa
+// tomada no dia da volta não é encontrada.
+function normalizarPlaca(p) {
+  return String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+// Aceita "6:00", "06:00", "0600", "6h30" -> "06:00"
+function normalizarHoraMulta(h) {
+  var s = String(h || '').replace(/[^0-9]/g, '');
+  if (!s) return '';
+  if (s.length <= 2) return s.padStart(2, '0') + ':00';
+  s = s.padStart(4, '0').slice(0, 4);
+  var hh = s.slice(0, 2), mm = s.slice(2, 4);
+  if (Number(hh) > 23 || Number(mm) > 59) return '';
+  return hh + ':' + mm;
+}
+// Os horários não são campos do processo — ficam dentro do texto da descrição
+// ("HORA DE SAÍDA: 08:00, HORA DE CHEGADA: 17:00"). Extrai de lá.
+function horasDoProcesso(p) {
+  var out = { saida: normalizarHoraMulta(p.horaSaida) || '', chegada: normalizarHoraMulta(p.horaChegada) || '' };
+  if (out.saida && out.chegada) return out;
+  var d = String(p.descricao || '');
+  if (!d) return out;
+  var dn = d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  if (!out.saida) {
+    var ms = dn.match(/HORA DE SAIDA:\s*(\d{1,2})[:H](\d{2})/);
+    if (ms) out.saida = ms[1].padStart(2,'0') + ':' + ms[2];
+  }
+  if (!out.chegada) {
+    var mc = dn.match(/HORA DE CHEGADA:\s*(\d{1,2})[:H](\d{2})/);
+    if (mc) out.chegada = mc[1].padStart(2,'0') + ':' + mc[2];
+  }
+  return out;
+}
+function abrirConsultaMulta() {
+  document.getElementById('multa-placa').value = '';
+  document.getElementById('multa-data').value = '';
+  document.getElementById('multa-hora').value = '';
+  document.getElementById('multa-resultado').innerHTML = '';
+  document.getElementById('modalMulta').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('multa-placa').focus(); }, 50);
+}
+function buscarMulta() {
+  var placa = normalizarPlaca(document.getElementById('multa-placa').value);
+  var dataTxt = document.getElementById('multa-data').value.trim();
+  var horaTxt = document.getElementById('multa-hora').value.trim();
+  var box = document.getElementById('multa-resultado');
+
+  if (!placa && !dataTxt) { box.innerHTML = '<p style="color:var(--danger);">Informe ao menos a placa ou a data.</p>'; return; }
+
+  var alvoISO = dataTxt ? brParaISO(dataTxt) : '';
+  if (dataTxt && (!alvoISO || alvoISO.length < 10)) {
+    box.innerHTML = '<p style="color:var(--danger);">Data inválida. Use DD/MM/AAAA.</p>';
+    return;
+  }
+  var horaAlvo = horaTxt ? normalizarHoraMulta(horaTxt) : '';
+  if (horaTxt && !horaAlvo) {
+    box.innerHTML = '<p style="color:var(--danger);">Hora inválida. Use HH:MM.</p>';
+    return;
+  }
+
+  // Momento exato da infração. Sem hora informada, considera o dia inteiro.
+  var alvoIni = alvoISO ? alvoISO + 'T' + (horaAlvo || '00:00') : '';
+  var alvoFim = alvoISO ? alvoISO + 'T' + (horaAlvo || '23:59') : '';
+
+  var semHorario = 0;
+  var achados = processos.filter(function(p) {
+    if (placa && normalizarPlaca(p.placa).indexOf(placa) === -1) return false;
+    if (!alvoISO) return true;
+    var iniD = p.dataSaida ? brParaISO(p.dataSaida) : '';
+    if (!iniD) return false;
+    var fimD = p.dataChegada ? brParaISO(p.dataChegada) : iniD;
+    if (fimD < iniD) fimD = iniD; // proteção contra data de chegada digitada errada
+
+    // Horários da viagem (vêm da descrição). Faltando, assume o dia todo.
+    var hp = horasDoProcesso(p);
+    var hIni = hp.saida || '00:00';
+    var hFim = hp.chegada || '23:59';
+    if (horaAlvo && (!hp.saida || !hp.chegada)) semHorario++;
+
+    var viagemIni = iniD + 'T' + hIni;
+    var viagemFim = fimD + 'T' + hFim;
+    if (viagemFim < viagemIni) viagemFim = fimD + 'T23:59';
+
+    // Sobreposição entre o momento da multa e o período da viagem
+    return alvoIni <= viagemFim && alvoFim >= viagemIni;
+  });
+
+  if (achados.length === 0) {
+    box.innerHTML = '<div style="padding:12px;background:var(--surface2);border-radius:9px;font-size:13px;">'
+      + '<strong>Nenhuma viagem encontrada.</strong><br><br>'
+      + 'Vale lembrar: só aparecem aqui viagens que geraram diária. '
+      + 'Deslocamento local ou viagem sem diária não fica registrado no sistema.</div>';
+    return;
+  }
+
+  achados.sort(function(a,b){ return brParaISO(a.dataSaida||'').localeCompare(brParaISO(b.dataSaida||'')); });
+
+  var titulo = achados.length === 1
+    ? '<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--success);">✅ Um único motorista estava com o veículo:</div>'
+    : '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + achados.length + ' viagens cobrem esse momento:</div>';
+
+  box.innerHTML = titulo
+    + achados.map(function(p) {
+        var periodo = (p.dataSaida || '?') + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' até ' + p.dataChegada : '');
+        var hpr = horasDoProcesso(p);
+        var horas = (hpr.saida || hpr.chegada)
+          ? '<div style="font-size:12px;color:var(--text-muted);">🕐 ' + (hpr.saida||'?') + ' → ' + (hpr.chegada||'?') + '</div>'
+          : '<div style="font-size:12px;color:var(--warning);">🕐 sem horário na descrição</div>';
+        return '<div style="padding:10px 4px;border-bottom:1px solid var(--border);">'
+          + '<div style="font-weight:600;">' + (p.servidor || '(sem nome)') + '</div>'
+          + '<div style="font-size:12px;color:var(--text-muted);">🚗 ' + (p.placa||'—') + ' · 📍 ' + (p.cidade||'—') + '</div>'
+          + '<div style="font-size:12px;color:var(--text-muted);">📅 ' + periodo + '</div>'
+          + horas
+          + (p.numProcesso ? '<div style="font-size:12px;color:var(--text-muted);">📄 Processo ' + p.numProcesso + '</div>' : '')
+          + '</div>';
+      }).join('')
+    + (achados.length > 1 && !horaAlvo
+        ? '<p style="font-size:12px;color:var(--text-muted);margin-top:10px;">💡 Informe a <strong>hora da multa</strong> para reduzir a lista — costuma sobrar um só.</p>'
+        : '')
+    + (achados.length > 1 && horaAlvo
+        ? '<p style="font-size:12px;color:var(--text-muted);margin-top:10px;">Compare o <strong>local da infração</strong> com o destino de cada viagem para decidir.</p>'
+        : '')
+    + (semHorario > 0 && horaAlvo
+        ? '<p style="font-size:12px;color:var(--warning);margin-top:6px;">⚠️ ' + semHorario + ' viagem(ns) sem horário completo — foram consideradas o dia inteiro.</p>'
+        : '');
+}
+document.getElementById('btnConsultaMulta').addEventListener('click', abrirConsultaMulta);
+document.getElementById('btnBuscarMulta').addEventListener('click', buscarMulta);
+document.getElementById('multa-data').addEventListener('keydown', function(e){ if (e.key === 'Enter') buscarMulta(); });
+document.getElementById('multa-hora').addEventListener('keydown', function(e){ if (e.key === 'Enter') buscarMulta(); });
+document.getElementById('multa-placa').addEventListener('keydown', function(e){ if (e.key === 'Enter') buscarMulta(); });
 
 // ═══════════════════════════════════════════════════════
 // RADIO DISTÂNCIA
