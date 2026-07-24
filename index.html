@@ -98,9 +98,9 @@ display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align
   .btn-edit-row{
 background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:13px;color:var(--accent);transition:all .15s;}
   .btn-edit-row:hover{background:var(--accent-light);}
-  #modalEditar{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center;}
+  #modalEditar{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}
   #modalEditar.open{display:flex;}
-  #modalEditar .modal-inner{background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  #modalEditar .modal-inner{background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:85vh;overflow-y:auto;}
   #modalEditar h3{margin:0 0 16px;font-size:16px;}
   #modalEditar .field{margin-bottom:12px;}
   #modalEditar label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.1</span>
+    <span class="header-version">v1.7.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -883,6 +883,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="field" style="flex:1;"><label>Hora de Saída</label><input type="time" id="edit-horasaida"></div>
       <div class="field" style="flex:1;"><label>Hora de Chegada</label><input type="time" id="edit-horachegada"></div>
     </div>
+    <div id="edit-hash-area" style="margin-top:4px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button id="edit-btn-salvar" style="flex:1;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">✅ Salvar</button>
       <button id="edit-btn-cancelar" style="padding:10px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;">Cancelar</button>
@@ -4120,6 +4121,15 @@ function abrirEdicaoProcesso(id) {
   document.getElementById('edit-horasaida').value = hEdit.saida || '';
   document.getElementById('edit-horachegada').value = hEdit.chegada || '';
   document.getElementById('edit-unificar-info').textContent = '';
+  var areaHash = document.getElementById('edit-hash-area');
+  if (p.hash1doc) {
+    areaHash.innerHTML = '<a href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash1doc + '&itd=7" target="_blank" '
+      + 'style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--brand-deep);text-decoration:none;font-weight:600;">'
+      + '🔗 Abrir este processo no 1Doc</a>'
+      + '<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Para conferir os dados na origem antes de corrigir.</div>';
+  } else {
+    areaHash.innerHTML = '<div style="font-size:11px;color:var(--text-muted);">Sem link do 1Doc neste processo.</div>';
+  }
   mostrarSugestoesSimilares(p.servidor || '');
   document.getElementById('modalEditar').classList.add('open');
   document.getElementById('edit-servidor').focus();
