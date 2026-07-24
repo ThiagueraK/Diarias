@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.0</span>
+    <span class="header-version">v1.7.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2651,6 +2651,7 @@ function renderTabela() {
       '<td>'+hl(p.cidade,'cidade')+'</td>'+
       '<td class="td-num">'+hl(p.dataSaida,'dataSaida')+'</td>'+
       '<td class="td-num">'+hl(p.dataChegada,'dataChegada')+'</td>'+
+      '<td class="td-num">'+horarioResumo(p)+'</td>'+
       '<td class="td-num">'+hl(p.placa,'placa')+'</td>'+
       '<td class="td-num">'+(p.km ? p.km+' km' : '<span style="color:var(--text-muted)">—</span>')+'</td>'+
       '<td>'+badgePC+'</td>'+
@@ -2680,7 +2681,7 @@ function renderTabela() {
     '<div class="table-wrap"><table>'+
     '<thead><tr>'+
     '<th>#</th><th>Nome do Credor</th><th>Nº Processo</th><th>Nº Empenho</th>'+
-    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Pagto Avisado</th><th>Adicionado</th><th>Prest. Contas</th><th></th>'+
+    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Pagto Avisado</th><th>Adicionado</th><th>Prest. Contas</th><th></th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
     (totalStr ? '<tfoot><tr><td colspan="4" style="text-align:right;font-weight:700;padding:10px;color:var(--text-muted);font-size:12px;">TOTAL DO DIA:</td>'+
     '<td style="font-weight:700;color:var(--accent);padding:10px;">'+totalStr+'</td>'+
@@ -3935,7 +3936,7 @@ function renderRelatorio() {
       ? '<button class="rel-btn-desc" onclick="toggleDesc(\''+descId+'\')" title="Ver descrição">▶</button>'
       : '<span style="color:var(--border);font-size:11px;">—</span>';
     var descRow = temDesc
-      ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="16"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
+      ? '<tr id="'+descId+'" class="rel-desc-row" style="display:none;"><td colspan="17"><div class="rel-desc-inner">'+p.descricao.trim()+'</div></td></tr>'
       : '';
     return '<tr data-id="'+p.id+'" class="rel-row-clicavel" title="Duplo clique para ver na Tabela de Controle">'
       +'<td class="col-num">'+(i+1)+'</td>'
@@ -3946,6 +3947,7 @@ function renderRelatorio() {
       +'<td class="col-cidade">'+(p.cidade||'')+'</td>'
       +'<td>'+(p.dataSaida||'')+'</td>'
       +'<td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+horarioResumo(p)+'</td>'
       +'<td>'+(p.placa||'—')+'</td>'
       +'<td>'+(p.km?p.km+'&nbsp;km':'—')+'</td>'
       +'<td>'+pc+'</td>'
@@ -3960,7 +3962,7 @@ function renderRelatorio() {
   document.getElementById('rel-tabela').innerHTML =
     '<table class="rel-table"><thead><tr>'
     +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
-    +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th>'
+    +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th><th>Horário</th>'
     +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th><th>📄</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 
@@ -4064,6 +4066,13 @@ function sgdValorNum(v) {
   if (s.indexOf(',') !== -1) s = s.replace(/\./g, '').replace(',', '.');
   var n = parseFloat(s);
   return isNaN(n) ? 0 : n;
+}
+
+// Horário da viagem em formato curto para as tabelas ("08:00 → 17:00").
+function horarioResumo(p) {
+  var h = horasDoProcesso(p);
+  if (!h.saida && !h.chegada) return '<span class="td-empty">—</span>';
+  return (h.saida || '?') + ' → ' + (h.chegada || '?');
 }
 
 // Data em que o processo foi ADICIONADO na tabela. O id de cada processo já é
@@ -4355,11 +4364,12 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       ? '<b style="color:#16a34a">&#128176; '+p.pagamentoNotificadoEm.split(';').pop()+'</b>'
       : '—';
     var descRow = (p.descricao && p.descricao.trim())
-      ? '<tr><td colspan="15" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
+      ? '<tr><td colspan="16" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
       : '';
     return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
       +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
       +'<td>'+(p.cidade||'')+'</td><td>'+(p.dataSaida||'')+'</td><td>'+(p.dataChegada||'')+'</td>'
+      +'<td>'+horarioResumo(p).replace(/<[^>]+>/g,'').replace('—','-')+'</td>'
       +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td>'
       +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td>'
       +'<td>'+pagAvisado+'</td><td>'+dataAdicaoBR(p.id)+'</td></tr>'
@@ -4409,7 +4419,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     +'<div class="sec"><h2>&#128205; Por Cidade (Top 8)</h2>'+barrasCid+'</div>'
     +'</div>'
     +'<div class="sec"><h2>&#128203; Processos Detalhados</h2>'
-    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th></tr></thead>'
+    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th></tr></thead>'
     +'<tbody>'+linhasTabela+'</tbody></table></div>'
     +'<div style="text-align:center;font-size:9px;color:#aaa;margin-top:12px;">SGD &mdash; Setor de Gest&atilde;o de Di&aacute;rias &middot; Prefeitura Municipal de Tupanciret&atilde;/RS</div>'
     +'<script>window.onload=function(){window.print();};<\/script>'
