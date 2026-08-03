@@ -1175,11 +1175,16 @@ function carregarSolicitacoesBot() {
       var comprovanteTag = s.qtdComprovantes > 0
         ? '<span style="background:var(--accent-light);color:var(--brand-deep);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;">📎 '+s.qtdComprovantes+'</span>'
         : '<span style="color:var(--text-dim);font-size:11px;">sem comprovante</span>';
+      // Processo já gerado automaticamente no 1Doc (pelo botão do bot) — mostra o número
+      // e um link direto pro processo, pra já poder lançar sem precisar procurar o hash.
+      var onedocTag = s.onedocNumeroProcesso
+        ? '<a href="'+s.onedocUrl+'" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">📄 Proc. '+s.onedocNumeroProcesso+'</a>'
+        : '';
       return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);">'
         +'<div style="min-width:0;">'
           +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.nome+'</div>'
           +'<div style="font-size:12px;color:var(--text-muted);">'+s.dataSaida+' · '+(s.cidade||'')+' · '+(s.placa||'')+'</div>'
-          +'<div style="margin-top:3px;">'+comprovanteTag+'</div>'
+          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;flex-shrink:0;">'
           +'<button onclick="usarSolicitacaoNoGerador(\''+s.chave+'\')" title="Puxar estes dados para o Gerador" style="padding:6px 10px;background:var(--accent-light);color:var(--brand-deep);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">📋 Usar no Gerador</button>'
@@ -2042,6 +2047,11 @@ function preencherDadosDoBot(solic, raw, servidorAncorado) {
   var numProcesso = '';
   var mProc = (raw || '').match(/Proc\.?\s*Administrativo\s*(\d[\d.]*\/\d{4})/i);
   if (mProc) numProcesso = mProc[1].trim();
+
+  // Se o processo já foi gerado automaticamente pelo botão do bot no 1Doc, o número e
+  // a hash já vêm prontos na própria solicitação — nem precisa colar nada do 1Doc.
+  if (!numProcesso && solic.onedocNumeroProcesso) numProcesso = solic.onedocNumeroProcesso;
+  if (solic.onedocHash) window._hash1doc = solic.onedocHash;
 
   // Se não veio número do texto (ex: fluxo do PDF), preserva o que já está no campo
   // (capturado quando você abriu o processo no 1Doc antes do PDF).
