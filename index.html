@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.5</span>
+    <span class="header-version">v1.7.6</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1240,7 +1240,7 @@ function verSolicitacaoBot(chave) {
       html += '<div style="margin-top:14px;font-weight:600;">📎 Comprovantes ('+comprovantes.length+')</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">'
         + comprovantes.map(function(b64,i){
-            return '<a href="data:image/jpeg;base64,'+b64+'" target="_blank" style="display:block;">'
+            return '<a href="#" onclick="abrirComprovanteAmpliado(this, event)" data-b64="'+b64+'" style="display:block;">'
               + '<img src="data:image/jpeg;base64,'+b64+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Comprovante '+(i+1)+'">'
               + '</a>';
           }).join('')
@@ -1284,6 +1284,25 @@ function usarSolicitacaoNoGerador(chave) {
   var painel = document.getElementById('panel-gerador');
   if (painel) painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+// Abre o comprovante em tamanho maior numa aba nova. Não usa a data-URI direto no href —
+// o Chrome (e outros navegadores modernos) bloqueia silenciosamente navegação de nível
+// superior pra URLs "data:" (proteção contra phishing), o que fazia abrir uma aba em
+// branco. Convertendo pra Blob e usando URL.createObjectURL, a aba abre normalmente.
+function abrirComprovanteAmpliado(link, evento) {
+  evento.preventDefault();
+  var b64 = link.getAttribute('data-b64');
+  var bin = atob(b64);
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  var blob = new Blob([bytes], { type: 'image/jpeg' });
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  // Revoga depois de um tempo — dá folga pra aba nova terminar de carregar a imagem antes
+  // da URL parar de funcionar.
+  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+}
+window.abrirComprovanteAmpliado = abrirComprovanteAmpliado;
+
 window.verSolicitacaoBot = verSolicitacaoBot;
 window.apagarSolicitacaoBot = apagarSolicitacaoBot;
 window.usarSolicitacaoNoGerador = usarSolicitacaoNoGerador;
