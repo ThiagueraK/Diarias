@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.7</span>
+    <span class="header-version">v1.7.8</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4125,12 +4125,44 @@ var NOMES_CANONICOS = {
   'PAULO ROBERTO MARTINS': 'PAULO CAVALHEIRO'
 };
 
-// Se o nome bater com uma grafia alternativa j\u00e1 conhecida, devolve o nome can\u00f4nico;
-// sen\u00e3o devolve o nome como veio (n\u00e3o inventa fus\u00e3o nenhuma sozinho).
+// Se o nome bater com uma grafia alternativa j\u00e1 conhecida (lista fixa) OU j\u00e1 existir um
+// motorista cadastrado nos processos com o mesmo nome s\u00f3 que com acento diferente, devolve
+// a grafia certa; sen\u00e3o devolve o nome como veio (n\u00e3o inventa fus\u00e3o nenhuma sozinho \u2014 s\u00f3
+// corrige o que j\u00e1 \u00e9 comprovadamente a mesma pessoa).
 function aplicarNomeCanonico(nome) {
   if (!nome) return nome;
-  var canonico = NOMES_CANONICOS[normalizarNome(nome)];
-  return canonico || nome;
+
+  // Erro de digita\u00e7\u00e3o recorrente: "DIARIA " colado antes do nome de verdade (ex: motorista
+  // copiou o t\u00edtulo do processo junto). Remove sempre, n\u00e3o \u00e9 fus\u00e3o de pessoa nenhuma.
+  nome = nome.replace(/^di[a\u00e1]ria\s+/i, '').trim();
+
+  var norm = normalizarNome(nome);
+
+  // Lista fixa de apelidos/abrevia\u00e7\u00f5es j\u00e1 revisados manualmente.
+  if (NOMES_CANONICOS[norm]) return NOMES_CANONICOS[norm];
+
+  // Diferen\u00e7a s\u00f3 de acento contra um nome que j\u00e1 existe na Tabela de Controle: adota a
+  // grafia mais usada pra essa pessoa em vez de criar mais uma varia\u00e7\u00e3o. S\u00f3 entra aqui se
+  // o nome n\u00e3o bater 100% com nada (sen\u00e3o nem precisaria ajustar).
+  if (typeof processos !== 'undefined') {
+    var jaExiste = processos.some(function (p) { return p.servidor && p.servidor.trim() === nome; });
+    if (!jaExiste) {
+      var contagemPorGrafia = {};
+      processos.forEach(function (p) {
+        var s = p.servidor && p.servidor.trim();
+        if (s && normalizarNome(s) === norm) {
+          contagemPorGrafia[s] = (contagemPorGrafia[s] || 0) + 1;
+        }
+      });
+      var grafias = Object.keys(contagemPorGrafia);
+      if (grafias.length > 0) {
+        grafias.sort(function (a, b) { return contagemPorGrafia[b] - contagemPorGrafia[a]; });
+        return grafias[0];
+      }
+    }
+  }
+
+  return nome;
 }
 
 // Converte valor em texto para número, aceitando formato brasileiro.
