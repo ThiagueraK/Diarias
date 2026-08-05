@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.4</span>
+    <span class="header-version">v1.7.5</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1189,6 +1189,11 @@ function carregarSolicitacoesBot() {
       var tabelaTag = jaNaTabela
         ? '<span onclick="abrirProcessoNaTabela('+jaNaTabela.id+')" title="Clique para ver na Tabela de Controle" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,235,.12);color:var(--accent2);border:1px solid rgba(37,99,235,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">✅ Já na tabela</span>'
         : '';
+      // Origem: 'saudefrota' = veio direto do app dos motoristas (já com processo pronto,
+      // na maioria das vezes); 'bot' (padrão) = veio do bot do Telegram, como sempre foi.
+      var origemTag = s.origem === 'saudefrota'
+        ? '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,.12);color:#7c3aed;border:1px solid rgba(124,58,237,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">📱 App</span>'
+        : '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--text-dim);font-size:11px;margin-left:6px;">🤖 Bot</span>';
       var rowStyle = jaNaTabela
         ? 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);opacity:.65;'
         : 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);';
@@ -1196,7 +1201,7 @@ function carregarSolicitacoesBot() {
         +'<div style="min-width:0;">'
           +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.nome+'</div>'
           +'<div style="font-size:12px;color:var(--text-muted);">'+s.dataSaida+' · '+(s.cidade||'')+' · '+(s.placa||'')+'</div>'
-          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+tabelaTag+'</div>'
+          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+tabelaTag+origemTag+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;flex-shrink:0;">'
           +'<button onclick="usarSolicitacaoNoGerador(\''+s.chave+'\')" title="Puxar estes dados para o Gerador" style="padding:6px 10px;background:var(--accent-light);color:var(--brand-deep);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">📋 Usar no Gerador</button>'
