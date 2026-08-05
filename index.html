@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.6</span>
+    <span class="header-version">v1.7.7</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2474,6 +2474,11 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 // STORAGE
 // ═══════════════════════════════════════════════════════
 function adicionarProcesso(dados) {
+  // Corrige pra grafia canônica ANTES de checar duplicata — assim um processo novo colado
+  // como "Douglas Padilha" já entra como "Douglas Quevedo Padilha" e casa certo com o que
+  // já existe, em vez de criar mais uma variação separada.
+  dados.servidor = aplicarNomeCanonico(dados.servidor);
+
   // Verifica duplicata: mesmo credor + mesma data de ida + mesma cidade
   var duplicata = processos.find(function(p) {
     var mesmoCred = p.servidor && dados.servidor &&
@@ -4103,6 +4108,31 @@ function normalizarNome(nome) {
     .replace(/\s+/g,' ').trim();
 }
 
+// Apelidos/grafias j\u00e1 confirmadas como a MESMA pessoa (revisado manualmente em 2026-08-05,
+// ver limpeza que unificou 116 processos antigos) \u2014 chave \u00e9 a grafia alternativa (j\u00e1
+// normalizada), valor \u00e9 o nome can\u00f4nico que deve ser gravado a partir de agora. Sem isso,
+// a bagun\u00e7a de nomes volta a se acumular a cada processo novo colado do 1Doc com uma
+// grafia diferente da que j\u00e1 vimos antes.
+var NOMES_CANONICOS = {
+  'DOUGLAS PADILHA': 'DOUGLAS QUEVEDO PADILHA',
+  'FRANCISCO SANDERS': 'FRANCISCO C SANDERS',
+  'JAIME MACHADO': 'JAIME COSTA MACHADO',
+  'FERNANDA WANDER': 'FERNANDA WANDER FERREIRA',
+  'RODOLFO DAMBROSIO': 'RODOLFO DE JESUS DAMBROSIO',
+  'PAULO ROBERTO COSTA DA SILVA': 'PAULO COSTA',
+  'PAULO ROBERTO CAVALHEIRO MARTINS': 'PAULO CAVALHEIRO',
+  'PAULO ROBERTO CAVALHEIRO': 'PAULO CAVALHEIRO',
+  'PAULO ROBERTO MARTINS': 'PAULO CAVALHEIRO'
+};
+
+// Se o nome bater com uma grafia alternativa j\u00e1 conhecida, devolve o nome can\u00f4nico;
+// sen\u00e3o devolve o nome como veio (n\u00e3o inventa fus\u00e3o nenhuma sozinho).
+function aplicarNomeCanonico(nome) {
+  if (!nome) return nome;
+  var canonico = NOMES_CANONICOS[normalizarNome(nome)];
+  return canonico || nome;
+}
+
 // Converte valor em texto para número, aceitando formato brasileiro.
 // "2.622,12" -> 2622.12 | "2622,12" -> 2622.12 | "2622.12" -> 2622.12
 // Se há vírgula, ela é o decimal e os pontos são separadores de milhar.
@@ -4223,7 +4253,7 @@ document.getElementById('edit-btn-salvar').addEventListener('click', function() 
   var p = processos.find(function(x){ return x.id === editandoId; });
   if (!p) return;
   var empenhoAntigo = p.empenho || '';
-  p.servidor = document.getElementById('edit-servidor').value.trim().toUpperCase();
+  p.servidor = aplicarNomeCanonico(document.getElementById('edit-servidor').value.trim().toUpperCase());
   p.numProcesso = document.getElementById('edit-numprocesso').value.trim();
   p.empenho = document.getElementById('edit-empenho').value.trim();
   p.valor = document.getElementById('edit-valor').value.trim();
