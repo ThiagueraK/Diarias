@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.8</span>
+    <span class="header-version">v1.7.9</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2510,8 +2510,15 @@ function adicionarProcesso(dados) {
   // Salva hash do processo no 1Doc para link direto.
   // Prioriza a hash que já veio no objeto (gravada no pendente); a global é fallback.
   if (!dados.hash1doc && window._hash1doc) { dados.hash1doc = window._hash1doc; }
-  processos.push(Object.assign({id: Date.now()}, dados));
+  var novoProcesso = Object.assign({id: Date.now()}, dados);
+  processos.push(novoProcesso);
   salvar(); atualizarBadge();
+
+  // Empenho já veio preenchido na criação (leitura automática do PDF) — notifica na hora,
+  // sem esperar alguém clicar em "Notificar Empenhos" depois.
+  if (novoProcesso.empenhadoEm) {
+    notificarAutomaticamente('notificar-empenhos', isoParaBR(hojeISO()), [novoProcesso], 'empenhoNotificadoEm');
+  }
 }
 function salvar() {
   atualizarBackupInfo();
@@ -2806,6 +2813,59 @@ document.getElementById('btnExportarMD').addEventListener('click', function() {
   });
   baixar(md, 'diarias_'+filtroAtivo+'.md', 'text/markdown');
 });
+
+// Aviso rápido e não-bloqueante (some sozinho) — usado pelas notificações automáticas de
+// empenho/pagamento, que não devem interromper quem está digitando com um alert().
+function mostrarAvisoRapido(texto, cor) {
+  var el = document.createElement('div');
+  el.textContent = texto;
+  el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);'
+    + 'background:' + (cor || '#16a34a') + ';color:#fff;padding:10px 18px;border-radius:999px;'
+    + 'font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;'
+    + 'opacity:0;transition:opacity .25s;max-width:90vw;text-align:center;';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ el.style.opacity = '1'; });
+  setTimeout(function(){
+    el.style.opacity = '0';
+    setTimeout(function(){ el.remove(); }, 300);
+  }, 4000);
+}
+
+// Dispara notificação de empenho/pagamento automaticamente (sem prompt/confirm), chamada
+// no exato momento em que o estado muda — ver adicionarProcesso, edit-btn-salvar e
+// processarTextoPagamentos. `acao` é 'notificar-empenhos' ou 'notificar-pagamentos',
+// `campoMarcacao` é o nome do campo ('empenhoNotificadoEm'/'pagamentoNotificadoEm') usado
+// pra não notificar a mesma coisa duas vezes — mesma checagem/marcação dos botões manuais,
+// que continuam existindo como reforço caso isso aqui falhe silenciosamente por algum motivo.
+function notificarAutomaticamente(acao, dataStr, lista, campoMarcacao) {
+  if (!lista || !lista.length) return;
+  var pendentes = lista.filter(function(p){
+    var marca = p[campoMarcacao] || '';
+    return marca.indexOf(dataStr) === -1;
+  });
+  if (!pendentes.length) return;
+
+  sgdFetch(SGD_WORKER_URL + '?action=' + acao, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: dataStr, processos: pendentes })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) { console.error('Falha ao notificar automaticamente:', res.error); return; }
+    pendentes.forEach(function(p){
+      var marca = p[campoMarcacao] || '';
+      if (marca.indexOf(dataStr) === -1) {
+        p[campoMarcacao] = marca ? (marca + ';' + dataStr) : dataStr;
+      }
+    });
+    salvar();
+    if (res.enviados > 0) {
+      mostrarAvisoRapido('✅ ' + res.enviados + ' motorista' + (res.enviados>1?'s':'') + ' notificado' + (res.enviados>1?'s':'') + ' automaticamente');
+    }
+  })
+  .catch(function(e){ console.error('Falha ao notificar automaticamente:', e.message); });
+}
 
 // Relatório mensal
 document.getElementById('btnNotificarPagamentos') && document.getElementById('btnNotificarPagamentos').addEventListener('click', function() {
@@ -4300,8 +4360,12 @@ document.getElementById('edit-btn-salvar').addEventListener('click', function() 
   p.dataChegada = dcNovo;
   p.horaSaida = document.getElementById('edit-horasaida').value || '';
   p.horaChegada = document.getElementById('edit-horachegada').value || '';
-  // Marca a data de empenho se ele passou de vazio para preenchido
-  if (!empenhoAntigo && p.empenho) p.empenhadoEm = Date.now();
+  // Marca a data de empenho se ele passou de vazio para preenchido — e já notifica o
+  // motorista na hora, sem precisar esperar clicar em "Notificar Empenhos" depois.
+  if (!empenhoAntigo && p.empenho) {
+    p.empenhadoEm = Date.now();
+    notificarAutomaticamente('notificar-empenhos', isoParaBR(hojeISO()), [p], 'empenhoNotificadoEm');
+  }
   salvar();
   document.getElementById('modalEditar').classList.remove('open');
   renderTabela();
@@ -4728,10 +4792,11 @@ document.getElementById('rel-input-pdf').addEventListener('change', function(e){
       status.style.color = 'var(--success,#2d5016)';
       resultado.style.display = 'block';
       resultado.innerHTML =
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">'
         +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">'+res.totalEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Empenhos no PDF</div></div>'
         +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#16a34a;">'+res.atualizados+'</div><div style="font-size:11px;color:var(--text-muted);">Marcados como Pagos</div></div>'
         +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#d97706;">'+res.naoEncontrados+'</div><div style="font-size:11px;color:var(--text-muted);">Sem empenho ou não encontrado</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:22px;font-weight:700;color:#7c3aed;">'+(res.notificados||0)+'</div><div style="font-size:11px;color:var(--text-muted);">Notificados no bot</div></div>'
         +'</div>';
       renderRelatorio();
     }).catch(function(err){
@@ -4779,14 +4844,17 @@ function processarTextoPagamentos(texto) {
   Object.assign(empenhosPagesPorNumero, novosMapa);
 
   var atualizados = 0;
+  var recemPagos = []; // só quem passou de não-pago pra pago nesta importação — pra notificar
   processos.forEach(function(p){
     if (!p.empenho) return;
     var numEmp = String(parseInt(p.empenho.replace(/[^\d]/g,''), 10));
     if (empenhosPagesPorNumero[numEmp]) {
       var info = empenhosPagesPorNumero[numEmp];
+      var jaEstavaPago = p.pago === true;
       p.pago = true;
       p.dataPagamento = info.dataPagamento;
       atualizados++;
+      if (!jaEstavaPago) recemPagos.push(p);
     }
   });
   var naoEncontrados = processos.filter(function(p){ return p.empenho && !p.pago; }).length;
@@ -4795,7 +4863,23 @@ function processarTextoPagamentos(texto) {
   sgdMeta.ultimaLeituraPagamentos = Date.now();
 
   salvar();
-  return { totalEncontrados: totalEncontrados, atualizados: atualizados, naoEncontrados: naoEncontrados };
+
+  // Notifica automaticamente quem acabou de ser marcado como pago — agrupado por data de
+  // pagamento (um PDF pode trazer datas diferentes), sem esperar alguém clicar em
+  // "Notificar Pagamentos" depois. dataPagamento vem com ponto (DD.MM.AAAA); a marcação de
+  // "já notificado" usa barra (DD/MM/AAAA), então converte antes de agrupar.
+  var porData = {};
+  recemPagos.forEach(function(p){
+    var dataBarra = String(p.dataPagamento || '').replace(/\./g, '/');
+    if (!dataBarra) return;
+    if (!porData[dataBarra]) porData[dataBarra] = [];
+    porData[dataBarra].push(p);
+  });
+  Object.keys(porData).forEach(function(dataBarra){
+    notificarAutomaticamente('notificar-pagamentos', dataBarra, porData[dataBarra], 'pagamentoNotificadoEm');
+  });
+
+  return { totalEncontrados: totalEncontrados, atualizados: atualizados, naoEncontrados: naoEncontrados, notificados: recemPagos.length };
 }
 
 // Ponte para a extensão: registra a implementação interna para o stub global.
