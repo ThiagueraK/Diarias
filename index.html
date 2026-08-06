@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.7.9</span>
+    <span class="header-version">v1.8.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1240,12 +1240,19 @@ function verSolicitacaoBot(chave) {
       html += '<div style="margin-top:14px;font-weight:600;">📎 Comprovantes ('+comprovantes.length+')</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">'
         + comprovantes.map(function(b64,i){
-            return '<a href="#" onclick="abrirComprovanteAmpliado(this, event)" data-b64="'+b64+'" style="display:block;">'
-              + '<img src="data:image/jpeg;base64,'+b64+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Comprovante '+(i+1)+'">'
+            // O app do SaúdeFrota manda o roteiro da viagem como PDF junto dos comprovantes
+            // (foto) — tratar tudo como imagem quebra a miniatura e a aba de abrir (o roteiro
+            // não é foto). Detecta pela assinatura em base64 ("JVBER" = "%PDF").
+            var ehPdf = b64.indexOf('JVBER') === 0;
+            var miniatura = ehPdf
+              ? '<div style="width:100px;height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);"><span style="font-size:28px;">📄</span><span style="font-size:10px;color:var(--text-muted);">Roteiro (PDF)</span></div>'
+              : '<img src="data:image/jpeg;base64,'+b64+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Comprovante '+(i+1)+'">';
+            return '<a href="#" onclick="abrirComprovanteAmpliado(this, event)" data-b64="'+b64+'" data-tipo="'+(ehPdf?'pdf':'imagem')+'" style="display:block;">'
+              + miniatura
               + '</a>';
           }).join('')
         + '</div>'
-        + '<p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Toque na imagem para abrir em tamanho maior.</p>';
+        + '<p style="font-size:11px;color:var(--text-muted);margin-top:6px;">Toque pra abrir em tamanho maior (ou baixar, no caso do roteiro).</p>';
     } else {
       html += '<p style="margin-top:14px;color:var(--text-muted);font-size:13px;">Sem comprovantes anexados.</p>';
     }
@@ -1291,14 +1298,17 @@ function usarSolicitacaoNoGerador(chave) {
 function abrirComprovanteAmpliado(link, evento) {
   evento.preventDefault();
   var b64 = link.getAttribute('data-b64');
+  var ehPdf = link.getAttribute('data-tipo') === 'pdf';
   var bin = atob(b64);
   var bytes = new Uint8Array(bin.length);
   for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  var blob = new Blob([bytes], { type: 'image/jpeg' });
+  // Tipo errado (sempre "image/jpeg" antes) fazia o roteiro em PDF não abrir — o navegador
+  // decide como renderizar pelo MIME type do Blob, não pelo conteúdo real dos bytes.
+  var blob = new Blob([bytes], { type: ehPdf ? 'application/pdf' : 'image/jpeg' });
   var url = URL.createObjectURL(blob);
   window.open(url, '_blank');
-  // Revoga depois de um tempo — dá folga pra aba nova terminar de carregar a imagem antes
-  // da URL parar de funcionar.
+  // Revoga depois de um tempo — dá folga pra aba nova terminar de carregar antes da URL
+  // parar de funcionar.
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
 window.abrirComprovanteAmpliado = abrirComprovanteAmpliado;
