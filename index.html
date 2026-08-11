@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.8.2</span>
+    <span class="header-version">v1.9.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -470,6 +470,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabAtividade">📱 Atividade do Bot</button>
     <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
+    <button class="tab-btn" id="tabPC">📄 Prestação de Contas <span class="tab-badge" id="badgePCCount">0</span></button>
   </div>
 
   <!-- ══════════════════════════════════════ -->
@@ -805,6 +806,17 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     </div>
   </div>
 
+  <div class="tab-panel" id="panel-pc">
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📄 Prestação de Contas — fila</span>
+        <span id="pcFilaContador" style="font-size:12px;color:var(--text-muted);font-family:var(--mono);"></span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 16px;">Mostra só o próximo pendente por vez — evita clicar no empenho errado. Ao marcar como concluído, some da fila e mostra o seguinte sozinho.</p>
+      <div id="pcFilaConteudo"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL DETALHE DA SOLICITAÇÃO (PDF + fotos) -->
@@ -1121,8 +1133,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade','panel-solicitacoes'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade','tabSolicitacoes'];
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade','panel-solicitacoes','panel-pc'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade','tabSolicitacoes','tabPC'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1133,6 +1145,74 @@ document.getElementById('tabGerador').addEventListener('click', function() { swi
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
 document.getElementById('tabAtividade').addEventListener('click', function() { switchTab('panel-atividade','tabAtividade'); carregarAtividade(); });
+document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(); });
+
+// ═══════════════════════════════════════════════════════
+// FILA DE PRESTAÇÃO DE CONTAS — um pendente por vez
+// ═══════════════════════════════════════════════════════
+// Ordena por empenho (numérico) pra ficar previsível — mesma ordem sequencial
+// usada ao processar manualmente. Cai pra ordem de array se o empenho não for numérico.
+function proximosPendentesPC() {
+  return processos
+    .filter(function(p){ return !p.pcOk; })
+    .sort(function(a, b) {
+      var na = parseInt((a.empenho||'').replace(/\D/g,''), 10);
+      var nb = parseInt((b.empenho||'').replace(/\D/g,''), 10);
+      if (isNaN(na) || isNaN(nb)) return 0;
+      return na - nb;
+    });
+}
+
+function atualizarBadgePC() {
+  var badge = document.getElementById('badgePCCount');
+  if (badge) badge.textContent = proximosPendentesPC().length;
+}
+
+function renderPCFila() {
+  var pendentes = proximosPendentesPC();
+  var contador = document.getElementById('pcFilaContador');
+  var conteudo = document.getElementById('pcFilaConteudo');
+  atualizarBadgePC();
+
+  if (pendentes.length === 0) {
+    contador.textContent = '';
+    conteudo.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">'
+      + '<div style="font-size:32px;margin-bottom:12px;">🎉</div>'
+      + '<div>Nenhuma prestação de contas pendente.</div></div>';
+    return;
+  }
+
+  var atual = pendentes[0];
+  contador.textContent = pendentes.length + ' pendente' + (pendentes.length === 1 ? '' : 's');
+  var resultado = gerarTextoPC(atual);
+
+  conteudo.innerHTML =
+    '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Empenho</div>'
+      + '<div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent);margin-bottom:12px;">' + (atual.empenho || '—') + '</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);">' + (atual.servidor||'') + (atual.numProcesso ? ' — Proc. ' + atual.numProcesso : '') + (atual.dataSaida ? ' — ' + atual.dataSaida : '') + '</div>'
+    + '</div>'
+    + (resultado.aviso ? '<div class="pc-aviso visible" style="margin-bottom:14px;">⚠️ Valor R$ ' + (atual.valor||'') + ' não corresponde a nenhum valor fixo de diária — confira antes de usar.</div>' : '')
+    + '<div class="pc-texto" id="pcFilaTexto" style="margin-bottom:14px;">' + resultado.texto + '</div>'
+    + '<div class="modal-pc-actions">'
+      + '<button class="btn-pc-copiar" id="btnPCFilaCopiar">📋 Copiar texto</button>'
+      + '<button class="btn-pc-concluir" id="btnPCFilaConcluir">✅ Concluído → Próximo</button>'
+    + '</div>';
+
+  document.getElementById('btnPCFilaCopiar').addEventListener('click', function() {
+    var texto = document.getElementById('pcFilaTexto').textContent;
+    var btn = this;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(texto).then(function(){ feedbackPC(btn); }).catch(function(){ pcCopiarFallback(texto, btn); });
+    } else { pcCopiarFallback(texto, btn); }
+  });
+
+  document.getElementById('btnPCFilaConcluir').addEventListener('click', function() {
+    atual.pcOk = true;
+    salvar();
+    renderPCFila();
+  });
+}
 
 function carregarAtividade() {
   var lista = document.getElementById('atv-lista');
@@ -3514,6 +3594,7 @@ sgdFetch('https://diarias.aceitacoes.workers.dev?action=carregar')
 .finally(function() {
   document.getElementById('filtroData').value = filtroAtivo;
   atualizarBadge();
+  atualizarBadgePC();
   atualizarBackupInfo();
   if (typeof renderRelatorio === 'function') renderRelatorio();
 });
@@ -3610,6 +3691,7 @@ document.getElementById('btnPCConcluir').addEventListener('click', function() {
 
   p.pcOk = true;
   salvar();
+  atualizarBadgePC();
 
   // Salva posição do scroll antes de rerenderizar
   var wrap = document.querySelector('.table-wrap');
