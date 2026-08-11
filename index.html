@@ -456,7 +456,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.8.0</span>
+    <span class="header-version">v1.8.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -467,7 +467,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabAtividade">📱 Atividade do Bot</button>
-    <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot</button>
+    <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
   </div>
 
   <!-- ══════════════════════════════════════ -->
@@ -793,10 +793,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <div class="tab-panel" id="panel-solicitacoes">
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>🎫 Solicitações geradas pelo bot</span>
+        <span>🎫 Solicitações do Bot/APP</span>
         <button id="sol-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Todas as diárias solicitadas pelos motoristas no Telegram, com ou sem comprovante anexado.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Todas as diárias solicitadas pelos motoristas, via bot no Telegram ou direto pelo app, com ou sem comprovante anexado.</p>
       <div id="sol-lista" style="max-height:65vh;overflow-y:auto;">
         <p style="color:var(--text-muted);">Clique em 🔄 Atualizar para carregar.</p>
       </div>
@@ -2063,12 +2063,13 @@ function mostrarEscolhaSolicitacao(lista, raw) {
   box.style.cssText = 'width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;';
   var titulo = document.createElement('div');
   titulo.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:8px;color:var(--text);';
-  titulo.textContent = '🤖 Encontrei ' + lista.length + ' solicitações do bot neste dia. Qual é a deste processo?';
+  titulo.textContent = '🔎 Encontrei ' + lista.length + ' solicitações neste dia. Qual é a deste processo?';
   box.appendChild(titulo);
   lista.forEach(function(solic) {
+    var origemLabel = solic.origem === 'saudefrota' ? '📱 App' : '🤖 Bot';
     var b = document.createElement('button');
     b.style.cssText = 'display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--border-strong);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;font-size:13px;color:var(--text);';
-    b.innerHTML = '<strong>' + solic.nome + '</strong> · ' + (solic.cidade||'') + ' · ' + (solic.dataSaida||'');
+    b.innerHTML = '<strong>' + solic.nome + '</strong> · ' + (solic.cidade||'') + ' · ' + (solic.dataSaida||'') + ' · <span style="color:var(--text-dim);font-size:11px;">' + origemLabel + '</span>';
     b.onclick = function() {
       box.dataset.aguardando = '0';
       preencherDadosDoBot(solic, raw, solic.nome);
@@ -2121,13 +2122,19 @@ function preencherDadosDoBot(solic, raw, servidorAncorado) {
 
   preencherCampos(found);
 
-  // Avisa claramente que os dados vieram do bot (transparência)
+  // Avisa claramente de onde os dados vieram (transparência) — origem: 'saudefrota' = app
+  // dos motoristas, qualquer outro valor (ou ausente) = bot do Telegram, como sempre foi.
   var tagsEl = document.getElementById('parsedTags');
   if (tagsEl) {
+    var vemDoApp = solic.origem === 'saudefrota';
     var aviso = document.createElement('div');
     aviso.className = 'tag ok';
-    aviso.style.cssText = 'background:var(--accent-light);color:var(--brand-deep);font-weight:600;width:100%;justify-content:center;margin-top:4px;';
-    aviso.innerHTML = '🤖 Dados carregados da solicitação do bot (sem IA)';
+    aviso.style.cssText = (vemDoApp
+      ? 'background:rgba(124,58,237,.12);color:#7c3aed;'
+      : 'background:var(--accent-light);color:var(--brand-deep);') + 'font-weight:600;width:100%;justify-content:center;margin-top:4px;';
+    aviso.innerHTML = vemDoApp
+      ? '📱 Dados carregados da solicitação do app (sem IA)'
+      : '🤖 Dados carregados da solicitação do bot (sem IA)';
     tagsEl.appendChild(aviso);
   }
 }
