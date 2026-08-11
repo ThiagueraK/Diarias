@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.0</span>
+    <span class="header-version">v1.9.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1145,7 +1145,7 @@ document.getElementById('tabGerador').addEventListener('click', function() { swi
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
 document.getElementById('tabAtividade').addEventListener('click', function() { switchTab('panel-atividade','tabAtividade'); carregarAtividade(); });
-document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(); });
+document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
 // ═══════════════════════════════════════════════════════
 // FILA DE PRESTAÇÃO DE CONTAS — um pendente por vez
@@ -1168,7 +1168,18 @@ function atualizarBadgePC() {
   if (badge) badge.textContent = proximosPendentesPC().length;
 }
 
-function renderPCFila() {
+function copiarTextoPCFila(btn) {
+  var el = document.getElementById('pcFilaTexto');
+  if (!el) return;
+  var texto = el.textContent;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(function(){ if (btn) feedbackPC(btn); }).catch(function(){ if (btn) pcCopiarFallback(texto, btn); });
+  } else if (btn) {
+    pcCopiarFallback(texto, btn);
+  }
+}
+
+function renderPCFila(autoCopiar) {
   var pendentes = proximosPendentesPC();
   var contador = document.getElementById('pcFilaContador');
   var conteudo = document.getElementById('pcFilaConteudo');
@@ -1200,17 +1211,17 @@ function renderPCFila() {
     + '</div>';
 
   document.getElementById('btnPCFilaCopiar').addEventListener('click', function() {
-    var texto = document.getElementById('pcFilaTexto').textContent;
-    var btn = this;
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(texto).then(function(){ feedbackPC(btn); }).catch(function(){ pcCopiarFallback(texto, btn); });
-    } else { pcCopiarFallback(texto, btn); }
+    copiarTextoPCFila(this);
   });
+
+  if (autoCopiar) {
+    copiarTextoPCFila(document.getElementById('btnPCFilaCopiar'));
+  }
 
   document.getElementById('btnPCFilaConcluir').addEventListener('click', function() {
     atual.pcOk = true;
     salvar();
-    renderPCFila();
+    renderPCFila(true);
   });
 }
 
