@@ -384,6 +384,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .btn-pc-copiar.copied{background:#166534;color:#bbf7d0;}
   .btn-pc-fechar{padding:11px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--sans);font-size:14px;cursor:pointer;transition:all .15s;}
   .btn-pc-fechar:hover{border-color:var(--text-muted);color:var(--text);}
+  .btn-pc-concluir{flex:1;padding:11px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .btn-pc-concluir:hover{filter:brightness(1.1);}
 
   @media(max-width:580px){
     body{padding:14px 10px 40px;}
@@ -456,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.8.1</span>
+    <span class="header-version">v1.8.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3554,6 +3556,10 @@ function gerarTextoPC(p) {
   return { texto: texto, aviso: aviso, valorNum: valorNum };
 }
 
+// Id do processo cujo texto de PC está aberto no modal no momento — usado pelo botão
+// "Marcar concluído" pra saber qual registro confirmar (ver comentário abaixo).
+var pcIdAberto = null;
+
 // Clique no botão PC (delegação global)
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.btn-pc');
@@ -3564,7 +3570,8 @@ document.addEventListener('click', function(e) {
 
   var resultado = gerarTextoPC(p);
 
-  document.getElementById('pcSub').textContent = (p.servidor||'') + (p.numProcesso ? ' — Proc. ' + p.numProcesso : '');
+  pcIdAberto = id;
+  document.getElementById('pcSub').textContent = (p.servidor||'') + (p.numProcesso ? ' — Proc. ' + p.numProcesso : '') + (p.empenho ? ' — Empenho ' + p.empenho : '');
   document.getElementById('pcTexto').textContent = resultado.texto;
 
   var aviso = document.getElementById('pcAviso');
@@ -3582,7 +3589,25 @@ document.addEventListener('click', function(e) {
   btnCop.className = 'btn-pc-copiar';
   btnCop.textContent = '📋 Copiar texto';
 
-  // Marcar processo como concluído
+  // NÃO marca como concluído aqui — gerar o texto não é a mesma coisa que ter lançado
+  // de verdade no AppController. Marcar cedo demais deixava o SGD mostrando "Concluído"
+  // mesmo quando o lançamento no AppController falhava (empenho errado, popup inesperado,
+  // etc), sem nenhum aviso de dessincronia. Só marca quando "✅ Marcar concluído" é clicado,
+  // depois de confirmado que o lançamento no AppController deu certo.
+  var btnConcluir = document.getElementById('btnPCConcluir');
+  if (btnConcluir) {
+    btnConcluir.textContent = p.pcOk ? '✅ Já concluído' : '✅ Marcar concluído';
+    btnConcluir.disabled = false;
+  }
+
+  document.getElementById('modalPC').classList.add('open');
+});
+
+// Confirma que o lançamento no AppController foi feito de verdade — só agora marca pcOk.
+document.getElementById('btnPCConcluir').addEventListener('click', function() {
+  var p = processos.find(function(x){ return x.id === pcIdAberto; });
+  if (!p) return;
+
   p.pcOk = true;
   salvar();
 
@@ -3598,7 +3623,7 @@ document.addEventListener('click', function(e) {
     wrapNovo.scrollLeft = scrollLeftAntes;
   }
 
-  document.getElementById('modalPC').classList.add('open');
+  document.getElementById('modalPC').classList.remove('open');
 });
 
 document.getElementById('btnPCFechar').addEventListener('click', function() {
@@ -4943,6 +4968,7 @@ document.getElementById('rel-status-pago').addEventListener('change', renderRela
     <div class="modal-pc-actions">
       <button class="btn-pc-fechar" id="btnPCFechar">Fechar</button>
       <button class="btn-pc-copiar" id="btnPCCopiar">📋 Copiar texto</button>
+      <button class="btn-pc-concluir" id="btnPCConcluir">✅ Marcar concluído</button>
     </div>
   </div>
 </div>
