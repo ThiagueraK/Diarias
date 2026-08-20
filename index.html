@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.1</span>
+    <span class="header-version">v1.9.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1743,20 +1743,15 @@ function parsear() {
   }
 
   if (servidorValido && dataSaidaExtraida) {
-    // Caso normal: campo preenchido -> casa por nome + data
-    btn.textContent = 'Verificando solicitação do bot...';
-    sgdFetch(SGD_WORKER_URL + '?action=solicitacao-buscar&nome=' + encodeURIComponent(servidorAncorado) + '&data=' + encodeURIComponent(dataSaidaExtraida))
-      .then(function(r){ return r.json(); })
-      .then(function(res){
-        if (res && res.encontrada && res.solicitacao) {
-          preencherDadosDoBot(res.solicitacao, raw, servidorAncorado);
-          btn.disabled = false; window._sgdParseando = false;
-          btn.textContent = '🔍 Reconhecer Dados Automaticamente';
-        } else {
-          executarParseIA();
-        }
-      })
-      .catch(function(){ executarParseIA(); });
+    // Caso normal: campo preenchido -> casa por data, desambiguando por nome (buscarPorData,
+    // definida abaixo). Antes usava a action 'solicitacao-buscar' (nome+data) direto no Worker,
+    // mas ela sempre voltava "não encontrada" mesmo pra registro existente (confirmado testando
+    // ao vivo: 'solicitacao-buscar-data' acha o mesmo registro que 'solicitacao-buscar' não
+    // achava) — bug no Worker (sem acesso ao código, só existe no painel da Cloudflare). Como
+    // o app preenche o formulário do 1Doc (diferente do bot, que só anexa o PDF), TODO processo
+    // vindo do app caía nesse caminho quebrado e ia sempre pra IA. buscarPorData já lida com
+    // 0/1/vários candidatos no dia, então cobre esse caso sem precisar do endpoint quebrado.
+    buscarPorData(dataSaidaExtraida);
   } else {
     // Campo vazio/xxx. A data vem do nome do arquivo anexo (gerado pelo bot) ou do título.
     var dataTit = dataDoNomeArquivo(raw) || dataDoTitulo(raw);
