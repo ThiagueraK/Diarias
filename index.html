@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.2</span>
+    <span class="header-version">v1.9.3</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1791,13 +1791,13 @@ function parsear() {
           return;
         }
 
-        if (lista.length === 1) {
-          preencherDadosDoBot(lista[0], raw, lista[0].nome);
-          liberarBotao();
-          return;
-        }
-
-        // Mais de uma solicitação no dia: identifica pelo nome presente no texto.
+        // Sempre confirma pelo nome presente no texto, mesmo quando só existe 1 solicitação
+        // no dia — não dá pra assumir que é a mesma pessoa só porque é a única do dia
+        // (motorista que não usa bot/app pode ter criado o processo manualmente, sem
+        // nenhuma relação com a solicitação de outra pessoa que caiu no mesmo dia; bug real
+        // relatado em produção 2026-08-20: sem essa checagem, tanto preenchia dado errado
+        // quando lista.length===1 quanto mostrava um "escolha" com gente aleatória em vez
+        // de cair na IA quando ninguém do dia batia com o nome do processo).
         var textoNorm = normalizarNome(raw);
         var candidatas = lista.filter(function(s){
           return s.nome && textoNorm.indexOf(normalizarNome(s.nome)) !== -1;
@@ -1806,10 +1806,14 @@ function parsear() {
         if (candidatas.length === 1) {
           preencherDadosDoBot(candidatas[0], raw, candidatas[0].nome);
           liberarBotao();
-        } else {
-          // Nenhum nome bateu, ou mais de um: aí sim você escolhe.
-          mostrarEscolhaSolicitacao(candidatas.length ? candidatas : lista, raw);
+        } else if (candidatas.length > 1) {
+          // Ambíguo de verdade: mais de um nome do dia aparece no texto do processo.
+          mostrarEscolhaSolicitacao(candidatas, raw);
           liberarBotao();
+        } else {
+          // Nenhum nome bateu: esse processo não tem solicitação de bot/app por trás
+          // (motorista que preencheu na mão) -> segue pro fluxo normal da IA.
+          executarParseIA();
         }
       })
       .catch(function(){ executarParseIA(); });
