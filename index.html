@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.3</span>
+    <span class="header-version">v1.9.4</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1273,6 +1273,12 @@ function carregarSolicitacoesBot() {
       var onedocTag = s.onedocNumeroProcesso
         ? '<a href="'+s.onedocUrl+'" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">📄 Proc. '+s.onedocNumeroProcesso+'</a>'
         : '';
+      // Falha na geração automática (sem processo ainda) — mostra pra quem administra o SGD,
+      // não só pro motorista no Telegram (achado real, Délvio 2026-08-24: até então só ele via
+      // o motivo do erro, ninguém mais sabia que tinha falhado sem perguntar direto pra ele).
+      var erroTag = (s.onedocErro && !s.onedocNumeroProcesso)
+        ? '<span title="'+s.onedocErro.replace(/"/g,'&quot;')+'" style="cursor:help;display:inline-flex;align-items:center;gap:4px;background:rgba(220,38,38,.12);color:#dc2626;border:1px solid rgba(220,38,38,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">⚠️ Falha ao gerar</span>'
+        : '';
       // Já foi lançada na Tabela de Controle? Casa pelo mesmo critério de duplicata usado
       // ao adicionar um processo (credor + data de saída) — sem isso é fácil relançar a
       // mesma diária sem perceber que já tinha sido feita.
@@ -1294,7 +1300,7 @@ function carregarSolicitacoesBot() {
         +'<div style="min-width:0;">'
           +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.nome+'</div>'
           +'<div style="font-size:12px;color:var(--text-muted);">'+s.dataSaida+' · '+(s.cidade||'')+' · '+(s.placa||'')+'</div>'
-          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+tabelaTag+origemTag+'</div>'
+          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+erroTag+tabelaTag+origemTag+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;flex-shrink:0;">'
           +'<button onclick="usarSolicitacaoNoGerador(\''+s.chave+'\')" title="Puxar estes dados para o Gerador" style="padding:6px 10px;background:var(--accent-light);color:var(--brand-deep);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">📋 Usar no Gerador</button>'
