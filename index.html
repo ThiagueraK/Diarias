@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.4</span>
+    <span class="header-version">v1.9.5</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -468,7 +468,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
-    <button class="tab-btn" id="tabAtividade">📱 Atividade do Bot</button>
+    <button class="tab-btn" id="tabManutencao">🔧 Manutenção</button>
     <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
     <button class="tab-btn" id="tabPC">📄 Prestação de Contas <span class="tab-badge" id="badgePCCount">0</span></button>
   </div>
@@ -780,14 +780,14 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
   </div>
 
-  <div class="tab-panel" id="panel-atividade">
+  <div class="tab-panel" id="panel-manutencao">
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>📱 Atividade dos motoristas no bot</span>
-        <button id="atv-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
+        <span>🔧 Manutenção — falhas de geração já investigadas</span>
+        <button id="man-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Últimas ações dos motoristas (consultas e solicitações). Mostra as 100 mais recentes.</p>
-      <div id="atv-lista" style="max-height:60vh;overflow-y:auto;">
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Quando uma diária falha ao gerar processo automaticamente, o achado (causa) e o fix proposto aparecem aqui pra revisão — nada é aplicado sozinho.</p>
+      <div id="man-lista" style="max-height:65vh;overflow-y:auto;">
         <p style="color:var(--text-muted);">Clique em 🔄 Atualizar para carregar.</p>
       </div>
     </div>
@@ -1133,8 +1133,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-atividade','panel-solicitacoes','panel-pc'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabAtividade','tabSolicitacoes','tabPC'];
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-manutencao','panel-solicitacoes','panel-pc'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabManutencao','tabSolicitacoes','tabPC'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1144,7 +1144,7 @@ function switchTab(panelId, tabId) {
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
-document.getElementById('tabAtividade').addEventListener('click', function() { switchTab('panel-atividade','tabAtividade'); carregarAtividade(); });
+document.getElementById('tabManutencao').addEventListener('click', function() { switchTab('panel-manutencao','tabManutencao'); carregarManutencao(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
 // ═══════════════════════════════════════════════════════
@@ -1225,31 +1225,62 @@ function renderPCFila(autoCopiar) {
   });
 }
 
-function carregarAtividade() {
-  var lista = document.getElementById('atv-lista');
+function carregarManutencao() {
+  var lista = document.getElementById('man-lista');
   lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
-  sgdFetch(SGD_WORKER_URL + '?action=atividade-motoristas')
+  sgdFetch(SGD_WORKER_URL + '?action=manutencao-listar')
   .then(function(r){ return r.json(); })
   .then(function(res){
-    if (!res.ok || !res.atividade || res.atividade.length === 0) {
-      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma atividade registrada ainda.</p>';
+    if (!res.ok || !res.itens || res.itens.length === 0) {
+      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma falha investigada ainda — apareceria aqui assim que o diagnóstico automático terminasse.</p>';
       return;
     }
-    lista.innerHTML = res.atividade.map(function(a){
-      var d = new Date(a.em);
-      var quando = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()
-        + ' ' + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px solid var(--border);">'
-        +'<div><span style="font-weight:600;">'+a.nome+'</span> <span style="color:var(--text-muted);">'+a.acao+'</span></div>'
-        +'<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;margin-left:10px;">'+quando+'</div>'
-        +'</div>';
+    var corPorStatus = {
+      pendente: '#f59e0b', aprovado: '#16a34a', rejeitado: '#dc2626', aplicado: '#2563eb'
+    };
+    lista.innerHTML = res.itens.map(function(m){
+      var cor = corPorStatus[m.status] || 'var(--text-muted)';
+      var origemTag = m.origem === 'saudefrota' ? '📱 App' : '🤖 Bot';
+      var quando = m.criadoEm ? new Date(m.criadoEm).toLocaleString('pt-BR') : '';
+      return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
+          +'<div>'
+            +'<span style="font-weight:600;">'+(m.nome||'?')+'</span> '
+            +'<span style="color:var(--text-muted);font-size:12px;">'+(m.dataSaida||'')+' · '+(m.cidade||'')+' · '+origemTag+'</span>'
+          +'</div>'
+          +'<span style="background:'+cor+'22;color:'+cor+';border:1px solid '+cor+'55;font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;white-space:nowrap;">'+(m.status||'pendente')+'</span>'
+        +'</div>'
+        +(m.erro ? '<div style="margin-top:8px;font-size:12px;color:var(--danger);"><b>Erro:</b> '+m.erro.replace(/</g,'&lt;').slice(0,300)+'</div>' : '')
+        +(m.diagnostico ? '<div style="margin-top:6px;font-size:12px;"><b>Diagnóstico:</b> '+m.diagnostico.replace(/</g,'&lt;')+'</div>' : '')
+        +(m.fixProposto ? '<pre style="margin-top:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;">'+m.fixProposto.replace(/</g,'&lt;')+'</pre>' : '')
+        +'<div style="margin-top:8px;font-size:11px;color:var(--text-dim);">'+quando+'</div>'
+        +(m.status === 'pendente' ? (
+          '<div style="margin-top:8px;display:flex;gap:6px;">'
+            +'<button onclick="marcarManutencao(\''+m.chave+'\',\'aprovado\')" style="padding:6px 12px;background:rgba(22,163,74,.12);color:#16a34a;border:1px solid rgba(22,163,74,.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">✅ Aprovado — vou aplicar</button>'
+            +'<button onclick="marcarManutencao(\''+m.chave+'\',\'rejeitado\')" style="padding:6px 12px;background:var(--surface2);color:var(--danger);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">❌ Não aplicar</button>'
+          +'</div>'
+        ) : '')
+      +'</div>';
     }).join('');
   })
   .catch(function(e){
     lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>';
   });
 }
-document.getElementById('atv-atualizar') && document.getElementById('atv-atualizar').addEventListener('click', carregarAtividade);
+function marcarManutencao(chave, status) {
+  sgdFetch(SGD_WORKER_URL + '?action=manutencao-marcar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chave: chave, status: status })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.ok) { carregarManutencao(); }
+    else { alert('Erro ao marcar: ' + (res.error||'desconhecido')); }
+  })
+  .catch(function(e){ alert('Erro ao marcar: ' + e.message); });
+}
+document.getElementById('man-atualizar') && document.getElementById('man-atualizar').addEventListener('click', carregarManutencao);
 
 document.getElementById('tabSolicitacoes').addEventListener('click', function() { switchTab('panel-solicitacoes','tabSolicitacoes'); carregarSolicitacoesBot(); });
 
