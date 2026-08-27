@@ -18,7 +18,7 @@
   * { box-sizing:border-box; }
   body {
     margin:0; font-family:var(--sans); background:var(--bg); color:var(--text);
-    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px;
+    display:flex; align-items:flex-start; justify-content:center; min-height:100vh; padding:16px;
   }
   .card {
     background:var(--surface); border:1px solid var(--border); border-radius:14px;
@@ -39,17 +39,32 @@
   .btn-primary { background:var(--accent); color:#fff; width:100%; margin-top:18px; }
   .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
   .btn-secondary { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); width:100%; margin-top:10px; }
+  .btn-small { padding:7px 12px; font-size:12px; }
   .erro { color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
   .status { font-size:12px; color:var(--text-muted); margin-top:8px; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .resultado-item {
     padding:12px 4px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:2px;
   }
+  .resultado-item:last-child { border-bottom:none; }
   .resultado-item .nome { font-weight:600; }
   .resultado-item .meta { font-size:12px; color:var(--text-muted); }
   .hidden { display:none; }
   .aviso { font-size:12px; color:var(--warning); margin-top:6px; }
   .ok-badge { font-size:13px; font-weight:600; color:var(--success); margin-bottom:8px; }
+  .multa-card {
+    border:1.5px solid var(--border); border-radius:12px; padding:16px; margin-top:14px; background:var(--surface2);
+  }
+  .multa-card .multa-card-header {
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;
+  }
+  .multa-card .multa-card-tag {
+    font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;
+  }
+  .multa-card .btn-remover {
+    background:transparent; border:none; color:var(--text-dim); font-size:12px; padding:2px 6px; width:auto; margin:0;
+  }
+  .multa-card .resultado-multa { margin-top:12px; }
 </style>
 </head>
 <body>
@@ -65,34 +80,23 @@
 
 <div class="card hidden" id="cardMulta" style="max-width:640px;">
   <h1>Consulta de Multa</h1>
-  <p class="sub">Envie o PDF da multa — a placa, data e hora são preenchidas sozinhas. Confira antes de buscar.</p>
+  <p class="sub">Envie o PDF — se tiver mais de uma multa no mesmo arquivo, cada uma vira um card separado. Confira os dados antes de buscar.</p>
 
-  <label for="arquivoPdf">PDF da multa</label>
+  <label for="arquivoPdf">PDF da(s) multa(s)</label>
   <input type="file" id="arquivoPdf" accept="application/pdf">
   <div class="status" id="statusExtracao"></div>
 
-  <div class="grid2">
-    <div>
-      <label for="multaPlaca">Placa</label>
-      <input type="text" id="multaPlaca" placeholder="ABC1234">
-    </div>
-    <div>
-      <label for="multaData">Data (DD/MM/AAAA)</label>
-      <input type="text" id="multaData" placeholder="24/08/2026">
-    </div>
-  </div>
-  <label for="multaHora">Hora (HH:MM) — opcional, ajuda a reduzir a lista</label>
-  <input type="text" id="multaHora" placeholder="14:30">
+  <div id="listaCards"></div>
 
-  <button class="btn-primary" id="btnBuscar">Buscar motorista</button>
+  <button class="btn-secondary" id="btnAdicionar" style="margin-top:14px;">+ Adicionar multa manualmente</button>
+  <button class="btn-primary" id="btnBuscarTodas">Buscar motorista de todas</button>
   <button class="btn-secondary" id="btnSair">Sair</button>
-
-  <div id="resultadoMulta" style="margin-top:16px;"></div>
 </div>
 
 <script>
 var WORKER_URL = 'https://diarias.aceitacoes.workers.dev';
 var processos = [];
+var proximoIdCard = 0;
 
 // ── Auth ────────────────────────────────────────────────────────────────
 document.getElementById('btnEntrar').addEventListener('click', fazerLogin);
@@ -115,6 +119,7 @@ function fazerLogin() {
       // Senha só fica em memória pra essa aba — nunca salva em disco/localStorage.
       document.getElementById('cardLogin').classList.add('hidden');
       document.getElementById('cardMulta').classList.remove('hidden');
+      adicionarCard('', '', '', '');
     })
     .catch(function(e) { erro.textContent = e.message; });
 }
@@ -122,14 +127,53 @@ function fazerLogin() {
 document.getElementById('btnSair').addEventListener('click', function() {
   processos = [];
   document.getElementById('senha').value = '';
-  document.getElementById('resultadoMulta').innerHTML = '';
+  document.getElementById('listaCards').innerHTML = '';
+  document.getElementById('statusExtracao').textContent = '';
   document.getElementById('cardMulta').classList.add('hidden');
   document.getElementById('cardLogin').classList.remove('hidden');
 });
 
+// ── Cards (um por multa — placa/data/hora editáveis + resultado da busca) ─
+function adicionarCard(placa, data, hora, tag) {
+  var id = 'card' + (proximoIdCard++);
+  var div = document.createElement('div');
+  div.className = 'multa-card';
+  div.dataset.cardId = id;
+  div.innerHTML =
+      '<div class="multa-card-header">'
+    + '<span class="multa-card-tag">' + (tag || 'Manual') + '</span>'
+    + '<button class="btn-remover" data-acao="remover">✕ remover</button>'
+    + '</div>'
+    + '<div class="grid2">'
+    + '<div><label>Placa</label><input type="text" class="in-placa" placeholder="ABC1234" value="' + (placa || '') + '"></div>'
+    + '<div><label>Data (DD/MM/AAAA)</label><input type="text" class="in-data" placeholder="24/08/2026" value="' + (data || '') + '"></div>'
+    + '</div>'
+    + '<label>Hora (HH:MM) — opcional, ajuda a reduzir a lista</label>'
+    + '<input type="text" class="in-hora" placeholder="14:30" value="' + (hora || '') + '">'
+    + '<button class="btn-primary btn-small" data-acao="buscar" style="margin-top:10px;">Buscar essa</button>'
+    + '<div class="resultado-multa"></div>';
+  document.getElementById('listaCards').appendChild(div);
+  return div;
+}
+
+document.getElementById('btnAdicionar').addEventListener('click', function() { adicionarCard('', '', '', 'Manual'); });
+
+document.getElementById('listaCards').addEventListener('click', function(e) {
+  var acao = e.target.dataset.acao;
+  if (!acao) return;
+  var cardEl = e.target.closest('.multa-card');
+  if (acao === 'remover') { cardEl.remove(); return; }
+  if (acao === 'buscar') { buscarNoCard(cardEl); }
+});
+
+document.getElementById('btnBuscarTodas').addEventListener('click', function() {
+  document.querySelectorAll('.multa-card').forEach(function(cardEl) { buscarNoCard(cardEl); });
+});
+
 // ── Extração do PDF (mesmo padrão já usado no site principal: pdf.js lê o
 // texto real do PDF, sem OCR de imagem — os autos de infração daqui são
-// gerados digitalmente, não escaneados) ─────────────────────────────────
+// gerados digitalmente, não escaneados) — passa por TODAS as páginas, já
+// que uma notificação em lote costuma trazer uma multa por página. ───────
 function normalizarPlaca(p) {
   return String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
@@ -141,6 +185,20 @@ function normalizarHoraMulta(h) {
   var hh = s.slice(0, 2), mm = s.slice(2, 4);
   if (Number(hh) > 23 || Number(mm) > 59) return '';
   return hh + ':' + mm;
+}
+function extrairCamposDoTexto(texto) {
+  var placaM = texto.match(/PLACA[:\s\/A-Z]*?([A-Z]{3}[-\s]?[0-9][A-Z0-9][0-9]{2})/i);
+  var dataM = texto.match(/DATA(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-3]?[0-9]\/[0-1]?[0-9]\/[0-9]{2,4})/i);
+  // "HOR[ÁA](?:RIO)?" casa tanto "Hora" quanto "Horário" — achado real, 27/08/2026,
+  // testando contra uma multa da PRF de verdade: o rótulo lá é só "Hora", e a versão
+  // anterior exigia "Horário"/"Horario" completo (RI obrigatório), então nunca batia.
+  var horaM = texto.match(/HOR[ÁA](?:RIO)?(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-2]?[0-9][:h][0-5][0-9])/i);
+  return {
+    placa: placaM ? normalizarPlaca(placaM[1]) : '',
+    data: dataM ? dataM[1] : '',
+    hora: horaM ? normalizarHoraMulta(horaM[1]) : '',
+    achouAlgo: !!(placaM || dataM || horaM),
+  };
 }
 
 document.getElementById('arquivoPdf').addEventListener('change', function(e) {
@@ -154,30 +212,38 @@ document.getElementById('arquivoPdf').addEventListener('change', function(e) {
   reader.onload = function(ev) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     pdfjsLib.getDocument({ data: ev.target.result }).promise.then(function(pdf) {
-      return pdf.getPage(1);
-    }).then(function(page) {
-      return page.getTextContent();
-    }).then(function(tc) {
-      var texto = tc.items.map(function(i) { return i.str; }).join(' ');
+      var promessasPaginas = [];
+      for (var n = 1; n <= pdf.numPages; n++) {
+        promessasPaginas.push(
+          pdf.getPage(n).then(function(page) { return page.getTextContent(); })
+            .then(function(tc) { return tc.items.map(function(i) { return i.str; }).join(' '); })
+        );
+      }
+      return Promise.all(promessasPaginas);
+    }).then(function(textosPorPagina) {
+      // Limpa os cards em branco de antes de subir o arquivo (mas não os que já tinham
+      // busca feita — só substitui os vazios, pra não perder trabalho já feito).
+      document.querySelectorAll('.multa-card').forEach(function(el) {
+        var vazio = !el.querySelector('.in-placa').value && !el.querySelector('.in-data').value;
+        if (vazio) el.remove();
+      });
 
-      var placaM = texto.match(/PLACA[:\s\/A-Z]*?([A-Z]{3}[-\s]?[0-9][A-Z0-9][0-9]{2})/i);
-      var dataM = texto.match(/DATA(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-3]?[0-9]\/[0-1]?[0-9]\/[0-9]{2,4})/i);
-      // "HOR[ÁA](?:RIO)?" casa tanto "Hora" quanto "Horário" — achado real, 27/08/2026,
-      // testando contra uma multa da PRF de verdade: o rótulo lá é só "Hora", e a versão
-      // anterior exigia "Horário"/"Horario" completo (RI obrigatório), então nunca batia.
-      var horaM = texto.match(/HOR[ÁA](?:RIO)?(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-2]?[0-9][:h][0-5][0-9])/i);
+      var encontradas = 0;
+      textosPorPagina.forEach(function(texto, i) {
+        var campos = extrairCamposDoTexto(texto);
+        if (!campos.achouAlgo) return; // página sem nada reconhecível (ex: verso em branco) — pula
+        encontradas++;
+        var tag = textosPorPagina.length > 1 ? 'Página ' + (i + 1) : 'PDF';
+        adicionarCard(campos.placa, campos.data, campos.hora, tag);
+      });
 
-      var achou = false;
-      if (placaM) { document.getElementById('multaPlaca').value = normalizarPlaca(placaM[1]); achou = true; }
-      if (dataM) { document.getElementById('multaData').value = dataM[1]; achou = true; }
-      if (horaM) { document.getElementById('multaHora').value = normalizarHoraMulta(horaM[1]); achou = true; }
-
-      if (achou) {
-        status.textContent = '✅ Dados extraídos — confira antes de buscar.';
-        status.style.color = 'var(--success)';
-      } else {
-        status.textContent = '⚠️ Não consegui extrair automaticamente. Preencha manualmente.';
+      if (encontradas === 0) {
+        status.textContent = '⚠️ Não consegui extrair nada automaticamente. Preencha manualmente.';
         status.style.color = 'var(--warning)';
+        if (!document.querySelector('.multa-card')) adicionarCard('', '', '', 'Manual');
+      } else {
+        status.textContent = '✅ ' + encontradas + ' multa(s) encontrada(s) — confira os dados antes de buscar.';
+        status.style.color = 'var(--success)';
       }
     }).catch(function(e) {
       status.textContent = '❌ Erro ao ler PDF: ' + e.message;
@@ -187,8 +253,8 @@ document.getElementById('arquivoPdf').addEventListener('change', function(e) {
   reader.readAsArrayBuffer(file);
 });
 
-// ── Busca (mesma lógica de correspondência do site principal, sem o botão
-// de editar — essa tela só encontra, nunca modifica nenhum processo) ─────
+// ── Busca (mesma lógica de correspondência do site principal, sem edição —
+// essa tela só encontra, nunca modifica nenhum processo) ─────────────────
 function brParaISO(br) {
   if (!br) return '';
   var p = br.split('/');
@@ -213,19 +279,17 @@ function horasDoProcesso(p) {
   return out;
 }
 
-document.getElementById('btnBuscar').addEventListener('click', buscarMulta);
+function buscarNoCard(cardEl) {
+  var placa = normalizarPlaca(cardEl.querySelector('.in-placa').value);
+  var dataTxt = cardEl.querySelector('.in-data').value.trim();
+  var horaTxt = cardEl.querySelector('.in-hora').value.trim();
+  var box = cardEl.querySelector('.resultado-multa');
 
-function buscarMulta() {
-  var placa = normalizarPlaca(document.getElementById('multaPlaca').value);
-  var dataTxt = document.getElementById('multaData').value.trim();
-  var horaTxt = document.getElementById('multaHora').value.trim();
-  var box = document.getElementById('resultadoMulta');
-
-  if (!placa && !dataTxt) { box.innerHTML = '<p style="color:var(--danger);font-size:13px;">Informe ao menos a placa ou a data.</p>'; return; }
+  if (!placa && !dataTxt) { box.innerHTML = '<p style="color:var(--danger);font-size:13px;margin:0;">Informe ao menos a placa ou a data.</p>'; return; }
 
   var alvoISO = dataTxt ? brParaISO(dataTxt) : '';
   if (dataTxt && (!alvoISO || alvoISO.length < 10)) {
-    box.innerHTML = '<p style="color:var(--danger);font-size:13px;">Data inválida. Use DD/MM/AAAA.</p>';
+    box.innerHTML = '<p style="color:var(--danger);font-size:13px;margin:0;">Data inválida. Use DD/MM/AAAA.</p>';
     return;
   }
   var horaAlvo = horaTxt ? normalizarHoraMulta(horaTxt) : '';
@@ -257,9 +321,8 @@ function buscarMulta() {
   });
 
   if (achados.length === 0) {
-    box.innerHTML = '<div style="padding:12px;background:var(--surface2);border-radius:9px;font-size:13px;">'
-      + '<strong>Nenhuma viagem encontrada.</strong><br><br>'
-      + 'Só aparecem aqui viagens que geraram diária.</div>';
+    box.innerHTML = '<div style="padding:10px;background:var(--surface);border-radius:8px;font-size:13px;">'
+      + '<strong>Nenhuma viagem encontrada.</strong> Só aparecem aqui viagens que geraram diária.</div>';
     return;
   }
 
