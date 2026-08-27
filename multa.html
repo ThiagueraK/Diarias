@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Consulta de Multa</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -134,11 +135,12 @@ document.getElementById('btnSair').addEventListener('click', function() {
 });
 
 // ── Cards (um por multa — placa/data/hora editáveis + resultado da busca) ─
-function adicionarCard(placa, data, hora, tag) {
+function adicionarCard(placa, data, hora, tag, numeroAuto) {
   var id = 'card' + (proximoIdCard++);
   var div = document.createElement('div');
   div.className = 'multa-card';
   div.dataset.cardId = id;
+  div.dataset.numeroAuto = numeroAuto || '';
   div.innerHTML =
       '<div class="multa-card-header">'
     + '<span class="multa-card-tag">' + (tag || 'Manual') + '</span>'
@@ -150,6 +152,7 @@ function adicionarCard(placa, data, hora, tag) {
     + '</div>'
     + '<label>Hora (HH:MM) — opcional, ajuda a reduzir a lista</label>'
     + '<input type="text" class="in-hora" placeholder="14:30" value="' + (hora || '') + '">'
+    + (numeroAuto ? '<div class="status" style="margin-top:4px;">Auto de infração nº ' + numeroAuto + '</div>' : '')
     + '<button class="btn-primary btn-small" data-acao="buscar" style="margin-top:10px;">Buscar essa</button>'
     + '<div class="resultado-multa"></div>';
   document.getElementById('listaCards').appendChild(div);
@@ -163,7 +166,18 @@ document.getElementById('listaCards').addEventListener('click', function(e) {
   if (!acao) return;
   var cardEl = e.target.closest('.multa-card');
   if (acao === 'remover') { cardEl.remove(); return; }
-  if (acao === 'buscar') { buscarNoCard(cardEl); }
+  if (acao === 'buscar') { buscarNoCard(cardEl); return; }
+  if (acao === 'termo') {
+    var idx = Number(e.target.dataset.idx);
+    var processo = (cardEl._achadosAtual || [])[idx];
+    if (!processo) return;
+    gerarTermoPDF(processo, {
+      placa: cardEl.querySelector('.in-placa').value.trim(),
+      data: cardEl.querySelector('.in-data').value.trim(),
+      hora: cardEl.querySelector('.in-hora').value.trim(),
+      numeroAuto: cardEl.dataset.numeroAuto || '',
+    });
+  }
 });
 
 document.getElementById('btnBuscarTodas').addEventListener('click', function() {
@@ -193,10 +207,12 @@ function extrairCamposDoTexto(texto) {
   // testando contra uma multa da PRF de verdade: o rótulo lá é só "Hora", e a versão
   // anterior exigia "Horário"/"Horario" completo (RI obrigatório), então nunca batia.
   var horaM = texto.match(/HOR[ÁA](?:RIO)?(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-2]?[0-9][:h][0-5][0-9])/i);
+  var autoM = texto.match(/Auto de infra[çc][ãa]o\s*n[ºo°]?\s*([A-Z]?[0-9][0-9.\-]{5,})/i);
   return {
     placa: placaM ? normalizarPlaca(placaM[1]) : '',
     data: dataM ? dataM[1] : '',
     hora: horaM ? normalizarHoraMulta(horaM[1]) : '',
+    numeroAuto: autoM ? autoM[1] : '',
     achouAlgo: !!(placaM || dataM || horaM),
   };
 }
@@ -234,7 +250,7 @@ document.getElementById('arquivoPdf').addEventListener('change', function(e) {
         if (!campos.achouAlgo) return; // página sem nada reconhecível (ex: verso em branco) — pula
         encontradas++;
         var tag = textosPorPagina.length > 1 ? 'Página ' + (i + 1) : 'PDF';
-        adicionarCard(campos.placa, campos.data, campos.hora, tag);
+        adicionarCard(campos.placa, campos.data, campos.hora, tag, campos.numeroAuto);
       });
 
       if (encontradas === 0) {
@@ -327,12 +343,13 @@ function buscarNoCard(cardEl) {
   }
 
   achados.sort(function(a, b) { return brParaISO(a.dataSaida || '').localeCompare(brParaISO(b.dataSaida || '')); });
+  cardEl._achadosAtual = achados; // pro clique em "Gerar termo" achar o processo certo por índice
 
   var titulo = achados.length === 1
     ? '<div class="ok-badge">✅ Um único motorista estava com o veículo:</div>'
     : '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + achados.length + ' viagens cobrem esse momento:</div>';
 
-  box.innerHTML = titulo + achados.map(function(p) {
+  box.innerHTML = titulo + achados.map(function(p, idx) {
     var periodo = (p.dataSaida || '?') + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' até ' + p.dataChegada : '');
     var hpr = horasDoProcesso(p);
     var horas = (hpr.saida || hpr.chegada) ? (hpr.saida || '?') + ' → ' + (hpr.chegada || '?') : 'sem horário na descrição';
@@ -343,10 +360,76 @@ function buscarNoCard(cardEl) {
       + (p.numProcesso ? '<div class="meta">📄 Processo ' + p.numProcesso
           + (p.hash1doc ? ' — <a href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash1doc + '&itd=7" target="_blank" rel="noopener">🔗 Abrir no 1Doc</a>' : '')
           + '</div>' : '')
+      + '<button class="btn-secondary btn-small" style="width:auto;margin-top:8px;" data-acao="termo" data-idx="' + idx + '">📄 Gerar termo pra assinar</button>'
       + '</div>';
   }).join('')
   + (achados.length > 1 && !horaAlvo ? '<p class="aviso">💡 Informe a hora da multa pra reduzir a lista.</p>' : '')
   + (semHorario > 0 && horaAlvo ? '<p class="aviso">⚠️ ' + semHorario + ' viagem(ns) sem horário completo — consideradas o dia inteiro.</p>' : '');
+}
+
+// ── Termo de ciência + autorização de desconto em folha ──────────────────
+// Texto padrão simples — não é parecer jurídico. Revisar redação com o RH antes de usar
+// em produção pra valer, principalmente a parte de autorização de desconto (impacta
+// folha de pagamento de servidor público).
+function gerarTermoPDF(processo, dadosMulta) {
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  var margem = 20;
+  var largura = 210 - margem * 2;
+  var y = 22;
+
+  function linha(texto, opts) {
+    opts = opts || {};
+    doc.setFontSize(opts.tamanho || 11);
+    doc.setFont('helvetica', opts.negrito ? 'bold' : 'normal');
+    var quebradas = doc.splitTextToSize(texto, largura);
+    doc.text(quebradas, margem, y, { align: opts.centro ? 'center' : 'left' });
+    y += quebradas.length * (opts.altura || 6) + (opts.espacoDepois || 0);
+  }
+
+  linha('PREFEITURA MUNICIPAL DE TUPANCIRETÃ', { negrito: true, tamanho: 12, centro: true });
+  linha('SECRETARIA MUNICIPAL DE SAÚDE', { tamanho: 10, centro: true, espacoDepois: 8 });
+  linha('TERMO DE CIÊNCIA DE INFRAÇÃO DE TRÂNSITO E', { negrito: true, tamanho: 13, centro: true });
+  linha('AUTORIZAÇÃO DE DESCONTO EM FOLHA DE PAGAMENTO', { negrito: true, tamanho: 13, centro: true, espacoDepois: 10 });
+
+  linha(
+    'Pelo presente termo, eu, ' + (processo.servidor || '_______________________________') + ', ' +
+    'servidor(a)/motorista lotado(a) na Secretaria Municipal de Saúde, portador(a) do CPF ' +
+    'nº ______________________, declaro estar ciente da infração de trânsito abaixo identificada, ' +
+    'ocorrida durante o uso do veículo oficial no exercício de minhas funções, e AUTORIZO o desconto ' +
+    'do valor correspondente diretamente em minha folha de pagamento, nos termos definidos pelo ' +
+    'Departamento de Recursos Humanos desta Prefeitura.',
+    { espacoDepois: 8 }
+  );
+
+  linha('DADOS DA INFRAÇÃO', { negrito: true, espacoDepois: 2 });
+  linha('Veículo (placa): ' + (dadosMulta.placa || processo.placa || '—'));
+  linha('Data da infração: ' + (dadosMulta.data || '—') + (dadosMulta.hora ? '   Hora: ' + dadosMulta.hora : ''));
+  if (dadosMulta.numeroAuto) linha('Auto de Infração nº: ' + dadosMulta.numeroAuto);
+  linha('Valor da multa: R$ ______________________ (a preencher conforme boleto/notificação)', { espacoDepois: 8 });
+
+  linha('DADOS DA VIAGEM RELACIONADA (SGD)', { negrito: true, espacoDepois: 2 });
+  linha('Destino: ' + (processo.cidade || '—'));
+  linha('Período: ' + (processo.dataSaida || '—') + (processo.dataChegada && processo.dataChegada !== processo.dataSaida ? ' até ' + processo.dataChegada : ''));
+  if (processo.numProcesso) linha('Processo (1Doc): ' + processo.numProcesso, { espacoDepois: 8 });
+  else y += 8;
+
+  linha(
+    'Declaro que as informações acima são verdadeiras e que fui devidamente notificado(a) sobre ' +
+    'a infração cometida, não me opondo ao desconto autorizado neste termo.',
+    { espacoDepois: 16 }
+  );
+
+  linha('Tupanciretã/RS, ____ de _______________________ de 2026.', { espacoDepois: 20 });
+
+  linha('_______________________________________________', { centro: true });
+  linha(processo.servidor || 'Assinatura do(a) servidor(a)', { centro: true, espacoDepois: 10 });
+
+  linha('_______________________________________________', { centro: true });
+  linha('Recebido pelo RH — Prefeitura Municipal de Tupanciretã', { centro: true });
+
+  var nomeArquivo = 'termo_multa_' + (processo.servidor || 'servidor').replace(/\s+/g, '_').toLowerCase() + '.pdf';
+  doc.save(nomeArquivo);
 }
 </script>
 </body>
