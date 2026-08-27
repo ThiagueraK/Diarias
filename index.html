@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.5</span>
+    <span class="header-version">v1.9.6</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1280,6 +1280,7 @@ function marcarManutencao(chave, status) {
   })
   .catch(function(e){ alert('Erro ao marcar: ' + e.message); });
 }
+window.marcarManutencao = marcarManutencao;
 document.getElementById('man-atualizar') && document.getElementById('man-atualizar').addEventListener('click', carregarManutencao);
 
 document.getElementById('tabSolicitacoes').addEventListener('click', function() { switchTab('panel-solicitacoes','tabSolicitacoes'); carregarSolicitacoesBot(); });
