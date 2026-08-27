@@ -136,12 +136,13 @@ document.getElementById('btnSair').addEventListener('click', function() {
 });
 
 // ── Cards (um por multa — placa/data/hora editáveis + resultado da busca) ─
-function adicionarCard(placa, data, hora, tag, numeroAuto, valor) {
+function adicionarCard(placa, data, hora, tag, numeroAuto, valor, municipio) {
   var id = 'card' + (proximoIdCard++);
   var div = document.createElement('div');
   div.className = 'multa-card';
   div.dataset.cardId = id;
   div.dataset.numeroAuto = numeroAuto || '';
+  div.dataset.municipio = municipio || '';
   div.innerHTML =
       '<div class="multa-card-header">'
     + '<span class="multa-card-tag">' + (tag || 'Manual') + '</span>'
@@ -156,6 +157,7 @@ function adicionarCard(placa, data, hora, tag, numeroAuto, valor) {
     + '<div><label>Valor (R$) — opcional, pro termo</label><input type="text" class="in-valor" placeholder="130,16" value="' + (valor || '') + '"></div>'
     + '</div>'
     + (numeroAuto ? '<div class="status" style="margin-top:4px;">Auto de infração nº ' + numeroAuto + '</div>' : '')
+    + (municipio ? '<div class="status" style="margin-top:2px;">📍 Local da multa reconhecido — usado pra filtrar a busca</div>' : '')
     + '<button class="btn-primary btn-small" data-acao="buscar" style="margin-top:10px;">Buscar essa</button>'
     + '<div class="resultado-multa"></div>';
   document.getElementById('listaCards').appendChild(div);
@@ -241,16 +243,47 @@ function extrairCamposDoTexto(texto) {
     hora: hora,
     valor: valor,
     numeroAuto: autoM ? autoM[1] : '',
+    municipio: detectarMunicipio(texto),
     achouAlgo: !!(placa || data || hora),
   };
 }
 
+// Compara o local da multa com o destino das viagens já carregadas — pedido explícito,
+// 27/08/2026: em vez de tentar extrair "o campo Município" da multa (posição/rótulo muda
+// de layout pra layout, e o OCR às vezes engole essa linha inteira da tabela), procura se o
+// nome de alguma cidade que já existe nos dados de viagem aparece EM QUALQUER LUGAR do
+// texto da multa — mais robusto a ruído de OCR, já que a cidade normalmente aparece pelo
+// menos duas vezes no documento (legenda da foto + linha "Município" da tabela).
+function normalizarCidade(c) {
+  return String(c || '').toUpperCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\/.*$/, '').replace(/[^A-Z]/g, '');
+}
+function detectarMunicipio(texto) {
+  var textoNorm = normalizarCidade(texto);
+  var vistas = {};
+  var cidades = [];
+  processos.forEach(function(p) {
+    var norm = normalizarCidade(p.cidade);
+    if (norm.length >= 4 && !vistas[norm]) { vistas[norm] = true; cidades.push({ norm: norm, original: p.cidade }); }
+  });
+  // Cidades mais longas primeiro — "Faxinal do Soturno" não pode ser ofuscada por um match
+  // parcial de 4 letras de outra cidade menor contida nela.
+  cidades.sort(function(a, b) { return b.norm.length - a.norm.length; });
+  var achada = cidades.find(function(c) { return textoNorm.indexOf(c.norm) !== -1; });
+  return achada ? achada.norm : '';
+}
+
 // OCR real (Tesseract, português) — só entra em ação se a página não tiver texto real
 // nenhum (< 40 caracteres extraídos = praticamente certeza de que é imagem escaneada).
-// Renderiza em resolução mais alta que a tela (scale 2.5, ~180dpi) porque isso muda muito
-// a precisão do OCR num documento cheio de tabela/letra miúda — testado ao vivo.
+// scale 4 (~290dpi) — achado real, 27/08/2026: testado ao vivo contra 4 notificações reais
+// de multa (formato PRF e DAER-RS), 2.5 (~180dpi) deixava passar batido linhas inteiras da
+// tabela (inclusive placa/data/hora, que são os campos mais importantes); em ~290dpi essas
+// mesmas linhas ficaram legíveis pro OCR na maioria dos casos. Testei também mudar o modo
+// de segmentação do Tesseract (PSM) — não ajudou de forma consistente, então mantido o
+// padrão (automático).
 function ocrDaPagina(page) {
-  var viewport = page.getViewport({ scale: 2.5 });
+  var viewport = page.getViewport({ scale: 4 });
   var canvas = document.createElement('canvas');
   canvas.width = viewport.width;
   canvas.height = viewport.height;
@@ -305,7 +338,7 @@ document.getElementById('arquivoPdf').addEventListener('change', function(e) {
         // Sempre cria um card por página, mesmo sem nada reconhecido — senão uma multa cuja
         // extração falhou (scan ruim, assinatura em cima do campo) simplesmente some sem
         // avisar, em vez de pedir preenchimento manual.
-        adicionarCard(campos.placa, campos.data, campos.hora, tag, campos.numeroAuto, campos.valor);
+        adicionarCard(campos.placa, campos.data, campos.hora, tag, campos.numeroAuto, campos.valor, campos.municipio);
         if (campos.placa && campos.data) encontradas++;
         else if (campos.achouAlgo) parciais++;
       });
@@ -401,12 +434,27 @@ function buscarNoCard(cardEl) {
     return;
   }
 
+  // Filtro extra por local — pedido explícito, 27/08/2026: compara o município reconhecido
+  // na multa com o destino de cada viagem candidata, pra cortar mais possibilidades quando
+  // placa+data+hora sozinhos ainda deixam mais de um resultado. Só aplica se sobrar pelo
+  // menos 1 depois — nunca esconde tudo por causa de um local que não bateu.
+  var municipioMulta = cardEl.dataset.municipio || '';
+  var filtradoPorLocal = false;
+  if (municipioMulta && achados.length > 1) {
+    var comLocalCorrespondente = achados.filter(function(p) { return normalizarCidade(p.cidade) === municipioMulta; });
+    if (comLocalCorrespondente.length > 0 && comLocalCorrespondente.length < achados.length) {
+      achados = comLocalCorrespondente;
+      filtradoPorLocal = true;
+    }
+  }
+
   achados.sort(function(a, b) { return brParaISO(a.dataSaida || '').localeCompare(brParaISO(b.dataSaida || '')); });
   cardEl._achadosAtual = achados; // pro clique em "Gerar termo" achar o processo certo por índice
 
   var titulo = achados.length === 1
-    ? '<div class="ok-badge">✅ Um único motorista estava com o veículo:</div>'
-    : '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + achados.length + ' viagens cobrem esse momento:</div>';
+    ? '<div class="ok-badge">✅ Um único motorista estava com o veículo' + (filtradoPorLocal ? ' (local da multa confere)' : '') + ':</div>'
+    : '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + achados.length + ' viagens cobrem esse momento'
+      + (filtradoPorLocal ? ' (já filtrado pelo local da multa)' : '') + ':</div>';
 
   box.innerHTML = titulo + achados.map(function(p, idx) {
     var periodo = (p.dataSaida || '?') + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' até ' + p.dataChegada : '');
