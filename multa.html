@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta de Multa</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root {
+    --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
+    --accent:#2f7d5d; --accent2:#2563eb; --success:#1f9d57;
+    --warning:#c77d18; --danger:#d64545;
+    --text:#1a2230; --text-muted:#5b6675; --text-dim:#97a1b0;
+    --shadow-sm:0 1px 2px rgba(20,30,48,.06), 0 1px 3px rgba(20,30,48,.04);
+    --shadow-md:0 4px 12px rgba(20,30,48,.08), 0 2px 4px rgba(20,30,48,.04);
+    --sans:'IBM Plex Sans',-apple-system,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; font-family:var(--sans); background:var(--bg); color:var(--text);
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px;
+  }
+  .card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    box-shadow:var(--shadow-md); padding:28px; width:100%; max-width:480px;
+  }
+  h1 { font-size:19px; margin:0 0 4px; }
+  p.sub { color:var(--text-muted); font-size:13px; margin:0 0 22px; }
+  label { display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin:14px 0 5px; }
+  input[type=password], input[type=text] {
+    width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:9px;
+    font-size:14px; font-family:inherit; background:var(--surface2);
+  }
+  input[type=file] { width:100%; padding:8px 0; font-size:13px; }
+  button {
+    cursor:pointer; border:none; border-radius:9px; font-weight:600; font-size:14px;
+    padding:11px 16px; font-family:inherit;
+  }
+  .btn-primary { background:var(--accent); color:#fff; width:100%; margin-top:18px; }
+  .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-secondary { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); width:100%; margin-top:10px; }
+  .erro { color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
+  .status { font-size:12px; color:var(--text-muted); margin-top:8px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .resultado-item {
+    padding:12px 4px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:2px;
+  }
+  .resultado-item .nome { font-weight:600; }
+  .resultado-item .meta { font-size:12px; color:var(--text-muted); }
+  .hidden { display:none; }
+  .aviso { font-size:12px; color:var(--warning); margin-top:6px; }
+  .ok-badge { font-size:13px; font-weight:600; color:var(--success); margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="card" id="cardLogin">
+  <h1>Consulta de Multa</h1>
+  <p class="sub">Acesso restrito só a essa consulta.</p>
+  <label for="senha">Senha</label>
+  <input type="password" id="senha" autocomplete="current-password">
+  <button class="btn-primary" id="btnEntrar">Entrar</button>
+  <div class="erro" id="erroLogin"></div>
+</div>
+
+<div class="card hidden" id="cardMulta" style="max-width:640px;">
+  <h1>Consulta de Multa</h1>
+  <p class="sub">Envie o PDF da multa — a placa, data e hora são preenchidas sozinhas. Confira antes de buscar.</p>
+
+  <label for="arquivoPdf">PDF da multa</label>
+  <input type="file" id="arquivoPdf" accept="application/pdf">
+  <div class="status" id="statusExtracao"></div>
+
+  <div class="grid2">
+    <div>
+      <label for="multaPlaca">Placa</label>
+      <input type="text" id="multaPlaca" placeholder="ABC1234">
+    </div>
+    <div>
+      <label for="multaData">Data (DD/MM/AAAA)</label>
+      <input type="text" id="multaData" placeholder="24/08/2026">
+    </div>
+  </div>
+  <label for="multaHora">Hora (HH:MM) — opcional, ajuda a reduzir a lista</label>
+  <input type="text" id="multaHora" placeholder="14:30">
+
+  <button class="btn-primary" id="btnBuscar">Buscar motorista</button>
+  <button class="btn-secondary" id="btnSair">Sair</button>
+
+  <div id="resultadoMulta" style="margin-top:16px;"></div>
+</div>
+
+<script>
+var WORKER_URL = 'https://diarias.aceitacoes.workers.dev';
+var processos = [];
+
+// ── Auth ────────────────────────────────────────────────────────────────
+document.getElementById('btnEntrar').addEventListener('click', fazerLogin);
+document.getElementById('senha').addEventListener('keydown', function(e){ if (e.key === 'Enter') fazerLogin(); });
+
+function fazerLogin() {
+  var senha = document.getElementById('senha').value;
+  var erro = document.getElementById('erroLogin');
+  erro.textContent = '';
+  if (!senha) { erro.textContent = 'Informe a senha.'; return; }
+
+  fetch(WORKER_URL + '?action=multa-carregar', { headers: { 'X-Multa-Pass': senha } })
+    .then(function(r) {
+      if (r.status === 401) throw new Error('Senha incorreta.');
+      if (!r.ok) throw new Error('Falha ao conectar (HTTP ' + r.status + ').');
+      return r.json();
+    })
+    .then(function(data) {
+      processos = data.processos || [];
+      // Senha só fica em memória pra essa aba — nunca salva em disco/localStorage.
+      document.getElementById('cardLogin').classList.add('hidden');
+      document.getElementById('cardMulta').classList.remove('hidden');
+    })
+    .catch(function(e) { erro.textContent = e.message; });
+}
+
+document.getElementById('btnSair').addEventListener('click', function() {
+  processos = [];
+  document.getElementById('senha').value = '';
+  document.getElementById('resultadoMulta').innerHTML = '';
+  document.getElementById('cardMulta').classList.add('hidden');
+  document.getElementById('cardLogin').classList.remove('hidden');
+});
+
+// ── Extração do PDF (mesmo padrão já usado no site principal: pdf.js lê o
+// texto real do PDF, sem OCR de imagem — os autos de infração daqui são
+// gerados digitalmente, não escaneados) ─────────────────────────────────
+function normalizarPlaca(p) {
+  return String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+function normalizarHoraMulta(h) {
+  var s = String(h || '').replace(/[^0-9]/g, '');
+  if (!s) return '';
+  if (s.length <= 2) return s.padStart(2, '0') + ':00';
+  s = s.padStart(4, '0').slice(0, 4);
+  var hh = s.slice(0, 2), mm = s.slice(2, 4);
+  if (Number(hh) > 23 || Number(mm) > 59) return '';
+  return hh + ':' + mm;
+}
+
+document.getElementById('arquivoPdf').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var status = document.getElementById('statusExtracao');
+  status.textContent = 'Lendo PDF...';
+  status.style.color = 'var(--text-muted)';
+
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.getDocument({ data: ev.target.result }).promise.then(function(pdf) {
+      return pdf.getPage(1);
+    }).then(function(page) {
+      return page.getTextContent();
+    }).then(function(tc) {
+      var texto = tc.items.map(function(i) { return i.str; }).join(' ');
+
+      var placaM = texto.match(/PLACA[:\s\/A-Z]*?([A-Z]{3}[-\s]?[0-9][A-Z0-9][0-9]{2})/i);
+      var dataM = texto.match(/DATA(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-3]?[0-9]\/[0-1]?[0-9]\/[0-9]{2,4})/i);
+      var horaM = texto.match(/HOR[ÁA]RIO?(?:\s+DA\s+INFRA[ÇC][ÃA]O)?[:\s]*([0-2]?[0-9][:h][0-5][0-9])/i);
+
+      var achou = false;
+      if (placaM) { document.getElementById('multaPlaca').value = normalizarPlaca(placaM[1]); achou = true; }
+      if (dataM) { document.getElementById('multaData').value = dataM[1]; achou = true; }
+      if (horaM) { document.getElementById('multaHora').value = normalizarHoraMulta(horaM[1]); achou = true; }
+
+      if (achou) {
+        status.textContent = '✅ Dados extraídos — confira antes de buscar.';
+        status.style.color = 'var(--success)';
+      } else {
+        status.textContent = '⚠️ Não consegui extrair automaticamente. Preencha manualmente.';
+        status.style.color = 'var(--warning)';
+      }
+    }).catch(function(e) {
+      status.textContent = '❌ Erro ao ler PDF: ' + e.message;
+      status.style.color = 'var(--danger)';
+    });
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+// ── Busca (mesma lógica de correspondência do site principal, sem o botão
+// de editar — essa tela só encontra, nunca modifica nenhum processo) ─────
+function brParaISO(br) {
+  if (!br) return '';
+  var p = br.split('/');
+  if (p.length < 3) return '2026-' + p[1].padStart(2, '0') + '-' + p[0].padStart(2, '0');
+  var ano = p[2].length === 2 ? '20' + p[2] : p[2];
+  return ano + '-' + p[1].padStart(2, '0') + '-' + p[0].padStart(2, '0');
+}
+function horasDoProcesso(p) {
+  var out = { saida: normalizarHoraMulta(p.horaSaida) || '', chegada: normalizarHoraMulta(p.horaChegada) || '' };
+  if (out.saida && out.chegada) return out;
+  var d = String(p.descricao || '');
+  if (!d) return out;
+  var dn = d.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  if (!out.saida) {
+    var ms = dn.match(/HORA DE SAIDA:\s*(\d{1,2})[:H](\d{2})/);
+    if (ms) out.saida = ms[1].padStart(2, '0') + ':' + ms[2];
+  }
+  if (!out.chegada) {
+    var mc = dn.match(/HORA DE CHEGADA:\s*(\d{1,2})[:H](\d{2})/);
+    if (mc) out.chegada = mc[1].padStart(2, '0') + ':' + mc[2];
+  }
+  return out;
+}
+
+document.getElementById('btnBuscar').addEventListener('click', buscarMulta);
+
+function buscarMulta() {
+  var placa = normalizarPlaca(document.getElementById('multaPlaca').value);
+  var dataTxt = document.getElementById('multaData').value.trim();
+  var horaTxt = document.getElementById('multaHora').value.trim();
+  var box = document.getElementById('resultadoMulta');
+
+  if (!placa && !dataTxt) { box.innerHTML = '<p style="color:var(--danger);font-size:13px;">Informe ao menos a placa ou a data.</p>'; return; }
+
+  var alvoISO = dataTxt ? brParaISO(dataTxt) : '';
+  if (dataTxt && (!alvoISO || alvoISO.length < 10)) {
+    box.innerHTML = '<p style="color:var(--danger);font-size:13px;">Data inválida. Use DD/MM/AAAA.</p>';
+    return;
+  }
+  var horaAlvo = horaTxt ? normalizarHoraMulta(horaTxt) : '';
+
+  var alvoIni = alvoISO ? alvoISO + 'T' + (horaAlvo || '00:00') : '';
+  var alvoFim = alvoISO ? alvoISO + 'T' + (horaAlvo || '23:59') : '';
+  var semHorario = 0;
+
+  var achados = processos.filter(function(p) {
+    if (placa && normalizarPlaca(p.placa).indexOf(placa) === -1) return false;
+    if (!alvoISO) return true;
+    var iniD = p.dataSaida ? brParaISO(p.dataSaida) : '';
+    if (!iniD) return false;
+    var fimD = p.dataChegada ? brParaISO(p.dataChegada) : iniD;
+    if (fimD < iniD) fimD = iniD;
+    var dias = (new Date(fimD + 'T00:00') - new Date(iniD + 'T00:00')) / 86400000;
+    if (dias > 30) fimD = iniD;
+
+    var hp = horasDoProcesso(p);
+    var hIni = hp.saida || '00:00';
+    var hFim = hp.chegada || '23:59';
+    if (horaAlvo && (!hp.saida || !hp.chegada)) semHorario++;
+
+    var viagemIni = iniD + 'T' + hIni;
+    var viagemFim = fimD + 'T' + hFim;
+    if (viagemFim < viagemIni) viagemFim = fimD + 'T23:59';
+
+    return alvoIni <= viagemFim && alvoFim >= viagemIni;
+  });
+
+  if (achados.length === 0) {
+    box.innerHTML = '<div style="padding:12px;background:var(--surface2);border-radius:9px;font-size:13px;">'
+      + '<strong>Nenhuma viagem encontrada.</strong><br><br>'
+      + 'Só aparecem aqui viagens que geraram diária.</div>';
+    return;
+  }
+
+  achados.sort(function(a, b) { return brParaISO(a.dataSaida || '').localeCompare(brParaISO(b.dataSaida || '')); });
+
+  var titulo = achados.length === 1
+    ? '<div class="ok-badge">✅ Um único motorista estava com o veículo:</div>'
+    : '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + achados.length + ' viagens cobrem esse momento:</div>';
+
+  box.innerHTML = titulo + achados.map(function(p) {
+    var periodo = (p.dataSaida || '?') + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' até ' + p.dataChegada : '');
+    var hpr = horasDoProcesso(p);
+    var horas = (hpr.saida || hpr.chegada) ? (hpr.saida || '?') + ' → ' + (hpr.chegada || '?') : 'sem horário na descrição';
+    return '<div class="resultado-item">'
+      + '<div class="nome">' + (p.servidor || '(sem nome)') + '</div>'
+      + '<div class="meta">🚗 ' + (p.placa || '—') + ' · 📍 ' + (p.cidade || '—') + '</div>'
+      + '<div class="meta">📅 ' + periodo + ' · 🕐 ' + horas + '</div>'
+      + (p.numProcesso ? '<div class="meta">📄 Processo ' + p.numProcesso + '</div>' : '')
+      + '</div>';
+  }).join('')
+  + (achados.length > 1 && !horaAlvo ? '<p class="aviso">💡 Informe a hora da multa pra reduzir a lista.</p>' : '')
+  + (semHorario > 0 && horaAlvo ? '<p class="aviso">⚠️ ' + semHorario + ' viagem(ns) sem horário completo — consideradas o dia inteiro.</p>' : '');
+}
+</script>
+</body>
+</html>
