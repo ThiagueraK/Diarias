@@ -274,7 +274,9 @@ function buscarMulta() {
       + '<div class="nome">' + (p.servidor || '(sem nome)') + '</div>'
       + '<div class="meta">🚗 ' + (p.placa || '—') + ' · 📍 ' + (p.cidade || '—') + '</div>'
       + '<div class="meta">📅 ' + periodo + ' · 🕐 ' + horas + '</div>'
-      + (p.numProcesso ? '<div class="meta">📄 Processo ' + p.numProcesso + '</div>' : '')
+      + (p.numProcesso ? '<div class="meta">📄 Processo ' + p.numProcesso
+          + (p.hash1doc ? ' — <a href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash1doc + '&itd=7" target="_blank" rel="noopener">🔗 Abrir no 1Doc</a>' : '')
+          + '</div>' : '')
       + '</div>';
   }).join('')
   + (achados.length > 1 && !horaAlvo ? '<p class="aviso">💡 Informe a hora da multa pra reduzir a lista.</p>' : '')
