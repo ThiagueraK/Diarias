@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.7</span>
+    <span class="header-version">v1.9.8</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1248,6 +1248,72 @@ var processosCaixaAtual = [];
 function escaparHtmlProc(s) {
   return (s == null ? '' : String(s)).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+// Mesmo template do botão "⚡ Gerar Descrição" (função gerar(), aba Gerador) — a descrição
+// do processo tem que sair no mesmo formato que o resto do sistema já usa, não um resumo
+// à parte. Só o "motivo" (já extraído sem IA pela varredura) entra no lugar do campo que lá
+// é digitado manualmente.
+function montarDescricaoCompletaProcesso(p) {
+  if (!p.descricaoSugerida) return null;
+  var cidade = (p.cidade || '').toUpperCase();
+  var uf = (p.uf || 'RS').toUpperCase();
+  var servidor = (p.servidor || '').toUpperCase();
+  return 'DIÁRIA TRANSPORTE VIAGEM '+cidade+'/'+uf+', '+servidor+' '+p.descricaoSugerida+
+    '. DATA DE SAÍDA: '+(p.dataSaida||'')+', DATA DE CHEGADA: '+(p.dataChegada||'')+
+    ', HORA DE SAÍDA: '+(p.horaSaida||'')+', HORA DE CHEGADA: '+(p.horaChegada||'')+'.';
+}
+// Mesma classificação de distância do botão "📍 KM" (calcularKmMultiplo/calcularKm), mas sem
+// tocar no DOM do formulário da aba Gerador (kmResult é elemento daquela aba, não desta) —
+// só devolve o km pelo callback.
+function calcularKmSilencioso(cidade, callback) {
+  if (!cidade) { callback(null); return; }
+  var cidades = splitCidades(cidade);
+  if (cidades.length === 0) cidades = [cidade.trim().toUpperCase()];
+  var promises = cidades.map(function(c) {
+    if (kmCache[c]) return Promise.resolve(parseFloat(kmCache[c]));
+    return Promise.all([geocodificar(ORIGEM), geocodificar(c + ', RS, Brasil')])
+      .then(function(coords) {
+        var orig = coords[0], dest = coords[1];
+        if (!orig || !dest) return 0;
+        return fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': ORS_KEY },
+          body: JSON.stringify({ coordinates: [orig, dest], preference: 'recommended' })
+        }).then(function(r){ return r.json(); })
+        .then(function(data) {
+          if (!data.routes || !data.routes[0]) return 0;
+          var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
+          kmCache[c] = String(km);
+          return km;
+        });
+      }).catch(function(){ return 0; });
+  });
+  Promise.all(promises).then(function(kms) {
+    var total = kms.reduce(function(a,b){ return a+b; }, 0);
+    callback(total > 0 ? total : null);
+  }).catch(function(){ callback(null); });
+}
+// Fechamento é só pra "interior do estado" (com/sem pernoite) — capital e interior do
+// município não têm (mesma regra da função gerar()). Sem km calculado ainda, não arrisca
+// classificação errada num documento oficial: fica sem fechamento até resolver.
+function fecharDescricaoProcessoComKm(idx) {
+  var p = processosCaixaAtual[idx];
+  if (!p || !p.descricaoCompletaBase || !p.cidade) return;
+  calcularKmSilencioso(p.cidade, function(km) {
+    var fechamento = '';
+    if (km != null && km <= 350) {
+      var pernoite = p.dataSaida && p.dataChegada && p.dataSaida !== p.dataChegada;
+      fechamento = pernoite
+        ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE'
+        : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE';
+    }
+    p.kmCalculado = km;
+    p.descricaoCompletaFinal = p.descricaoCompletaBase + (fechamento ? ' ' + fechamento + '.' : '');
+    var el = document.getElementById('proc-desc-' + idx);
+    if (el) el.textContent = p.descricaoCompletaFinal;
+    var kmEl = document.getElementById('proc-km-' + idx);
+    if (kmEl) kmEl.textContent = km != null ? (km + ' km de Tupanciretã' + (km > 350 ? ' — capital/longa distância, sem fechamento' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
+  });
+}
 function renderProcessosCaixa(itens, atualizadoEm) {
   processosCaixaAtual = itens || [];
   var lista = document.getElementById('proc-lista');
@@ -1261,7 +1327,9 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var titulo = (p.numeroProcesso||'?') + ' — ' + (p.servidor||'?');
     var linha2 = [p.placa, p.cidade ? (p.cidade + (p.uf ? '/'+p.uf : '')) : null].filter(Boolean).join(' · ');
     var linha3 = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
-    var desc = p.descricaoSugerida;
+    var descBase = montarDescricaoCompletaProcesso(p);
+    p.descricaoCompletaBase = descBase;
+    p.descricaoCompletaFinal = descBase; // até o km resolver, copia já funciona com o que tem
     return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
         +'<div>'
@@ -1273,24 +1341,29 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       +'</div>'
       +(p.erro
         ? '<div style="margin-top:8px;font-size:12px;color:var(--danger);"><b>Erro ao ler:</b> '+escaparHtmlProc(p.erro)+'</div>'
-        : (desc
+        : (descBase
           ? '<div style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
-              +'<span style="font-size:12px;">'+escaparHtmlProc(desc)+'</span>'
+              +'<span id="proc-desc-'+idx+'" style="font-size:12px;">'+escaparHtmlProc(descBase)+'</span>'
               +'<button onclick="copiarDescricaoProcesso('+idx+')" style="flex:0 0 auto;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">📋 Copiar</button>'
             +'</div>'
+            +'<div id="proc-km-'+idx+'" style="margin-top:4px;font-size:11px;color:var(--text-dim);">calculando distância...</div>'
           : '<div style="margin-top:8px;font-size:12px;color:var(--text-dim);">Sem descrição — preencher na mão.</div>'
         )
       )
     +'</div>';
   }).join('');
+  itens.forEach(function(p, idx){
+    if (p.descricaoCompletaBase && p.cidade) fecharDescricaoProcessoComKm(idx);
+  });
 }
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
-  if (!p || !p.descricaoSugerida) return;
-  navigator.clipboard.writeText(p.descricaoSugerida).then(function(){
+  var texto = p && (p.descricaoCompletaFinal || p.descricaoCompletaBase);
+  if (!texto) return;
+  navigator.clipboard.writeText(texto).then(function(){
     alert('Descrição copiada!');
   }).catch(function(){
-    prompt('Copie manualmente:', p.descricaoSugerida);
+    prompt('Copie manualmente:', texto);
   });
 }
 window.copiarDescricaoProcesso = copiarDescricaoProcesso;
