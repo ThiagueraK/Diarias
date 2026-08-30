@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.1</span>
+    <span class="header-version">v1.10.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1520,7 +1520,7 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     elEmp.innerHTML = '✅ Empenho <b>' + escaparHtmlProc(numero) + '</b>' + (valor ? ' — R$ ' + escaparHtmlProc(valor) : '');
   }
   window._processoAtivoHash = null; // consome — evita reaproveitar num empenho seguinte por engano
-  return { ok: true };
+  return { ok: true, hash: hash };
 }
 window.sgdRegistrarEmpenhoPorHash = sgdRegistrarEmpenhoPorHash;
 
