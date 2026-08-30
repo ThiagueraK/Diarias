@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.4</span>
+    <span class="header-version">v1.10.5</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1372,7 +1372,7 @@ function fecharDescricoesEmFila(itens) {
     if (i >= itens.length) return;
     var idx = i++;
     var p = itens[idx];
-    if (!p.descricaoCompletaBase || p.ehAgenteSaude) { proximo(); return; }
+    if (!p.descricaoCompletaBase || p.ehAgenteSaude || empenhoJaLancado(p.hash)) { proximo(); return; }
     fecharDescricaoProcessoComKm(idx, function() {
       setTimeout(proximo, 1100); // folga entre chamadas reais (~1/seg, dentro do limite comum de geocoding gratuito)
     });
@@ -1441,6 +1441,12 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var descBase = montarDescricaoCompletaProcesso(p);
     p.descricaoCompletaBase = descBase;
     p.descricaoCompletaFinal = descBase; // até o km resolver, copia já funciona com o que tem
+
+    // Empenho já lançado antes desta sessão (ex: recarregou a página) — não mostra o card,
+    // igual ao que já acontece quando o vínculo acontece AO VIVO (sgdRegistrarEmpenhoPorHash).
+    // idx continua o mesmo índice de processosCaixaAtual (não filtra o array antes do .map)
+    // pra não quebrar os onclick que indexam por idx (copiarDescricaoProcesso etc).
+    if (empenhoJaLancado(p.hash)) return '';
 
     var classeCard = p.erro ? 'is-erro' : (p.ehAgenteSaude ? 'is-agente' : (!descBase ? 'is-vazio' : ''));
     var credorNum = credorPorNome(p.servidor);
