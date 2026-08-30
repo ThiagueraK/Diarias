@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.8</span>
+    <span class="header-version">v1.9.9</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1254,12 +1254,21 @@ function escaparHtmlProc(s) {
 // é digitado manualmente.
 function montarDescricaoCompletaProcesso(p) {
   if (!p.descricaoSugerida) return null;
+  // Agente de Saúde não é viagem — o texto legal fixo é a descrição inteira, sem frase de
+  // diária nem km (mesmo comportamento da aba Gerador pra esse tipo de processo).
+  if (p.ehAgenteSaude) return p.descricaoSugerida;
   var cidade = (p.cidade || '').toUpperCase();
   var uf = (p.uf || 'RS').toUpperCase();
   var servidor = (p.servidor || '').toUpperCase();
   return 'DIÁRIA TRANSPORTE VIAGEM '+cidade+'/'+uf+', '+servidor+' '+p.descricaoSugerida+
     '. DATA DE SAÍDA: '+(p.dataSaida||'')+', DATA DE CHEGADA: '+(p.dataChegada||'')+
     ', HORA DE SAÍDA: '+(p.horaSaida||'')+', HORA DE CHEGADA: '+(p.horaChegada||'')+'.';
+}
+// "TUPANCIRETÃ"/variações == interior do próprio município, nunca tem fechamento de
+// distância (mesma regra de "capital"/"municipio" na função gerar()).
+function ehMesmoMunicipio(cidade) {
+  var norm = (cidade || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim();
+  return norm === 'TUPANCIRETA';
 }
 // Mesma classificação de distância do botão "📍 KM" (calcularKmMultiplo/calcularKm), mas sem
 // tocar no DOM do formulário da aba Gerador (kmResult é elemento daquela aba, não desta) —
@@ -1297,7 +1306,12 @@ function calcularKmSilencioso(cidade, callback) {
 // classificação errada num documento oficial: fica sem fechamento até resolver.
 function fecharDescricaoProcessoComKm(idx) {
   var p = processosCaixaAtual[idx];
-  if (!p || !p.descricaoCompletaBase || !p.cidade) return;
+  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) return;
+  if (!p.cidade || ehMesmoMunicipio(p.cidade)) {
+    var kmElMun = document.getElementById('proc-km-' + idx);
+    if (kmElMun) kmElMun.textContent = p.cidade ? 'interior do município — sem fechamento' : 'sem cidade — revisar manualmente';
+    return;
+  }
   calcularKmSilencioso(p.cidade, function(km) {
     var fechamento = '';
     if (km != null && km <= 350) {
@@ -1346,14 +1360,16 @@ function renderProcessosCaixa(itens, atualizadoEm) {
               +'<span id="proc-desc-'+idx+'" style="font-size:12px;">'+escaparHtmlProc(descBase)+'</span>'
               +'<button onclick="copiarDescricaoProcesso('+idx+')" style="flex:0 0 auto;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">📋 Copiar</button>'
             +'</div>'
-            +'<div id="proc-km-'+idx+'" style="margin-top:4px;font-size:11px;color:var(--text-dim);">calculando distância...</div>'
+            +(p.ehAgenteSaude
+              ? '<div style="margin-top:4px;font-size:11px;color:var(--text-dim);">Agente de Saúde — indenização fixa, sem cálculo de distância.</div>'
+              : '<div id="proc-km-'+idx+'" style="margin-top:4px;font-size:11px;color:var(--text-dim);">calculando distância...</div>')
           : '<div style="margin-top:8px;font-size:12px;color:var(--text-dim);">Sem descrição — preencher na mão.</div>'
         )
       )
     +'</div>';
   }).join('');
   itens.forEach(function(p, idx){
-    if (p.descricaoCompletaBase && p.cidade) fecharDescricaoProcessoComKm(idx);
+    if (p.descricaoCompletaBase && !p.ehAgenteSaude) fecharDescricaoProcessoComKm(idx);
   });
 }
 function copiarDescricaoProcesso(idx) {
