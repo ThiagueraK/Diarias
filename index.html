@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.10</span>
+    <span class="header-version">v1.9.11</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1304,12 +1304,14 @@ function calcularKmSilencioso(cidade, callback) {
 // Fechamento é só pra "interior do estado" (com/sem pernoite) — capital e interior do
 // município não têm (mesma regra da função gerar()). Sem km calculado ainda, não arrisca
 // classificação errada num documento oficial: fica sem fechamento até resolver.
-function fecharDescricaoProcessoComKm(idx) {
+function fecharDescricaoProcessoComKm(idx, aoTerminar) {
+  var pronto = aoTerminar || function(){};
   var p = processosCaixaAtual[idx];
-  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) return;
+  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) { pronto(); return; }
   if (!p.cidade || ehMesmoMunicipio(p.cidade)) {
     var kmElMun = document.getElementById('proc-km-' + idx);
     if (kmElMun) kmElMun.textContent = p.cidade ? 'interior do município — sem fechamento' : 'sem cidade — revisar manualmente';
+    pronto();
     return;
   }
   calcularKmSilencioso(p.cidade, function(km) {
@@ -1326,7 +1328,25 @@ function fecharDescricaoProcessoComKm(idx) {
     if (el) el.textContent = p.descricaoCompletaFinal;
     var kmEl = document.getElementById('proc-km-' + idx);
     if (kmEl) kmEl.textContent = km != null ? (km + ' km de Tupanciretã' + (km > 350 ? ' — capital/longa distância, sem fechamento' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
+    pronto();
   });
+}
+// Processa um card de cada vez, com folga entre chamadas de rede reais — 21 cards batendo
+// tudo de uma vez na API de geolocalização (openrouteservice) estourava o limite de taxa
+// dela (achado real, 30/08/2026). kmCache (já existente) faz cidades repetidas nem chamarem
+// a API de novo, então essa fila só demora de verdade nas cidades realmente distintas.
+function fecharDescricoesEmFila(itens) {
+  var i = 0;
+  function proximo() {
+    if (i >= itens.length) return;
+    var idx = i++;
+    var p = itens[idx];
+    if (!p.descricaoCompletaBase || p.ehAgenteSaude) { proximo(); return; }
+    fecharDescricaoProcessoComKm(idx, function() {
+      setTimeout(proximo, 1100); // folga entre chamadas reais (~1/seg, dentro do limite comum de geocoding gratuito)
+    });
+  }
+  proximo();
 }
 function renderProcessosCaixa(itens, atualizadoEm) {
   processosCaixaAtual = itens || [];
@@ -1368,9 +1388,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       )
     +'</div>';
   }).join('');
-  itens.forEach(function(p, idx){
-    if (p.descricaoCompletaBase && !p.ehAgenteSaude) fecharDescricaoProcessoComKm(idx);
-  });
+  fecharDescricoesEmFila(itens);
 }
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
@@ -1395,34 +1413,29 @@ function carregarProcessosCaixa() {
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro: '+(res.error||'desconhecido')+'</p>'; return; }
-    if (res.emAndamento) {
-      // Já tinha uma varredura rodando (ex: disparada em outra aba/aparelho) — entra no
-      // mesmo polling em vez de mostrar a lista antiga parada.
-      var btn = document.getElementById('proc-atualizar');
-      btn.disabled = true;
-      btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
-      lista.innerHTML = '<p style="color:var(--text-muted);">Varredura em andamento (iniciada em outro lugar), aguardando...</p>';
-      pollProcessosCaixa(0);
-      return;
-    }
     renderProcessosCaixa(res.itens, res.atualizadoEm);
-    if (res.erro) {
-      var kmDiv = document.createElement('p');
-      kmDiv.style.color = 'var(--danger)';
-      kmDiv.style.fontSize = '12px';
-      kmDiv.textContent = 'Última varredura falhou: ' + res.erro + ' (lista abaixo é do cache anterior, se houver)';
-      lista.parentNode.insertBefore(kmDiv, lista);
+    // Erro mais recente que o próprio dado (nenhuma varredura boa depois dele) — avisa,
+    // mas mostra o que tiver de cache mesmo assim.
+    if (res.erro && (!res.atualizadoEm || res.erroEm > res.atualizadoEm)) {
+      var avisoErro = document.createElement('p');
+      avisoErro.style.color = 'var(--danger)';
+      avisoErro.style.fontSize = '12px';
+      avisoErro.textContent = 'Última varredura falhou: ' + res.erro + ' (lista abaixo é do cache anterior, se houver)';
+      lista.parentNode.insertBefore(avisoErro, lista);
     }
   })
   .catch(function(e){ lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>'; });
 }
-// Consulta processos-caixa-listar de novo até emAndamento virar false — a varredura real
-// passa dos ~100s de timeout da borda do Cloudflare pro Worker (achado real, 30/08/2026,
-// erro 524), então o disparo é fire-and-forget (ctx.waitUntil no Worker) e a aba fica
-// perguntando "já terminou?" em vez de esperar uma resposta só que nunca chegaria a tempo.
-function pollProcessosCaixa(tentativa) {
+// Consulta processos-caixa-listar de novo até atualizadoEm ou erroEm avançarem além do
+// instante em que a varredura foi pedida — a varredura real passa dos ~100s de timeout da
+// borda do Cloudflare pro Worker (achado real, 30/08/2026, erro 524), então o disparo é
+// fire-and-forget (ctx.waitUntil no Worker) e a aba fica perguntando "já terminou?" via
+// timestamp, sem depender de nenhuma flag escrita à parte no KV (achado real 2: escrever
+// uma flag "em andamento" separada colidia com o limite de 1 escrita/segundo por chave do
+// KV — "Rate exceeded." quebrando o JSON da resposta).
+function pollProcessosCaixa(tentativa, horaInicio) {
   pararPollingProcessos();
-  if (tentativa > 40) { // ~40 * 4s = 160s de folga além do timeout de 30min do Cloud Run seria exagero — isso é só um teto de segurança da interface
+  if (tentativa > 40) { // ~40 * 4s = 160s — só teto de segurança da interface
     var lista = document.getElementById('proc-lista');
     lista.innerHTML = '<p style="color:var(--danger);">Varredura demorando demais — recarregue a aba pra conferir se terminou.</p>';
     var btn = document.getElementById('proc-atualizar');
@@ -1434,18 +1447,20 @@ function pollProcessosCaixa(tentativa) {
     sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
     .then(function(r){ return r.json(); })
     .then(function(res){
-      if (!res.ok) { pollProcessosCaixa(tentativa + 1); return; }
-      if (res.emAndamento) { pollProcessosCaixa(tentativa + 1); return; }
+      if (!res.ok) { pollProcessosCaixa(tentativa + 1, horaInicio); return; }
+      var terminouComErro = res.erroEm && res.erroEm >= horaInicio;
+      var terminouComSucesso = res.atualizadoEm && res.atualizadoEm >= horaInicio;
+      if (!terminouComErro && !terminouComSucesso) { pollProcessosCaixa(tentativa + 1, horaInicio); return; }
       var btn = document.getElementById('proc-atualizar');
       btn.disabled = false;
       btn.textContent = '🔄 Varrer caixa agora';
-      if (res.erro) {
+      if (terminouComErro && !terminouComSucesso) {
         document.getElementById('proc-lista').innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+escaparHtmlProc(res.erro)+'</p>';
         return;
       }
       renderProcessosCaixa(res.itens, res.atualizadoEm);
     })
-    .catch(function(){ pollProcessosCaixa(tentativa + 1); });
+    .catch(function(){ pollProcessosCaixa(tentativa + 1, horaInicio); });
   }, 4000);
 }
 function escanearProcessosCaixa() {
@@ -1454,6 +1469,7 @@ function escanearProcessosCaixa() {
   btn.disabled = true;
   btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
   lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde (isso passa por várias telas do 1Doc, pode levar 1-2 minutos)...</p>';
+  var horaInicio = Date.now();
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-escanear', { method: 'POST' })
   .then(function(r){ return r.json(); })
   .then(function(res){
@@ -1463,7 +1479,7 @@ function escanearProcessosCaixa() {
       lista.innerHTML = '<p style="color:var(--danger);">Erro ao iniciar varredura: '+escaparHtmlProc(res.error||'desconhecido')+'</p>';
       return;
     }
-    pollProcessosCaixa(0);
+    pollProcessosCaixa(0, res.iniciadoEm || horaInicio);
   })
   .catch(function(e){
     btn.disabled = false;
