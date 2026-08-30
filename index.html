@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.6</span>
+    <span class="header-version">v1.10.7</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1592,6 +1592,10 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
   return { ok: true, hash: hash, servidor: p.servidor || '', numProcesso: p.numeroProcesso || '' };
 }
 window.sgdRegistrarEmpenhoPorHash = sgdRegistrarEmpenhoPorHash;
+// Ponte pro console (F12) — corrigir a Tabela de Controle na mão quando o fluxo automático
+// não se aplica (ex: correção manual feita direto no 1Doc). adicionarProcesso é interna
+// (dentro de sgdAppMain), sem isso não dava pra chamar do console.
+window.sgdAdicionarProcessoManual = adicionarProcesso;
 
 var procPollingTimer = null;
 function pararPollingProcessos() {
