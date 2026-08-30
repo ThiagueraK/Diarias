@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.2</span>
+    <span class="header-version">v1.10.3</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1379,6 +1379,47 @@ function fecharDescricoesEmFila(itens) {
   }
   proximo();
 }
+// Mapa Nome → Código de Credor no sistema CP (30/08/2026) — extraído do relatório "Recursos
+// Antecipados Concedidos... Adto-Viagens" do próprio CP (01/01/2026 a 28/08/2026), confirmado
+// pelo usuário. Só cobre quem já recebeu ao menos uma diária esse ano (28 pessoas) — pedido
+// explícito: mostrar no card pra não depender de decorar todo mundo. Atualizar aqui na mão
+// quando alguém novo aparecer (não tem endpoint pra isso, é lista fixa/manual mesmo).
+var MAPA_CREDORES_CP = {
+  'ALEXANDRE COSTA DOS SANTOS': '5125',
+  'ANA PAULA DA SILVA': '4853',
+  'ARIANE DE OLIVEIRA BOTEGA': '6772',
+  'DELVIO AUGUSTO OLIVEIRA NUNES': '4626',
+  'DOMINGOS MOREIRA DOS SANTOS': '5127',
+  'DORIVAL PEREIRA SIMOES NETO': '5150',
+  'DOUGLAS QUEVEDO PADILHA': '4381',
+  'EDSON MARTINS MENUS': '5121',
+  'ELDER BECKER RODRIGUES': '8293',
+  'ELIZABETE DE MELO BRAZ': '5386',
+  'FELIZARDO CHAVES RIBAS': '5115',
+  'FERNANDA WANDER FERREIRA': '7744',
+  'FRANCISCO CARLOS SANDERS': '5113',
+  'IRAJA OLIVEIRA DE OLIVEIRA': '5135',
+  'JACI VIEIRA NUNES': '5126',
+  'JAIME COSTA MACHADO': '7137',
+  'JOAO PAULO GUTERRES NETO': '6957',
+  'JOSE ADEMIR DA SILVA FARIAS': '5320',
+  'LUANA NASCIMENTO DA COSTA': '2965',
+  'LUCIANA APARECIDA DA SILVA PINHEIRO': '5337',
+  'LUIZ FERNANDO CORTIANA DO AMARAL': '5156',
+  'MARCIO RODRIGO N. SANTOS': '8117',
+  'MARCOS ADRIANO BOROWIEC': '5999',
+  'PAULO ROBERTO CAVALHEIRO MARTINS': '5253',
+  'PAULO ROBERTO COSTA DA SILVA': '5110',
+  'RAMONNY FERREIRA THONES': '7563',
+  'RODOLFO DE JESUS DAMBROSIO': '6726',
+  'SABRINA VARONI DE OLIVEIRA': '5151'
+};
+function normalizarNomeCredor(nome) {
+  return (nome || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim().replace(/\s+/g, ' ');
+}
+function credorPorNome(nome) {
+  return MAPA_CREDORES_CP[normalizarNomeCredor(nome)] || null;
+}
 function iniciaisDoNome(nome) {
   if (!nome) return '?';
   var partes = nome.trim().split(/\s+/).filter(Boolean);
@@ -1402,7 +1443,9 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     p.descricaoCompletaFinal = descBase; // até o km resolver, copia já funciona com o que tem
 
     var classeCard = p.erro ? 'is-erro' : (p.ehAgenteSaude ? 'is-agente' : (!descBase ? 'is-vazio' : ''));
+    var credorNum = credorPorNome(p.servidor);
     var metaPartes = [];
+    if (credorNum) metaPartes.push('<span>🏷️ Credor <b>' + credorNum + '</b></span>');
     if (p.placa) metaPartes.push('<span>🚗 ' + escaparHtmlProc(p.placa) + '</span>');
     if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
     var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
