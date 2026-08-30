@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.12</span>
+    <span class="header-version">v1.9.13</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1435,9 +1435,9 @@ function carregarProcessosCaixa() {
 // KV — "Rate exceeded." quebrando o JSON da resposta).
 function pollProcessosCaixa(tentativa, horaInicio) {
   pararPollingProcessos();
-  if (tentativa > 75) { // ~75 * 4s = 300s — folga além do ~2-3min real observado (30/08/2026), só teto de segurança da interface
+  if (tentativa > 150) { // ~150 * 4s = 600s (10min) — bem acima do observado (30s a ~4min, 30/08/2026); a varredura roda no servidor mesmo com a aba fechada, então isso é só a interface desistindo de perguntar, não a varredura em si
     var lista = document.getElementById('proc-lista');
-    lista.innerHTML = '<p style="color:var(--danger);">Varredura demorando demais — recarregue a aba pra conferir se terminou.</p>';
+    lista.innerHTML = '<p style="color:var(--text-muted);">Ainda não terminou depois de 10min de espera — a varredura continua rodando no servidor mesmo assim. Pode fechar essa aba e voltar depois: quando entrar de novo, se já tiver terminado, o resultado já aparece sozinho.</p>';
     var btn = document.getElementById('proc-atualizar');
     btn.disabled = false;
     btn.textContent = '🔄 Varrer caixa agora';
