@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.6</span>
+    <span class="header-version">v1.9.7</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -468,6 +468,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
+    <button class="tab-btn" id="tabProcessos">📋 Processos</button>
     <button class="tab-btn" id="tabManutencao">🔧 Manutenção</button>
     <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
     <button class="tab-btn" id="tabPC">📄 Prestação de Contas <span class="tab-badge" id="badgePCCount">0</span></button>
@@ -778,6 +779,20 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div id="rel-tabela" style="overflow-x:auto;max-height:50vh;overflow-y:auto;"></div>
     </div>
 
+  </div>
+
+  <div class="tab-panel" id="panel-processos">
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📋 Processos — caixa SGD pendentes de empenho</span>
+        <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
+      <p id="proc-atualizado-em" style="font-size:11px;color:var(--text-dim);margin:0 0 12px;"></p>
+      <div id="proc-lista" style="max-height:65vh;overflow-y:auto;">
+        <p style="color:var(--text-muted);">Carregando...</p>
+      </div>
+    </div>
   </div>
 
   <div class="tab-panel" id="panel-manutencao">
@@ -1133,8 +1148,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-manutencao','panel-solicitacoes','panel-pc'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabManutencao','tabSolicitacoes','tabPC'];
+var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-processos','panel-manutencao','panel-solicitacoes','panel-pc'];
+var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabProcessos','tabManutencao','tabSolicitacoes','tabPC'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1144,6 +1159,7 @@ function switchTab(panelId, tabId) {
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
+document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); });
 document.getElementById('tabManutencao').addEventListener('click', function() { switchTab('panel-manutencao','tabManutencao'); carregarManutencao(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
@@ -1224,6 +1240,92 @@ function renderPCFila(autoCopiar) {
     renderPCFila(true);
   });
 }
+
+// ═══════════════════════════════════════════════════════
+// PROCESSOS — caixa SGD pendentes de empenho (sem IA)
+// ═══════════════════════════════════════════════════════
+var processosCaixaAtual = [];
+function escaparHtmlProc(s) {
+  return (s == null ? '' : String(s)).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function renderProcessosCaixa(itens, atualizadoEm) {
+  processosCaixaAtual = itens || [];
+  var lista = document.getElementById('proc-lista');
+  var infoEl = document.getElementById('proc-atualizado-em');
+  infoEl.textContent = atualizadoEm ? ('Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR')) : '';
+  if (!itens || itens.length === 0) {
+    lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum processo ainda — clique em "🔄 Varrer caixa agora".</p>';
+    return;
+  }
+  lista.innerHTML = itens.map(function(p, idx){
+    var titulo = (p.numeroProcesso||'?') + ' — ' + (p.servidor||'?');
+    var linha2 = [p.placa, p.cidade ? (p.cidade + (p.uf ? '/'+p.uf : '')) : null].filter(Boolean).join(' · ');
+    var linha3 = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
+    var desc = p.descricaoSugerida;
+    return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
+        +'<div>'
+          +'<span style="font-weight:600;">'+escaparHtmlProc(titulo)+'</span><br>'
+          +'<span style="color:var(--text-muted);font-size:12px;">'+escaparHtmlProc(linha2)+'</span><br>'
+          +'<span style="color:var(--text-muted);font-size:12px;">'+escaparHtmlProc(linha3)+'</span>'
+        +'</div>'
+        +(p.url ? '<a href="'+p.url+'" target="_blank" style="font-size:11px;color:var(--accent);white-space:nowrap;">Abrir no 1Doc ↗</a>' : '')
+      +'</div>'
+      +(p.erro
+        ? '<div style="margin-top:8px;font-size:12px;color:var(--danger);"><b>Erro ao ler:</b> '+escaparHtmlProc(p.erro)+'</div>'
+        : (desc
+          ? '<div style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+              +'<span style="font-size:12px;">'+escaparHtmlProc(desc)+'</span>'
+              +'<button onclick="copiarDescricaoProcesso('+idx+')" style="flex:0 0 auto;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">📋 Copiar</button>'
+            +'</div>'
+          : '<div style="margin-top:8px;font-size:12px;color:var(--text-dim);">Sem descrição — preencher na mão.</div>'
+        )
+      )
+    +'</div>';
+  }).join('');
+}
+function copiarDescricaoProcesso(idx) {
+  var p = processosCaixaAtual[idx];
+  if (!p || !p.descricaoSugerida) return;
+  navigator.clipboard.writeText(p.descricaoSugerida).then(function(){
+    alert('Descrição copiada!');
+  }).catch(function(){
+    prompt('Copie manualmente:', p.descricaoSugerida);
+  });
+}
+window.copiarDescricaoProcesso = copiarDescricaoProcesso;
+function carregarProcessosCaixa() {
+  var lista = document.getElementById('proc-lista');
+  lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
+  sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro: '+(res.error||'desconhecido')+'</p>'; return; }
+    renderProcessosCaixa(res.itens, res.atualizadoEm);
+  })
+  .catch(function(e){ lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>'; });
+}
+function escanearProcessosCaixa() {
+  var btn = document.getElementById('proc-atualizar');
+  var lista = document.getElementById('proc-lista');
+  btn.disabled = true;
+  btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
+  lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde...</p>';
+  sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-escanear', { method: 'POST' })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    btn.disabled = false;
+    btn.textContent = '🔄 Varrer caixa agora';
+    if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+escaparHtmlProc(res.error||'desconhecido')+'</p>'; return; }
+    renderProcessosCaixa(res.itens, res.atualizadoEm);
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    btn.textContent = '🔄 Varrer caixa agora';
+    lista.innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+e.message+'</p>';
+  });
+}
+document.getElementById('proc-atualizar') && document.getElementById('proc-atualizar').addEventListener('click', escanearProcessosCaixa);
 
 function carregarManutencao() {
   var lista = document.getElementById('man-lista');

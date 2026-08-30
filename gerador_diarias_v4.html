@@ -701,7 +701,12 @@ function parsearLocal(raw) {
 
   if (listaM) {
     var bloco = listaM[1].trim();
-    var linhas = bloco.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+    // separa tanto por quebra de linha quanto por 2+ espaços seguidos (alguns formularios
+    // listam os pacientes numa linha so, tipo "CARLOS   NELCI   ERONI  VALERIA")
+    var linhas = bloco.split(/\n/).reduce(function(acc, l) {
+      var partes = l.split(/\s{2,}/).map(function(p){return p.trim();}).filter(function(p){return p.length>0;});
+      return acc.concat(partes);
+    }, []);
     var primeira = linhas.length > 0 ? linhas[0] : '';
 
     // Frase descritiva no inicio (acompanhar, realizar, participar...)
@@ -716,17 +721,22 @@ function parsearLocal(raw) {
         found.motivo = ('BUSCAR PACIENTE' + (destBuscar ? ' NO ' + destBuscar : '')).trim();
       } else {
         // Coleta nomes e descricao adicional
+        // Nota: aqui so CONTAMOS quantos pacientes tem na lista, nunca citamos o nome no
+        // resultado (LGPD) - por isso nao exigimos "parece nome completo" (2+ palavras),
+        // ja que varios formularios listam so o primeiro nome de cada paciente.
         var nomes = [];
         var descExtra = '';
         for (var li = 0; li < linhas.length; li++) {
           var linha = linhas[li].replace(/^\+ac\.+\s*/i,'').trim();
-          if (!linha || linha.length < 4) continue;
+          if (!linha || linha.length < 2) continue;
           if (/^(levar|buscar|trazer|transportar|conduzir|acompanhar|para realizar|realizar|PREENCHIMENTO|Clinica|Lista)/i.test(linha)) {
             if (!descExtra) descExtra = linha;
             continue;
           }
           linha = linha.replace(/^(paciente|gestante|crianca|idoso|pacientes)\s+/i,'').trim();
-          if (isNome(linha)) nomes.push(linha);
+          if (linha.length >= 2 && !/\b(paciente|gestante|interna..o|consulta|quimioterapia|cirurgia)\b/i.test(linha)) {
+            nomes.push(linha);
+          }
         }
 
         if (nomes.length > 0) {
