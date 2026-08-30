@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.9</span>
+    <span class="header-version">v1.9.10</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1383,35 +1383,92 @@ function copiarDescricaoProcesso(idx) {
   });
 }
 window.copiarDescricaoProcesso = copiarDescricaoProcesso;
+var procPollingTimer = null;
+function pararPollingProcessos() {
+  if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
+}
 function carregarProcessosCaixa() {
+  pararPollingProcessos();
   var lista = document.getElementById('proc-lista');
   lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro: '+(res.error||'desconhecido')+'</p>'; return; }
+    if (res.emAndamento) {
+      // Já tinha uma varredura rodando (ex: disparada em outra aba/aparelho) — entra no
+      // mesmo polling em vez de mostrar a lista antiga parada.
+      var btn = document.getElementById('proc-atualizar');
+      btn.disabled = true;
+      btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
+      lista.innerHTML = '<p style="color:var(--text-muted);">Varredura em andamento (iniciada em outro lugar), aguardando...</p>';
+      pollProcessosCaixa(0);
+      return;
+    }
     renderProcessosCaixa(res.itens, res.atualizadoEm);
+    if (res.erro) {
+      var kmDiv = document.createElement('p');
+      kmDiv.style.color = 'var(--danger)';
+      kmDiv.style.fontSize = '12px';
+      kmDiv.textContent = 'Última varredura falhou: ' + res.erro + ' (lista abaixo é do cache anterior, se houver)';
+      lista.parentNode.insertBefore(kmDiv, lista);
+    }
   })
   .catch(function(e){ lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>'; });
+}
+// Consulta processos-caixa-listar de novo até emAndamento virar false — a varredura real
+// passa dos ~100s de timeout da borda do Cloudflare pro Worker (achado real, 30/08/2026,
+// erro 524), então o disparo é fire-and-forget (ctx.waitUntil no Worker) e a aba fica
+// perguntando "já terminou?" em vez de esperar uma resposta só que nunca chegaria a tempo.
+function pollProcessosCaixa(tentativa) {
+  pararPollingProcessos();
+  if (tentativa > 40) { // ~40 * 4s = 160s de folga além do timeout de 30min do Cloud Run seria exagero — isso é só um teto de segurança da interface
+    var lista = document.getElementById('proc-lista');
+    lista.innerHTML = '<p style="color:var(--danger);">Varredura demorando demais — recarregue a aba pra conferir se terminou.</p>';
+    var btn = document.getElementById('proc-atualizar');
+    btn.disabled = false;
+    btn.textContent = '🔄 Varrer caixa agora';
+    return;
+  }
+  procPollingTimer = setTimeout(function() {
+    sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res.ok) { pollProcessosCaixa(tentativa + 1); return; }
+      if (res.emAndamento) { pollProcessosCaixa(tentativa + 1); return; }
+      var btn = document.getElementById('proc-atualizar');
+      btn.disabled = false;
+      btn.textContent = '🔄 Varrer caixa agora';
+      if (res.erro) {
+        document.getElementById('proc-lista').innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+escaparHtmlProc(res.erro)+'</p>';
+        return;
+      }
+      renderProcessosCaixa(res.itens, res.atualizadoEm);
+    })
+    .catch(function(){ pollProcessosCaixa(tentativa + 1); });
+  }, 4000);
 }
 function escanearProcessosCaixa() {
   var btn = document.getElementById('proc-atualizar');
   var lista = document.getElementById('proc-lista');
   btn.disabled = true;
   btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
-  lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde...</p>';
+  lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde (isso passa por várias telas do 1Doc, pode levar 1-2 minutos)...</p>';
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-escanear', { method: 'POST' })
   .then(function(r){ return r.json(); })
   .then(function(res){
-    btn.disabled = false;
-    btn.textContent = '🔄 Varrer caixa agora';
-    if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+escaparHtmlProc(res.error||'desconhecido')+'</p>'; return; }
-    renderProcessosCaixa(res.itens, res.atualizadoEm);
+    if (!res.ok) {
+      btn.disabled = false;
+      btn.textContent = '🔄 Varrer caixa agora';
+      lista.innerHTML = '<p style="color:var(--danger);">Erro ao iniciar varredura: '+escaparHtmlProc(res.error||'desconhecido')+'</p>';
+      return;
+    }
+    pollProcessosCaixa(0);
   })
   .catch(function(e){
     btn.disabled = false;
     btn.textContent = '🔄 Varrer caixa agora';
-    lista.innerHTML = '<p style="color:var(--danger);">Erro na varredura: '+e.message+'</p>';
+    lista.innerHTML = '<p style="color:var(--danger);">Erro ao iniciar varredura: '+e.message+'</p>';
   });
 }
 document.getElementById('proc-atualizar') && document.getElementById('proc-atualizar').addEventListener('click', escanearProcessosCaixa);
