@@ -175,6 +175,35 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
   .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-family:var(--mono);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* PROC-CARD — grid de processos da caixa SGD */
+  .proc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+  .proc-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px 16px 20px;box-shadow:var(--shadow-sm);transition:box-shadow .18s ease,transform .18s ease;overflow:hidden;}
+  .proc-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+  .proc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+  .proc-card.is-agente::before{background:var(--accent2);}
+  .proc-card.is-erro::before{background:var(--danger);}
+  .proc-card.is-vazio::before{background:var(--text-dim);}
+  .proc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+  .proc-avatar{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--accent-light);color:var(--brand-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:var(--sans);}
+  .proc-card.is-agente .proc-avatar{background:var(--accent-soft);color:var(--accent2);}
+  .proc-headtext{min-width:0;flex:1;}
+  .proc-nome{font-weight:600;font-size:14.5px;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .proc-num{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:2px;}
+  .proc-link{flex:0 0 auto;color:var(--text-dim);padding:4px;border-radius:6px;transition:color .15s,background .15s;font-size:15px;text-decoration:none;line-height:1;}
+  .proc-link:hover{color:var(--accent);background:var(--accent-light);}
+  .proc-meta{display:flex;flex-wrap:wrap;gap:5px 12px;font-size:12px;color:var(--text-muted);margin-bottom:12px;}
+  .proc-meta span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+  .proc-badge{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.3px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent2);margin-bottom:10px;}
+  .proc-desc-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .proc-desc-text{font-size:12.5px;line-height:1.5;color:var(--text);}
+  .proc-copy-btn{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:6px 11px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:600;white-space:nowrap;transition:background .15s,transform .1s;}
+  .proc-copy-btn:hover{background:var(--brand-deep);}
+  .proc-copy-btn:active{transform:scale(.96);}
+  .proc-copy-btn.copiado{background:var(--success);}
+  .proc-km{margin-top:7px;font-size:11px;color:var(--text-dim);}
+  .proc-erro-box{background:rgba(214,69,69,.07);border:1px solid rgba(214,69,69,.25);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--danger);}
+  .proc-vazio-box{font-size:12px;color:var(--text-dim);font-style:italic;}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .span-2{grid-column:span 2;}
   .field{display:flex;flex-direction:column;gap:6px;}
@@ -458,7 +487,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.13</span>
+    <span class="header-version">v1.10.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1348,45 +1377,63 @@ function fecharDescricoesEmFila(itens) {
   }
   proximo();
 }
+function iniciaisDoNome(nome) {
+  if (!nome) return '?';
+  var partes = nome.trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
 function renderProcessosCaixa(itens, atualizadoEm) {
   processosCaixaAtual = itens || [];
   var lista = document.getElementById('proc-lista');
   var infoEl = document.getElementById('proc-atualizado-em');
   infoEl.textContent = atualizadoEm ? ('Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR')) : '';
   if (!itens || itens.length === 0) {
+    lista.className = '';
     lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum processo ainda — clique em "🔄 Varrer caixa agora".</p>';
     return;
   }
+  lista.className = 'proc-grid';
   lista.innerHTML = itens.map(function(p, idx){
-    var titulo = (p.numeroProcesso||'?') + ' — ' + (p.servidor||'?');
-    var linha2 = [p.placa, p.cidade ? (p.cidade + (p.uf ? '/'+p.uf : '')) : null].filter(Boolean).join(' · ');
-    var linha3 = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
     var descBase = montarDescricaoCompletaProcesso(p);
     p.descricaoCompletaBase = descBase;
     p.descricaoCompletaFinal = descBase; // até o km resolver, copia já funciona com o que tem
-    return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
-        +'<div>'
-          +'<span style="font-weight:600;">'+escaparHtmlProc(titulo)+'</span><br>'
-          +'<span style="color:var(--text-muted);font-size:12px;">'+escaparHtmlProc(linha2)+'</span><br>'
-          +'<span style="color:var(--text-muted);font-size:12px;">'+escaparHtmlProc(linha3)+'</span>'
-        +'</div>'
-        +(p.url ? '<a href="'+p.url+'" target="_blank" style="font-size:11px;color:var(--accent);white-space:nowrap;">Abrir no 1Doc ↗</a>' : '')
-      +'</div>'
-      +(p.erro
-        ? '<div style="margin-top:8px;font-size:12px;color:var(--danger);"><b>Erro ao ler:</b> '+escaparHtmlProc(p.erro)+'</div>'
-        : (descBase
-          ? '<div style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
-              +'<span id="proc-desc-'+idx+'" style="font-size:12px;">'+escaparHtmlProc(descBase)+'</span>'
-              +'<button onclick="copiarDescricaoProcesso('+idx+')" style="flex:0 0 auto;padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;">📋 Copiar</button>'
-            +'</div>'
-            +(p.ehAgenteSaude
-              ? '<div style="margin-top:4px;font-size:11px;color:var(--text-dim);">Agente de Saúde — indenização fixa, sem cálculo de distância.</div>'
-              : '<div id="proc-km-'+idx+'" style="margin-top:4px;font-size:11px;color:var(--text-dim);">calculando distância...</div>')
-          : '<div style="margin-top:8px;font-size:12px;color:var(--text-dim);">Sem descrição — preencher na mão.</div>'
-        )
-      )
-    +'</div>';
+
+    var classeCard = p.erro ? 'is-erro' : (p.ehAgenteSaude ? 'is-agente' : (!descBase ? 'is-vazio' : ''));
+    var metaPartes = [];
+    if (p.placa) metaPartes.push('<span>🚗 ' + escaparHtmlProc(p.placa) + '</span>');
+    if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
+    var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
+    if (periodo.trim()) metaPartes.push('<span>📅 ' + escaparHtmlProc(periodo) + '</span>');
+
+    var corpo;
+    if (p.erro) {
+      corpo = '<div class="proc-erro-box"><b>Erro ao ler:</b> ' + escaparHtmlProc(p.erro) + '</div>';
+    } else if (descBase) {
+      corpo = '<div class="proc-desc-box">'
+          + '<span id="proc-desc-' + idx + '" class="proc-desc-text">' + escaparHtmlProc(descBase) + '</span>'
+          + '<button class="proc-copy-btn" id="proc-copybtn-' + idx + '" onclick="copiarDescricaoProcesso(' + idx + ')">📋 Copiar</button>'
+        + '</div>'
+        + (p.ehAgenteSaude
+          ? '<div class="proc-km">Indenização fixa — sem cálculo de distância.</div>'
+          : '<div class="proc-km" id="proc-km-' + idx + '">calculando distância...</div>');
+    } else {
+      corpo = '<div class="proc-vazio-box">Sem descrição — preencher na mão.</div>';
+    }
+
+    return '<div class="proc-card ' + classeCard + '">'
+      + '<div class="proc-head">'
+        + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
+        + '<div class="proc-headtext">'
+          + '<div class="proc-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + '</div>'
+          + '<div class="proc-num">' + escaparHtmlProc(p.numeroProcesso || '?') + '</div>'
+        + '</div>'
+        + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
+      + '</div>'
+      + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
+      + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
+      + corpo
+    + '</div>';
   }).join('');
   fecharDescricoesEmFila(itens);
 }
@@ -1394,9 +1441,15 @@ function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
   var texto = p && (p.descricaoCompletaFinal || p.descricaoCompletaBase);
   if (!texto) return;
-  navigator.clipboard.writeText(texto).then(function(){
-    alert('Descrição copiada!');
-  }).catch(function(){
+  var btn = document.getElementById('proc-copybtn-' + idx);
+  function marcarCopiado() {
+    if (!btn) return;
+    var original = btn.textContent;
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copiado');
+    setTimeout(function(){ btn.textContent = original; btn.classList.remove('copiado'); }, 1600);
+  }
+  navigator.clipboard.writeText(texto).then(marcarCopiado).catch(function(){
     prompt('Copie manualmente:', texto);
   });
 }
