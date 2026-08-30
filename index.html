@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.5</span>
+    <span class="header-version">v1.10.6</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1517,6 +1517,7 @@ function copiarDescricaoProcesso(idx) {
   // qual processo vincular o número/valor lidos do PDF do CP depois. Acompanha o clique em
   // Copiar, que o usuário já faz naturalmente antes de ir empenhar — sem botão novo.
   window._processoAtivoHash = p.hash;
+  window._processoAtivoQuando = Date.now();
   var btn = document.getElementById('proc-copybtn-' + idx);
   function marcarCopiado() {
     if (!btn) return;
@@ -1535,9 +1536,20 @@ window.copiarDescricaoProcesso = copiarDescricaoProcesso;
 // modal aberto) — chamada quando ela lê o número/valor no PDF do CP. Usa
 // window._processoAtivoHash (setado no clique de "Copiar" do card) pra achar o processo
 // certo e grava direto na Tabela de Controle, igual o fluxo antigo do modal fazia.
+// 30/08/2026: achado real — "processo ativo" ficava marcado indefinidamente até ser
+// consumido, sem prazo. Se um "Copiar" era clicado em outro card ENTRE o clique original e o
+// PDF sendo processado (ex: durante um teste, ou simplesmente esquecimento), o empenho ia
+// pro processo errado silenciosamente — foi exatamente o que aconteceu com o empenho 10424
+// (deveria ir pro 7.926, foi pro 7.927). Trava: só aceita se o "Copiar" foi nos últimos 10min.
+var PRAZO_PROCESSO_ATIVO_MS = 10 * 60 * 1000;
 function sgdRegistrarEmpenhoPorHash(numero, valor) {
   var hash = window._processoAtivoHash;
   if (!hash) return { ok: false, motivo: 'sem-processo-ativo' };
+  var quando = window._processoAtivoQuando || 0;
+  if (Date.now() - quando > PRAZO_PROCESSO_ATIVO_MS) {
+    window._processoAtivoHash = null;
+    return { ok: false, motivo: 'processo-ativo-expirado' };
+  }
   var p = (processosCaixaAtual || []).find(function(x){ return x.hash === hash; });
   if (!p) return { ok: false, motivo: 'processo-nao-encontrado' };
   if (empenhoJaLancado(hash)) return { ok: false, motivo: 'ja-lancado' };
@@ -1574,7 +1586,10 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     setTimeout(function(){ elCard.remove(); }, 350);
   }
   window._processoAtivoHash = null; // consome — evita reaproveitar num empenho seguinte por engano
-  return { ok: true, hash: hash };
+  // servidor/numProcesso vão junto pro chamador (extensão) poder mostrar QUAL processo
+  // recebeu o vínculo na notificação — sem isso, um vínculo no processo errado passava
+  // batido silenciosamente (só aparecia "Empenho X vinculado", sem dizer a qual processo).
+  return { ok: true, hash: hash, servidor: p.servidor || '', numProcesso: p.numeroProcesso || '' };
 }
 window.sgdRegistrarEmpenhoPorHash = sgdRegistrarEmpenhoPorHash;
 
