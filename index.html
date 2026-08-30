@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.3</span>
+    <span class="header-version">v1.10.4</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1557,10 +1557,15 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
   adicionarProcesso(dados);
 
   var idx = processosCaixaAtual.indexOf(p);
-  var elEmp = document.getElementById('proc-emp-' + idx);
-  if (elEmp) {
-    elEmp.className = 'proc-empenho-ok';
-    elEmp.innerHTML = '✅ Empenho <b>' + escaparHtmlProc(numero) + '</b>' + (valor ? ' — R$ ' + escaparHtmlProc(valor) : '');
+  // Pedido do usuário (30/08/2026): assim que o empenho é vinculado com sucesso, o card
+  // inteiro some da lista em vez de só trocar o aviso pra "✅" — mantém a grade focada só no
+  // que ainda está pendente, sem precisar caçar visualmente qual já foi resolvido.
+  var elCard = document.getElementById('proc-card-' + idx);
+  if (elCard) {
+    elCard.style.transition = 'opacity .35s, transform .35s';
+    elCard.style.opacity = '0';
+    elCard.style.transform = 'scale(.96)';
+    setTimeout(function(){ elCard.remove(); }, 350);
   }
   window._processoAtivoHash = null; // consome — evita reaproveitar num empenho seguinte por engano
   return { ok: true, hash: hash };
