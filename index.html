@@ -458,7 +458,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.9.11</span>
+    <span class="header-version">v1.9.12</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1435,7 +1435,7 @@ function carregarProcessosCaixa() {
 // KV — "Rate exceeded." quebrando o JSON da resposta).
 function pollProcessosCaixa(tentativa, horaInicio) {
   pararPollingProcessos();
-  if (tentativa > 40) { // ~40 * 4s = 160s — só teto de segurança da interface
+  if (tentativa > 75) { // ~75 * 4s = 300s — folga além do ~2-3min real observado (30/08/2026), só teto de segurança da interface
     var lista = document.getElementById('proc-lista');
     lista.innerHTML = '<p style="color:var(--danger);">Varredura demorando demais — recarregue a aba pra conferir se terminou.</p>';
     var btn = document.getElementById('proc-atualizar');
@@ -1467,8 +1467,8 @@ function escanearProcessosCaixa() {
   var btn = document.getElementById('proc-atualizar');
   var lista = document.getElementById('proc-lista');
   btn.disabled = true;
-  btn.textContent = '⏳ Varrendo (pode levar até 2 min)...';
-  lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde (isso passa por várias telas do 1Doc, pode levar 1-2 minutos)...</p>';
+  btn.textContent = '⏳ Varrendo (pode levar até 3 min)...';
+  lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde (abre cada processo um por um, pode levar 2-3 minutos)...</p>';
   var horaInicio = Date.now();
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-escanear', { method: 'POST' })
   .then(function(r){ return r.json(); })
