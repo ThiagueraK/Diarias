@@ -204,6 +204,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-km{margin-top:7px;font-size:11px;color:var(--text-dim);}
   .proc-erro-box{background:rgba(214,69,69,.07);border:1px solid rgba(214,69,69,.25);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--danger);}
   .proc-vazio-box{font-size:12px;color:var(--text-dim);font-style:italic;}
+  .proc-empenho-ok{margin-top:10px;font-size:12px;color:var(--success);background:var(--ok-soft);border:1px solid rgba(31,157,87,.25);border-radius:8px;padding:6px 10px;}
+  .proc-empenho-pendente{margin-top:10px;font-size:11px;color:var(--text-dim);}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .span-2{grid-column:span 2;}
   .field{display:flex;flex-direction:column;gap:6px;}
@@ -487,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.0</span>
+    <span class="header-version">v1.10.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1421,7 +1423,20 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       corpo = '<div class="proc-vazio-box">Sem descrição — preencher na mão.</div>';
     }
 
-    return '<div class="proc-card ' + classeCard + '">'
+    var tcExistente = empenhoJaLancado(p.hash);
+    var empenhoHtml;
+    if (tcExistente && tcExistente.empenho) {
+      empenhoHtml = '<div class="proc-empenho-ok" id="proc-emp-' + idx + '">✅ Empenho <b>' + escaparHtmlProc(tcExistente.empenho) + '</b>'
+        + (tcExistente.valor ? ' — R$ ' + escaparHtmlProc(tcExistente.valor) : '') + '</div>';
+    } else if (!p.erro && descBase) {
+      // Sem botão — clicar em "Copiar" já marca esse processo como ativo; a extensão de
+      // empenho lê o PDF do CP e grava sozinha (window.sgdRegistrarEmpenhoPorHash).
+      empenhoHtml = '<div class="proc-empenho-pendente" id="proc-emp-' + idx + '">⏳ Aguardando empenho (copie a descrição, o resto é automático)</div>';
+    } else {
+      empenhoHtml = '';
+    }
+
+    return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
       + '<div class="proc-head">'
         + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
         + '<div class="proc-headtext">'
@@ -1433,14 +1448,26 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
       + corpo
+      + empenhoHtml
     + '</div>';
   }).join('');
   fecharDescricoesEmFila(itens);
+}
+// Casa uma hash de processo com uma linha já lançada na Tabela de Controle (adicionarProcesso
+// já grava hash1doc em cada linha nova — ver pendente.hash1doc na função gerar()).
+function empenhoJaLancado(hash) {
+  if (!hash) return null;
+  return processos.find(function(tc){ return tc.hash1doc === hash; }) || null;
 }
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
   var texto = p && (p.descricaoCompletaFinal || p.descricaoCompletaBase);
   if (!texto) return;
+  // Marca esse processo como "o que estou trabalhando agora" — é o sinal que a extensão de
+  // empenho (chrome.scripting.executeScript, sem precisar de modal aberto) usa pra saber a
+  // qual processo vincular o número/valor lidos do PDF do CP depois. Acompanha o clique em
+  // Copiar, que o usuário já faz naturalmente antes de ir empenhar — sem botão novo.
+  window._processoAtivoHash = p.hash;
   var btn = document.getElementById('proc-copybtn-' + idx);
   function marcarCopiado() {
     if (!btn) return;
@@ -1454,6 +1481,49 @@ function copiarDescricaoProcesso(idx) {
   });
 }
 window.copiarDescricaoProcesso = copiarDescricaoProcesso;
+
+// Ponte pra extensão "SGD - Salvar Empenho" (chrome.scripting.executeScript, sem precisar de
+// modal aberto) — chamada quando ela lê o número/valor no PDF do CP. Usa
+// window._processoAtivoHash (setado no clique de "Copiar" do card) pra achar o processo
+// certo e grava direto na Tabela de Controle, igual o fluxo antigo do modal fazia.
+function sgdRegistrarEmpenhoPorHash(numero, valor) {
+  var hash = window._processoAtivoHash;
+  if (!hash) return { ok: false, motivo: 'sem-processo-ativo' };
+  var p = (processosCaixaAtual || []).find(function(x){ return x.hash === hash; });
+  if (!p) return { ok: false, motivo: 'processo-nao-encontrado' };
+  if (empenhoJaLancado(hash)) return { ok: false, motivo: 'ja-lancado' };
+
+  var dados = {
+    servidor: p.servidor || '',
+    numProcesso: p.numeroProcesso || '',
+    cidade: (p.cidade || '') + (p.uf ? '/' + p.uf : ''),
+    dataSaida: p.dataSaida || '',
+    dataChegada: p.dataChegada || '',
+    placa: p.placa || '',
+    horaSaida: p.horaSaida || '',
+    horaChegada: p.horaChegada || '',
+    diaRef: hojeISO(),
+    hash1doc: hash,
+    empenho: String(numero),
+    valor: String(valor),
+    descricao: p.descricaoCompletaFinal || p.descricaoCompletaBase || '',
+    empenhadoEm: Date.now()
+  };
+  if (p.kmCalculado) dados.km = String(p.kmCalculado);
+
+  adicionarProcesso(dados);
+
+  var idx = processosCaixaAtual.indexOf(p);
+  var elEmp = document.getElementById('proc-emp-' + idx);
+  if (elEmp) {
+    elEmp.className = 'proc-empenho-ok';
+    elEmp.innerHTML = '✅ Empenho <b>' + escaparHtmlProc(numero) + '</b>' + (valor ? ' — R$ ' + escaparHtmlProc(valor) : '');
+  }
+  window._processoAtivoHash = null; // consome — evita reaproveitar num empenho seguinte por engano
+  return { ok: true };
+}
+window.sgdRegistrarEmpenhoPorHash = sgdRegistrarEmpenhoPorHash;
+
 var procPollingTimer = null;
 function pararPollingProcessos() {
   if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
