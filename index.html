@@ -206,6 +206,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-vazio-box{font-size:12px;color:var(--text-dim);font-style:italic;}
   .proc-empenho-ok{margin-top:10px;font-size:12px;color:var(--success);background:var(--ok-soft);border:1px solid rgba(31,157,87,.25);border-radius:8px;padding:6px 10px;}
   .proc-empenho-pendente{margin-top:10px;font-size:11px;color:var(--text-dim);}
+  .proc-aviso-duplicata{margin-bottom:10px;font-size:11.5px;color:var(--warning);background:var(--warn-soft,#fbf2e3);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .proc-confirmar-dup-btn{flex:0 0 auto;padding:4px 9px;background:var(--warning);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .span-2{grid-column:span 2;}
   .field{display:flex;flex-direction:column;gap:6px;}
@@ -489,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.8</span>
+    <span class="header-version">v1.10.9</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1485,6 +1487,19 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       empenhoHtml = '';
     }
 
+    // 30/08/2026: pedido do usuário — avisa (não esconde sozinho) quando o processo PARECE já
+    // estar na Tabela de Controle por outro caminho (credor+data+cidade batendo, sem a hash
+    // gravada). Botão "Já lançado, remover" deixa a decisão com o usuário — ao confirmar,
+    // sgdConfirmarDuplicataProcesso liga a hash na linha existente (pra próxima varredura já
+    // reconhecer direto, igual quando o vínculo é automático) e some com o card, igual o caso
+    // de empenho lançado.
+    var possivelDup = possivelDuplicataSemHash(p);
+    var avisoDuplicataHtml = possivelDup
+      ? '<div class="proc-aviso-duplicata" id="proc-dup-' + idx + '">⚠️ Já parece estar na Tabela de Controle'
+        + ' (Processo ' + escaparHtmlProc(possivelDup.numProcesso || '?') + ', Empenho ' + escaparHtmlProc(possivelDup.empenho || '-') + ') — confira.'
+        + ' <button class="proc-confirmar-dup-btn" onclick="sgdConfirmarDuplicataProcesso(' + idx + ')">✅ Já lançado, remover</button></div>'
+      : '';
+
     return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
       + '<div class="proc-head">'
         + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
@@ -1496,6 +1511,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       + '</div>'
       + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
+      + avisoDuplicataHtml
       + corpo
       + empenhoHtml
     + '</div>';
@@ -1507,6 +1523,23 @@ function renderProcessosCaixa(itens, atualizadoEm) {
 function empenhoJaLancado(hash) {
   if (!hash) return null;
   return processos.find(function(tc){ return tc.hash1doc === hash; }) || null;
+}
+// 30/08/2026: pedido do usuário — achar processo que PARECE já estar na Tabela de Controle
+// mas sem a hash gravada certa (ex: linha adicionada por um caminho antigo/manual, sem
+// passar pelo vínculo automático). Mesmo critério de duplicata que adicionarProcesso já usa
+// (credor + data de saída + cidade) — mas aqui só AVISA (não esconde o card sozinho), porque
+// esse critério pode colidir por coincidência (mesma pessoa viajando 2x pra mesma cidade no
+// mesmo dia). Decisão fica com o usuário — ver botão "Já lançado, remover" no card.
+function possivelDuplicataSemHash(p) {
+  if (!p.servidor || !p.dataSaida || !p.cidade) return null;
+  return processos.find(function(tc) {
+    if (tc.hash1doc === p.hash) return false; // essa já é pega pelo empenhoJaLancado normal
+    var mesmoCred = tc.servidor && tc.servidor.trim().toUpperCase() === p.servidor.trim().toUpperCase();
+    var mesmaData = tc.dataSaida && tc.dataSaida === p.dataSaida;
+    var cidadeP = (p.cidade + (p.uf ? '/' + p.uf : '')).trim().toUpperCase();
+    var mesmaCid = tc.cidade && tc.cidade.trim().toUpperCase() === cidadeP;
+    return mesmoCred && mesmaData && mesmaCid;
+  }) || null;
 }
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
@@ -1598,6 +1631,27 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
   return { ok: true, hash: hash, servidor: p.servidor || '', numProcesso: p.numeroProcesso || '' };
 }
 window.sgdRegistrarEmpenhoPorHash = sgdRegistrarEmpenhoPorHash;
+// Botão "✅ Já lançado, remover" do aviso de possível duplicata (ver possivelDuplicataSemHash
+// em renderProcessosCaixa). Confirma que é o mesmo processo: liga a hash na linha já
+// existente da Tabela de Controle (assim empenhoJaLancado passa a reconhecer direto numa
+// próxima varredura, sem precisar avisar de novo) e some com o card, igual o caso de empenho
+// recém-vinculado.
+function sgdConfirmarDuplicataProcesso(idx) {
+  var p = processosCaixaAtual[idx];
+  if (!p) return;
+  var tc = possivelDuplicataSemHash(p);
+  if (!tc) return;
+  tc.hash1doc = p.hash;
+  salvar();
+  var elCard = document.getElementById('proc-card-' + idx);
+  if (elCard) {
+    elCard.style.transition = 'opacity .35s, transform .35s';
+    elCard.style.opacity = '0';
+    elCard.style.transform = 'scale(.96)';
+    setTimeout(function(){ elCard.remove(); }, 350);
+  }
+}
+window.sgdConfirmarDuplicataProcesso = sgdConfirmarDuplicataProcesso;
 // Ponte pro console (F12) — corrigir a Tabela de Controle na mão quando o fluxo automático
 // não se aplica (ex: correção manual feita direto no 1Doc). adicionarProcesso é interna
 // (dentro de sgdAppMain), sem isso não dava pra chamar do console.
