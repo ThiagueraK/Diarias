@@ -491,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.10</span>
+    <span class="header-version">v1.10.11</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1325,6 +1325,7 @@ function calcularKmSilencioso(cidade, callback) {
           if (!data.routes || !data.routes[0]) return 0;
           var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
           kmCache[c] = String(km);
+          persistirKmCache();
           return km;
         });
       }).catch(function(){ return 0; });
@@ -3940,7 +3941,21 @@ document.getElementById('bannerDuplicataBtnFechar').addEventListener('click', fe
 // Calcular KM via OpenRouteService
 var ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhN2NlZjFhNWFmNTQ0MzdiMjJhOTM0N2E1ZmY5NTI3IiwiaCI6Im11cm11cjY0In0=';
 var ORIGEM = 'Tupanciretã, RS, Brasil';
-var kmCache = {}; // cache por cidade para nao recalcular
+// 30/08/2026: achado real — kmCache era só uma variável em memória, resetava a cada
+// recarregada da página. Numa varredura nova (ou só reabrindo a aba) ele recalculava as
+// MESMAS cidades de novo, gastando cota do OpenRouteService à toa (contribuiu pra cota
+// diária estourar de tanto teste hoje). Persiste no localStorage (só cidade→km, nada
+// sensível) — sobrevive a reload, some sozinho se o navegador limpar dados do site.
+function carregarKmCachePersistido() {
+  try {
+    var bruto = localStorage.getItem('sgd_kmCache');
+    return bruto ? JSON.parse(bruto) : {};
+  } catch (e) { return {}; }
+}
+function persistirKmCache() {
+  try { localStorage.setItem('sgd_kmCache', JSON.stringify(kmCache)); } catch (e) {}
+}
+var kmCache = carregarKmCachePersistido(); // cache por cidade para nao recalcular (persistido)
 
 // Separa múltiplas cidades: 'SANTA MARIA / CRUZ ALTA' -> ['SANTA MARIA', 'CRUZ ALTA']
 function splitCidades(cidade) {
@@ -3983,6 +3998,7 @@ function calcularKmMultiplo(cidade, callback) {
         if (!data.routes || !data.routes[0]) return 0;
         var km = parseFloat((data.routes[0].summary.distance / 1000).toFixed(1));
         kmCache[c] = String(km);
+        persistirKmCache();
         return km;
       });
     }).catch(function(){ return 0; });
@@ -3994,6 +4010,7 @@ function calcularKmMultiplo(cidade, callback) {
     // Salva no cache com a chave da cidade composta
     var cidNorm = cidade.trim().toUpperCase();
     kmCache[cidNorm] = kmStr;
+    persistirKmCache();
     kmResult.textContent = '📍 ' + kmStr + ' km de Tupanciretã (' + cidades.join(' + ') + ')';
     kmResult.style.color = 'var(--success, #2d5016)';
     if (callback) callback(kmStr);
@@ -4036,6 +4053,7 @@ function calcularKm(cidade, callback) {
     if (!data.routes || !data.routes[0]) throw new Error('Rota não encontrada');
     var km = (data.routes[0].summary.distance / 1000).toFixed(1);
     kmCache[cidadeNorm] = km;
+    persistirKmCache();
     kmResult.textContent = '📍 ' + km + ' km de Tupanciretã';
     kmResult.style.color = 'var(--success, #2d5016)';
     if (callback) callback(km);
@@ -5391,6 +5409,7 @@ document.getElementById('km-revisao-recalcular').addEventListener('click', funct
         var input = document.querySelector('.km-input[data-cidade="'+cidade+'"]');
         if (input) { input.value = km; input.classList.add('editado'); }
         kmCache[cidade] = km;
+        persistirKmCache();
       }
       idx++;
       setTimeout(proxima, 400);
@@ -5423,6 +5442,7 @@ document.getElementById('km-revisao-salvar').addEventListener('click', function(
 
   // Atualiza cache
   Object.keys(mapaKm).forEach(function(c){ kmCache[c] = mapaKm[c]; });
+  persistirKmCache();
 
   salvar();
   renderTabela();
