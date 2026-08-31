@@ -491,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.11</span>
+    <span class="header-version">v1.10.12</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1429,8 +1429,21 @@ function iniciaisDoNome(nome) {
   if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
   return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
 }
+// "25/08/2026" -> valor comparável (número), pra ordenar por data real em vez de string
+// (string ordenaria "05/09" antes de "25/08" por engano, dia vem primeiro no formato BR).
+function dataBrParaOrdenacao(dataBR) {
+  if (!dataBR) return 0;
+  var partes = dataBR.split('/');
+  if (partes.length !== 3) return 0;
+  return Number(partes[2]) * 10000 + Number(partes[1]) * 100 + Number(partes[0]);
+}
 function renderProcessosCaixa(itens, atualizadoEm) {
-  processosCaixaAtual = itens || [];
+  // 31/08/2026: pedido do usuário — mais antigo primeiro (por dataSaida), não a ordem crua
+  // que a varredura devolve (que segue a ordem de listagem do 1Doc, sem relação com data).
+  itens = (itens || []).slice().sort(function(a, b) {
+    return dataBrParaOrdenacao(a.dataSaida) - dataBrParaOrdenacao(b.dataSaida);
+  });
+  processosCaixaAtual = itens;
   var lista = document.getElementById('proc-lista');
   var infoEl = document.getElementById('proc-atualizado-em');
   infoEl.textContent = atualizadoEm ? ('Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR')) : '';
