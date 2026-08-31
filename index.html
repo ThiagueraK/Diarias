@@ -489,7 +489,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.7</span>
+    <span class="header-version">v1.10.8</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1512,12 +1512,15 @@ function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
   var texto = p && (p.descricaoCompletaFinal || p.descricaoCompletaBase);
   if (!texto) return;
-  // Marca esse processo como "o que estou trabalhando agora" — é o sinal que a extensão de
-  // empenho (chrome.scripting.executeScript, sem precisar de modal aberto) usa pra saber a
-  // qual processo vincular o número/valor lidos do PDF do CP depois. Acompanha o clique em
-  // Copiar, que o usuário já faz naturalmente antes de ir empenhar — sem botão novo.
-  window._processoAtivoHash = p.hash;
-  window._processoAtivoQuando = Date.now();
+  // 30/08/2026: FILA em vez de um valor único — o usuário sempre clica "Copiar" antes de
+  // empenhar (precisa do texto pra colar no CP), em sequência, então os PDFs de empenho vão
+  // aparecer na MESMA ORDEM que os cliques em Copiar. Cada clique entra no fim da fila; quem
+  // consome (sgdRegistrarEmpenhoPorHash) sempre pega o primeiro que ainda não foi usado — não
+  // "o último clicado". Isso deixa ir rápido (Copiar A, Copiar B, sem esperar A confirmar)
+  // sem repetir a mistura do dia 30/08 (empenho 10424 foi pro 7.927 em vez do 7.926 porque um
+  // clique em outro card no meio trocou o valor único que existia antes).
+  window._filaProcessosAtivos = window._filaProcessosAtivos || [];
+  window._filaProcessosAtivos.push({ hash: p.hash, quando: Date.now() });
   var btn = document.getElementById('proc-copybtn-' + idx);
   function marcarCopiado() {
     if (!btn) return;
@@ -1533,23 +1536,27 @@ function copiarDescricaoProcesso(idx) {
 window.copiarDescricaoProcesso = copiarDescricaoProcesso;
 
 // Ponte pra extensão "SGD - Salvar Empenho" (chrome.scripting.executeScript, sem precisar de
-// modal aberto) — chamada quando ela lê o número/valor no PDF do CP. Usa
-// window._processoAtivoHash (setado no clique de "Copiar" do card) pra achar o processo
-// certo e grava direto na Tabela de Controle, igual o fluxo antigo do modal fazia.
-// 30/08/2026: achado real — "processo ativo" ficava marcado indefinidamente até ser
-// consumido, sem prazo. Se um "Copiar" era clicado em outro card ENTRE o clique original e o
-// PDF sendo processado (ex: durante um teste, ou simplesmente esquecimento), o empenho ia
-// pro processo errado silenciosamente — foi exatamente o que aconteceu com o empenho 10424
-// (deveria ir pro 7.926, foi pro 7.927). Trava: só aceita se o "Copiar" foi nos últimos 10min.
+// modal aberto) — chamada quando ela lê o número/valor no PDF do CP. Consome o primeiro item
+// da fila (window._filaProcessosAtivos, ver copiarDescricaoProcesso) e grava direto na
+// Tabela de Controle, igual o fluxo antigo do modal fazia.
+// 30/08/2026: achado real — antes disso era um valor único sem prazo, e um "Copiar" em outro
+// card ENTRE o clique original e o PDF sendo processado trocava o alvo silenciosamente (foi
+// o que aconteceu com o empenho 10424: deveria ir pro 7.926, foi pro 7.927). Virou fila
+// FIFO — cada clique em Copiar entra no fim, quem consome pega sempre o primeiro ainda
+// válido, na ordem que os cliques aconteceram, não "o último". Itens com mais de 10min são
+// descartados (expiraram) sem travar os que vêm depois na fila.
 var PRAZO_PROCESSO_ATIVO_MS = 10 * 60 * 1000;
 function sgdRegistrarEmpenhoPorHash(numero, valor) {
-  var hash = window._processoAtivoHash;
-  if (!hash) return { ok: false, motivo: 'sem-processo-ativo' };
-  var quando = window._processoAtivoQuando || 0;
-  if (Date.now() - quando > PRAZO_PROCESSO_ATIVO_MS) {
-    window._processoAtivoHash = null;
-    return { ok: false, motivo: 'processo-ativo-expirado' };
+  window._filaProcessosAtivos = window._filaProcessosAtivos || [];
+  var hash = null;
+  var descartouExpirado = false;
+  while (window._filaProcessosAtivos.length) {
+    var item = window._filaProcessosAtivos.shift();
+    if (Date.now() - item.quando > PRAZO_PROCESSO_ATIVO_MS) { descartouExpirado = true; continue; } // expirou, descarta e tenta o próximo
+    hash = item.hash;
+    break;
   }
+  if (!hash) return { ok: false, motivo: descartouExpirado ? 'processo-ativo-expirado' : 'sem-processo-ativo' };
   var p = (processosCaixaAtual || []).find(function(x){ return x.hash === hash; });
   if (!p) return { ok: false, motivo: 'processo-nao-encontrado' };
   if (empenhoJaLancado(hash)) return { ok: false, motivo: 'ja-lancado' };
@@ -1585,7 +1592,6 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     elCard.style.transform = 'scale(.96)';
     setTimeout(function(){ elCard.remove(); }, 350);
   }
-  window._processoAtivoHash = null; // consome — evita reaproveitar num empenho seguinte por engano
   // servidor/numProcesso vão junto pro chamador (extensão) poder mostrar QUAL processo
   // recebeu o vínculo na notificação — sem isso, um vínculo no processo errado passava
   // batido silenciosamente (só aparecia "Empenho X vinculado", sem dizer a qual processo).
