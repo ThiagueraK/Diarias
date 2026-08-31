@@ -491,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.9</span>
+    <span class="header-version">v1.10.10</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1475,14 +1475,17 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     }
 
     var tcExistente = empenhoJaLancado(p.hash);
+    // 30/08/2026: pedido do usuário — "⏳ Aguardando empenho" aparecia em TODO card pendente
+    // (mesmo depois de recarregar a página), sem dizer qual você realmente copiou. Agora só
+    // mostra no(s) card(s) que estão na fila ativa (window._filaProcessosAtivos, ver
+    // copiarDescricaoProcesso/sgdRegistrarEmpenhoPorHash) — os outros ficam sem esse aviso.
+    var estaNaFila = (window._filaProcessosAtivos || []).some(function(item){ return item.hash === p.hash; });
     var empenhoHtml;
     if (tcExistente && tcExistente.empenho) {
       empenhoHtml = '<div class="proc-empenho-ok" id="proc-emp-' + idx + '">✅ Empenho <b>' + escaparHtmlProc(tcExistente.empenho) + '</b>'
         + (tcExistente.valor ? ' — R$ ' + escaparHtmlProc(tcExistente.valor) : '') + '</div>';
-    } else if (!p.erro && descBase) {
-      // Sem botão — clicar em "Copiar" já marca esse processo como ativo; a extensão de
-      // empenho lê o PDF do CP e grava sozinha (window.sgdRegistrarEmpenhoPorHash).
-      empenhoHtml = '<div class="proc-empenho-pendente" id="proc-emp-' + idx + '">⏳ Aguardando empenho (copie a descrição, o resto é automático)</div>';
+    } else if (estaNaFila) {
+      empenhoHtml = '<div class="proc-empenho-pendente" id="proc-emp-' + idx + '">⏳ Aguardando empenho (copiado, esperando o PDF)</div>';
     } else {
       empenhoHtml = '';
     }
