@@ -491,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.12</span>
+    <span class="header-version">v1.10.13</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -821,6 +821,12 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
+      <!-- 31/08/2026: pedido do usuário — contador bem visível pra comparar de olho com o
+           total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo. -->
+      <div id="proc-contador" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;margin:2px 0 10px;font-size:13px;color:var(--text);">
+        <span style="font-size:20px;font-weight:800;color:var(--accent2);" id="proc-contador-num">0</span>
+        <span>processos nessa varredura — compare com o total no 1Doc</span>
+      </div>
       <p id="proc-atualizado-em" style="font-size:11px;color:var(--text-dim);margin:0 0 12px;"></p>
       <div id="proc-lista" style="max-height:65vh;overflow-y:auto;">
         <p style="color:var(--text-muted);">Carregando...</p>
@@ -1447,6 +1453,11 @@ function renderProcessosCaixa(itens, atualizadoEm) {
   var lista = document.getElementById('proc-lista');
   var infoEl = document.getElementById('proc-atualizado-em');
   infoEl.textContent = atualizadoEm ? ('Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR')) : '';
+  // Contador visível — conta só os cards que realmente vão aparecer (mesmo filtro do .map
+  // abaixo: esconde processo com empenho já lançado), pra bater com o que o usuário vê na
+  // tela, não com o total bruto da varredura (que pode incluir algum já resolvido).
+  var numEl = document.getElementById('proc-contador-num');
+  if (numEl) numEl.textContent = (itens || []).filter(function(p){ return !empenhoJaLancado(p.hash); }).length;
   if (!itens || itens.length === 0) {
     lista.className = '';
     lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum processo ainda — clique em "🔄 Varrer caixa agora".</p>';
@@ -1687,15 +1698,13 @@ function carregarProcessosCaixa() {
   .then(function(res){
     if (!res.ok) { lista.innerHTML = '<p style="color:var(--danger);">Erro: '+(res.error||'desconhecido')+'</p>'; return; }
     renderProcessosCaixa(res.itens, res.atualizadoEm);
-    // Erro mais recente que o próprio dado (nenhuma varredura boa depois dele) — avisa,
-    // mas mostra o que tiver de cache mesmo assim.
-    if (res.erro && (!res.atualizadoEm || res.erroEm > res.atualizadoEm)) {
-      var avisoErro = document.createElement('p');
-      avisoErro.style.color = 'var(--danger)';
-      avisoErro.style.fontSize = '12px';
-      avisoErro.textContent = 'Última varredura falhou: ' + res.erro + ' (lista abaixo é do cache anterior, se houver)';
-      lista.parentNode.insertBefore(avisoErro, lista);
-    }
+    // 31/08/2026: pedido do usuário — o aviso de "última varredura falhou" ficava reaparecendo
+    // em TODO refresh/troca de aba enquanto o erro antigo continuasse mais recente que o
+    // último sucesso no KV, mesmo sem nada de novo acontecendo (ex: ficou vários dias com um
+    // erro de dias atrás sempre à mostra). Removido daqui — carregarProcessosCaixa roda em
+    // toda entrada passiva na aba, não é o lugar certo pra alarme. O aviso de falha real
+    // continua existindo em pollProcessosCaixa/escanearProcessosCaixa, mostrado só na hora em
+    // que VOCÊ pediu a varredura e ela falhou de verdade — não fica repetindo depois disso.
   })
   .catch(function(e){ lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>'; });
 }
