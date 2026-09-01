@@ -520,7 +520,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.15</span>
+    <span class="header-version">v1.10.16</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4058,6 +4058,22 @@ document.getElementById('bannerDuplicataBtnFechar').addEventListener('click', fe
 // Calcular KM via OpenRouteService
 var ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFhN2NlZjFhNWFmNTQ0MzdiMjJhOTM0N2E1ZmY5NTI3IiwiaCI6Im11cm11cjY0In0=';
 var ORIGEM = 'Tupanciretã, RS, Brasil';
+// 01/09/2026: achado real (Julio de Castilhos calculando 414km em vez dos ~45km reais) —
+// testado direto na API: falta de acento sozinha nunca quebra nada (Ijui/Girua/Santo
+// Angelo/Sao Sepe etc. todos resolvem certo sem acento, confidence 1) — o problema real é
+// "Julio de castilho" (sem o "s" final, erro comum de digitação no 1Doc) bater com
+// confiança ALTA num lugar diferente de verdade chamado só "Julio, RS", nada a ver com
+// Júlio de Castilhos. Corrige esse caso específico antes de geocodificar.
+var CIDADES_CANONICAS = {
+  'JULIO DE CASTILHO': 'JULIO DE CASTILHOS',
+  'JULHO DE CASTILHOS': 'JULIO DE CASTILHOS',
+  'JULHO DE CASTILHO': 'JULIO DE CASTILHOS',
+};
+function normalizarCidade(cidade) {
+  if (!cidade) return cidade;
+  var chave = cidade.trim().toUpperCase();
+  return CIDADES_CANONICAS[chave] || cidade;
+}
 // 30/08/2026: achado real — kmCache era só uma variável em memória, resetava a cada
 // recarregada da página. Numa varredura nova (ou só reabrindo a aba) ele recalculava as
 // MESMAS cidades de novo, gastando cota do OpenRouteService à toa (contribuiu pra cota
@@ -4080,7 +4096,7 @@ function splitCidades(cidade) {
   // Separa por / ou + ou e (entre palavras) — normaliza espaços
   var partes = cidade.split(/\s*[\/\+]\s*|\s+E\s+/i);
   return partes
-    .map(function(c){ return c.trim().toUpperCase(); })
+    .map(function(c){ return normalizarCidade(c.trim().toUpperCase()); })
     .filter(function(c){ return c.length > 2; });
 }
 
@@ -4140,7 +4156,8 @@ function calcularKmMultiplo(cidade, callback) {
 function calcularKm(cidade, callback) {
 
   var kmResult = document.getElementById('kmResult');
-  var cidadeNorm = cidade.trim().toUpperCase();
+  cidade = normalizarCidade(cidade.trim().toUpperCase());
+  var cidadeNorm = cidade;
 
   // Cache: evita chamar API duas vezes para a mesma cidade
   if (kmCache[cidadeNorm]) {
@@ -4218,6 +4235,14 @@ function geocodificar(lugar) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (!data.features || !data.features[0]) return null;
+    var props = data.features[0].properties || {};
+    // 01/09/2026: achado real — nome de cidade digitado errado (ex: "Julho de Castilhos" em
+    // vez de "Júlio de Castilhos") às vezes não acha nada de verdade e cai pro centro do
+    // ESTADO INTEIRO como resposta mais próxima, mas com confiança baixa (~0.3) — usar essa
+    // coordenada calculava uma distância completamente sem sentido, silenciosamente. Nunca
+    // confia em match de baixa confiança — trata como "não achei" (cai no fallback já
+    // existente de "não foi possível calcular a distância — revisar manualmente").
+    if (typeof props.confidence === 'number' && props.confidence < 0.6) return null;
     var coords = data.features[0].geometry.coordinates;
     return [coords[0], coords[1]];
   });
@@ -5504,7 +5529,7 @@ document.getElementById('km-revisao-recalcular').addEventListener('click', funct
       status.style.color = 'var(--success, #2d5016)';
       return;
     }
-    var cidade = lista[idx];
+    var cidade = normalizarCidade(lista[idx]);
     status.textContent = '⏳ Calculando ' + (idx+1) + '/' + lista.length + ': ' + cidade;
 
     Promise.all([
