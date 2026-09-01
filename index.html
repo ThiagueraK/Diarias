@@ -491,7 +491,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.13</span>
+    <span class="header-version">v1.10.14</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -822,10 +822,21 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <!-- 31/08/2026: pedido do usuário — contador bem visível pra comparar de olho com o
-           total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo. -->
-      <div id="proc-contador" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;margin:2px 0 10px;font-size:13px;color:var(--text);">
-        <span style="font-size:20px;font-weight:800;color:var(--accent2);" id="proc-contador-num">0</span>
-        <span>processos nessa varredura — compare com o total no 1Doc</span>
+           total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo.
+           01/09/2026: 2 ajustes pedidos — (1) o número precisa cair sozinho quando um card
+           some da tela (empenho vinculado / duplicata confirmada), sem precisar de refresh;
+           (2) card ao lado com número/credor/cidade do ÚLTIMO processo que sumiu — o usuário
+           precisa desses dados pra continuar a liquidação logo depois, e sem isso a
+           informação some da tela junto com o card. Ver marcarProcessoRemovidoDaLista(). -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 10px;align-items:stretch;">
+        <div id="proc-contador" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
+          <span style="font-size:20px;font-weight:800;color:var(--accent2);" id="proc-contador-num">0</span>
+          <span>processos nessa varredura — compare com o total no 1Doc</span>
+        </div>
+        <div id="proc-ultimo-removido" hidden style="display:inline-flex;align-items:center;gap:8px;background:rgba(37,99,235,.1);border:1.5px solid var(--accent2);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
+          <span style="font-size:16px;">➡️</span>
+          <span>Último p/ liquidação: <b id="proc-ultimo-removido-texto"></b></span>
+        </div>
       </div>
       <p id="proc-atualizado-em" style="font-size:11px;color:var(--text-dim);margin:0 0 12px;"></p>
       <div id="proc-lista" style="max-height:65vh;overflow-y:auto;">
@@ -1606,6 +1617,29 @@ window.copiarDescricaoProcesso = copiarDescricaoProcesso;
 // FIFO — cada clique em Copiar entra no fim, quem consome pega sempre o primeiro ainda
 // válido, na ordem que os cliques aconteceram, não "o último". Itens com mais de 10min são
 // descartados (expiraram) sem travar os que vêm depois na fila.
+// 01/09/2026: pedido do usuário — quando um card some da tela (empenho vinculado ou
+// duplicata confirmada), o contador visível (ver renderProcessosCaixa) precisa cair na hora
+// (sem refresh) e o card "Último p/ liquidação" precisa mostrar número/credor/cidade desse
+// processo — é a informação que o usuário usa em seguida pra continuar a liquidação, e sem
+// isso ela desaparece da tela junto com o card removido.
+function marcarProcessoRemovidoDaLista(p) {
+  var numEl = document.getElementById('proc-contador-num');
+  if (numEl) {
+    var atual = parseInt(numEl.textContent, 10) || 0;
+    numEl.textContent = Math.max(0, atual - 1);
+  }
+  var credor = credorPorNome(p.servidor);
+  var cidade = (p.cidade || '') + (p.uf ? '/' + p.uf : '');
+  var partes = [p.numeroProcesso || '?'];
+  if (credor) partes.push('Credor ' + credor);
+  if (cidade.trim()) partes.push(cidade);
+  var box = document.getElementById('proc-ultimo-removido');
+  var texto = document.getElementById('proc-ultimo-removido-texto');
+  if (box && texto) {
+    texto.textContent = partes.join(' — ');
+    box.hidden = false;
+  }
+}
 var PRAZO_PROCESSO_ATIVO_MS = 10 * 60 * 1000;
 function sgdRegistrarEmpenhoPorHash(numero, valor) {
   window._filaProcessosAtivos = window._filaProcessosAtivos || [];
@@ -1653,6 +1687,7 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     elCard.style.transform = 'scale(.96)';
     setTimeout(function(){ elCard.remove(); }, 350);
   }
+  marcarProcessoRemovidoDaLista(p);
   // servidor/numProcesso vão junto pro chamador (extensão) poder mostrar QUAL processo
   // recebeu o vínculo na notificação — sem isso, um vínculo no processo errado passava
   // batido silenciosamente (só aparecia "Empenho X vinculado", sem dizer a qual processo).
@@ -1678,6 +1713,7 @@ function sgdConfirmarDuplicataProcesso(idx) {
     elCard.style.transform = 'scale(.96)';
     setTimeout(function(){ elCard.remove(); }, 350);
   }
+  marcarProcessoRemovidoDaLista(p);
 }
 window.sgdConfirmarDuplicataProcesso = sgdConfirmarDuplicataProcesso;
 // Ponte pro console (F12) — corrigir a Tabela de Controle na mão quando o fluxo automático
