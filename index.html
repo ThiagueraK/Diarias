@@ -127,6 +127,26 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   #bannerDuplicata .banner-fechar{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;color:#fff;cursor:pointer;padding:6px 12px;font-family:var(--mono);font-size:12px;white-space:nowrap;transition:background .15s;}
   #bannerDuplicata .banner-fechar:hover{background:rgba(255,255,255,.25);}
 
+  /* 01/09/2026: achado real — salvar() falhava e o erro só ia pro console.log, nunca
+     avisava a pessoa (achado com o processo do Iraja: rodou tudo certo no 1Doc, empenho
+     vinculado, mas a Tabela de Controle nunca gravou — provável colisão com o limite de
+     1 escrita/segundo do KV numa sequência rápida de 48 empenhos seguidos). Mesmo visual
+     do banner de duplicata (já provado que chama atenção), banner próprio pra não misturar
+     os dois avisos. */
+  #bannerFalhaSalvar{
+    display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
+    background:#7f1d1d;border-bottom:2px solid #ef4444;
+    padding:14px 20px;color:#fff;font-family:var(--mono);font-size:13px;
+    box-shadow:0 4px 24px rgba(239,68,68,.4);
+    animation:slideBanner .3s ease;
+  }
+  #bannerFalhaSalvar.visible{display:flex;align-items:center;gap:12px;}
+  #bannerFalhaSalvar .banner-icon{font-size:20px;flex-shrink:0;}
+  #bannerFalhaSalvar .banner-texto{flex:1;line-height:1.5;}
+  #bannerFalhaSalvar .banner-titulo{font-weight:700;font-size:14px;color:#fca5a5;display:block;margin-bottom:2px;}
+  #bannerFalhaSalvar .banner-fechar{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:6px;color:#fff;cursor:pointer;padding:6px 12px;font-family:var(--mono);font-size:12px;white-space:nowrap;transition:background .15s;}
+  #bannerFalhaSalvar .banner-fechar:hover{background:rgba(255,255,255,.25);}
+
   /* HEADER */
 
   header{margin-bottom:24px;display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow-sm);}
@@ -466,6 +486,15 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <button id="bannerDuplicataBtnIr" class="banner-fechar" style="display:none;background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.5);">🔍 Ver processo</button>
   <button id="bannerDuplicataBtnFechar" class="banner-fechar">✕ Fechar</button>
 </div>
+<!-- BANNER FALHA AO SALVAR (01/09/2026) -->
+<div id="bannerFalhaSalvar">
+  <span class="banner-icon">🚨</span>
+  <div class="banner-texto">
+    <span class="banner-titulo">FALHA AO SALVAR NA TABELA DE CONTROLE</span>
+    <span id="bannerFalhaSalvarMsg"></span>
+  </div>
+  <button id="bannerFalhaSalvarBtnFechar" class="banner-fechar">✕ Fechar</button>
+</div>
 
 <!-- LOGIN -->
 <div id="loginOverlay">
@@ -491,7 +520,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.14</span>
+    <span class="header-version">v1.10.15</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3249,15 +3278,45 @@ function adicionarProcesso(dados) {
     notificarAutomaticamente('notificar-empenhos', isoParaBR(hojeISO()), [novoProcesso], 'empenhoNotificadoEm');
   }
 }
+// 01/09/2026: achado real — essa gravação falhava (offline, rede, ou provável colisão com o
+// limite de 1 escrita/segundo do KV numa sequência rápida de vários empenhos seguidos) e
+// SÓ ia pro console.log, nunca avisava ninguém — achado com o processo do Iraja (7.938/2026):
+// rodou tudo certo no 1Doc, empenho vinculado, mas a Tabela de Controle nunca gravou, e só se
+// soube porque o usuário foi conferir na mão. Agora: 1) tenta de novo até 3x com espera
+// crescente antes de desistir (cobre bem uma colisão passageira de rate limit); 2) se mesmo
+// assim falhar, mostra um banner vermelho fixo no topo (não um toast que passa despercebido)
+// — a pessoa PRECISA saber que um dado real não foi salvo.
 function salvar() {
   atualizarBackupInfo();
-  // Salva no KV na nuvem
+  salvarComRetry(0);
+}
+function salvarComRetry(tentativa) {
   sgdFetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ processos: processos, meta: sgdMeta })
-  }).catch(function(e){ console.log('Sync KV falhou (offline?):', e.message); });
+  }).then(function(r){
+    if (!r.ok) throw new Error('status ' + r.status);
+  }).catch(function(e){
+    console.log('Sync KV falhou (tentativa ' + (tentativa + 1) + '):', e.message);
+    if (tentativa < 3) {
+      setTimeout(function(){ salvarComRetry(tentativa + 1); }, 1500 * (tentativa + 1));
+    } else {
+      avisarFalhaAoSalvar(e.message);
+    }
+  });
 }
+function avisarFalhaAoSalvar(motivo) {
+  var banner = document.getElementById('bannerFalhaSalvar');
+  var msgEl = document.getElementById('bannerFalhaSalvarMsg');
+  if (!banner || !msgEl) return;
+  msgEl.textContent = 'Um lançamento não foi salvo na nuvem depois de 3 tentativas (' + motivo + '). '
+    + 'Confira sua internet e tente salvar de novo — se sumir da tela ao recarregar, os dados dele se perderam.';
+  banner.classList.add('visible');
+}
+document.getElementById('bannerFalhaSalvarBtnFechar')?.addEventListener('click', function(){
+  document.getElementById('bannerFalhaSalvar').classList.remove('visible');
+});
 function atualizarBadge() { document.getElementById('badgeCount').textContent = processos.length; }
 
 // ═══════════════════════════════════════════════════════
