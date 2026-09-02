@@ -520,7 +520,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.19</span>
+    <span class="header-version">v1.10.20</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4341,7 +4341,17 @@ var VALORES_PC = [
   { valor: 148.02, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE' },
   { valor: 581.52, texto: 'VALOR REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE' },
   { valor: 52.87,  texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO MUNICIPIO SEM PERNOITE' },
-  { valor: 243.18, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE' }
+  { valor: 243.18, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE' },
+  { valor: 190.31, texto: 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE MAIS DE 350KM SEM PERNOITE' },
+  { valor: 296.04, texto: 'VALOR REFERENTE A VIAGEM CAPITAL DE ESTADO SEM PERNOITE' },
+  // 02/09/2026: empenhos que consolidam varias diarias de Porto Alegre num so (581,52 com
+  // pernoite + 296,04 sem pernoite, somados) - confirmado com o usuario a composicao exata
+  // de cada total antes de adicionar aqui.
+  { valor: 877.56,  texto: 'SAO 1 (UMA) DIARIA REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE E 1 (UMA) DIARIA REFERENTE A VIAGEM CAPITAL DE ESTADO SEM PERNOITE' },
+  { valor: 1459.08, texto: 'SAO 2 (DUAS) DIARIAS REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE E 1 (UMA) DIARIA REFERENTE A VIAGEM CAPITAL DE ESTADO SEM PERNOITE' },
+  { valor: 2622.12, texto: 'SAO 4 (QUATRO) DIARIAS REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE E 1 (UMA) DIARIA REFERENTE A VIAGEM CAPITAL DE ESTADO SEM PERNOITE' },
+  // Nao e diaria - ajuste de valor feito via empenho complementar
+  { valor: 42.29, texto: 'EMPENHO COMPLEMENTAR PARA AJUSTE DE VALOR AO CREDOR' }
 ];
 
 function gerarTextoPC(p) {
