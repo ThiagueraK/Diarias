@@ -520,7 +520,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.18</span>
+    <span class="header-version">v1.10.19</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1247,9 +1247,12 @@ document.getElementById('tabPC').addEventListener('click', function() { switchTa
 // ═══════════════════════════════════════════════════════
 // Ordena por empenho (numérico) pra ficar previsível — mesma ordem sequencial
 // usada ao processar manualmente. Cai pra ordem de array se o empenho não for numérico.
+// Só conta como "prestável" quando já está PAGA (p.pago === true) — o CP só libera a tela
+// de Prestação de Contas pra empenhos já pagos, então uma diária ainda não paga não é uma
+// pendência de verdade ainda (mesmo filtro já usado no Worker, ?action=pc-pendentes-listar).
 function proximosPendentesPC() {
   return processos
-    .filter(function(p){ return !p.pcOk; })
+    .filter(function(p){ return p.empenho && p.pago === true && !p.pcOk; })
     .sort(function(a, b) {
       var na = parseInt((a.empenho||'').replace(/\D/g,''), 10);
       var nb = parseInt((b.empenho||'').replace(/\D/g,''), 10);
