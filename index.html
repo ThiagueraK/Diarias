@@ -520,7 +520,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <h1>Gestão de Diárias</h1>
       <p>Prefeitura de Tupanciretã · RS</p>
     </div>
-    <span class="header-version">v1.10.21</span>
+    <div class="header-sino-wrap" style="position:relative;">
+      <button id="btnSinoDivergencias" title="Divergências na tabela" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px 6px;position:relative;display:none;">
+        🔔<span id="sinoContador" style="position:absolute;top:-2px;right:-2px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:999px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 3px;"></span>
+      </button>
+      <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
+    </div>
+    <span class="header-version">v1.10.22</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1266,6 +1272,74 @@ function atualizarBadgePC() {
   if (badge) badge.textContent = proximosPendentesPC().length;
 }
 
+// ═══════════════════════════════════════════════════════
+// SINO DE DIVERGÊNCIAS — 02/09/2026, pedido do usuário depois de achar o empenho 10519
+// gravado em dois processos diferentes (Marcio e Délvio) sem nenhum aviso. Roda toda vez
+// que os dados carregam/mudam (mesmo gancho do atualizarBadgePC), extensível pra outros
+// tipos de divergência no futuro (hoje só checa empenho duplicado).
+function detectarDivergencias() {
+  var divergencias = [];
+
+  var porEmpenho = {};
+  processos.forEach(function(p) {
+    var emp = (p.empenho || '').toString().trim();
+    if (!emp) return;
+    (porEmpenho[emp] = porEmpenho[emp] || []).push(p);
+  });
+  Object.keys(porEmpenho).forEach(function(emp) {
+    var lista = porEmpenho[emp];
+    if (lista.length > 1) {
+      divergencias.push({
+        tipo: 'empenho-duplicado',
+        titulo: 'Empenho ' + emp + ' em ' + lista.length + ' processos',
+        detalhe: lista.map(function(p){ return (p.servidor||'?') + ' — ' + (p.numProcesso||'?'); }).join('\n')
+      });
+    }
+  });
+
+  return divergencias;
+}
+
+function atualizarSinoDivergencias() {
+  var divergencias = detectarDivergencias();
+  var btn = document.getElementById('btnSinoDivergencias');
+  var contador = document.getElementById('sinoContador');
+  var painel = document.getElementById('painelDivergencias');
+  if (!btn) return;
+
+  if (divergencias.length === 0) {
+    btn.style.display = 'none';
+    painel.style.display = 'none';
+    return;
+  }
+
+  btn.style.display = 'inline-block';
+  contador.textContent = divergencias.length;
+
+  painel.innerHTML = '<div style="font-weight:700;margin-bottom:10px;font-size:13px;">⚠️ ' + divergencias.length + ' divergência' + (divergencias.length === 1 ? '' : 's') + ' na tabela</div>'
+    + divergencias.map(function(d) {
+        return '<div style="border-top:1px solid var(--border);padding:8px 0;font-size:12px;">'
+          + '<div style="font-weight:600;margin-bottom:4px;">' + d.titulo + '</div>'
+          + '<div style="color:var(--text-muted);white-space:pre-line;">' + d.detalhe + '</div>'
+          + '</div>';
+      }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('btnSinoDivergencias');
+  var painel = document.getElementById('painelDivergencias');
+  if (!btn || !painel) return;
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    painel.style.display = painel.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', function(e) {
+    if (painel.style.display !== 'none' && !painel.contains(e.target) && e.target !== btn) {
+      painel.style.display = 'none';
+    }
+  });
+});
+
 function copiarTextoPCFila(btn) {
   var el = document.getElementById('pcFilaTexto');
   if (!el) return;
@@ -1687,6 +1761,16 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
   var p = (processosCaixaAtual || []).find(function(x){ return x.hash === hash; });
   if (!p) return { ok: false, motivo: 'processo-nao-encontrado' };
   if (empenhoJaLancado(hash)) return { ok: false, motivo: 'ja-lancado' };
+
+  // 02/09/2026: achado real (empenho 10519 gravado em DOIS processos diferentes, Marcio e
+  // Délvio) — a checagem acima só olha se ESSE processo (hash) já tem empenho, nunca se o
+  // NÚMERO do empenho já está gravado em outro processo diferente. Bloqueia aqui em vez de
+  // deixar gravar — sem isso o duplicado passa batido silencioso até alguém notar na
+  // Prestação de Contas.
+  var conflito = processos.find(function(tc){ return tc.hash1doc !== hash && String(tc.empenho) === String(numero); });
+  if (conflito) {
+    return { ok: false, motivo: 'empenho-ja-usado', empenhoConflitante: { servidor: conflito.servidor || '', numProcesso: conflito.numProcesso || '' } };
+  }
 
   var dados = {
     servidor: p.servidor || '',
@@ -4329,6 +4413,7 @@ sgdFetch('https://diarias.aceitacoes.workers.dev?action=carregar')
   document.getElementById('filtroData').value = filtroAtivo;
   atualizarBadge();
   atualizarBadgePC();
+  atualizarSinoDivergencias();
   atualizarBackupInfo();
   if (typeof renderRelatorio === 'function') renderRelatorio();
 });
