@@ -526,7 +526,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.22</span>
+    <span class="header-version">v1.10.23</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -853,9 +853,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
         <span>📋 Processos — caixa SGD pendentes de empenho</span>
-        <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
+        <span style="display:flex;gap:8px;">
+          <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
+          <button id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h) — resultado aparece no painel SaúdeFrota" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📥 Varrer caixa do Marcos</button>
+        </span>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
+      <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
       <!-- 31/08/2026: pedido do usuário — contador bem visível pra comparar de olho com o
            total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo.
            01/09/2026: 2 ajustes pedidos — (1) o número precisa cair sozinho quando um card
@@ -1922,6 +1926,42 @@ function escanearProcessosCaixa() {
   });
 }
 document.getElementById('proc-atualizar') && document.getElementById('proc-atualizar').addEventListener('click', escanearProcessosCaixa);
+
+// Botão "📥 Varrer caixa do Marcos" (03/09/2026) — sistema totalmente separado (backend
+// SaúdeFrota, dashboard Transportes), que já roda por horário fixo (triagemAgendada.js).
+// Isso só dispara o mesmo escaneamento sob demanda; o resultado (itens encontrados,
+// assinatura automática etc.) aparece no painel próprio do SaúdeFrota, não aqui — 1Doc não
+// avisa a gente quando chega algo novo na caixa do Marcos, então não dá pra mostrar uma
+// lista "ao vivo" nessa aba sem reimplementar o painel inteiro do outro sistema.
+function escanearCaixaMarcos() {
+  var btn = document.getElementById('btn-triagem-marcos');
+  var status = document.getElementById('triagem-marcos-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Iniciando...';
+  status.style.display = 'block';
+  status.style.color = 'var(--text-muted)';
+  status.textContent = 'Acionando a varredura da caixa do Marcos...';
+  sgdFetch(SGD_WORKER_URL + '?action=triagem-marcos-escanear', { method: 'POST' })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    btn.disabled = false;
+    btn.textContent = '📥 Varrer caixa do Marcos';
+    if (!res.ok) {
+      status.style.color = 'var(--danger)';
+      status.textContent = 'Erro ao iniciar: ' + (res.error || 'desconhecido');
+      return;
+    }
+    status.style.color = 'var(--accent2)';
+    status.textContent = '✅ Varredura da caixa do Marcos iniciada — acompanhe o resultado no painel SaúdeFrota (pode levar alguns minutos).';
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    btn.textContent = '📥 Varrer caixa do Marcos';
+    status.style.color = 'var(--danger)';
+    status.textContent = 'Erro ao iniciar: ' + e.message;
+  });
+}
+document.getElementById('btn-triagem-marcos') && document.getElementById('btn-triagem-marcos').addEventListener('click', escanearCaixaMarcos);
 
 function carregarManutencao() {
   var lista = document.getElementById('man-lista');
