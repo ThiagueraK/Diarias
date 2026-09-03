@@ -526,7 +526,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.23</span>
+    <span class="header-version">v1.10.24</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1211,6 +1211,21 @@ function toggleDesc(id) {
   }
 }
 
+// 03/09/2026: pedido do usuário — os 395 processos importados do histórico de Prestação de
+// Contas (origemHistorico: true) não têm data real de lançamento na Tabela de Controle, e
+// como todo `p.diaRef || hojeISO()` do arquivo caía no fallback, eles apareciam sempre no
+// dia de HOJE (mudando sozinho todo dia — visto pelo usuário indo de 02/09 pra hoje).
+// Backfill deu um diaRef de verdade pra eles (esse sentinela), então o fallback pra
+// hojeISO() nunca mais entra em ação pra esses registros — só falta ordenar/rotular direito
+// em vez de tratar como uma data ISO normal (ver isoParaBR e ordenarDiasComSemDataNoFim).
+var DIA_REF_SEM_DATA = 'sem-data';
+// Ordena chaves de diaRef mais recente primeiro (mesmo critério de sempre), mas com
+// DIA_REF_SEM_DATA sempre por último — sem isso, a comparação de string pura colocava
+// "sem-data" ANTES de qualquer data real (letra > dígito), o oposto do pedido.
+function ordenarDiasComSemDataNoFim(keys) {
+  var reais = keys.filter(function(k){ return k !== DIA_REF_SEM_DATA; }).sort().reverse();
+  return keys.indexOf(DIA_REF_SEM_DATA) === -1 ? reais : reais.concat([DIA_REF_SEM_DATA]);
+}
 function hojeISO() {
   var d = new Date();
   var mm = String(d.getMonth()+1).padStart(2,'0');
@@ -1219,6 +1234,9 @@ function hojeISO() {
 }
 function isoParaBR(iso) {
   if (!iso) return '';
+  // 03/09/2026: sentinela usado no diaRef dos processos importados do histórico (sem data
+  // real de lançamento) — ver DIA_REF_SEM_DATA. Sem isso, split('-') quebrava o texto.
+  if (iso === DIA_REF_SEM_DATA) return '🕐 Sem data (histórico)';
   var p = iso.split('-');
   return p[2]+'/'+p[1]+'/'+p[0];
 }
@@ -3460,7 +3478,7 @@ function getDiasDisponiveis() {
 
 function renderPills(dias) {
   var el = document.getElementById('diasDisponiveis');
-  var keys = Object.keys(dias).sort().reverse(); // mais recente primeiro
+  var keys = ordenarDiasComSemDataNoFim(Object.keys(dias)); // mais recente primeiro, sem-data por último
   if (keys.length === 0) { el.innerHTML = ''; return; }
   var opcoes = keys.map(function(d) {
     var sel = d === filtroAtivo ? ' selected' : '';
@@ -3552,7 +3570,7 @@ function renderTabela() {
   if (!modoGlobal && !modoStatusGlobal && filtrados.length === 0) {
     diaInfo.style.display = 'none';
     buscaInfo.style.display = 'none';
-    var keys = Object.keys(dias).sort().reverse();
+    var keys = ordenarDiasComSemDataNoFim(Object.keys(dias));
     var sugestao = keys.length > 0 ? '<br>Dias com processos: <strong>'+keys.map(function(d){ return isoParaBR(d); }).join(', ')+'</strong>' : '';
     wrap.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Nenhum processo encontrado para <strong>'+isoParaBR(filtroAtivo)+'</strong>.'+sugestao+'</p></div>';
     return;
