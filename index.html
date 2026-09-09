@@ -526,7 +526,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.26</span>
+    <span class="header-version">v1.10.27</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -861,6 +861,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
+      <!-- 09/09/2026: painel de acompanhamento ao vivo do "Processar anexos pendentes" -
+           pedido explícito do usuário depois de não gostar do alert() único no final ("quero
+           acompanhar cada etapa enquanto ocorre"). Ver processarCheckpointEmpenho(). -->
+      <div id="checkpoint-progresso" style="display:none;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin:0 0 10px;background:var(--surface2);">
+        <div id="checkpoint-progresso-titulo" style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;"></div>
+        <div id="checkpoint-progresso-lista" style="display:flex;flex-direction:column;gap:4px;max-height:240px;overflow-y:auto;font-size:12px;"></div>
+      </div>
       <!-- 31/08/2026: pedido do usuário — contador bem visível pra comparar de olho com o
            total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo.
            01/09/2026: 2 ajustes pedidos — (1) o número precisa cair sozinho quando um card
@@ -1951,34 +1958,110 @@ document.getElementById('proc-atualizar') && document.getElementById('proc-atual
 // para cada empenho gravado no CP que ainda está esperando anexar/assinar/encaminhar no
 // 1Doc, dispara ou confere o status e registra na Tabela de Controle quando confirma. Só
 // existe pra não precisar esperar o próximo ciclo do cron quando alguém quer ver na hora.
+// 09/09/2026: reescrito a pedido do usuário - antes só mostrava "Processando..." e um
+// alert() único no final, impossível de acompanhar em tempo real. Agora faz polling em
+// ?action=checkpoint-processamento-status (a cada 2s) e desenha um painel que atualiza
+// item por item enquanto o processamento roda de verdade no Worker - sem nenhuma IA
+// envolvida, é só ler o log de progresso que o Worker já grava incrementalmente.
+var CHECKPOINT_ICONES = {
+  'disparando': '🔄', 'disparado': '📤', 'aguardando-confirmacao': '⏳',
+  'registrando': '🔄', 'registrado': '✅',
+  'falha-ao-disparar': '❌', 'erro-ao-disparar': '❌',
+  'erro-ao-registrar': '❌', 'falhou-no-anexo': '❌'
+};
+var CHECKPOINT_TEXTOS = {
+  'disparando': 'disparando anexo/assinatura/encaminhamento no 1Doc...',
+  'disparado': 'disparado — aguardando o 1Doc confirmar',
+  'aguardando-confirmacao': 'aguardando confirmação do 1Doc...',
+  'registrando': 'anexo confirmado — gravando na Tabela de Controle...',
+  'registrado': 'registrado na Tabela de Controle',
+  'falha-ao-disparar': 'falha ao disparar',
+  'erro-ao-disparar': 'erro ao disparar',
+  'erro-ao-registrar': 'erro ao registrar',
+  'falhou-no-anexo': 'falhou no 1Doc'
+};
+function renderizarProgressoCheckpoint(eventos, emAndamento) {
+  var painel = document.getElementById('checkpoint-progresso');
+  var titulo = document.getElementById('checkpoint-progresso-titulo');
+  var lista = document.getElementById('checkpoint-progresso-lista');
+  painel.style.display = 'block';
+  titulo.textContent = emAndamento ? '🔄 Processando anexos pendentes...' : '✅ Processamento concluído';
+  if (!eventos.length) {
+    lista.innerHTML = '<div style="color:var(--text-muted);">Conectando...</div>';
+    return;
+  }
+  // último evento de cada empenho (o log é append-only, um empenho pode aparecer várias
+  // vezes conforme passa de etapa em etapa - só a linha mais recente de cada um interessa).
+  var porNumero = {};
+  var ordem = [];
+  eventos.forEach(function(ev){
+    if (!(ev.numero in porNumero)) ordem.push(ev.numero);
+    porNumero[ev.numero] = ev;
+  });
+  lista.innerHTML = ordem.map(function(numero){
+    var ev = porNumero[numero];
+    var icone = CHECKPOINT_ICONES[ev.status] || 'ℹ️';
+    var texto = CHECKPOINT_TEXTOS[ev.status] || ev.status;
+    var extra = ev.detalhe || ev.motivo || '';
+    var cor = (ev.status.indexOf('erro') === 0 || ev.status.indexOf('falh') === 0) ? 'var(--danger)' : (ev.status === 'registrado' ? 'var(--accent2)' : 'var(--text)');
+    return '<div style="color:' + cor + ';"><b>' + icone + ' ' + numero + '</b>' + (ev.servidor ? ' (' + ev.servidor + ')' : '') + ': ' + texto + (extra ? ' — ' + String(extra).slice(0, 200) : '') + '</div>';
+  }).join('');
+  lista.scrollTop = lista.scrollHeight;
+}
 function processarCheckpointEmpenho() {
   var btn = document.getElementById('btn-checkpoint-empenho');
   btn.disabled = true;
   btn.textContent = '⏳ Processando...';
+  renderizarProgressoCheckpoint([], true);
+
+  var meuDisparoTerminou = false;
+  var poll = setInterval(function(){
+    sgdFetch(SGD_WORKER_URL + '?action=checkpoint-processamento-status', { method: 'GET' })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res.ok) return;
+      renderizarProgressoCheckpoint(res.eventos || [], res.emAndamento);
+      // só para de perguntar quando (a) o disparo que ESTE clique fez já voltou (senão
+      // corre risco de parar de acompanhar antes do processamento nem ter começado de
+      // verdade) e (b) o Worker já não marca mais nenhum processamento em andamento.
+      if (meuDisparoTerminou && !res.emAndamento) {
+        clearInterval(poll);
+        btn.disabled = false;
+        btn.textContent = '📎 Processar anexos pendentes';
+      }
+    })
+    .catch(function(){});
+  }, 2000);
+  // teto de segurança - nunca fica perguntando pra sempre se algo ficar preso.
+  setTimeout(function(){ clearInterval(poll); btn.disabled = false; btn.textContent = '📎 Processar anexos pendentes'; }, 20 * 60 * 1000);
+
   sgdFetch(SGD_WORKER_URL + '?action=empenho-checkpoint-processar', { method: 'POST' })
   .then(function(r){ return r.json(); })
   .then(function(res){
-    btn.disabled = false;
-    btn.textContent = '📎 Processar anexos pendentes';
+    meuDisparoTerminou = true;
     if (res.jaRodando) {
-      alert('⏳ ' + (res.error || 'Já tem um processamento em andamento. Aguarde terminar antes de clicar de novo.'));
+      // não é erro - só significa que outro clique/o cron já estava processando; o
+      // polling que já está rodando vai mostrar o progresso dessa execução em andamento.
       return;
     }
     if (!res.ok) {
-      alert('Erro ao processar: ' + (res.error || 'desconhecido'));
+      renderizarProgressoCheckpoint([{ numero: '—', status: 'erro-ao-disparar', detalhe: res.error || 'desconhecido' }], false);
+      clearInterval(poll);
+      btn.disabled = false;
+      btn.textContent = '📎 Processar anexos pendentes';
       return;
     }
-    var itens = res.resultados || [];
-    if (!itens.length) {
-      alert('Nenhum empenho pendente de anexo no momento.');
-      return;
+    if (!(res.resultados || []).length) {
+      document.getElementById('checkpoint-progresso-titulo').textContent = 'ℹ️ Nenhum empenho pendente de anexo no momento.';
+      document.getElementById('checkpoint-progresso-lista').innerHTML = '';
+      clearInterval(poll);
+      btn.disabled = false;
+      btn.textContent = '📎 Processar anexos pendentes';
     }
-    var linhas = itens.map(function(it){
-      return it.numero + ' (' + it.hash.slice(0, 8) + '…): ' + it.status + (it.detalhe ? ' — ' + it.detalhe : '') + (it.motivo ? ' — ' + it.motivo : '');
-    });
-    alert('Processado(s) ' + itens.length + ' item(ns):\n\n' + linhas.join('\n'));
   })
   .catch(function(e){
+    meuDisparoTerminou = true;
+    clearInterval(poll);
     btn.disabled = false;
     btn.textContent = '📎 Processar anexos pendentes';
     alert('Erro ao processar: ' + e.message);
