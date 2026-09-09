@@ -526,7 +526,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.25</span>
+    <span class="header-version">v1.10.26</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1960,6 +1960,10 @@ function processarCheckpointEmpenho() {
   .then(function(res){
     btn.disabled = false;
     btn.textContent = '📎 Processar anexos pendentes';
+    if (res.jaRodando) {
+      alert('⏳ ' + (res.error || 'Já tem um processamento em andamento. Aguarde terminar antes de clicar de novo.'));
+      return;
+    }
     if (!res.ok) {
       alert('Erro ao processar: ' + (res.error || 'desconhecido'));
       return;
