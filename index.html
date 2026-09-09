@@ -526,7 +526,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.24</span>
+    <span class="header-version">v1.10.25</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -856,6 +856,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <span style="display:flex;gap:8px;">
           <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
           <button id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h) — resultado aparece no painel SaúdeFrota" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📥 Varrer caixa do Marcos</button>
+          <button id="btn-checkpoint-empenho" title="Processa agora os empenhos já gravados no CP que ainda estão esperando anexar/assinar/registrar no 1Doc — mesmo trabalho que o Worker já faz sozinho a cada 15min, só que na hora, sem esperar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📎 Processar anexos pendentes</button>
         </span>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
@@ -1944,6 +1945,42 @@ function escanearProcessosCaixa() {
   });
 }
 document.getElementById('proc-atualizar') && document.getElementById('proc-atualizar').addEventListener('click', escanearProcessosCaixa);
+
+// Botão "📎 Processar anexos pendentes" (09/09/2026) — dispara na hora o mesmo
+// processamento que o Worker já roda sozinho a cada 15min (empenho-checkpoint-processar):
+// para cada empenho gravado no CP que ainda está esperando anexar/assinar/encaminhar no
+// 1Doc, dispara ou confere o status e registra na Tabela de Controle quando confirma. Só
+// existe pra não precisar esperar o próximo ciclo do cron quando alguém quer ver na hora.
+function processarCheckpointEmpenho() {
+  var btn = document.getElementById('btn-checkpoint-empenho');
+  btn.disabled = true;
+  btn.textContent = '⏳ Processando...';
+  sgdFetch(SGD_WORKER_URL + '?action=empenho-checkpoint-processar', { method: 'POST' })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    btn.disabled = false;
+    btn.textContent = '📎 Processar anexos pendentes';
+    if (!res.ok) {
+      alert('Erro ao processar: ' + (res.error || 'desconhecido'));
+      return;
+    }
+    var itens = res.resultados || [];
+    if (!itens.length) {
+      alert('Nenhum empenho pendente de anexo no momento.');
+      return;
+    }
+    var linhas = itens.map(function(it){
+      return it.numero + ' (' + it.hash.slice(0, 8) + '…): ' + it.status + (it.detalhe ? ' — ' + it.detalhe : '') + (it.motivo ? ' — ' + it.motivo : '');
+    });
+    alert('Processado(s) ' + itens.length + ' item(ns):\n\n' + linhas.join('\n'));
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    btn.textContent = '📎 Processar anexos pendentes';
+    alert('Erro ao processar: ' + e.message);
+  });
+}
+document.getElementById('btn-checkpoint-empenho') && document.getElementById('btn-checkpoint-empenho').addEventListener('click', processarCheckpointEmpenho);
 
 // Botão "📥 Varrer caixa do Marcos" (03/09/2026) — sistema totalmente separado (backend
 // SaúdeFrota, dashboard Transportes), que já roda por horário fixo (triagemAgendada.js).
