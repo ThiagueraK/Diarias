@@ -615,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.29</span>
+    <span class="header-version">v1.10.30</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2041,6 +2041,26 @@ setInterval(carregarEmpenhosAndamento, 8000);
 function pararPollingProcessos() {
   if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
 }
+// 10/09/2026: pedido do usuário - a lista de "esperando" precisa encolher sozinha
+// conforme os processos vão sendo empenhados, sem precisar de F5 nem de nova varredura.
+// Roda em paralelo ao polling de "Varrer caixa agora" (que é sobre uma varredura ATIVA,
+// coisa diferente) - esse aqui só re-lê a lista já filtrada (rápido, sem custo de
+// varredura de verdade) a cada poucos segundos enquanto a aba Processos está aberta.
+function atualizarListaProcessosCaixaSilenciosamente() {
+  if (!document.getElementById('panel-processos').classList.contains('active')) return;
+  // não atualiza por cima enquanto uma varredura ativa está em andamento (o botão
+  // "Varrer caixa agora" cuida do próprio ciclo de espera/renderização nesse caso).
+  if (procPollingTimer) return;
+  sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) return;
+    renderProcessosCaixa(res.itens, res.atualizadoEm);
+  })
+  .catch(function(){});
+}
+setInterval(atualizarListaProcessosCaixaSilenciosamente, 6000);
+
 function carregarProcessosCaixa() {
   pararPollingProcessos();
   var lista = document.getElementById('proc-lista');
