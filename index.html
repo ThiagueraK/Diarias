@@ -615,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.30</span>
+    <span class="header-version">v1.10.31</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2265,26 +2265,59 @@ document.getElementById('btn-checkpoint-empenho') && document.getElementById('bt
 // assinatura automática etc.) aparece no painel próprio do SaúdeFrota, não aqui — 1Doc não
 // avisa a gente quando chega algo novo na caixa do Marcos, então não dá pra mostrar uma
 // lista "ao vivo" nessa aba sem reimplementar o painel inteiro do outro sistema.
+var triagemMarcosPollTimer = null;
+// 10/09/2026: depois de disparar a varredura da caixa do Marcos, fica perguntando
+// "já acabou?" pro /triagem/status-externo (via Worker) a cada 4s e avisa na tela
+// quando termina - antes só mostrava "iniciada, veja no outro painel".
+function pollTriagemMarcos(tentativa, horaInicio, status, btn) {
+  if (triagemMarcosPollTimer) { clearTimeout(triagemMarcosPollTimer); triagemMarcosPollTimer = null; }
+  if (tentativa > 150) { // ~150 * 4s = 10min - a varredura continua no servidor mesmo assim
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Ainda não terminou depois de 10min — a varredura continua rodando no servidor. Confira o resultado no painel SaúdeFrota.';
+    btn.disabled = false;
+    btn.textContent = '📥 Varrer caixa do Marcos';
+    return;
+  }
+  triagemMarcosPollTimer = setTimeout(function() {
+    sgdFetch(SGD_WORKER_URL + '?action=triagem-marcos-status')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res.ok) { pollTriagemMarcos(tentativa + 1, horaInicio, status, btn); return; }
+      var terminou = !res.escaneando && res.ultimoResultado && res.ultimoResultado.escaneadoEm && res.ultimoResultado.escaneadoEm >= horaInicio;
+      if (!terminou) { pollTriagemMarcos(tentativa + 1, horaInicio, status, btn); return; }
+      btn.disabled = false;
+      btn.textContent = '📥 Varrer caixa do Marcos';
+      status.style.color = 'var(--accent2)';
+      var total = res.ultimoResultado.total || 0;
+      status.textContent = '✅ Varredura da caixa do Marcos concluída — ' + total + ' processo(s) encontrado(s). Detalhes e assinatura no painel SaúdeFrota.';
+    })
+    .catch(function(){ pollTriagemMarcos(tentativa + 1, horaInicio, status, btn); });
+  }, 4000);
+}
 function escanearCaixaMarcos() {
   var btn = document.getElementById('btn-triagem-marcos');
   var status = document.getElementById('triagem-marcos-status');
+  if (triagemMarcosPollTimer) { clearTimeout(triagemMarcosPollTimer); triagemMarcosPollTimer = null; }
   btn.disabled = true;
   btn.textContent = '⏳ Iniciando...';
   status.style.display = 'block';
   status.style.color = 'var(--text-muted)';
   status.textContent = 'Acionando a varredura da caixa do Marcos...';
+  var horaInicio = Date.now();
   sgdFetch(SGD_WORKER_URL + '?action=triagem-marcos-escanear', { method: 'POST' })
   .then(function(r){ return r.json(); })
   .then(function(res){
-    btn.disabled = false;
-    btn.textContent = '📥 Varrer caixa do Marcos';
     if (!res.ok) {
+      btn.disabled = false;
+      btn.textContent = '📥 Varrer caixa do Marcos';
       status.style.color = 'var(--danger)';
       status.textContent = 'Erro ao iniciar: ' + (res.error || 'desconhecido');
       return;
     }
-    status.style.color = 'var(--accent2)';
-    status.textContent = '✅ Varredura da caixa do Marcos iniciada — acompanhe o resultado no painel SaúdeFrota (pode levar alguns minutos).';
+    btn.textContent = '⏳ Varrendo (pode levar alguns minutos)...';
+    status.style.color = 'var(--text-muted)';
+    status.textContent = 'Varrendo a caixa do Marcos no 1Doc — aviso aqui quando terminar.';
+    pollTriagemMarcos(0, horaInicio, status, btn);
   })
   .catch(function(e){
     btn.disabled = false;
