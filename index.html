@@ -20,7 +20,7 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
 <title>SGD — Gerador de Diárias</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&display=swap');
   :root {
     /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -472,6 +472,95 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     #dashboard-print, #dashboard-print * { visibility: visible !important; }
     #dashboard-print { position: fixed; top: 0; left: 0; width: 100%; }
   }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     CENTRAL DE EMPENHOS — 10/09/2026, pedido do usuário: painel PERMANENTE
+     (não só durante um processamento ativo) com o andamento de cada
+     empenho, do checkpoint salvo até registrado. Visual deliberadamente
+     escuro/"sala de controle", independente do tema claro/escuro do resto
+     do site — é um widget próprio, não deriva das variáveis de tema.
+     ═══════════════════════════════════════════════════════════════════ */
+  .ce{
+    --ce-bg:#07090D; --ce-glass:rgba(14,19,29,0.62); --ce-grid:#10151d;
+    --ce-text:#E9F2FA; --ce-muted:#79899F;
+    --ce-cyan:#00E5FF; --ce-amber:#FFB454;
+    --ce-ok:#39FF88; --ce-warn:#FFD166; --ce-danger:#FF3D71;
+    position:relative;
+    background:
+      linear-gradient(var(--ce-grid) 1px, transparent 1px) 0 0/100% 34px,
+      linear-gradient(90deg, var(--ce-grid) 1px, transparent 1px) 0 0/34px 100%,
+      radial-gradient(ellipse 900px 480px at 15% -12%, rgba(0,229,255,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 460px at 105% 8%, rgba(255,180,84,0.07), transparent 60%),
+      var(--ce-bg);
+    color:var(--ce-text);
+    padding:22px 22px 26px;
+    border-radius:14px;
+    margin:0 0 16px;
+    font-family:'IBM Plex Mono',monospace;
+    overflow:hidden;
+  }
+  .ce-header{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;
+    margin-bottom:20px;flex-wrap:wrap;}
+  .ce-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.15rem;
+    letter-spacing:0.02em;margin:0;
+    background:linear-gradient(90deg,#fff,var(--ce-cyan));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ce-title span{background:none;-webkit-text-fill-color:var(--ce-amber);color:var(--ce-amber);}
+  .ce-sub{font-size:0.66rem;color:var(--ce-muted);letter-spacing:0.07em;margin-top:4px;
+    text-transform:uppercase;font-family:'Chakra Petch',sans-serif;}
+  .ce-cut{clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));}
+
+  .ce-telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .ce-tile{position:relative;padding:11px 14px;background:var(--ce-glass);backdrop-filter:blur(8px);
+    border:1px solid color-mix(in srgb, var(--tile-glow,var(--ce-cyan)) 45%, transparent);}
+  .ce-tile::after{content:'';position:absolute;inset:0;pointer-events:none;
+    box-shadow:0 0 22px -8px var(--tile-glow,rgba(0,229,255,0.4)) inset;}
+  .ce-tile-label{font-family:'Chakra Petch',sans-serif;font-size:0.6rem;font-weight:600;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--ce-muted);margin-bottom:6px;}
+  .ce-tile-value{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;
+    color:var(--tile-glow,var(--ce-cyan));text-shadow:0 0 14px var(--tile-glow,rgba(0,229,255,0.45));}
+
+  .ce-panel{position:relative;background:var(--ce-glass);backdrop-filter:blur(8px);
+    border:1px solid rgba(0,229,255,0.22);overflow:hidden;}
+  .ce-panel-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+    padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .ce-panel-title{font-family:'Chakra Petch',sans-serif;font-size:0.68rem;font-weight:600;
+    letter-spacing:0.09em;text-transform:uppercase;color:var(--ce-muted);}
+  .ce-legend{display:flex;gap:12px;font-size:0.62rem;color:var(--ce-muted);font-family:'IBM Plex Mono',monospace;flex-wrap:wrap;}
+  .ce-legend i{display:inline-block;width:6px;height:6px;margin-right:4px;box-shadow:0 0 6px currentColor;}
+
+  .ce-row{display:grid;grid-template-columns:1.1fr 1.5fr 1fr 0.85fr 1.5fr 0.75fr;
+    align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06);
+    position:relative;font-size:0.76rem;overflow:hidden;}
+  .ce-row:last-child{border-bottom:none;}
+  .ce-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--row-glow);box-shadow:0 0 10px var(--row-glow);}
+  .ce-row.ce-scanning::after{content:'';position:absolute;left:0;top:0;width:100%;height:1.5px;
+    background:linear-gradient(90deg,transparent,var(--ce-cyan),transparent);
+    animation:ce-scan 1.8s linear infinite;}
+  @keyframes ce-scan{0%{top:0;}100%{top:100%;}}
+  @keyframes ce-pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+  .ce-num{font-weight:700;color:#fff;font-family:'Orbitron',sans-serif;font-size:0.78rem;}
+  .ce-servidor{color:var(--ce-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ce-proc{color:var(--ce-muted);}
+  .ce-valor{color:var(--ce-text);text-align:right;font-variant-numeric:tabular-nums;}
+  .ce-status{display:flex;align-items:center;gap:7px;color:var(--row-glow);font-weight:600;font-size:0.7rem;
+    font-family:'Chakra Petch',sans-serif;letter-spacing:0.01em;}
+  .ce-dot{width:6px;height:6px;border-radius:50%;background:var(--row-glow);box-shadow:0 0 8px var(--row-glow);flex-shrink:0;}
+  .ce-dot.ce-pulse{animation:ce-pulse 1.3s ease-in-out infinite;}
+  .ce-time{color:var(--ce-muted);text-align:right;font-size:0.68rem;}
+  .ce-head-row{font-family:'Chakra Petch',sans-serif;font-size:0.58rem;font-weight:600;
+    letter-spacing:0.07em;text-transform:uppercase;color:var(--ce-muted);background:rgba(255,255,255,0.02);}
+  .ce-head-row .ce-valor,.ce-head-row .ce-time{text-align:right;}
+  .ce-detalhe-inline{grid-column:1 / -1;margin-top:6px;font-size:0.66rem;color:var(--ce-danger);
+    background:rgba(255,61,113,0.08);border:1px solid rgba(255,61,113,0.3);padding:5px 9px;}
+  .ce-empty{padding:20px 16px;text-align:center;color:var(--ce-muted);font-size:0.78rem;}
+
+  @media (max-width:760px){
+    .ce-telemetry{grid-template-columns:1fr;}
+    .ce-row{grid-template-columns:1fr;gap:3px;padding:12px 14px;}
+    .ce-head-row{display:none;}
+    .ce-time,.ce-valor{text-align:left;}
+  }
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -526,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.27</span>
+    <span class="header-version">v1.10.28</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -850,6 +939,37 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   </div>
 
   <div class="tab-panel" id="panel-processos">
+
+    <!-- 10/09/2026: painel permanente de andamento (não só durante processamento ativo) -->
+    <div class="ce" id="central-empenhos">
+      <div class="ce-header">
+        <div>
+          <h2 class="ce-title">CENTRAL DE <span>EMPENHOS</span></h2>
+          <div class="ce-sub">Tupanciretã · SGD-Diárias · rastreamento 1Doc em tempo real</div>
+        </div>
+      </div>
+      <div class="ce-telemetry">
+        <div class="ce-tile" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Em andamento</div><div class="ce-tile-value" id="ce-t-andamento">—</div></div>
+        <div class="ce-tile" style="--tile-glow:#39FF88"><div class="ce-tile-label">Registrados hoje</div><div class="ce-tile-value" id="ce-t-registrados">—</div></div>
+        <div class="ce-tile" style="--tile-glow:#FF3D71"><div class="ce-tile-label">Falhas</div><div class="ce-tile-value" id="ce-t-falhas">—</div></div>
+      </div>
+      <div class="ce-panel">
+        <div class="ce-panel-head">
+          <div class="ce-panel-title">Rastreamento por empenho</div>
+          <div class="ce-legend">
+            <span style="color:#39FF88"><i style="background:#39FF88"></i>Registrado</span>
+            <span style="color:#00E5FF"><i style="background:#00E5FF"></i>Aguardando 1Doc</span>
+            <span style="color:#FFD166"><i style="background:#FFD166"></i>Aguardando disparo</span>
+            <span style="color:#FF3D71"><i style="background:#FF3D71"></i>Falhou</span>
+          </div>
+        </div>
+        <div class="ce-row ce-head-row">
+          <div>Empenho</div><div>Servidor</div><div>Processo 1Doc</div><div>Valor</div><div>Etapa</div><div>Atualizado</div>
+        </div>
+        <div id="ce-linhas"><div class="ce-empty">Carregando…</div></div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
         <span>📋 Processos — caixa SGD pendentes de empenho</span>
@@ -1274,7 +1394,7 @@ function switchTab(panelId, tabId) {
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
-document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); });
+document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); });
 document.getElementById('tabManutencao').addEventListener('click', function() { switchTab('panel-manutencao','tabManutencao'); carregarManutencao(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
@@ -1868,6 +1988,56 @@ window.sgdConfirmarDuplicataProcesso = sgdConfirmarDuplicataProcesso;
 window.sgdAdicionarProcessoManual = adicionarProcesso;
 
 var procPollingTimer = null;
+// 10/09/2026: "Central de Empenhos" - painel permanente, atualiza sozinho a cada 8s
+// enquanto a aba Processos estiver aberta (sem gastar request enquanto o usuário está
+// em outra aba - o guard de 'active' no início da função cuida disso).
+var CE_CORES = { registrado: '#39FF88', aguardando_confirmacao: '#00E5FF', aguardando_disparo: '#FFD166', falhou: '#FF3D71' };
+var CE_LABELS = { registrado: 'Registrado', aguardando_confirmacao: 'Aguardando 1Doc', aguardando_disparo: 'Aguardando disparo', falhou: 'Falhou' };
+function ceTempoRelativo(ms) {
+  if (!ms) return '—';
+  var diffSeg = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (diffSeg < 60) return 'agora';
+  var diffMin = Math.round(diffSeg / 60);
+  if (diffMin < 60) return 'há ' + diffMin + 'min';
+  var diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return 'há ' + diffH + 'h';
+  return 'há ' + Math.round(diffH / 24) + 'd';
+}
+function carregarEmpenhosAndamento() {
+  if (!document.getElementById('panel-processos').classList.contains('active')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-andamento')
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.ok) return;
+    document.getElementById('ce-t-andamento').textContent = String(res.telemetria.emAndamento).padStart(2, '0');
+    document.getElementById('ce-t-registrados').textContent = String(res.telemetria.registradosHoje).padStart(2, '0');
+    document.getElementById('ce-t-falhas').textContent = String(res.telemetria.falhas).padStart(2, '0');
+    var cont = document.getElementById('ce-linhas');
+    if (!res.itens || !res.itens.length) {
+      cont.innerHTML = '<div class="ce-empty">Nenhum empenho em andamento ou registrado nas últimas 48h.</div>';
+      return;
+    }
+    cont.innerHTML = res.itens.map(function(it){
+      var cor = CE_CORES[it.status] || '#79899F';
+      var label = CE_LABELS[it.status] || it.status;
+      var scanning = it.status === 'aguardando_confirmacao' ? ' ce-scanning' : '';
+      var pulseDot = it.status === 'aguardando_confirmacao' ? ' ce-pulse' : '';
+      var detalheHtml = it.detalhe ? '<div class="ce-detalhe-inline">⚠ ' + escaparHtmlProc(it.detalhe).slice(0, 160) + '</div>' : '';
+      return '<div class="ce-row' + scanning + '" style="--row-glow:' + cor + '">'
+        + '<div class="ce-num">' + escaparHtmlProc(it.numero || '—') + '</div>'
+        + '<div class="ce-servidor">' + escaparHtmlProc(it.servidor || '—') + '</div>'
+        + '<div class="ce-proc">' + escaparHtmlProc(it.numeroProcesso1Doc || '—') + '</div>'
+        + '<div class="ce-valor">R$ ' + escaparHtmlProc(it.valor || '—') + '</div>'
+        + '<div class="ce-status"><span class="ce-dot' + pulseDot + '"></span>' + label + '</div>'
+        + '<div class="ce-time">' + ceTempoRelativo(it.atualizadoEm) + '</div>'
+        + detalheHtml
+        + '</div>';
+    }).join('');
+  })
+  .catch(function(){});
+}
+setInterval(carregarEmpenhosAndamento, 8000);
+
 function pararPollingProcessos() {
   if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
 }
