@@ -615,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.31</span>
+    <span class="header-version">v1.10.32</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1188,6 +1188,35 @@ function sgdFetch(url, opts) {
     return r;
   });
 }
+
+// 11/09/2026: gancho global de erro (pedido do usuário, mesmo padrão já feito no app
+// motorista Flutter) - avisa qualquer exceção JS não tratada nesta tela, em vez de só as que
+// eu previ manualmente ponto a ponto. window.onerror pega erro síncrono/de script,
+// unhandledrejection pega Promise rejeitada sem .catch. Best-effort, nunca lança de volta.
+var SGD_ERRO_DEDUP = {};
+function sgdReportarErroGlobal(origem, mensagem, stack) {
+  try {
+    var chave = origem + '|' + String(mensagem).slice(0, 200);
+    var agora = Date.now();
+    if (SGD_ERRO_DEDUP[chave] && (agora - SGD_ERRO_DEDUP[chave]) < 5 * 60 * 1000) return;
+    SGD_ERRO_DEDUP[chave] = agora;
+    // action=site-erro-issue exige o mesmo Bearer token de qualquer outra ação do Worker -
+    // manda direto no header em vez de usar sgdFetch (que desloga em 401 - não queria esse
+    // efeito colateral só por reportar um erro).
+    fetch(SGD_WORKER_URL + '?action=site-erro-issue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sgdGetToken() },
+      body: JSON.stringify({ origem: origem, mensagem: String(mensagem).slice(0, 2000), stack: stack ? String(stack).slice(0, 3000) : null, tela: (location.hash || location.pathname) })
+    }).catch(function() {});
+  } catch (e) {}
+}
+window.addEventListener('error', function(ev) {
+  sgdReportarErroGlobal('window.onerror', ev.message, ev.error && ev.error.stack);
+});
+window.addEventListener('unhandledrejection', function(ev) {
+  var razao = ev.reason;
+  sgdReportarErroGlobal('unhandledrejection', razao && razao.message ? razao.message : String(razao), razao && razao.stack);
+});
 
 // Ponte global para a extensão importar o relatório de pagamentos.
 // Existe desde o carregamento da página (escopo global), e delega para a
