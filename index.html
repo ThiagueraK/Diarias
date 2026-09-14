@@ -615,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.32</span>
+    <span class="header-version">v1.10.33</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1640,14 +1640,39 @@ function calcularKmSilencioso(cidade, callback) {
 // Fechamento é só pra "interior do estado" (com/sem pernoite) — capital e interior do
 // município não têm (mesma regra da função gerar()). Sem km calculado ainda, não arrisca
 // classificação errada num documento oficial: fica sem fechamento até resolver.
+// 14/09/2026: achado real — a aba Processos reconsulta a caixa a cada 6s
+// (setInterval(atualizarListaProcessosCaixaSilenciosamente, 6000)) e, a cada rodada,
+// fecharDescricoesEmFila reprocessava TODOS os itens de novo, mesmo os que já tinham km/
+// descrição calculados segundos antes — sem custo real na API externa (kmCache por CIDADE já
+// evitava isso), mas reescrevendo o DOM de cada card toda vez (o "fica regenerando" que o
+// usuário via) e, em listas grandes, uma rodada podia nem terminar (folga de 1100ms por item)
+// antes da próxima começar, empilhando filas. Diferente de kmCache (por nome de cidade, útil
+// entre processos diferentes na mesma cidade), este cache é por PROCESSO (p.hash, estável
+// entre polls mesmo que o array de itens seja recriado do zero a cada requisição).
+var _fechamentoPorHash = {};
 function fecharDescricaoProcessoComKm(idx, aoTerminar) {
   var pronto = aoTerminar || function(){};
   var p = processosCaixaAtual[idx];
-  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) { pronto(); return; }
+  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) { pronto(true); return; }
+  var cacheado = p.hash && _fechamentoPorHash[p.hash];
+  if (cacheado) {
+    // Já calculado numa rodada anterior — só reaplica no DOM (pode ter sido recriado desde
+    // então) e devolve, sem tocar em rede nem esperar o throttle da fila.
+    p.kmCalculado = cacheado.km;
+    p.descricaoCompletaFinal = cacheado.descricaoCompletaFinal;
+    var elC = document.getElementById('proc-desc-' + idx);
+    if (elC) elC.textContent = cacheado.descricaoCompletaFinal;
+    var kmElC = document.getElementById('proc-km-' + idx);
+    if (kmElC) kmElC.textContent = cacheado.textoKm;
+    pronto(true);
+    return;
+  }
   if (!p.cidade || ehMesmoMunicipio(p.cidade)) {
+    var textoMun = p.cidade ? 'interior do município — sem fechamento' : 'sem cidade — revisar manualmente';
     var kmElMun = document.getElementById('proc-km-' + idx);
-    if (kmElMun) kmElMun.textContent = p.cidade ? 'interior do município — sem fechamento' : 'sem cidade — revisar manualmente';
-    pronto();
+    if (kmElMun) kmElMun.textContent = textoMun;
+    if (p.hash) _fechamentoPorHash[p.hash] = { km: null, descricaoCompletaFinal: p.descricaoCompletaFinal || p.descricaoCompletaBase, textoKm: textoMun };
+    pronto(false);
     return;
   }
   calcularKmSilencioso(p.cidade, function(km) {
@@ -1662,15 +1687,20 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     p.descricaoCompletaFinal = p.descricaoCompletaBase + (fechamento ? ' ' + fechamento + '.' : '');
     var el = document.getElementById('proc-desc-' + idx);
     if (el) el.textContent = p.descricaoCompletaFinal;
+    var textoKm = km != null ? (km + ' km de Tupanciretã' + (km > 350 ? ' — capital/longa distância, sem fechamento' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
     var kmEl = document.getElementById('proc-km-' + idx);
-    if (kmEl) kmEl.textContent = km != null ? (km + ' km de Tupanciretã' + (km > 350 ? ' — capital/longa distância, sem fechamento' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
-    pronto();
+    if (kmEl) kmEl.textContent = textoKm;
+    if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm };
+    pronto(false);
   });
 }
 // Processa um card de cada vez, com folga entre chamadas de rede reais — 21 cards batendo
 // tudo de uma vez na API de geolocalização (openrouteservice) estourava o limite de taxa
 // dela (achado real, 30/08/2026). kmCache (já existente) faz cidades repetidas nem chamarem
 // a API de novo, então essa fila só demora de verdade nas cidades realmente distintas.
+// 14/09/2026: a folga de 1100ms só se aplica quando o item realmente tocou rede agora
+// (fecharDescricaoProcessoComKm devolve cacheado=true quando só reaplicou resultado já
+// conhecido) — sem isso, reprocessar uma lista já calculada demorava ~1,1s por item à toa.
 function fecharDescricoesEmFila(itens) {
   var i = 0;
   function proximo() {
@@ -1678,8 +1708,9 @@ function fecharDescricoesEmFila(itens) {
     var idx = i++;
     var p = itens[idx];
     if (!p.descricaoCompletaBase || p.ehAgenteSaude || empenhoJaLancado(p.hash)) { proximo(); return; }
-    fecharDescricaoProcessoComKm(idx, function() {
-      setTimeout(proximo, 1100); // folga entre chamadas reais (~1/seg, dentro do limite comum de geocoding gratuito)
+    fecharDescricaoProcessoComKm(idx, function(cacheado) {
+      if (cacheado) proximo();
+      else setTimeout(proximo, 1100); // folga entre chamadas reais (~1/seg, dentro do limite comum de geocoding gratuito)
     });
   }
   proximo();
