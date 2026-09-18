@@ -615,7 +615,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.33</span>
+    <span class="header-version">v1.10.34</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1792,6 +1792,11 @@ function renderProcessosCaixa(itens, atualizadoEm) {
   }
   lista.className = 'proc-grid';
   lista.innerHTML = itens.map(function(p, idx){
+    // 15/09/2026: fallback caso o motorista tenha sido preenchido no campo de placa por engano
+    if (!p.servidor && p.placa && credorPorNome(p.placa)) {
+      p.servidor = p.placa;
+      p.placa = null;
+    }
     var descBase = montarDescricaoCompletaProcesso(p);
     p.descricaoCompletaBase = descBase;
     p.descricaoCompletaFinal = descBase; // até o km resolver, copia já funciona com o que tem
@@ -1810,6 +1815,11 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
     var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
     if (periodo.trim()) metaPartes.push('<span>📅 ' + escaparHtmlProc(periodo) + '</span>');
+    // 18/09/2026: descrição agora pode vir da IA (DeepSeek) — marca a origem no card. Quando
+    // cai no fallback regex (IA falhou, ou a trava de segurança achou nome real vazando),
+    // destaca em amarelo pra chamar mais atenção na revisão manual do que o normal.
+    if (p.origemDescricao === 'regex-fallback') metaPartes.push('<span title="IA não gerou ou foi bloqueada por possível nome vazando — descrição veio do parser antigo, revise com atenção extra" style="color:#b8860b;">⚠️ fallback regex</span>');
+    else if (p.origemDescricao === 'ia') metaPartes.push('<span title="Descrição gerada por IA (DeepSeek)">✨ IA</span>');
 
     var corpo;
     if (p.erro) {
