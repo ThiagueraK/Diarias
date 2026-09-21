@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.37</span>
+    <span class="header-version">v1.10.38</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1007,6 +1007,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <div id="proc-contador" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
           <span style="font-size:20px;font-weight:800;color:var(--accent2);" id="proc-contador-num">0</span>
           <span>processos nessa varredura — compare com o total no 1Doc</span>
+          <span id="proc-contador-fora-num" style="display:none;margin-left:6px;font-size:12px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.12);padding:2px 8px;border-radius:12px;border:1px solid rgba(245,158,11,0.3);"></span>
         </div>
         <div id="proc-ultimo-removido" hidden style="display:inline-flex;align-items:center;gap:8px;background:rgba(37,99,235,.1);border:1.5px solid var(--accent2);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
           <span style="font-size:16px;">➡️</span>
@@ -1319,12 +1320,12 @@ document.addEventListener('DOMContentLoaded', function() {
           var m = t.match(/header-version">([^<]+)</);
           var versaoServidor = m ? m[1] : '';
           if (versaoServidor && versaoAtual && versaoServidor !== versaoAtual) {
-            if (!sessionStorage.getItem('sgd_recarregou')) {
-              sessionStorage.setItem('sgd_recarregou', '1');
+            if (sessionStorage.getItem('sgd_versao_recarregada') !== versaoServidor) {
+              sessionStorage.setItem('sgd_versao_recarregada', versaoServidor);
               location.reload(true);
             }
           } else {
-            sessionStorage.removeItem('sgd_recarregou');
+            sessionStorage.removeItem('sgd_versao_recarregada');
           }
         })
         .catch(function(){});
@@ -1891,10 +1892,10 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var statusScriptHtml = p.foraDoScript
       ? '<div class="proc-fora-script-box" id="proc-fs-' + idx + '">'
           + '<span>🚫 <b>Fora do script de empenho</b> (não será emitido pelo robô)</span>'
-          + '<button type="button" class="proc-btn-restaurar-script" onclick="sgdToggleForaDoScript(\'' + (p.hash || idx) + '\')">↩️ Incluir de volta</button>'
+          + '<button type="button" class="proc-btn-restaurar-script" onclick="sgdToggleForaDoScript(' + idx + ')">↩️ Incluir de volta</button>'
         + '</div>'
       : '<div class="proc-script-ativo-box" id="proc-fs-' + idx + '">'
-          + '<button type="button" class="proc-btn-fora-script" onclick="sgdToggleForaDoScript(\'' + (p.hash || idx) + '\')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Deixar fora do script de empenho</button>'
+          + '<button type="button" class="proc-btn-fora-script" onclick="sgdToggleForaDoScript(' + idx + ')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Deixar fora do script de empenho</button>'
         + '</div>';
 
     return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
@@ -1940,16 +1941,22 @@ function possivelDuplicataSemHash(p) {
   }) || null;
 }
 
-function sgdToggleForaDoScript(identificador) {
-  console.log('[SGD] sgdToggleForaDoScript disparado para:', identificador);
+function sgdToggleForaDoScript(alvo) {
+  console.log('[SGD] sgdToggleForaDoScript disparado para:', alvo);
   var p = null;
-  if (identificador !== undefined && identificador !== null) {
-    p = (processosCaixaAtual || []).find(function(x, i){
-      return x.hash === identificador || x.numeroProcesso === identificador || String(i) === String(identificador);
+  if (typeof alvo === 'number' || (typeof alvo === 'string' && /^\d+$/.test(alvo))) {
+    var idx = parseInt(alvo, 10);
+    if (processosCaixaAtual && processosCaixaAtual[idx]) {
+      p = processosCaixaAtual[idx];
+    }
+  }
+  if (!p && alvo !== undefined && alvo !== null) {
+    p = (processosCaixaAtual || []).find(function(x){
+      return x.hash === alvo || x.numeroProcesso === alvo;
     });
   }
   if (!p) {
-    alert('[SGD] Processo não encontrado na lista atual: ' + identificador);
+    alert('[SGD] Processo não encontrado na lista atual: ' + alvo);
     return;
   }
   var novoEstado = !p.foraDoScript;
@@ -1957,10 +1964,12 @@ function sgdToggleForaDoScript(identificador) {
 
   // Alerta toast visual imediato no rodapé
   var labelProc = p.numeroProcesso ? ('Processo ' + p.numeroProcesso) : (p.servidor || 'Item');
-  if (novoEstado) {
-    mostrarAvisoRapido('⏸️ ' + labelProc + ' colocado FORA do script de empenho!', '#b45309');
-  } else {
-    mostrarAvisoRapido('▶️ ' + labelProc + ' reincluído no script de empenho!', '#16a34a');
+  if (typeof mostrarAvisoRapido === 'function') {
+    if (novoEstado) {
+      mostrarAvisoRapido('⏸️ ' + labelProc + ' colocado FORA do script de empenho!', '#b45309');
+    } else {
+      mostrarAvisoRapido('▶️ ' + labelProc + ' reincluído no script de empenho!', '#16a34a');
+    }
   }
 
   // Atualiza imediatamente a visualização de todos os cards e do contador
@@ -1988,6 +1997,7 @@ function sgdToggleForaDoScript(identificador) {
     alert('Erro de conexão com o servidor: ' + err.message);
   });
 }
+window.sgdToggleForaDoScript = sgdToggleForaDoScript;
 
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
