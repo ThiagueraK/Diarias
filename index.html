@@ -204,13 +204,14 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-card.is-agente::before{background:var(--accent2);}
   .proc-card.is-erro::before{background:var(--danger);}
   .proc-card.is-vazio::before{background:var(--text-dim);}
-  .proc-card.is-fora-script{border:1.5px dashed var(--warning,#f59e0b);background:rgba(245,158,11,.03);}
-  .proc-card.is-fora-script::before{background:var(--warning,#f59e0b);}
-  .proc-fora-script-box{margin-bottom:10px;font-size:11.5px;color:var(--warning,#b45309);background:var(--warn-soft,#fbf2e3);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .proc-btn-fora-script{flex:0 0 auto;padding:4px 8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;transition:all .15s;display:inline-flex;align-items:center;gap:4px;}
-  .proc-btn-fora-script:hover{background:var(--warn-soft,#fbf2e3);color:var(--warning,#b45309);border-color:var(--warning,#f59e0b);}
-  .proc-btn-restaurar-script{flex:0 0 auto;padding:3px 8px;background:var(--warning,#f59e0b);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;}
-  .proc-btn-restaurar-script:hover{opacity:.9;}
+  .proc-card.is-fora-script{border:2px dashed #f59e0b !important;background:rgba(245,158,11,.04) !important;}
+  .proc-card.is-fora-script::before{background:#f59e0b !important;width:6px !important;}
+  .proc-fora-script-box{margin:8px 0 10px;font-size:12px;color:#92400e;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .proc-script-ativo-box{margin:6px 0 8px;}
+  .proc-btn-fora-script{padding:6px 12px;background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+  .proc-btn-fora-script:hover{background:#fef3c7;color:#b45309;border-color:#f59e0b;}
+  .proc-btn-restaurar-script{padding:5px 12px;background:#f59e0b;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700;}
+  .proc-btn-restaurar-script:hover{background:#d97706;}
   .proc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
   .proc-avatar{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--accent-light);color:var(--brand-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:var(--sans);}
   .proc-card.is-agente .proc-avatar{background:var(--accent-soft);color:var(--accent2);}
@@ -1887,14 +1888,14 @@ function renderProcessosCaixa(itens, atualizadoEm) {
 
     if (p.foraDoScript) classeCard += ' is-fora-script';
 
-    var foraScriptHtml = p.foraDoScript
-      ? '<div class="proc-fora-script-box" id="proc-fs-' + idx + '"><span>🚫 <b>Fora do script de empenho</b></span>'
-        + '<button class="proc-btn-restaurar-script" onclick="sgdToggleForaDoScript(' + idx + ')">↩️ Incluir no script</button></div>'
-      : '';
-
-    var botaoPularScript = !p.foraDoScript
-      ? '<button class="proc-btn-fora-script" id="proc-btn-fs-' + idx + '" onclick="sgdToggleForaDoScript(' + idx + ')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Pular no script</button>'
-      : '';
+    var statusScriptHtml = p.foraDoScript
+      ? '<div class="proc-fora-script-box" id="proc-fs-' + idx + '">'
+          + '<span>🚫 <b>Fora do script de empenho</b> (não será emitido pelo robô)</span>'
+          + '<button type="button" class="proc-btn-restaurar-script" onclick="sgdToggleForaDoScript(\'' + (p.hash || idx) + '\')">↩️ Incluir de volta</button>'
+        + '</div>'
+      : '<div class="proc-script-ativo-box" id="proc-fs-' + idx + '">'
+          + '<button type="button" class="proc-btn-fora-script" onclick="sgdToggleForaDoScript(\'' + (p.hash || idx) + '\')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Deixar fora do script de empenho</button>'
+        + '</div>';
 
     return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
       + '<div class="proc-head">'
@@ -1903,15 +1904,12 @@ function renderProcessosCaixa(itens, atualizadoEm) {
           + '<div class="proc-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + '</div>'
           + '<div class="proc-num">' + escaparHtmlProc(p.numeroProcesso || '?') + '</div>'
         + '</div>'
-        + '<div style="display:flex;align-items:center;gap:6px;">'
-          + botaoPularScript
-          + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
-        + '</div>'
+        + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
       + '</div>'
       + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
+      + statusScriptHtml
       + avisoDuplicataHtml
-      + foraScriptHtml
       + corpo
       + empenhoHtml
     + '</div>';
@@ -1942,11 +1940,31 @@ function possivelDuplicataSemHash(p) {
   }) || null;
 }
 
-function sgdToggleForaDoScript(idx) {
-  var p = processosCaixaAtual[idx];
-  if (!p) return;
+function sgdToggleForaDoScript(identificador) {
+  var p = null;
+  var idx = -1;
+  if (typeof identificador === 'number') {
+    idx = identificador;
+    p = processosCaixaAtual[idx];
+  } else {
+    idx = (processosCaixaAtual || []).findIndex(function(x){ return x.hash === identificador || x.numeroProcesso === identificador; });
+    if (idx !== -1) p = processosCaixaAtual[idx];
+  }
+  if (!p) {
+    console.warn('[SGD] Processo não encontrado:', identificador);
+    return;
+  }
   var novoEstado = !p.foraDoScript;
   p.foraDoScript = novoEstado;
+
+  // Alerta toast imediato na tela
+  if (novoEstado) {
+    mostrarAvisoRapido('⏸️ Processo ' + (p.numeroProcesso || p.servidor) + ' marcado para ficar FORA do script de empenho!', '#b45309');
+  } else {
+    mostrarAvisoRapido('▶️ Processo ' + (p.numeroProcesso || p.servidor) + ' reincluído no script de empenho!', '#16a34a');
+  }
+
+  // Atualiza visual do card e do contador
   renderProcessosCaixa(processosCaixaAtual, null);
 
   sgdFetch(SGD_WORKER_URL + '?action=processos-toggle-script', {
@@ -1961,12 +1979,12 @@ function sgdToggleForaDoScript(idx) {
     if (!res.ok) {
       p.foraDoScript = !novoEstado;
       renderProcessosCaixa(processosCaixaAtual, null);
-      alert('Erro ao salvar alteração: ' + (res.error || 'Falha no servidor'));
+      alert('Erro ao salvar no servidor: ' + (res.error || 'Falha desconhecida'));
     }
   }).catch(function(err){
     p.foraDoScript = !novoEstado;
     renderProcessosCaixa(processosCaixaAtual, null);
-    alert('Erro de conexão ao salvar: ' + err.message);
+    alert('Erro de conexão: ' + err.message);
   });
 }
 
