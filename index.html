@@ -1643,6 +1643,11 @@ function calcularKmSilencioso(cidade, callback) {
   });
   Promise.all(promises).then(function(kms) {
     var total = kms.reduce(function(a,b){ return a+b; }, 0);
+    // 21/09/2026: se múltiplas cidades, calcula o circuito estimado com retornos e conexões
+    if (cidades.length > 1 && total > 0) {
+      var maxKm = Math.max.apply(null, kms);
+      total = Math.max(Math.round((maxKm * 2) + ((cidades.length - 1) * 45)), Math.round(total * 1.15));
+    }
     callback(total > 0 ? total : null);
   }).catch(function(){ callback(null); });
 }
@@ -1686,17 +1691,24 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
   }
   calcularKmSilencioso(p.cidade, function(km) {
     var fechamento = '';
-    if (km != null && km <= 350) {
+    if (km != null) {
       var pernoite = p.dataSaida && p.dataChegada && p.dataSaida !== p.dataChegada;
-      fechamento = pernoite
-        ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE'
-        : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE';
+      // 21/09/2026: viagens com 310km ou mais recebem a diária de mais de 350km (R$ 190,31)
+      if (km >= 310) {
+        fechamento = pernoite
+          ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE MAIS DE 350KM COM PERNOITE'
+          : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE MAIS DE 350KM SEM PERNOITE';
+      } else {
+        fechamento = pernoite
+          ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM COM PERNOITE'
+          : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE';
+      }
     }
     p.kmCalculado = km;
     p.descricaoCompletaFinal = p.descricaoCompletaBase + (fechamento ? ' ' + fechamento + '.' : '');
     var el = document.getElementById('proc-desc-' + idx);
     if (el) el.textContent = p.descricaoCompletaFinal;
-    var textoKm = km != null ? (km + ' km de Tupanciretã' + (km > 350 ? ' — capital/longa distância, sem fechamento' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
+    var textoKm = km != null ? (km + ' km de Tupanciretã' + (km >= 310 ? ' — diária >350km (R$ 190,31)' : '')) : 'não foi possível calcular a distância — revisar classificação manualmente';
     var kmEl = document.getElementById('proc-km-' + idx);
     if (kmEl) kmEl.textContent = textoKm;
     if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm };
@@ -1730,7 +1742,9 @@ function fecharDescricoesEmFila(itens) {
 // explícito: mostrar no card pra não depender de decorar todo mundo. Atualizar aqui na mão
 // quando alguém novo aparecer (não tem endpoint pra isso, é lista fixa/manual mesmo).
 var MAPA_CREDORES_CP = {
-  'ALEXANDRE COSTA DOS SANTOS': '5125',
+  'ALEXANDRE COSTA DOS SANTOS': '9127',
+  'MICHELE APARECIDA CARDOSO DINARTE': '6664',
+  'CLAUDIA MARA SANTOS DA SILVA': '6659',
   'ANA PAULA DA SILVA': '4853',
   'ARIANE DE OLIVEIRA BOTEGA': '6772',
   'DELVIO AUGUSTO OLIVEIRA NUNES': '4626',
