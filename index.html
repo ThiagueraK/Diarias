@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.38</span>
+    <span class="header-version">v1.10.39</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1753,6 +1753,11 @@ var MAPA_CREDORES_CP = {
   'LUCIANA APARECIDA DA SILVA PINHEIRO': '5337',
   'LUIZ FERNANDO CORTIANA DO AMARAL': '5156',
   'MARCIO PAZATTO DE ALMEIDA': '9398',
+  'MARCIO PAZATTO': '9398',
+  'MARCIO DE ALMEIDA': '9398',
+  'MARCIO ALMEIDA': '9398',
+  'PAZATTO': '9398',
+  'PAZATTO DE ALMEIDA': '9398',
   'MARCIO RODRIGO N. SANTOS': '8117',
   'MARCOS ADRIANO BOROWIEC': '5999',
   'PAULO ROBERTO CAVALHEIRO MARTINS': '5253',
@@ -1765,7 +1770,11 @@ function normalizarNomeCredor(nome) {
   return (nome || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim().replace(/\s+/g, ' ');
 }
 function credorPorNome(nome) {
-  return MAPA_CREDORES_CP[normalizarNomeCredor(nome)] || null;
+  var norm = normalizarNomeCredor(nome);
+  if (norm.indexOf('PAZATTO') !== -1 || (norm.indexOf('MARCIO') !== -1 && norm.indexOf('ALMEIDA') !== -1)) {
+    return '9398';
+  }
+  return MAPA_CREDORES_CP[norm] || null;
 }
 function iniciaisDoNome(nome) {
   if (!nome) return '?';
