@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.36</span>
+    <span class="header-version">v1.10.37</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1789,7 +1789,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
   processosCaixaAtual = itens;
   var lista = document.getElementById('proc-lista');
   var infoEl = document.getElementById('proc-atualizado-em');
-  infoEl.textContent = atualizadoEm ? ('Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR')) : '';
+  if (atualizadoEm) { infoEl.textContent = 'Última varredura: ' + new Date(atualizadoEm).toLocaleString('pt-BR'); }
   // Contador visível — conta só os cards que realmente vão aparecer (mesmo filtro do .map
   // abaixo: esconde processo com empenho já lançado), pra bater com o que o usuário vê na
   // tela, não com o total bruto da varredura (que pode incluir algum já resolvido).
@@ -1941,30 +1941,29 @@ function possivelDuplicataSemHash(p) {
 }
 
 function sgdToggleForaDoScript(identificador) {
+  console.log('[SGD] sgdToggleForaDoScript disparado para:', identificador);
   var p = null;
-  var idx = -1;
-  if (typeof identificador === 'number') {
-    idx = identificador;
-    p = processosCaixaAtual[idx];
-  } else {
-    idx = (processosCaixaAtual || []).findIndex(function(x){ return x.hash === identificador || x.numeroProcesso === identificador; });
-    if (idx !== -1) p = processosCaixaAtual[idx];
+  if (identificador !== undefined && identificador !== null) {
+    p = (processosCaixaAtual || []).find(function(x, i){
+      return x.hash === identificador || x.numeroProcesso === identificador || String(i) === String(identificador);
+    });
   }
   if (!p) {
-    console.warn('[SGD] Processo não encontrado:', identificador);
+    alert('[SGD] Processo não encontrado na lista atual: ' + identificador);
     return;
   }
   var novoEstado = !p.foraDoScript;
   p.foraDoScript = novoEstado;
 
-  // Alerta toast imediato na tela
+  // Alerta toast visual imediato no rodapé
+  var labelProc = p.numeroProcesso ? ('Processo ' + p.numeroProcesso) : (p.servidor || 'Item');
   if (novoEstado) {
-    mostrarAvisoRapido('⏸️ Processo ' + (p.numeroProcesso || p.servidor) + ' marcado para ficar FORA do script de empenho!', '#b45309');
+    mostrarAvisoRapido('⏸️ ' + labelProc + ' colocado FORA do script de empenho!', '#b45309');
   } else {
-    mostrarAvisoRapido('▶️ Processo ' + (p.numeroProcesso || p.servidor) + ' reincluído no script de empenho!', '#16a34a');
+    mostrarAvisoRapido('▶️ ' + labelProc + ' reincluído no script de empenho!', '#16a34a');
   }
 
-  // Atualiza visual do card e do contador
+  // Atualiza imediatamente a visualização de todos os cards e do contador
   renderProcessosCaixa(processosCaixaAtual, null);
 
   sgdFetch(SGD_WORKER_URL + '?action=processos-toggle-script', {
@@ -1976,15 +1975,17 @@ function sgdToggleForaDoScript(identificador) {
       foraDoScript: novoEstado
     })
   }).then(function(r){ return r.json(); }).then(function(res){
+    console.log('[SGD] Resposta do toggle no servidor:', res);
     if (!res.ok) {
       p.foraDoScript = !novoEstado;
       renderProcessosCaixa(processosCaixaAtual, null);
       alert('Erro ao salvar no servidor: ' + (res.error || 'Falha desconhecida'));
     }
   }).catch(function(err){
+    console.error('[SGD] Erro ao conectar com Worker:', err);
     p.foraDoScript = !novoEstado;
     renderProcessosCaixa(processosCaixaAtual, null);
-    alert('Erro de conexão: ' + err.message);
+    alert('Erro de conexão com o servidor: ' + err.message);
   });
 }
 
