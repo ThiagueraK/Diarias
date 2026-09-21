@@ -204,6 +204,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-card.is-agente::before{background:var(--accent2);}
   .proc-card.is-erro::before{background:var(--danger);}
   .proc-card.is-vazio::before{background:var(--text-dim);}
+  .proc-card.is-fora-script{border:1.5px dashed var(--warning,#f59e0b);background:rgba(245,158,11,.03);}
+  .proc-card.is-fora-script::before{background:var(--warning,#f59e0b);}
+  .proc-fora-script-box{margin-bottom:10px;font-size:11.5px;color:var(--warning,#b45309);background:var(--warn-soft,#fbf2e3);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .proc-btn-fora-script{flex:0 0 auto;padding:4px 8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;transition:all .15s;display:inline-flex;align-items:center;gap:4px;}
+  .proc-btn-fora-script:hover{background:var(--warn-soft,#fbf2e3);color:var(--warning,#b45309);border-color:var(--warning,#f59e0b);}
+  .proc-btn-restaurar-script{flex:0 0 auto;padding:3px 8px;background:var(--warning,#f59e0b);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:600;}
+  .proc-btn-restaurar-script:hover{opacity:.9;}
   .proc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
   .proc-avatar{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--accent-light);color:var(--brand-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:var(--sans);}
   .proc-card.is-agente .proc-avatar{background:var(--accent-soft);color:var(--accent2);}
@@ -615,7 +622,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.35</span>
+    <span class="header-version">v1.10.36</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1743,6 +1750,7 @@ var MAPA_CREDORES_CP = {
   'LUANA NASCIMENTO DA COSTA': '2965',
   'LUCIANA APARECIDA DA SILVA PINHEIRO': '5337',
   'LUIZ FERNANDO CORTIANA DO AMARAL': '5156',
+  'MARCIO PAZATTO DE ALMEIDA': '9398',
   'MARCIO RODRIGO N. SANTOS': '8117',
   'MARCOS ADRIANO BOROWIEC': '5999',
   'PAULO ROBERTO CAVALHEIRO MARTINS': '5253',
@@ -1785,7 +1793,18 @@ function renderProcessosCaixa(itens, atualizadoEm) {
   // abaixo: esconde processo com empenho já lançado), pra bater com o que o usuário vê na
   // tela, não com o total bruto da varredura (que pode incluir algum já resolvido).
   var numEl = document.getElementById('proc-contador-num');
-  if (numEl) numEl.textContent = (itens || []).filter(function(p){ return !empenhoJaLancado(p.hash); }).length;
+  var totalVisiveis = (itens || []).filter(function(p){ return !empenhoJaLancado(p.hash); }).length;
+  var totalFora = (itens || []).filter(function(p){ return !empenhoJaLancado(p.hash) && p.foraDoScript; }).length;
+  if (numEl) numEl.textContent = totalVisiveis;
+  var foraEl = document.getElementById('proc-contador-fora-num');
+  if (foraEl) {
+    if (totalFora > 0) {
+      foraEl.style.display = 'inline-block';
+      foraEl.textContent = '(' + totalFora + ' fora do script)';
+    } else {
+      foraEl.style.display = 'none';
+    }
+  }
   if (!itens || itens.length === 0) {
     lista.className = '';
     lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum processo ainda — clique em "🔄 Varrer caixa agora".</p>';
@@ -1866,6 +1885,17 @@ function renderProcessosCaixa(itens, atualizadoEm) {
         + ' <button class="proc-confirmar-dup-btn" onclick="sgdConfirmarDuplicataProcesso(' + idx + ')">✅ Já lançado, remover</button></div>'
       : '';
 
+    if (p.foraDoScript) classeCard += ' is-fora-script';
+
+    var foraScriptHtml = p.foraDoScript
+      ? '<div class="proc-fora-script-box" id="proc-fs-' + idx + '"><span>🚫 <b>Fora do script de empenho</b></span>'
+        + '<button class="proc-btn-restaurar-script" onclick="sgdToggleForaDoScript(' + idx + ')">↩️ Incluir no script</button></div>'
+      : '';
+
+    var botaoPularScript = !p.foraDoScript
+      ? '<button class="proc-btn-fora-script" id="proc-btn-fs-' + idx + '" onclick="sgdToggleForaDoScript(' + idx + ')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Pular no script</button>'
+      : '';
+
     return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
       + '<div class="proc-head">'
         + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
@@ -1873,11 +1903,15 @@ function renderProcessosCaixa(itens, atualizadoEm) {
           + '<div class="proc-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + '</div>'
           + '<div class="proc-num">' + escaparHtmlProc(p.numeroProcesso || '?') + '</div>'
         + '</div>'
-        + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
+        + '<div style="display:flex;align-items:center;gap:6px;">'
+          + botaoPularScript
+          + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
+        + '</div>'
       + '</div>'
       + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
       + avisoDuplicataHtml
+      + foraScriptHtml
       + corpo
       + empenhoHtml
     + '</div>';
@@ -1907,6 +1941,35 @@ function possivelDuplicataSemHash(p) {
     return mesmoCred && mesmaData && mesmaCid;
   }) || null;
 }
+
+function sgdToggleForaDoScript(idx) {
+  var p = processosCaixaAtual[idx];
+  if (!p) return;
+  var novoEstado = !p.foraDoScript;
+  p.foraDoScript = novoEstado;
+  renderProcessosCaixa(processosCaixaAtual, null);
+
+  sgdFetch(SGD_WORKER_URL + '?action=processos-toggle-script', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hash: p.hash,
+      numeroProcesso: p.numeroProcesso,
+      foraDoScript: novoEstado
+    })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res.ok) {
+      p.foraDoScript = !novoEstado;
+      renderProcessosCaixa(processosCaixaAtual, null);
+      alert('Erro ao salvar alteração: ' + (res.error || 'Falha no servidor'));
+    }
+  }).catch(function(err){
+    p.foraDoScript = !novoEstado;
+    renderProcessosCaixa(processosCaixaAtual, null);
+    alert('Erro de conexão ao salvar: ' + err.message);
+  });
+}
+
 function copiarDescricaoProcesso(idx) {
   var p = processosCaixaAtual[idx];
   var texto = p && (p.descricaoCompletaFinal || p.descricaoCompletaBase);
