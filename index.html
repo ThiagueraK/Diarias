@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.41</span>
+    <span class="header-version">v1.10.42</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2508,28 +2508,32 @@ function renderResumoTriagemMarcos(res) {
   var semDados = r ? r.semDados : 0;
   document.getElementById('tm-quando').textContent = 'último escaneamento: ' + tmDataHora(ur.escaneadoEm) +
     (res.escaneando ? ' · tem varredura rodando agora' : '');
-  var html = tmPilula('candidatos', total, 'var(--text-muted)', 'var(--surface)');
+  var html = '';
   if (r) {
-    html += tmPilula('com dados', r.comDados, 'var(--accent2)', 'rgba(37,99,235,.10)');
-    html += tmPilula('sem dados', semDados, semDados ? '#f59e0b' : 'var(--text-muted)',
+    // Destaque: quantos processos REALMENTE pedem ação. O backend já tirou da lista o que voltou
+    // assinado/em outro setor (bug do 1Doc devolve pra caixa), então este número é o trabalho real.
+    html += tmPilula('pendentes', (r.pendentes === undefined ? r.comDados : r.pendentes), '#2f7d5d', 'rgba(47,125,93,.14)');
+    html += tmPilula('sem dados (falhou ao abrir)', semDados, semDados ? '#f59e0b' : 'var(--text-muted)',
       semDados ? 'rgba(245,158,11,.12)' : 'var(--surface)');
-  } else {
-    // Backend antigo (sem o campo resumo): não inventa "com dados" — só avisa que não veio detalhe.
-    html += tmPilula('sem detalhe', '—', 'var(--text-muted)', 'var(--surface)');
-  }
-  if (r) {
     html += tmPilula('anexos completos', r.comAnexosCompletos, 'var(--accent2)', 'rgba(37,99,235,.10)');
     html += tmPilula('faltando algo', r.faltandoAlgo, r.faltandoAlgo ? '#f59e0b' : 'var(--text-muted)',
       r.faltandoAlgo ? 'rgba(245,158,11,.12)' : 'var(--surface)');
-    if (r.jaAssinados) html += tmPilula('já assinados', r.jaAssinados, 'var(--text-muted)', 'var(--surface)');
-    if (r.emOutroSetor) html += tmPilula('em outro setor', r.emOutroSetor, 'var(--text-muted)', 'var(--surface)');
+    // Reaparecidos = já processados que o 1Doc jogou de volta na caixa. Contados, nunca escondidos.
+    if (r.ignoradosReaparecidos) {
+      html += tmPilula('reaparecidos já processados', r.ignoradosReaparecidos, '#f59e0b', 'rgba(245,158,11,.12)');
+    }
+  } else {
+    // Backend antigo (sem o campo resumo): não inventa número — só avisa que não veio detalhe.
+    html += tmPilula('candidatos na caixa (sem detalhe)', total, 'var(--text-muted)', 'var(--surface)');
   }
   document.getElementById('tm-pilulas').innerHTML = html;
   var lista = (r && r.itens) ? r.itens : [];
   var alvo = document.getElementById('tm-lista');
   if (!lista.length) {
-    alvo.innerHTML = '<p style="color:var(--text-muted);margin:0;">Nada aproveitável nesta varredura' +
-      (semDados ? ' — os ' + semDados + ' candidato(s) falharam ao abrir no 1Doc (sessão/estrutura), então não virou nenhum card.' : '.') + '</p>';
+    var semNada = (r && r.ignoradosReaparecidos) ? r.ignoradosReaparecidos : 0;
+    alvo.innerHTML = '<p style="color:var(--text-muted);margin:0;">Nada precisa de ação nesta varredura' +
+      (semDados ? ' — ' + semDados + ' candidato(s) falharam ao abrir no 1Doc (sessão/estrutura), olhe a coluna de erro.' : '') +
+      (semNada ? (semDados ? '' : ' — ') + semNada + ' processo(s) já processado(s) voltaram pra caixa (bug do 1Doc) e foram ignorados.' : '.') + '</p>';
   } else {
     var h = '<table class="rel-table"><thead><tr><th>Processo</th><th>Servidor/Motorista</th><th>Cidade</th><th>Saída</th><th>Valor</th><th>Situação</th></tr></thead><tbody>';
     for (var i = 0; i < lista.length; i++) {
@@ -2544,7 +2548,7 @@ function renderResumoTriagemMarcos(res) {
     }
     h += '</tbody></table>';
     if (total > lista.length) {
-      h += '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 0;">mostrando ' + lista.length + ' de ' + total + '</p>';
+      h += '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 0;">mostrando ' + lista.length + ' de ' + total + ' pendente(s)</p>';
     }
     alvo.innerHTML = h;
   }
@@ -2577,8 +2581,9 @@ function pollTriagemMarcos(tentativa, horaInicio, status, btn) {
       status.style.color = 'var(--accent2)';
       var total = res.ultimoResultado.total || 0;
       var rr = res.ultimoResultado.resumo || null;
-      status.textContent = '✅ Varredura da caixa do Marcos concluída — ' + total + ' candidato(s)' +
-        (rr ? ' (' + rr.comDados + ' com dados, ' + rr.semDados + ' sem dados)' : '') + '. Resumo abaixo.';
+      status.textContent = '✅ Varredura da caixa do Marcos concluída — ' + (rr ? (rr.pendentes === undefined ? rr.comDados : rr.pendentes) : total) + ' pendente(s)' +
+        (rr && rr.ignoradosReaparecidos ? ', ' + rr.ignoradosReaparecidos + ' já processado(s) ignorado(s)' : '') +
+        (rr && rr.semDados ? ', ' + rr.semDados + ' falhou ao abrir' : '') + '. Resumo abaixo.';
       carregarResumoTriagemMarcos();
     })
     .catch(function(){ pollTriagemMarcos(tentativa + 1, horaInicio, status, btn); });
