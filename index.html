@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.40</span>
+    <span class="header-version">v1.10.41</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -989,6 +989,19 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
+      <!-- 22/09/2026: resumo do último escaneamento da caixa do Marcos DENTRO da aba Processos
+           (pedido do usuário: ele não abre mais o painel do SaúdeFrota). Antes só existia um
+           "N processo(s) encontrado(s)" que contava candidato que FALHOU ao abrir como
+           encontrado — daí "17 encontrados" sem nenhum processo aproveitável. O resumo separa
+           os baldes e lista o que deu pra ler. Ver renderResumoTriagemMarcos(). -->
+      <div id="tm-resumo" hidden style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:0 0 10px;background:var(--surface2);">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:700;color:var(--text);">📥 Caixa do Marcos no 1Doc (setor SMS-STL)</span>
+          <span id="tm-quando" style="font-size:11px;color:var(--text-dim);"></span>
+        </div>
+        <div id="tm-pilulas" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+        <div id="tm-lista" style="max-height:240px;overflow-y:auto;font-size:12px;"></div>
+      </div>
       <!-- 09/09/2026: painel de acompanhamento ao vivo do "Processar anexos pendentes" -
            pedido explícito do usuário depois de não gostar do alert() único no final ("quero
            acompanhar cada etapa enquanto ocorre"). Ver processarCheckpointEmpenho(). -->
@@ -1432,7 +1445,7 @@ function switchTab(panelId, tabId) {
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
-document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); });
+document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); carregarResumoTriagemMarcos(); });
 document.getElementById('tabManutencao').addEventListener('click', function() { switchTab('panel-manutencao','tabManutencao'); carregarManutencao(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
@@ -2465,6 +2478,84 @@ var triagemMarcosPollTimer = null;
 // 10/09/2026: depois de disparar a varredura da caixa do Marcos, fica perguntando
 // "já acabou?" pro /triagem/status-externo (via Worker) a cada 4s e avisa na tela
 // quando termina - antes só mostrava "iniciada, veja no outro painel".
+// 22/09/2026: resumo do último escaneamento da caixa do Marcos renderizado na própria aba
+// Processos (pedido do usuário: ele não abre mais o painel do SaúdeFrota). O backend passou a
+// devolver ultimoResultado.resumo separando "com dados" de "sem dados" — antes um candidato que
+// FALHOU ao abrir contava como "processo encontrado" (foi o caso do "17 encontrados" sem
+// nenhum processo de verdade). A lista só aparece quando existe resumo; sem ele, o card esconde.
+function tmPilula(rotulo, valor, cor, fundo) {
+  return '<span style="display:inline-flex;align-items:center;gap:6px;border:1px solid ' + cor +
+    ';background:' + fundo + ';border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:' + cor + ';">' +
+    rotulo + ' <span style="font-family:var(--mono);">' + valor + '</span></span>';
+}
+function tmDataHora(ms) {
+  if (!ms) return '';
+  try { return new Date(ms).toLocaleString('pt-BR'); } catch (e) { return ''; }
+}
+function tmSituacaoItem(it) {
+  if (it.erro) return '<span style="color:#f59e0b;">falhou ao abrir</span>';
+  if (it.assinado) return 'já assinado';
+  if (it.jaEmOutroSetor) return 'em outro setor';
+  return it.anexosCompletos ? 'anexos completos' : 'faltando anexo';
+}
+function renderResumoTriagemMarcos(res) {
+  var box = document.getElementById('tm-resumo');
+  if (!box) return;
+  var ur = res && res.ultimoResultado;
+  if (!ur || !ur.escaneadoEm) { box.hidden = true; return; }
+  var r = ur.resumo || null;
+  var total = r ? r.total : (ur.total || 0);
+  var semDados = r ? r.semDados : 0;
+  document.getElementById('tm-quando').textContent = 'último escaneamento: ' + tmDataHora(ur.escaneadoEm) +
+    (res.escaneando ? ' · tem varredura rodando agora' : '');
+  var html = tmPilula('candidatos', total, 'var(--text-muted)', 'var(--surface)');
+  if (r) {
+    html += tmPilula('com dados', r.comDados, 'var(--accent2)', 'rgba(37,99,235,.10)');
+    html += tmPilula('sem dados', semDados, semDados ? '#f59e0b' : 'var(--text-muted)',
+      semDados ? 'rgba(245,158,11,.12)' : 'var(--surface)');
+  } else {
+    // Backend antigo (sem o campo resumo): não inventa "com dados" — só avisa que não veio detalhe.
+    html += tmPilula('sem detalhe', '—', 'var(--text-muted)', 'var(--surface)');
+  }
+  if (r) {
+    html += tmPilula('anexos completos', r.comAnexosCompletos, 'var(--accent2)', 'rgba(37,99,235,.10)');
+    html += tmPilula('faltando algo', r.faltandoAlgo, r.faltandoAlgo ? '#f59e0b' : 'var(--text-muted)',
+      r.faltandoAlgo ? 'rgba(245,158,11,.12)' : 'var(--surface)');
+    if (r.jaAssinados) html += tmPilula('já assinados', r.jaAssinados, 'var(--text-muted)', 'var(--surface)');
+    if (r.emOutroSetor) html += tmPilula('em outro setor', r.emOutroSetor, 'var(--text-muted)', 'var(--surface)');
+  }
+  document.getElementById('tm-pilulas').innerHTML = html;
+  var lista = (r && r.itens) ? r.itens : [];
+  var alvo = document.getElementById('tm-lista');
+  if (!lista.length) {
+    alvo.innerHTML = '<p style="color:var(--text-muted);margin:0;">Nada aproveitável nesta varredura' +
+      (semDados ? ' — os ' + semDados + ' candidato(s) falharam ao abrir no 1Doc (sessão/estrutura), então não virou nenhum card.' : '.') + '</p>';
+  } else {
+    var h = '<table class="rel-table"><thead><tr><th>Processo</th><th>Servidor/Motorista</th><th>Cidade</th><th>Saída</th><th>Valor</th><th>Situação</th></tr></thead><tbody>';
+    for (var i = 0; i < lista.length; i++) {
+      var it = lista[i] || {};
+      var valor = (it.valorSugerido === null || it.valorSugerido === undefined)
+        ? '—' : 'R$ ' + Number(it.valorSugerido).toFixed(2).replace('.', ',');
+      h += '<tr><td>' + (it.numeroProcesso || '—') + '</td>' +
+        '<td class="col-servidor">' + (it.motorista || '—') + '</td>' +
+        '<td class="col-cidade">' + (it.cidade || '—') + (it.uf ? '/' + it.uf : '') + '</td>' +
+        '<td>' + (it.dataSaida || '—') + '</td><td>' + valor + '</td>' +
+        '<td title="' + (it.erro ? it.erro.replace(/"/g, '') : '') + '">' + tmSituacaoItem(it) + '</td></tr>';
+    }
+    h += '</tbody></table>';
+    if (total > lista.length) {
+      h += '<p style="color:var(--text-dim);font-size:11px;margin:4px 0 0;">mostrando ' + lista.length + ' de ' + total + '</p>';
+    }
+    alvo.innerHTML = h;
+  }
+  box.hidden = false;
+}
+function carregarResumoTriagemMarcos() {
+  sgdFetch(SGD_WORKER_URL + '?action=triagem-marcos-status')
+    .then(function(r) { return r.json(); })
+    .then(function(res) { if (res && res.ok) renderResumoTriagemMarcos(res); })
+    .catch(function() {});
+}
 function pollTriagemMarcos(tentativa, horaInicio, status, btn) {
   if (triagemMarcosPollTimer) { clearTimeout(triagemMarcosPollTimer); triagemMarcosPollTimer = null; }
   if (tentativa > 150) { // ~150 * 4s = 10min - a varredura continua no servidor mesmo assim
@@ -2485,7 +2576,10 @@ function pollTriagemMarcos(tentativa, horaInicio, status, btn) {
       btn.textContent = '📥 Varrer caixa do Marcos';
       status.style.color = 'var(--accent2)';
       var total = res.ultimoResultado.total || 0;
-      status.textContent = '✅ Varredura da caixa do Marcos concluída — ' + total + ' processo(s) encontrado(s). Detalhes e assinatura no painel SaúdeFrota.';
+      var rr = res.ultimoResultado.resumo || null;
+      status.textContent = '✅ Varredura da caixa do Marcos concluída — ' + total + ' candidato(s)' +
+        (rr ? ' (' + rr.comDados + ' com dados, ' + rr.semDados + ' sem dados)' : '') + '. Resumo abaixo.';
+      carregarResumoTriagemMarcos();
     })
     .catch(function(){ pollTriagemMarcos(tentativa + 1, horaInicio, status, btn); });
   }, 4000);
