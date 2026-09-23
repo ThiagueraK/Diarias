@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.42</span>
+    <span class="header-version">v1.10.43</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1893,6 +1893,15 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
     var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
     if (periodo.trim()) metaPartes.push('<span>📅 ' + escaparHtmlProc(periodo) + '</span>');
+    if (p.ehAgenteSaude) {
+      metaPartes.push('<span style="color:#16a34a;font-weight:600;">💰 R$ 1.057,30 (Agente de Saúde)</span>');
+    } else if (p.valorSugerido) {
+      metaPartes.push('<span style="color:#2563eb;font-weight:600;">💰 R$ ' + Number(p.valorSugerido).toFixed(2).replace('.', ',') + (ehCapital(p.cidade) ? ' (Capital)' : '') + '</span>');
+    } else if (ehCapital(p.cidade) || ehCapital(p.descricaoSugerida)) {
+      metaPartes.push('<span style="color:#2563eb;font-weight:600;">💰 R$ 581,52 (Capital do Estado)</span>');
+    } else if (ehMesmoMunicipio(p.cidade) || ehMesmoMunicipio(p.descricaoSugerida)) {
+      metaPartes.push('<span style="color:#059669;font-weight:600;">💰 R$ 52,87 (Interior Município)</span>');
+    }
     // 18/09/2026: descrição agora pode vir da IA (DeepSeek) — marca a origem no card. Quando
     // cai no fallback regex (IA falhou, ou a trava de segurança achou nome real vazando),
     // destaca em amarelo pra chamar mais atenção na revisão manual do que o normal.
