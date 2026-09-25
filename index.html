@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.43</span>
+    <span class="header-version">v1.10.44</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1623,14 +1623,33 @@ function montarDescricaoCompletaProcesso(p) {
 }
 // "TUPANCIRETÃ"/variações == interior do próprio município, nunca tem fechamento de
 // distância (mesma regra de "capital"/"municipio" na função gerar()).
+// 25/09/2026 (revisão): antes bastava a palavra "INTERIOR" ou "SERAFIM" em QUALQUER lugar
+// (inclusive na descrição do motivo) pra virar "interior do município" (R$ 52,87) — uma
+// viagem a Santa Maria cuja descrição falasse em "interior" saía com o valor errado. Agora
+// é a mesma lista do Worker (ehInteriorMunicipio em sgd_worker.js): só o nome do lugar.
+function _normLugar(t) {
+  return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+}
 function ehMesmoMunicipio(cidade) {
-  var norm = (cidade || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
-  return norm === 'TUPANCIRETA' || norm.indexOf('INTERIOR') !== -1 || norm.indexOf('SERAFIM') !== -1;
+  var norm = _normLugar(cidade);
+  if (!norm) return false;
+  return norm === 'TUPANCIRETA' || norm === 'INTERIOR' || norm === 'INTERIOR RS' || norm === 'INTERIOR/RS' ||
+    /^INTERIOR D[OE] (TUPANCIRET|MUNICIPI)/.test(norm) ||
+    (norm.indexOf('INTERIOR') !== -1 && norm.indexOf('TUPANCIRET') !== -1) ||
+    (norm.indexOf('ESCOLA') !== -1 && norm.indexOf('INTERIOR') !== -1) ||
+    /SERAFIM CORREA|ESPINILHO|SANTA TECLA|INHACAPETUM/.test(norm);
 }
 function ehCapital(cidade) {
-  if (!cidade) return false;
-  var norm = (cidade || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
-  return norm.indexOf('PORTO ALEGRE') !== -1 || norm === 'POA' || norm.indexOf('CAPITAL') !== -1;
+  var norm = _normLugar(cidade);
+  if (!norm) return false;
+  return norm.indexOf('PORTO ALEGRE') !== -1 || norm === 'POA' || norm === 'CAPITAL' || norm === 'CAPITAL DO ESTADO';
+}
+// A descrição (motivo) só conta quando cita o lugar de forma explícita — nunca uma palavra solta.
+function descricaoEhMesmoMunicipio(desc) {
+  return /INTERIOR D[OE] (MUNICIPIO|TUPANCIRETA)|SERAFIM CORREA|ESPINILHO|SANTA TECLA|INHACAPETUM/.test(_normLugar(desc));
+}
+function descricaoEhCapital(desc) {
+  return /PORTO ALEGRE|CAPITAL D[OE] ESTADO/.test(_normLugar(desc));
 }
 // Mesma classificação de distância do botão "📍 KM" (calcularKmMultiplo/calcularKm), mas sem
 // tocar no DOM do formulário da aba Gerador (kmResult é elemento daquela aba, não desta) —
@@ -1662,11 +1681,11 @@ function calcularKmSilencioso(cidade, callback) {
   Promise.all(promises).then(function(kms) {
     var total = kms.reduce(function(a,b){ return a+b; }, 0);
     // 21/09/2026: se múltiplas cidades, calcula o circuito estimado com retornos e conexões
+    var maxKm = kms.length ? Math.max.apply(null, kms) : 0;
     if (cidades.length > 1 && total > 0) {
-      var maxKm = Math.max.apply(null, kms);
       total = Math.max(Math.round((maxKm * 2) + ((cidades.length - 1) * 45)), Math.round(total * 1.15));
     }
-    callback(total > 0 ? total : null);
+    callback(total > 0 ? total : null, maxKm > 0 ? maxKm : null);
   }).catch(function(){ callback(null); });
 }
 
@@ -1686,7 +1705,7 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     pronto(true);
     return;
   }
-  if (!p.cidade || ehMesmoMunicipio(p.cidade) || ehMesmoMunicipio(p.descricaoSugerida)) {
+  if (!p.cidade || ehMesmoMunicipio(p.cidade) || (!p.cidade && descricaoEhMesmoMunicipio(p.descricaoSugerida))) {
     var textoMun = 'interior do município — R$ 52,87 (5% Decreto 7160/2024)';
     var descMun = p.descricaoCompletaBase + ' VALOR REFERENTE A VIAGEM INTERIOR DO MUNICIPIO SEM PERNOITE.';
     p.kmCalculado = 0;
@@ -1699,25 +1718,34 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     pronto(false);
     return;
   }
-  if (ehCapital(p.cidade) || ehCapital(p.descricaoSugerida)) {
+  if (ehCapital(p.cidade) || (!p.cidade && descricaoEhCapital(p.descricaoSugerida))) {
+    // 25/09/2026: viagem de vários dias à Capital não é uma diária só — o texto segue o valor
+    // calculado pelo Worker/backend (ex.: 877,56 = 1 com pernoite + 1 sem pernoite).
     var fechamentoCap = 'VALOR REFERENTE A VIAGEM CAPITAL DE ESTADO COM PERNOITE';
+    if (p.valorSugerido) {
+      VALORES_PC.forEach(function(v) { if (Math.abs(Number(p.valorSugerido) - v.valor) < 0.01) fechamentoCap = v.texto; });
+    }
     p.kmCalculado = 376;
     p.descricaoCompletaFinal = p.descricaoCompletaBase + ' ' + fechamentoCap + '.';
     var elCap = document.getElementById('proc-desc-' + idx);
     if (elCap) elCap.textContent = p.descricaoCompletaFinal;
-    var textoKmCap = '376 km de Tupanciretã — Capital do Estado (R$ 581,52)';
+    var textoKmCap = '376 km de Tupanciretã — Capital do Estado (R$ ' + Number(p.valorSugerido || 581.52).toFixed(2).replace('.', ',') + ')';
     var kmElCap = document.getElementById('proc-km-' + idx);
     if (kmElCap) kmElCap.textContent = textoKmCap;
     if (p.hash) _fechamentoPorHash[p.hash] = { km: 376, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKmCap };
     pronto(false);
     return;
   }
-  calcularKmSilencioso(p.cidade, function(km) {
+  calcularKmSilencioso(p.cidade, function(km, kmDestino) {
     var fechamento = '';
+    // 25/09/2026: regra única com o Worker e o backend (Decreto 7160/2024): vale a distância
+    // até o destino mais distante, só de ida, MAIS DE 350km. Antes o site usava "310km do
+    // circuito" e o Worker "350km do destino" — o texto do empenho dizia "mais de 350km" e o
+    // valor saía R$ 148,02 (ou o contrário) pra viagens entre 310 e 350km.
+    var kmRegra = kmDestino != null ? kmDestino : km;
     if (km != null) {
       var pernoite = p.dataSaida && p.dataChegada && p.dataSaida !== p.dataChegada;
-      // 21/09/2026: viagens com 310km ou mais recebem a diária de mais de 350km (R$ 190,31)
-      if (km >= 310) {
+      if (kmRegra > 350) {
         fechamento = pernoite
           ? 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE MAIS DE 350KM COM PERNOITE'
           : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE MAIS DE 350KM SEM PERNOITE';
@@ -1731,7 +1759,7 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     p.descricaoCompletaFinal = p.descricaoCompletaBase + (fechamento ? ' ' + fechamento + '.' : '');
     var el = document.getElementById('proc-desc-' + idx);
     if (el) el.textContent = p.descricaoCompletaFinal;
-    var textoKm = km != null ? (km + ' km de Tupanciretã' + (km >= 310 ? ' — diária >350km (R$ 190,31)' : ' — diária até 350km (R$ 148,02)')) : 'não foi possível calcular a distância — revisar classificação manualmente';
+    var textoKm = km != null ? (km + ' km de Tupanciretã' + (kmRegra > 350 ? ' — diária >350km (R$ 190,31)' : ' — diária até 350km (R$ 148,02)')) : 'não foi possível calcular a distância — revisar classificação manualmente';
     var kmEl = document.getElementById('proc-km-' + idx);
     if (kmEl) kmEl.textContent = textoKm;
     if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm };
@@ -1897,9 +1925,12 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       metaPartes.push('<span style="color:#16a34a;font-weight:600;">💰 R$ 1.057,30 (Agente de Saúde)</span>');
     } else if (p.valorSugerido) {
       metaPartes.push('<span style="color:#2563eb;font-weight:600;">💰 R$ ' + Number(p.valorSugerido).toFixed(2).replace('.', ',') + (ehCapital(p.cidade) ? ' (Capital)' : '') + '</span>');
-    } else if (ehCapital(p.cidade) || ehCapital(p.descricaoSugerida)) {
+    } else if (p.revisarManual) {
+      // 25/09/2026: 2+ noites na Capital — o robô não empenha sozinho (ver valorCapitalSugerido no Worker).
+      metaPartes.push('<span style="color:#b45309;font-weight:600;" title="' + p.revisarManual.replace(/"/g, '') + '">⚠️ Conferir valor (vários dias na Capital)</span>');
+    } else if (ehCapital(p.cidade) || (!p.cidade && descricaoEhCapital(p.descricaoSugerida))) {
       metaPartes.push('<span style="color:#2563eb;font-weight:600;">💰 R$ 581,52 (Capital do Estado)</span>');
-    } else if (ehMesmoMunicipio(p.cidade) || ehMesmoMunicipio(p.descricaoSugerida)) {
+    } else if (ehMesmoMunicipio(p.cidade) || (!p.cidade && descricaoEhMesmoMunicipio(p.descricaoSugerida))) {
       metaPartes.push('<span style="color:#059669;font-weight:600;">💰 R$ 52,87 (Interior Município)</span>');
     }
     // 18/09/2026: descrição agora pode vir da IA (DeepSeek) — marca a origem no card. Quando
@@ -5026,7 +5057,10 @@ function calcularKmAuto(cidade) {
     var dataSaida = document.getElementById('dataSaida') ? document.getElementById('dataSaida').value : '';
     var dataChegada = document.getElementById('dataChegada') ? document.getElementById('dataChegada').value : '';
     var pernoite = dataSaida && dataChegada && dataSaida !== dataChegada;
-    if (kmNum >= 310) {
+    // 25/09/2026: mesma regra do Worker — destino mais distante (ida) acima de 350km.
+    var kmsDestinos = splitCidades(cidade).map(function(c){ return parseFloat(kmCache[c]) || 0; });
+    var kmRegraGer = kmsDestinos.length > 1 ? Math.max.apply(null, kmsDestinos) : kmNum;
+    if (kmRegraGer > 350) {
       var radioOutra = document.querySelector('input[name="distancia"][value="outra"]');
       if (radioOutra) {
         radioOutra.checked = true;
