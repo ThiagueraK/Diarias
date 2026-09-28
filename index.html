@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.46</span>
+    <span class="header-version">v1.10.47</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2364,6 +2364,10 @@ function pollProcessosCaixa(tentativa, horaInicio) {
       var terminouComErro = res.erroEm && res.erroEm >= horaInicio;
       var terminouComSucesso = res.atualizadoEm && res.atualizadoEm >= horaInicio;
       if (!terminouComErro && !terminouComSucesso) { mostrarProgressoVarredura(res.progresso, horaInicio); pollProcessosCaixa(tentativa + 1, horaInicio); return; }
+      // 28/09/2026: BUG REAL - o timer da ultima espera continuava guardado depois que a
+      // varredura terminava, e a atualizacao automatica da lista (a cada 6s) achava que ainda
+      // tinha varredura ativa e parava de vez - contador so mudava com F5. Limpa ao terminar.
+      procPollingTimer = null;
       var btn = document.getElementById('proc-atualizar');
       btn.disabled = false;
       btn.textContent = '🔄 Varrer caixa agora';
