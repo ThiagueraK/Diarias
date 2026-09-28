@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.45</span>
+    <span class="header-version">v1.10.46</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2363,7 +2363,7 @@ function pollProcessosCaixa(tentativa, horaInicio) {
       if (!res.ok) { pollProcessosCaixa(tentativa + 1, horaInicio); return; }
       var terminouComErro = res.erroEm && res.erroEm >= horaInicio;
       var terminouComSucesso = res.atualizadoEm && res.atualizadoEm >= horaInicio;
-      if (!terminouComErro && !terminouComSucesso) { pollProcessosCaixa(tentativa + 1, horaInicio); return; }
+      if (!terminouComErro && !terminouComSucesso) { mostrarProgressoVarredura(res.progresso, horaInicio); pollProcessosCaixa(tentativa + 1, horaInicio); return; }
       var btn = document.getElementById('proc-atualizar');
       btn.disabled = false;
       btn.textContent = '🔄 Varrer caixa agora';
@@ -2376,11 +2376,28 @@ function pollProcessosCaixa(tentativa, horaInicio) {
     .catch(function(){ pollProcessosCaixa(tentativa + 1, horaInicio); });
   }, 4000);
 }
+// 28/09/2026: mostra em que ponto a varredura está (o serviço do 1Doc agora manda o andamento).
+function mostrarProgressoVarredura(p, horaInicio) {
+  var lista = document.getElementById('proc-lista');
+  var btn = document.getElementById('proc-atualizar');
+  if (!lista || !p || !p.em || p.em < horaInicio - 5000) return;
+  var txt = '';
+  if (p.etapa === 'conectado') txt = 'Conectado ao 1Doc, abrindo a caixa...';
+  else if (p.etapa === 'escaneando_pagina') txt = 'Lendo a lista da caixa (página ' + (p.pagina || 1) + ')...';
+  else if (p.etapa === 'candidatos_encontrados') txt = p.total + ' processo(s) na caixa. Abrindo os novos...';
+  else if (p.etapa === 'abrindo_processo' || p.etapa === 'reaproveitando_processo') txt = (p.etapa === 'abrindo_processo' ? 'Abrindo processo ' : 'Já conhecido: ') + p.atual + ' de ' + p.total + (p.numero ? ' (' + escaparHtmlProc(p.numero) + ')' : '') + '...';
+  else if (p.etapa === 'aguardando_descricoes') txt = 'Terminando as descrições dos empenhos (' + p.total + ')...';
+  else if (p.etapa === 'loop_finalizado' || p.etapa === 'fechando_navegador' || p.etapa === 'navegador_fechado') txt = 'Quase pronto, salvando o resultado...';
+  if (!txt) return;
+  var pct = (p.total && p.atual) ? Math.round(p.atual / p.total * 100) : null;
+  lista.innerHTML = '<p style="color:var(--text-muted);">' + txt + '</p>' + (pct !== null ? '<div style="height:6px;background:var(--surface2);border-radius:4px;overflow:hidden;max-width:420px;"><div style="height:100%;width:' + pct + '%;background:var(--primary, #2563eb);transition:width .4s;"></div></div>' : '');
+  if (btn && p.total && p.atual) btn.textContent = '⏳ Varrendo ' + p.atual + '/' + p.total + '...';
+}
 function escanearProcessosCaixa() {
   var btn = document.getElementById('proc-atualizar');
   var lista = document.getElementById('proc-lista');
   btn.disabled = true;
-  btn.textContent = '⏳ Varrendo (pode levar até 3 min)...';
+  btn.textContent = '⏳ Varrendo...';
   lista.innerHTML = '<p style="color:var(--text-muted);">Varrendo a caixa no 1Doc, aguarde (abre cada processo um por um, pode levar 2-3 minutos)...</p>';
   var horaInicio = Date.now();
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-escanear', { method: 'POST' })
