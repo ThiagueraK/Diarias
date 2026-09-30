@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.48</span>
+    <span class="header-version">v1.10.49</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1613,7 +1613,7 @@ function montarDescricaoCompletaProcesso(p) {
   if (!p.descricaoSugerida) return null;
   // Agente de Saúde não é viagem — o texto legal fixo é a descrição inteira, sem frase de
   // diária nem km (mesmo comportamento da aba Gerador pra esse tipo de processo).
-  if (p.ehAgenteSaude) return p.descricaoSugerida;
+  if (p.ehAgenteSaude || p.ehRessarcimento) return p.descricaoSugerida; // 30/09/2026: ressarcimento de nota idem
   var cidade = (p.cidade || '').toUpperCase();
   var uf = (p.uf || 'RS').toUpperCase();
   var servidor = (p.servidor || '').toUpperCase();
@@ -1693,7 +1693,7 @@ var _fechamentoPorHash = {};
 function fecharDescricaoProcessoComKm(idx, aoTerminar) {
   var pronto = aoTerminar || function(){};
   var p = processosCaixaAtual[idx];
-  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) { pronto(true); return; }
+  if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude || p.ehRessarcimento) { pronto(true); return; }
   var cacheado = p.hash && _fechamentoPorHash[p.hash];
   // 30/09/2026: se o valor do item mudou (ex.: pernoite por nota de hotel), refaz o texto
   if (cacheado && (cacheado.valor || null) !== (p.valorSugerido ? Number(p.valorSugerido) : null)) cacheado = null;
@@ -1789,7 +1789,7 @@ function fecharDescricoesEmFila(itens) {
     if (i >= itens.length) return;
     var idx = i++;
     var p = itens[idx];
-    if (!p.descricaoCompletaBase || p.ehAgenteSaude || empenhoJaLancado(p.hash)) { proximo(); return; }
+    if (!p.descricaoCompletaBase || p.ehAgenteSaude || p.ehRessarcimento || empenhoJaLancado(p.hash)) { proximo(); return; }
     fecharDescricaoProcessoComKm(idx, function(cacheado) {
       if (cacheado) proximo();
       else setTimeout(proximo, 1100); // folga entre chamadas reais (~1/seg, dentro do limite comum de geocoding gratuito)
@@ -1931,7 +1931,9 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
     var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
     if (periodo.trim()) metaPartes.push('<span>📅 ' + escaparHtmlProc(periodo) + '</span>');
-    if (p.ehAgenteSaude) {
+    if (p.ehRessarcimento) {
+      metaPartes.push('<span style="color:#7c3aed;font-weight:600;">💵 Ressarcimento R$ ' + Number(p.valorSugerido || 0).toFixed(2).replace('.', ',') + ' (despesa e centro de custo das Agentes)</span>');
+    } else if (p.ehAgenteSaude) {
       metaPartes.push('<span style="color:#16a34a;font-weight:600;">💰 R$ 1.057,30 (Agente de Saúde)</span>');
     } else if (p.valorSugerido) {
       metaPartes.push('<span style="color:#2563eb;font-weight:600;">💰 R$ ' + Number(p.valorSugerido).toFixed(2).replace('.', ',') + (ehCapital(p.cidade) ? ' (Capital)' : '') + '</span>');
@@ -1957,8 +1959,8 @@ function renderProcessosCaixa(itens, atualizadoEm) {
           + '<span id="proc-desc-' + idx + '" class="proc-desc-text">' + escaparHtmlProc(descBase) + '</span>'
           + '<button class="proc-copy-btn" id="proc-copybtn-' + idx + '" onclick="copiarDescricaoProcesso(' + idx + ')">📋 Copiar</button>'
         + '</div>'
-        + (p.ehAgenteSaude
-          ? '<div class="proc-km">Indenização fixa — sem cálculo de distância.</div>'
+        + (p.ehAgenteSaude || p.ehRessarcimento
+          ? '<div class="proc-km">' + (p.ehRessarcimento ? 'Ressarcimento de nota — valor do processo, sem diária nem km.' : 'Indenização fixa — sem cálculo de distância.') + '</div>'
           : '<div class="proc-km" id="proc-km-' + idx + '">calculando distância...</div>');
     } else {
       corpo = '<div class="proc-vazio-box">Sem descrição — preencher na mão.</div>';
