@@ -623,7 +623,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.47</span>
+    <span class="header-version">v1.10.48</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1695,6 +1695,8 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
   var p = processosCaixaAtual[idx];
   if (!p || !p.descricaoCompletaBase || p.ehAgenteSaude) { pronto(true); return; }
   var cacheado = p.hash && _fechamentoPorHash[p.hash];
+  // 30/09/2026: se o valor do item mudou (ex.: pernoite por nota de hotel), refaz o texto
+  if (cacheado && (cacheado.valor || null) !== (p.valorSugerido ? Number(p.valorSugerido) : null)) cacheado = null;
   if (cacheado) {
     p.kmCalculado = cacheado.km;
     p.descricaoCompletaFinal = cacheado.descricaoCompletaFinal;
@@ -1755,14 +1757,22 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
           : 'VALOR REFERENTE A VIAGEM INTERIOR DO ESTADO DISTANTE ATE 350KM SEM PERNOITE';
       }
     }
+    // 30/09/2026: quando o item já traz valor definido (ex.: 243,18 com pernoite por nota de
+    // hotel), o fechamento e a linha de km seguem esse valor, não a regra só pelas datas/km.
+    var valorItem = p.valorSugerido ? Number(p.valorSugerido) : null;
+    var textoDoValor = null;
+    if (valorItem) VALORES_PC.forEach(function(v) { if (Math.abs(valorItem - v.valor) < 0.01) textoDoValor = v.texto; });
+    if (textoDoValor) fechamento = textoDoValor;
     p.kmCalculado = km;
     p.descricaoCompletaFinal = p.descricaoCompletaBase + (fechamento ? ' ' + fechamento + '.' : '');
     var el = document.getElementById('proc-desc-' + idx);
     if (el) el.textContent = p.descricaoCompletaFinal;
-    var textoKm = km != null ? (km + ' km de Tupanciretã' + (kmRegra > 350 ? ' — diária >350km (R$ 190,31)' : ' — diária até 350km (R$ 148,02)')) : 'não foi possível calcular a distância — revisar classificação manualmente';
+    var textoKm = km != null ? (km + ' km de Tupanciretã' + (valorItem
+        ? ' — diária R$ ' + valorItem.toFixed(2).replace('.', ',') + (p.pernoiteNotaHotel ? ' com pernoite (nota de hotel)' : '')
+        : (kmRegra > 350 ? ' — diária >350km (R$ 190,31)' : ' — diária até 350km (R$ 148,02)'))) : 'não foi possível calcular a distância — revisar classificação manualmente';
     var kmEl = document.getElementById('proc-km-' + idx);
     if (kmEl) kmEl.textContent = textoKm;
-    if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm };
+    if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm, valor: valorItem };
     pronto(false);
   });
 }
