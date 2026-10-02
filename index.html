@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.51</span>
+    <span class="header-version">v1.10.52</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -985,7 +985,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <span style="display:flex;gap:8px;">
           <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
           <button id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h) — resultado aparece no painel SaúdeFrota" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📥 Varrer caixa do Marcos</button>
-          <button id="btn-checkpoint-empenho" title="Processa agora os empenhos já gravados no CP que ainda estão esperando anexar/assinar/registrar no 1Doc — mesmo trabalho que o Worker já faz sozinho a cada 2min, só que na hora, sem esperar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📎 Processar anexos pendentes</button>
+          <button id="btn-checkpoint-empenho" title="Os empenhos gerados no CP ficam guardados aqui. Ao clicar, todos são anexados, enviados pra assinatura da Secretária e do Secretário de Administração e encaminhados no 1Doc de uma vez (assim a Secretária assina em lote)" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📎 Encaminhar empenhos guardados</button>
         </span>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
@@ -2516,13 +2516,13 @@ function processarCheckpointEmpenho() {
       if (meuDisparoTerminou && !res.emAndamento) {
         clearInterval(poll);
         btn.disabled = false;
-        btn.textContent = '📎 Processar anexos pendentes';
+        atualizarContadorGuardados();
       }
     })
     .catch(function(){});
   }, 2000);
   // teto de segurança - nunca fica perguntando pra sempre se algo ficar preso.
-  setTimeout(function(){ clearInterval(poll); btn.disabled = false; btn.textContent = '📎 Processar anexos pendentes'; }, 20 * 60 * 1000);
+  setTimeout(function(){ clearInterval(poll); btn.disabled = false; atualizarContadorGuardados(); }, 20 * 60 * 1000);
 
   sgdFetch(SGD_WORKER_URL + '?action=empenho-checkpoint-processar', { method: 'POST' })
   .then(function(r){ return r.json(); })
@@ -2537,7 +2537,7 @@ function processarCheckpointEmpenho() {
       renderizarProgressoCheckpoint([{ numero: '—', status: 'erro-ao-disparar', detalhe: res.error || 'desconhecido' }], false);
       clearInterval(poll);
       btn.disabled = false;
-      btn.textContent = '📎 Processar anexos pendentes';
+      atualizarContadorGuardados();
       return;
     }
     if (!(res.resultados || []).length) {
@@ -2545,18 +2545,38 @@ function processarCheckpointEmpenho() {
       document.getElementById('checkpoint-progresso-lista').innerHTML = '';
       clearInterval(poll);
       btn.disabled = false;
-      btn.textContent = '📎 Processar anexos pendentes';
+      atualizarContadorGuardados();
     }
   })
   .catch(function(e){
     meuDisparoTerminou = true;
     clearInterval(poll);
     btn.disabled = false;
-    btn.textContent = '📎 Processar anexos pendentes';
+    atualizarContadorGuardados();
     alert('Erro ao processar: ' + e.message);
   });
 }
 document.getElementById('btn-checkpoint-empenho') && document.getElementById('btn-checkpoint-empenho').addEventListener('click', processarCheckpointEmpenho);
+// 02/10/2026: modo manual da fase 2 - os empenhos gerados no CP ficam guardados e só seguem pro 1Doc
+// por este botão (acumula pra Secretária assinar em lote). Mostra quantos estão guardados.
+function atualizarContadorGuardados() {
+  var btn = document.getElementById('btn-checkpoint-empenho');
+  if (!btn || btn.disabled) return;
+  sgdFetch(SGD_WORKER_URL + '?action=fase2-guardados', { method: 'GET' })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res || !res.ok || btn.disabled) return;
+    var n = res.total || 0;
+    btn.textContent = '📎 Encaminhar empenhos guardados (' + n + ')';
+    btn.style.background = n ? '#2563eb' : 'var(--surface2)';
+    btn.style.color = n ? '#fff' : 'var(--text)';
+    btn.title = n ? ('Guardados: ' + res.itens.map(function(i){ return (i.processo || '?') + ' (empenho ' + i.numero + (i.servidor ? ', ' + i.servidor : '') + ')'; }).join('; ') + '. Ao clicar, todos seguem pro 1Doc de uma vez.') : 'Nenhum empenho guardado esperando.';
+  })
+  .catch(function(){});
+}
+setTimeout(atualizarContadorGuardados, 1500);
+setInterval(atualizarContadorGuardados, 5 * 60000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) atualizarContadorGuardados(); });
 
 // Botão "📥 Varrer caixa do Marcos" (03/09/2026) — sistema totalmente separado (backend
 // SaúdeFrota, dashboard Transportes), que já roda por horário fixo (triagemAgendada.js).
