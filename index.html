@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.52</span>
+    <span class="header-version">v1.10.53</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2499,6 +2499,9 @@ function renderizarProgressoCheckpoint(eventos, emAndamento) {
 }
 function processarCheckpointEmpenho() {
   var btn = document.getElementById('btn-checkpoint-empenho');
+  // 02/10/2026: um clique sem querer já mandou 2 empenhos pro 1Doc - agora pede confirmação.
+  var qtd = (btn.textContent.match(/\((\d+)\)/) || [])[1];
+  if (!confirm('Encaminhar ' + (qtd ? qtd + ' empenho(s) guardado(s)' : 'os empenhos guardados') + ' agora?\n\nCada um é anexado, enviado pra assinatura da Secretária e do Secretário de Administração e encaminhado no 1Doc. Não dá pra desfazer pelo SGD.')) return;
   btn.disabled = true;
   btn.textContent = '⏳ Processando...';
   renderizarProgressoCheckpoint([], true);
