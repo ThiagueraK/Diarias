@@ -57,6 +57,7 @@
   .rel-row-clicavel{cursor:pointer;}
   .rel-table td.col-num{text-align:center;color:var(--text-muted);font-size:11px;}
   .rel-badge-pago{display:inline-flex;align-items:center;gap:4px;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);border-radius:6px;padding:2px 8px;color:#16a34a;font-weight:600;font-size:11px;}
+  .rel-badge-autorizado{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.28);border-radius:6px;padding:2px 8px;color:#2563eb;font-weight:600;font-size:11px;}
   .rel-badge-pendente{display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.25);border-radius:6px;padding:2px 8px;color:#d97706;font-size:11px;}
   .rel-badge-sem{color:var(--text-muted);font-size:11px;}
   .rel-alerta{color:#ef4444;font-weight:700;}
@@ -623,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.50</span>
+    <span class="header-version">v1.10.51</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -5803,6 +5804,10 @@ function renderRelatorio() {
     if (p.pago) {
       statusPago = '<span class="rel-badge-pago">💰 Pago</span>';
       dataPag = p.dataPagamento || '—';
+    } else if (p.autorizadoEm) {
+      // 02/10/2026: autorizado pela Secretária de Saúde + Secretário de Adm (lido do 1Doc pelo robô)
+      statusPago = '<span class="rel-badge-autorizado" title="'+String(p.autorizadoPor||'').replace(/"/g,'&quot;')+'">✍️ Autorizado '+String(p.autorizadoEm).slice(0,5)+'</span>';
+      dataPag = '—';
     } else if (temPagamentos) {
       statusPago = '<span class="rel-badge-pendente">⏳ Pendente</span>';
       dataPag = '—';
@@ -6303,6 +6308,9 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     if (p.pago) {
       statusPago = '<b style="color:#16a34a">&#10004; Pago</b>';
       dataPag = p.dataPagamento || '—';
+    } else if (p.autorizadoEm) {
+      statusPago = '<span style="color:#2563eb">Autorizado '+String(p.autorizadoEm).slice(0,5)+'</span>';
+      dataPag = '—';
     } else if (temPagamentosImp) {
       statusPago = '<span style="color:#d97706">&#9203; Pend.</span>';
       dataPag = '—';
