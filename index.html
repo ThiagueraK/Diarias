@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.54</span>
+    <span class="header-version">v1.10.55</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -958,7 +958,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         </div>
       </div>
       <div class="ce-telemetry">
-        <div class="ce-tile" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Em andamento</div><div class="ce-tile-value" id="ce-t-andamento">—</div></div>
+        <div class="ce-tile" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Guardados / em andamento</div><div class="ce-tile-value" id="ce-t-andamento">—</div></div>
         <div class="ce-tile" style="--tile-glow:#39FF88"><div class="ce-tile-label">Registrados hoje</div><div class="ce-tile-value" id="ce-t-registrados">—</div></div>
         <div class="ce-tile" style="--tile-glow:#FF3D71"><div class="ce-tile-label">Falhas</div><div class="ce-tile-value" id="ce-t-falhas">—</div></div>
       </div>
@@ -2264,8 +2264,8 @@ var procPollingTimer = null;
 // 10/09/2026: "Central de Empenhos" - painel permanente, atualiza sozinho a cada 8s
 // enquanto a aba Processos estiver aberta (sem gastar request enquanto o usuário está
 // em outra aba - o guard de 'active' no início da função cuida disso).
-var CE_CORES = { registrado: '#39FF88', aguardando_confirmacao: '#00E5FF', aguardando_disparo: '#FFD166', falhou: '#FF3D71' };
-var CE_LABELS = { registrado: 'Registrado', aguardando_confirmacao: 'Aguardando 1Doc', aguardando_disparo: 'Aguardando disparo', falhou: 'Falhou' };
+var CE_CORES = { registrado: '#39FF88', aguardando_confirmacao: '#00E5FF', aguardando_disparo: '#FFD166', guardado: '#7AA7FF', falhou: '#FF3D71' };
+var CE_LABELS = { registrado: 'Registrado', aguardando_confirmacao: 'Aguardando 1Doc', aguardando_disparo: 'Na fila do robô', guardado: 'Empenhado · guardado', falhou: 'Falhou' };
 function ceTempoRelativo(ms) {
   if (!ms) return '—';
   var diffSeg = Math.max(0, Math.round((Date.now() - ms) / 1000));
