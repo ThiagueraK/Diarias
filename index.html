@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.55</span>
+    <span class="header-version">v1.10.56</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -987,6 +987,27 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <button id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h) — resultado aparece no painel SaúdeFrota" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📥 Varrer caixa do Marcos</button>
           <button id="btn-checkpoint-empenho" title="Os empenhos gerados no CP ficam guardados aqui. Ao clicar, todos são anexados, enviados pra assinatura da Secretária e do Secretário de Administração e encaminhados no 1Doc de uma vez (assim a Secretária assina em lote)" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📎 Encaminhar empenhos guardados</button>
         </span>
+      </div>
+      <!-- 03/10/2026: rodar o CP pelo SGD. Um vigia aberto na sessão do CP pega o pedido, abre a
+           tela (Emissão de Empenho / Prestação de Contas) e roda o lote; andamento ao vivo aqui. -->
+      <div id="cp-vigia-painel" style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:6px 0 10px;background:var(--surface2);">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
+          <b style="font-size:13px;">🖥️ Rodar no CP</b>
+          <span id="cp-vigia-online" style="font-size:12px;color:var(--text-muted);">verificando o vigia…</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;align-items:center;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+            <button id="cp-btn-empenho" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">💼 Empenhar pendentes</button>
+            <input id="cp-qtd-empenho" type="number" min="1" max="200" style="width:64px;padding:5px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-variant-numeric:tabular-nums;" aria-label="Quantos empenhar">
+            <span id="cp-cont-empenho" style="color:var(--text-muted);"></span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+            <button id="cp-btn-prestacao" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🧾 Prestar contas</button>
+            <input id="cp-qtd-prestacao" type="number" min="1" max="200" style="width:64px;padding:5px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-variant-numeric:tabular-nums;" aria-label="Quantas prestações">
+            <span id="cp-cont-prestacao" style="color:var(--text-muted);"></span>
+          </label>
+        </div>
+        <div id="cp-vigia-andamento" style="font-size:12px;margin-top:8px;display:none;"></div>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
@@ -2610,6 +2631,74 @@ function atualizarContadorGuardados() {
   })
   .catch(function(){});
 }
+// 03/10/2026: painel "Rodar no CP" (vigia na sessão do CP). Contagens vêm das mesmas listas que
+// os scripts usam; o andamento do empenho vem do cp_lote_status (etapa a etapa).
+var CP_STATUS_TXT = { pendente: 'esperando o vigia pegar', pegou: 'vigia pegou o pedido', abrindo_tela: 'abrindo a tela no CP', rodando: 'lote rodando', concluido: 'terminou', erro: 'parou' };
+function cpMinAtras(ms) { if (!ms) return '—'; var m = Math.round((Date.now() - ms) / 60000); return m < 1 ? 'agora' : 'há ' + m + ' min'; }
+function cpAtualizarContagens() {
+  var painel = document.getElementById('panel-processos');
+  if (!painel || !painel.classList.contains('active')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=empenho-pendentes-listar', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res || !res.ok) return;
+    var n = (res.itens || []).length;
+    document.getElementById('cp-cont-empenho').textContent = n + ' pendente(s)';
+    var inp = document.getElementById('cp-qtd-empenho'); if (!inp.dataset.mexido) inp.value = n || '';
+  }).catch(function(){});
+  sgdFetch(SGD_WORKER_URL + '?action=pc-pendentes-listar', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res || !res.ok) return;
+    var itens = res.itens || []; var sem = itens.filter(function(i){ return !i.aviso; }).length;
+    document.getElementById('cp-cont-prestacao').textContent = sem + ' pronta(s)' + (itens.length > sem ? ' · ' + (itens.length - sem) + ' com aviso (fora)' : '');
+    var inp = document.getElementById('cp-qtd-prestacao'); if (!inp.dataset.mexido) inp.value = sem || '';
+  }).catch(function(){});
+}
+function cpAtualizarEstado() {
+  var painel = document.getElementById('panel-processos');
+  if (!painel || !painel.classList.contains('active')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=cp-tarefa-estado', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res || !res.ok) return;
+    var on = res.vigiaVivoEm && (Date.now() - res.vigiaVivoEm) < 3 * 60000;
+    var el = document.getElementById('cp-vigia-online');
+    el.textContent = on ? '🟢 vigia ligado na sessão do CP' : '⚪ vigia desligado' + (res.vigiaVivoEm ? ' (último sinal ' + cpMinAtras(res.vigiaVivoEm) + ')' : '') + ' — abra o vigia no CP';
+    el.style.color = on ? '#16a34a' : 'var(--text-muted)';
+    var t = res.tarefa, lote = res.lote, and = document.getElementById('cp-vigia-andamento');
+    var ativa = t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0;
+    ['cp-btn-empenho', 'cp-btn-prestacao'].forEach(function(id){ var b = document.getElementById(id); b.disabled = !!ativa || !on; b.style.opacity = b.disabled ? .5 : 1; b.title = !on ? 'O vigia não está ligado na sessão do CP' : (ativa ? 'Já tem um pedido em andamento' : ''); });
+    if (!t) { and.style.display = 'none'; return; }
+    var rot = t.tipo === 'empenho' ? 'Empenho' : 'Prestação de contas';
+    var cor = t.status === 'erro' ? 'var(--danger, #dc2626)' : (t.status === 'concluido' ? '#16a34a' : 'var(--text)');
+    var html = '<b style="color:' + cor + ';">' + rot + ' (até ' + t.limite + '): ' + (CP_STATUS_TXT[t.status] || t.status) + '</b> <span style="color:var(--text-muted);">· ' + cpMinAtras(t.atualizadoEm) + '</span>';
+    if (t.mensagem) html += '<div style="color:var(--text-muted);margin-top:2px;">' + escaparHtmlProc(t.mensagem).slice(0, 400) + '</div>';
+    if (t.tipo === 'empenho' && lote && lote.em >= (t.pegoEm || t.solicitadoEm || 0)) {
+      html += '<div style="margin-top:4px;font-variant-numeric:tabular-nums;">Lote: ' + (lote.feitos != null ? lote.feitos : '?') + ' de ' + (lote.total != null ? lote.total : '?') + ' feitos'
+        + (lote.processo ? ' · agora: proc. ' + escaparHtmlProc(lote.processo) + (lote.servidor ? ' (' + escaparHtmlProc(lote.servidor) + ')' : '') : '')
+        + (lote.etapa ? ' · ' + escaparHtmlProc(lote.etapa) : '') + ' · ' + cpMinAtras(lote.em) + '</div>';
+    }
+    if (t.status === 'pendente') html += ' <button id="cp-btn-cancelar" style="margin-left:6px;padding:2px 8px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;">Cancelar pedido</button>';
+    and.innerHTML = html; and.style.display = 'block';
+    var bc = document.getElementById('cp-btn-cancelar');
+    if (bc) bc.onclick = function(){ sgdFetch(SGD_WORKER_URL + '?action=cp-tarefa-cancelar', { method: 'POST' }).then(function(){ cpAtualizarEstado(); }); };
+  }).catch(function(){});
+}
+function cpPedir(tipo) {
+  var qtd = parseInt(document.getElementById(tipo === 'empenho' ? 'cp-qtd-empenho' : 'cp-qtd-prestacao').value, 10);
+  if (!(qtd >= 1 && qtd <= 200)) { alert('Informe uma quantidade de 1 a 200.'); return; }
+  var txt = tipo === 'empenho'
+    ? 'Empenhar ' + qtd + ' processo(s) no CP agora?\n\nO vigia abre a Emissão de Empenho e roda o lote (empenho + liquidação + documento de viagem). Os empenhos ficam guardados até você encaminhar.'
+    : 'Prestar contas de ' + qtd + ' empenho(s) no CP agora?\n\nO vigia abre Movimentações › Recursos Antecipados › Prestação de Contas e roda o lote.';
+  if (!confirm(txt)) return;
+  sgdFetch(SGD_WORKER_URL + '?action=cp-tarefa-solicitar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo: tipo, limite: qtd }) })
+  .then(function(r){ return r.json(); }).then(function(res){
+    if (!res.ok) { alert(res.error || 'Não foi possível fazer o pedido.'); return; }
+    cpAtualizarEstado();
+  }).catch(function(e){ alert('Erro: ' + e.message); });
+}
+document.getElementById('cp-btn-empenho').addEventListener('click', function(){ cpPedir('empenho'); });
+document.getElementById('cp-btn-prestacao').addEventListener('click', function(){ cpPedir('prestacao'); });
+['cp-qtd-empenho', 'cp-qtd-prestacao'].forEach(function(id){ document.getElementById(id).addEventListener('input', function(){ this.dataset.mexido = '1'; }); });
+document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(cpAtualizarEstado, 600); setTimeout(cpAtualizarContagens, 900); });
+setInterval(cpAtualizarEstado, 10000);
+setInterval(cpAtualizarContagens, 5 * 60000);
+setTimeout(function(){ cpAtualizarEstado(); cpAtualizarContagens(); }, 2000);
 setTimeout(atualizarContadorGuardados, 1500);
 setInterval(atualizarContadorGuardados, 5 * 60000);
 document.addEventListener('visibilitychange', function(){ if (!document.hidden) atualizarContadorGuardados(); });
