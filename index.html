@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.58</span>
+    <span class="header-version">v1.10.59</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1227,6 +1227,8 @@ function sgdClearToken() {
 function sgdFetch(url, opts) {
   opts = opts || {};
   opts.headers = Object.assign({}, opts.headers, { 'Authorization': 'Bearer ' + sgdGetToken() });
+  // 07/10/2026: sempre a resposta nova do servidor (o cache do navegador fazia o painel exigir refresh)
+  if (!opts.cache) opts.cache = 'no-store';
   return fetch(url, opts).then(function(r) {
     if (r.status === 401) {
       sgdClearToken();
@@ -2720,6 +2722,14 @@ function cpAtualizarEstado() {
     el.textContent = on ? '🟢 vigia ligado na sessão do CP' : '⚪ vigia desligado' + (res.vigiaVivoEm ? ' (último sinal ' + cpMinAtras(res.vigiaVivoEm) + ')' : '') + ' — abra o vigia no CP';
     el.style.color = on ? '#16a34a' : 'var(--text-muted)';
     var t = res.tarefa, lote = res.lote, and = document.getElementById('cp-vigia-andamento');
+    var assinaturaEstado = (t ? t.id + ':' + t.status : '-') + '|' + (on ? 'on' : 'off') + '|' + (lote ? lote.feitos + ':' + lote.etapa : '-');
+    if (window._cpUltimoEstado !== undefined && window._cpUltimoEstado !== assinaturaEstado) {
+      atualizarContadorGuardados();
+      // terminou um pedido, ou o vigia acabou de ligar: atualiza as contagens também
+      if (!t || ['concluido', 'erro'].indexOf(t.status) >= 0 || (on && !window._cpUltimoOn)) cpAtualizarContagens();
+    }
+    window._cpUltimoEstado = assinaturaEstado;
+    window._cpUltimoOn = !!on;
     var ativa = t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0;
     ['cp-btn-empenho', 'cp-btn-prestacao'].forEach(function(id){ var b = document.getElementById(id); b.disabled = !!ativa || !on; b.style.opacity = b.disabled ? .5 : 1; b.title = !on ? 'O vigia não está ligado na sessão do CP' : (ativa ? 'Já tem um pedido em andamento' : ''); });
     if (!t) { and.style.display = 'none'; return; }
@@ -2765,10 +2775,11 @@ document.getElementById('cp-btn-prestacao').addEventListener('click', function()
 ['cp-qtd-empenho', 'cp-qtd-prestacao'].forEach(function(id){ document.getElementById(id).addEventListener('input', function(){ this.dataset.mexido = '1'; }); });
 document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(cpAtualizarEstado, 600); setTimeout(cpAtualizarContagens, 900); });
 setInterval(cpAtualizarEstado, 10000);
-setInterval(cpAtualizarContagens, 5 * 60000);
+setInterval(cpAtualizarContagens, 2 * 60000);
 setTimeout(function(){ cpAtualizarEstado(); cpAtualizarContagens(); }, 2000);
 setTimeout(atualizarContadorGuardados, 1500);
-setInterval(atualizarContadorGuardados, 5 * 60000);
+// 07/10/2026: 15 s com a aba Processos aberta (antes 5 min - o botão "Encaminhar (N)" só aparecia com refresh)
+setInterval(function(){ var pp = document.getElementById('panel-processos'); if (pp && pp.classList.contains('active')) atualizarContadorGuardados(); }, 15000);
 document.addEventListener('visibilitychange', function(){ if (!document.hidden) atualizarContadorGuardados(); });
 
 // Botão "📥 Varrer caixa do Marcos" (03/09/2026) — sistema totalmente separado (backend
