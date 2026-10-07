@@ -624,7 +624,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.57</span>
+    <span class="header-version">v1.10.58</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1974,6 +1974,12 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     // 18/09/2026: descrição agora pode vir da IA (DeepSeek) — marca a origem no card. Quando
     // cai no fallback regex (IA falhou, ou a trava de segurança achou nome real vazando),
     // destaca em amarelo pra chamar mais atenção na revisão manual do que o normal.
+    // 07/10/2026: correção manual do card (servidor/cidade/datas/horas/placa), guardada no servidor
+    if (p.corrigidoManual) {
+      var lidosTxt = Object.keys(p.corrigidoManual.lidos || {}).map(function(k){ return k + ': "' + (p.corrigidoManual.lidos[k] || '') + '"'; }).join(', ');
+      metaPartes.push('<span title="' + escaparHtmlProc('Corrigido à mão. A varredura tinha lido: ' + (lidosTxt || '(igual)')) + '" style="color:#7c3aed;font-weight:600;">✏️ corrigido</span>');
+    }
+    if (p.hash) metaPartes.push('<button type="button" class="proc-btn-corrigir" data-idx="' + idx + '" title="Corrigir nome, cidade, datas, horas ou placa lidos errado na varredura" style="padding:1px 8px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);cursor:pointer;">✏️ Corrigir</button>');
     if (p.origemDescricao === 'regex-fallback') metaPartes.push('<span title="IA não gerou ou foi bloqueada por possível nome vazando — descrição veio do parser antigo, revise com atenção extra" style="color:#b8860b;">⚠️ fallback regex</span>');
     else if (p.origemDescricao === 'ia') metaPartes.push('<span title="Descrição gerada por IA (DeepSeek)">✨ IA</span>');
 
@@ -2363,6 +2369,56 @@ function atualizarListaProcessosCaixaSilenciosamente() {
 }
 var _ultimaAssinaturaCaixa = null;
 setInterval(atualizarListaProcessosCaixaSilenciosamente, 6000);
+
+// 07/10/2026: botão "Corrigir" dos cards - edita o que a varredura leu errado. Fica guardado no
+// servidor (próxima varredura não desfaz; o script do CP já pega o corrigido). Campo vazio = volta ao lido.
+var CORRIGIR_CAMPOS = [['servidor', 'Servidor / motorista'], ['cidade', 'Cidade de destino'], ['dataSaida', 'Data de saída (DD/MM/AAAA)'], ['horaSaida', 'Hora de saída (HH:MM)'], ['dataChegada', 'Data de chegada (DD/MM/AAAA)'], ['horaChegada', 'Hora de chegada (HH:MM)'], ['placa', 'Placa']];
+function abrirCorrecaoCard(idx) {
+  var p = (processosCaixaAtual || [])[idx];
+  if (!p || !p.hash) return;
+  var velho = document.getElementById('modal-corrigir-card'); if (velho) velho.remove();
+  var div = document.createElement('div');
+  div.id = 'modal-corrigir-card';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;';
+  var campos = CORRIGIR_CAMPOS.map(function(c){
+    return '<label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">' + c[1]
+      + '<input data-campo="' + c[0] + '" value="' + escaparHtmlProc(p[c[0]] || '') + '" style="padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px;"></label>';
+  }).join('');
+  div.innerHTML = '<div style="background:var(--surface);color:var(--text);border-radius:12px;padding:16px;max-width:420px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.3);">'
+    + '<b style="font-size:14px;">✏️ Corrigir processo ' + escaparHtmlProc(p.numeroProcesso || '') + '</b>'
+    + '<p style="font-size:12px;color:var(--text-muted);margin:4px 0 10px;">Vale para o card, para a lista do script do CP e para as próximas varreduras. Deixe um campo vazio para voltar ao que a varredura leu.</p>'
+    + '<div style="display:grid;gap:8px;">' + campos + '</div>'
+    + '<div id="corrigir-erro" style="color:var(--danger,#dc2626);font-size:12px;margin-top:8px;"></div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">'
+    + '<button type="button" id="corrigir-cancelar" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);cursor:pointer;">Cancelar</button>'
+    + '<button type="button" id="corrigir-salvar" style="padding:6px 12px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer;font-weight:600;">Salvar correção</button>'
+    + '</div></div>';
+  document.body.appendChild(div);
+  div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
+  document.getElementById('corrigir-cancelar').onclick = function(){ div.remove(); };
+  document.getElementById('corrigir-salvar').onclick = function(){
+    var b = this; var c = {};
+    div.querySelectorAll('input[data-campo]').forEach(function(i){
+      var lido = (p.corrigidoManual && p.corrigidoManual.lidos && i.dataset.campo in p.corrigidoManual.lidos) ? p.corrigidoManual.lidos[i.dataset.campo] : p[i.dataset.campo];
+      var v = i.value.trim();
+      // só manda o que mudou em relação à leitura da varredura (ou o que já estava corrigido)
+      if (v && (v !== (lido || '') || (p.corrigidoManual && i.dataset.campo in (p.corrigidoManual.lidos || {})))) c[i.dataset.campo] = v;
+    });
+    b.disabled = true; b.textContent = 'Salvando…';
+    sgdFetch(SGD_WORKER_URL + '?action=processo-caixa-corrigir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: p.hash, campos: c }) })
+    .then(function(r){ return r.json(); }).then(function(res){
+      if (!res.ok) { document.getElementById('corrigir-erro').textContent = res.error || 'Não foi possível salvar.'; b.disabled = false; b.textContent = 'Salvar correção'; return; }
+      div.remove();
+      _ultimaAssinaturaCaixa = null;
+      if (typeof atualizarListaProcessosCaixaSilenciosamente === 'function') atualizarListaProcessosCaixaSilenciosamente();
+      if (typeof mostrarAvisoRapido === 'function') mostrarAvisoRapido('✏️ Correção salva no processo ' + (p.numeroProcesso || ''));
+    }).catch(function(e){ document.getElementById('corrigir-erro').textContent = 'Erro: ' + e.message; b.disabled = false; b.textContent = 'Salvar correção'; });
+  };
+}
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest && e.target.closest('.proc-btn-corrigir');
+  if (b) { e.preventDefault(); e.stopPropagation(); abrirCorrecaoCard(parseInt(b.dataset.idx, 10)); }
+});
 // 02/10/2026: divide o total da caixa em "a empenhar / empenhados guardados / bloqueados" - o
 // script do CP só vê os "a empenhar" (os guardados continuam na caixa até o botão encaminhar).
 function atualizarResumoSituacaoCaixa() {
