@@ -564,8 +564,46 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     background:rgba(255,61,113,0.08);border:1px solid rgba(255,61,113,0.3);padding:5px 9px;}
   .ce-empty{padding:20px 16px;text-align:center;color:var(--ce-muted);font-size:0.78rem;}
 
+  /* 07/10/2026: CENTRAL COMPLETA - trilha de etapas por empenho, contadores que filtram, busca */
+  .ce-telemetry.ce-tel2{grid-template-columns:repeat(auto-fit,minmax(112px,1fr));}
+  .ce-tel2 .ce-tile{cursor:pointer;text-align:left;font:inherit;color:inherit;transition:transform .12s, border-color .12s;}
+  .ce-tel2 .ce-tile:hover{transform:translateY(-1px);}
+  .ce-tel2 .ce-tile:focus-visible{outline:2px solid var(--tile-glow,var(--ce-cyan));outline-offset:2px;}
+  .ce-tel2 .ce-tile.ativo{border-color:var(--tile-glow,var(--ce-cyan));background:color-mix(in srgb, var(--tile-glow,var(--ce-cyan)) 14%, var(--ce-glass));}
+  .ce-tel2 .ce-tile.fixo{cursor:default;}
+  .ce-tel2 .ce-tile-value small{font-size:0.7rem;font-weight:600;margin-left:3px;opacity:.8;}
+  .ce-filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .ce-chip{font-family:'Chakra Petch',sans-serif;font-size:0.64rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+    padding:4px 10px;border:1px solid rgba(255,255,255,0.14);background:transparent;color:var(--ce-muted);cursor:pointer;}
+  .ce-chip.ativo{color:var(--ce-cyan);border-color:var(--ce-cyan);box-shadow:0 0 10px -4px var(--ce-cyan) inset;}
+  .ce-busca{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;padding:5px 9px;min-width:180px;flex:1 1 180px;max-width:280px;
+    background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.14);color:var(--ce-text);}
+  .ce-busca:focus{outline:none;border-color:var(--ce-cyan);}
+  .ce-row.ce-r2{grid-template-columns:0.95fr 1.35fr 2.3fr 1.15fr;}
+  .ce-sub2{display:block;font-size:0.64rem;color:var(--ce-muted);margin-top:2px;font-family:'IBM Plex Mono',monospace;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ce-track{position:relative;display:grid;grid-template-columns:repeat(7,1fr);align-items:start;}
+  .ce-track::before{content:'';position:absolute;left:7%;right:7%;top:5px;height:1px;background:rgba(255,255,255,0.12);}
+  .ce-node{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;}
+  .ce-node b{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.22);background:var(--ce-bg);display:block;}
+  .ce-node span{font-family:'Chakra Petch',sans-serif;font-size:0.54rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--ce-muted);white-space:nowrap;}
+  .ce-node.ok b{background:var(--ce-ok);border-color:var(--ce-ok);box-shadow:0 0 8px var(--ce-ok);}
+  .ce-node.imp b{background:color-mix(in srgb, var(--ce-ok) 35%, transparent);border-color:color-mix(in srgb, var(--ce-ok) 55%, transparent);}
+  .ce-node.cur b{border-color:var(--ce-cyan);background:color-mix(in srgb, var(--ce-cyan) 30%, transparent);box-shadow:0 0 10px var(--ce-cyan);animation:ce-pulse 1.3s ease-in-out infinite;}
+  .ce-node.cur span{color:var(--ce-cyan);}
+  .ce-node.fail b{background:var(--ce-danger);border-color:var(--ce-danger);box-shadow:0 0 10px var(--ce-danger);}
+  .ce-node.fail span{color:var(--ce-danger);}
+  .ce-node.ok span{color:var(--ce-text);}
+  .ce-sit{font-family:'Chakra Petch',sans-serif;font-size:0.7rem;font-weight:600;color:var(--row-glow);text-align:right;}
+  .ce-sit small{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:0.62rem;color:var(--ce-muted);margin-top:2px;}
+  .ce-atualizado{font-size:0.62rem;color:var(--ce-muted);font-family:'IBM Plex Mono',monospace;}
+  @media (prefers-reduced-motion: reduce){ .ce-node.cur b,.ce-dot.ce-pulse{animation:none;} }
+
   @media (max-width:760px){
     .ce-telemetry{grid-template-columns:1fr;}
+    .ce-telemetry.ce-tel2{grid-template-columns:repeat(2,1fr);}
+    .ce-row.ce-r2{grid-template-columns:1fr;}
+    .ce-sit{text-align:left;}
     .ce-row{grid-template-columns:1fr;gap:3px;padding:12px 14px;}
     .ce-head-row{display:none;}
     .ce-time,.ce-valor{text-align:left;}
@@ -624,7 +662,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.59</span>
+    <span class="header-version">v1.10.60</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -954,28 +992,39 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="ce-header">
         <div>
           <h2 class="ce-title">CENTRAL DE <span>EMPENHOS</span></h2>
-          <div class="ce-sub">Tupanciretã · SGD-Diárias · rastreamento 1Doc em tempo real</div>
+          <div class="ce-sub">Tupanciretã · SGD-Diárias · do CP à prestação de contas</div>
         </div>
+        <div class="ce-atualizado" id="ce-atualizado">carregando…</div>
       </div>
-      <div class="ce-telemetry">
-        <div class="ce-tile" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Guardados / em andamento</div><div class="ce-tile-value" id="ce-t-andamento">—</div></div>
-        <div class="ce-tile" style="--tile-glow:#39FF88"><div class="ce-tile-label">Registrados hoje</div><div class="ce-tile-value" id="ce-t-registrados">—</div></div>
-        <div class="ce-tile" style="--tile-glow:#FF3D71"><div class="ce-tile-label">Falhas</div><div class="ce-tile-value" id="ce-t-falhas">—</div></div>
+      <div class="ce-telemetry ce-tel2" id="ce-tiles">
+        <button type="button" class="ce-tile" data-f="cp" style="--tile-glow:#7AA7FF"><div class="ce-tile-label">No CP · guardados</div><div class="ce-tile-value" id="ce-t-cp">—</div></button>
+        <button type="button" class="ce-tile" data-f="sua" style="--tile-glow:#FF3D71"><div class="ce-tile-label">Sua assinatura</div><div class="ce-tile-value" id="ce-t-sua">—</div></button>
+        <button type="button" class="ce-tile" data-f="saude" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Secretária</div><div class="ce-tile-value" id="ce-t-saude">—</div></button>
+        <button type="button" class="ce-tile" data-f="adm" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Secretário Adm</div><div class="ce-tile-value" id="ce-t-adm">—</div></button>
+        <button type="button" class="ce-tile" data-f="pago" style="--tile-glow:#FFB454"><div class="ce-tile-label">Autorizado · a pagar</div><div class="ce-tile-value" id="ce-t-pagar">—</div></button>
+        <button type="button" class="ce-tile" data-f="pc" style="--tile-glow:#FFD166"><div class="ce-tile-label">Pago · sem prestação</div><div class="ce-tile-value" id="ce-t-pc">—</div></button>
+        <button type="button" class="ce-tile" data-f="pagos7" style="--tile-glow:#39FF88"><div class="ce-tile-label">Pagos em 7 dias</div><div class="ce-tile-value" id="ce-t-pagos">—</div></button>
+        <div class="ce-tile fixo" style="--tile-glow:#C9A8FF"><div class="ce-tile-label">Ciclo médio CP→pago</div><div class="ce-tile-value" id="ce-t-ciclo">—</div></div>
       </div>
       <div class="ce-panel">
         <div class="ce-panel-head">
-          <div class="ce-panel-title">Rastreamento por empenho</div>
+          <div class="ce-filtros" id="ce-filtros">
+            <button type="button" class="ce-chip ativo" data-f="todos">Todos</button>
+            <button type="button" class="ce-chip" data-f="alerta">⚠ Com alerta <span id="ce-n-alerta"></span></button>
+            <button type="button" class="ce-chip" data-f="andamento">Em andamento</button>
+            <button type="button" class="ce-chip" data-f="concluidos">Concluídos</button>
+            <input type="search" class="ce-busca" id="ce-busca" placeholder="servidor, processo ou empenho" aria-label="Buscar na Central de Empenhos">
+          </div>
           <div class="ce-legend">
-            <span style="color:#39FF88"><i style="background:#39FF88"></i>Registrado</span>
-            <span style="color:#00E5FF"><i style="background:#00E5FF"></i>Aguardando 1Doc</span>
-            <span style="color:#FFD166"><i style="background:#FFD166"></i>Aguardando disparo</span>
+            <span style="color:#39FF88"><i style="background:#39FF88"></i>Feito</span>
+            <span style="color:#00E5FF"><i style="background:#00E5FF"></i>Esperando</span>
             <span style="color:#FF3D71"><i style="background:#FF3D71"></i>Falhou</span>
           </div>
         </div>
-        <div class="ce-row ce-head-row">
-          <div>Empenho</div><div>Servidor</div><div>Processo 1Doc</div><div>Valor</div><div>Etapa</div><div>Atualizado</div>
+        <div class="ce-row ce-r2 ce-head-row">
+          <div>Empenho · processo</div><div>Servidor · viagem</div><div>Etapas</div><div style="text-align:right;">Situação</div>
         </div>
-        <div id="ce-linhas" style="max-height:340px;overflow-y:auto;"><div class="ce-empty">Carregando…</div></div>
+        <div id="ce-linhas" style="max-height:520px;overflow-y:auto;"><div class="ce-empty">Carregando…</div></div>
       </div>
     </div>
 
@@ -2296,8 +2345,9 @@ var procPollingTimer = null;
 // 10/09/2026: "Central de Empenhos" - painel permanente, atualiza sozinho a cada 8s
 // enquanto a aba Processos estiver aberta (sem gastar request enquanto o usuário está
 // em outra aba - o guard de 'active' no início da função cuida disso).
-var CE_CORES = { registrado: '#39FF88', aguardando_confirmacao: '#00E5FF', aguardando_disparo: '#FFD166', guardado: '#7AA7FF', falhou: '#FF3D71' };
-var CE_LABELS = { registrado: 'Registrado', aguardando_confirmacao: 'Aguardando 1Doc', aguardando_disparo: 'Na fila do robô', guardado: 'Empenhado · guardado', falhou: 'Falhou' };
+// 07/10/2026: Central COMPLETA (rota central-empenhos) - cada empenho do CP à prestação de contas.
+var CE_ETAPAS = [['cp', 'CP'], ['enviado', '1Doc'], ['autor', 'Você'], ['saude', 'Secretária'], ['adm', 'Adm'], ['pago', 'Pago'], ['pc', 'PC']];
+var ceDados = null, ceFiltro = 'todos', ceBusca = '';
 function ceTempoRelativo(ms) {
   if (!ms) return '—';
   var diffSeg = Math.max(0, Math.round((Date.now() - ms) / 1000));
@@ -2308,40 +2358,95 @@ function ceTempoRelativo(ms) {
   if (diffH < 24) return 'há ' + diffH + 'h';
   return 'há ' + Math.round(diffH / 24) + 'd';
 }
+function ceData(v) {
+  if (typeof v !== 'number') return v === true ? 'feito' : '';
+  var d = new Date(v - 3 * 3600 * 1000);
+  return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+}
+function ceNormal(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function cePassaFiltro(it) {
+  var f = ceFiltro, e = it.etapas;
+  if (f === 'alerta' && !it.alerta) return false;
+  if (f === 'andamento' && !it.proxima) return false;
+  if (f === 'concluidos' && it.proxima) return false;
+  if (f === 'cp' && it.proxima !== 'enviado') return false;
+  if (f === 'sua' && !(e.autorFalhou && !e.autor)) return false;
+  if ((f === 'saude' || f === 'adm' || f === 'pago' || f === 'pc') && it.proxima !== f) return false;
+  if (f === 'pagos7' && !(typeof e.pago === 'number' && Date.now() - e.pago < 7 * 86400000)) return false;
+  if (ceBusca) {
+    var alvo = ceNormal([it.servidor, it.processo, it.empenho, it.cidade].join(' '));
+    if (alvo.indexOf(ceBusca) < 0) return false;
+  }
+  return true;
+}
+function ceTrilha(it) {
+  var e = it.etapas, imp = it.implicitas || [];
+  return '<div class="ce-track">' + CE_ETAPAS.map(function(par) {
+    var k = par[0], cls = 'off', dica = par[1];
+    if (k === 'autor' && e.autorFalhou && !e.autor) { cls = 'fail'; dica = 'Sua assinatura não entrou'; }
+    else if (k === 'enviado' && it.falhaEnvio) { cls = 'fail'; dica = 'Falhou: ' + it.falhaEnvio; }
+    else if (e[k]) { cls = 'ok'; dica = par[1] + ' · ' + ceData(e[k]); }
+    else if (imp.indexOf(k) >= 0) { cls = 'imp'; dica = par[1] + ' · feito (sem data registrada)'; }
+    else if (k === it.proxima) { cls = 'cur'; dica = 'Esperando: ' + it.proximaNome; }
+    else if (k === 'autor') { dica = 'Sua assinatura · sem registro'; }
+    return '<div class="ce-node ' + cls + '" title="' + escaparHtmlProc(dica) + '"><b></b><span>' + par[1] + '</span></div>';
+  }).join('') + '</div>';
+}
+function ceRender() {
+  if (!ceDados) return;
+  var t = ceDados.telemetria || {};
+  var pad = function(n) { return n == null ? '—' : String(n).padStart(2, '0'); };
+  document.getElementById('ce-t-cp').textContent = pad(t.noCp);
+  document.getElementById('ce-t-sua').textContent = pad(t.suaAssinatura);
+  document.getElementById('ce-t-saude').textContent = pad(t.secretaria);
+  document.getElementById('ce-t-adm').textContent = pad(t.administracao);
+  document.getElementById('ce-t-pagar').textContent = pad(t.aPagar);
+  document.getElementById('ce-t-pc').textContent = pad(t.semPc);
+  document.getElementById('ce-t-pagos').textContent = pad(t.pagos7d);
+  document.getElementById('ce-t-ciclo').innerHTML = t.cicloMedioDias == null ? '—' : String(t.cicloMedioDias).replace('.', ',') + '<small>dias</small>';
+  document.getElementById('ce-n-alerta').textContent = t.alertas ? '(' + t.alertas + ')' : '';
+  document.querySelectorAll('#ce-tiles .ce-tile[data-f]').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === ceFiltro); });
+  document.querySelectorAll('#ce-filtros .ce-chip').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === ceFiltro); });
+  document.getElementById('ce-atualizado').textContent = 'atualizado ' + ceTempoRelativo(ceDados.geradoEm);
+  var lista = (ceDados.itens || []).filter(cePassaFiltro);
+  var cont = document.getElementById('ce-linhas');
+  if (!lista.length) { cont.innerHTML = '<div class="ce-empty">Nenhum empenho neste filtro.</div>'; return; }
+  var mais = lista.length > 150 ? '<div class="ce-empty">Mostrando 150 de ' + lista.length + ' — use a busca para achar os outros.</div>' : '';
+  cont.innerHTML = lista.slice(0, 150).map(function(it) {
+    var cor = it.alerta ? '#FF3D71' : (it.proxima ? '#00E5FF' : '#39FF88');
+    var sit = it.proxima ? 'Esperando ' + escaparHtmlProc(it.proxima === 'autor' ? 'sua assinatura' : it.proximaNome) : '✓ Concluído';
+    var desde = it.proxima && it.desde ? '<small>' + (it.diasParado >= 1 ? 'parado há ' + it.diasParado + (it.diasParado === 1 ? ' dia' : ' dias') : 'desde ' + ceData(it.desde)) + '</small>' : '';
+    var viagem = [it.dataSaida, it.cidade].filter(Boolean).join(' · ');
+    return '<div class="ce-row ce-r2" style="--row-glow:' + cor + '">'
+      + '<div><span class="ce-num">' + escaparHtmlProc(it.empenho || '—') + '</span><span class="ce-sub2">' + escaparHtmlProc(it.processo || '—') + (it.valor ? ' · R$ ' + escaparHtmlProc(it.valor) : '') + '</span></div>'
+      + '<div class="ce-servidor">' + escaparHtmlProc(it.servidor || '—') + (viagem ? '<span class="ce-sub2">' + escaparHtmlProc(viagem) + '</span>' : '') + '</div>'
+      + ceTrilha(it)
+      + '<div class="ce-sit">' + sit + desde + '</div>'
+      + (it.alerta ? '<div class="ce-detalhe-inline">⚠ ' + escaparHtmlProc(it.alerta) + '</div>' : '')
+      + '</div>';
+  }).join('') + mais;
+}
 function carregarEmpenhosAndamento() {
   if (!document.getElementById('panel-processos').classList.contains('active')) return;
-  sgdFetch(SGD_WORKER_URL + '?action=empenhos-andamento')
+  sgdFetch(SGD_WORKER_URL + '?action=central-empenhos')
   .then(function(r){ return r.json(); })
   .then(function(res){
-    if (!res.ok) return;
-    document.getElementById('ce-t-andamento').textContent = String(res.telemetria.emAndamento).padStart(2, '0');
-    document.getElementById('ce-t-registrados').textContent = String(res.telemetria.registradosHoje).padStart(2, '0');
-    document.getElementById('ce-t-falhas').textContent = String(res.telemetria.falhas).padStart(2, '0');
-    var cont = document.getElementById('ce-linhas');
-    if (!res.itens || !res.itens.length) {
-      cont.innerHTML = '<div class="ce-empty">Nenhum empenho em andamento ou registrado nas últimas 48h.</div>';
-      return;
-    }
-    cont.innerHTML = res.itens.map(function(it){
-      var cor = CE_CORES[it.status] || '#79899F';
-      var label = CE_LABELS[it.status] || it.status;
-      var scanning = it.status === 'aguardando_confirmacao' ? ' ce-scanning' : '';
-      var pulseDot = it.status === 'aguardando_confirmacao' ? ' ce-pulse' : '';
-      var detalheHtml = it.detalhe ? '<div class="ce-detalhe-inline">⚠ ' + escaparHtmlProc(it.detalhe).slice(0, 160) + '</div>' : '';
-      return '<div class="ce-row' + scanning + '" style="--row-glow:' + cor + '">'
-        + '<div class="ce-num">' + escaparHtmlProc(it.numero || '—') + '</div>'
-        + '<div class="ce-servidor">' + escaparHtmlProc(it.servidor || '—') + '</div>'
-        + '<div class="ce-proc">' + escaparHtmlProc(it.numeroProcesso1Doc || '—') + '</div>'
-        + '<div class="ce-valor">R$ ' + escaparHtmlProc(it.valor || '—') + '</div>'
-        + '<div class="ce-status"><span class="ce-dot' + pulseDot + '"></span>' + label + '</div>'
-        + '<div class="ce-time">' + ceTempoRelativo(it.atualizadoEm) + '</div>'
-        + detalheHtml
-        + '</div>';
-    }).join('');
+    if (!res.ok) { document.getElementById('ce-atualizado').textContent = 'não consegui atualizar: ' + (res.error || '?'); return; }
+    ceDados = res;
+    ceRender();
   })
-  .catch(function(){});
+  .catch(function(e){ document.getElementById('ce-atualizado').textContent = 'sem conexão com o servidor'; });
 }
-setInterval(carregarEmpenhosAndamento, 8000);
+document.addEventListener('click', function(ev) {
+  var b = ev.target.closest('#ce-tiles .ce-tile[data-f], #ce-filtros .ce-chip');
+  if (!b) return;
+  ceFiltro = (ceFiltro === b.dataset.f && b.classList.contains('ce-tile')) ? 'todos' : b.dataset.f;
+  ceRender();
+});
+document.addEventListener('input', function(ev) {
+  if (ev.target && ev.target.id === 'ce-busca') { ceBusca = ceNormal(ev.target.value.trim()); ceRender(); }
+});
+setInterval(carregarEmpenhosAndamento, 15000);
 
 function pararPollingProcessos() {
   if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
