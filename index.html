@@ -635,6 +635,35 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .ce-sit small{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:0.62rem;color:var(--ce-muted);margin-top:2px;}
   .ce-atualizado{font-size:0.62rem;color:var(--ce-muted);font-family:'IBM Plex Mono',monospace;}
   @media (prefers-reduced-motion: reduce){ .ce-node.cur b,.ce-dot.ce-pulse{animation:none;} }
+  /* 08/10/2026: aba Equipe (usa os tokens da Central de Empenhos) */
+  .eq-bots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:14px;}
+  .eq-bot{padding:11px 14px;background:var(--ce-glass);border:1px solid color-mix(in srgb, var(--b-cor) 45%, transparent);}
+  .eq-bot-top{display:flex;align-items:center;gap:8px;font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.04em;}
+  .eq-bot-top i{width:8px;height:8px;border-radius:50%;background:var(--b-cor);box-shadow:0 0 8px var(--b-cor);}
+  .eq-bot-top small{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.62rem;color:var(--ce-muted);letter-spacing:0;}
+  .eq-bot-papel{font-size:.66rem;color:var(--ce-muted);margin-top:6px;line-height:1.45;}
+  .eq-bot-det{font-size:.7rem;color:var(--b-cor);margin-top:5px;font-family:'Chakra Petch',sans-serif;font-weight:600;}
+  .eq-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;align-items:start;}
+  .eq-msgs{height:420px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+  .eq-msg{max-width:88%;padding:9px 12px;font-size:.78rem;line-height:1.5;white-space:normal;word-wrap:break-word;}
+  .eq-msg small{display:block;font-size:.6rem;color:var(--ce-muted);margin-bottom:3px;font-family:'Chakra Petch',sans-serif;letter-spacing:.06em;text-transform:uppercase;}
+  .eq-msg.eu{align-self:flex-end;background:color-mix(in srgb, var(--ce-cyan) 14%, transparent);border:1px solid color-mix(in srgb, var(--ce-cyan) 40%, transparent);}
+  .eq-msg.bot{align-self:flex-start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);}
+  .eq-msg.pensando{opacity:.7;font-style:italic;}
+  .eq-form{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);}
+  .eq-input{max-width:none;flex:1;}
+  .eq-enviar{flex-shrink:0;}
+  .eq-tarefas{max-height:470px;overflow-y:auto;}
+  .eq-t{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);position:relative;font-size:.74rem;}
+  .eq-t::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--t-cor);box-shadow:0 0 8px var(--t-cor);}
+  .eq-t-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
+  .eq-t-tit{color:#fff;font-weight:600;flex:1;min-width:0;}
+  .eq-pill{font-family:'Chakra Petch',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--t-cor);color:var(--t-cor);}
+  .eq-t-meta{font-size:.62rem;color:var(--ce-muted);margin-top:3px;}
+  .eq-t-corpo{margin-top:6px;white-space:pre-wrap;font-size:.68rem;color:var(--ce-text);background:rgba(0,0,0,.25);padding:6px 8px;max-height:160px;overflow:auto;}
+  .eq-t-acoes{display:flex;gap:6px;margin-top:6px;}
+  .eq-t-acoes button{font-size:.6rem;padding:3px 8px;}
+  @media (max-width:860px){ .eq-grid{grid-template-columns:1fr;} .eq-msgs{height:340px;} }
 
   @media (max-width:760px){
     .ce-telemetry{grid-template-columns:1fr;}
@@ -699,14 +728,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.61</span>
+    <span class="header-version">v1.10.62</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
   <!-- Modal de configuração -->
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" id="tabGerador">⚡ Gerador</button>
+    <button class="tab-btn active" id="tabEquipe">🤖 Equipe <span class="tab-badge" id="badgeEquipe" style="display:none"></span></button>
+    <!-- 08/10/2026: o Gerador saiu da barra (não é mais usado), mas o painel continua: alguns atalhos ainda abrem ele -->
+    <button class="tab-btn" id="tabGerador" style="display:none">⚡ Gerador</button>
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabProcessos">📋 Processos</button>
@@ -718,7 +749,41 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <!-- ══════════════════════════════════════ -->
   <!-- ABA GERADOR                            -->
   <!-- ══════════════════════════════════════ -->
-  <div class="tab-panel active" id="panel-gerador">
+  <!-- 08/10/2026: EQUIPE DE BOTS - conversa com o Coordenador e quadro de ocorrências/tarefas -->
+  <div class="tab-panel active" id="panel-equipe">
+    <div class="ce" id="equipe">
+      <div class="ce-header">
+        <div>
+          <h2 class="ce-title">EQUIPE DE <span>BOTS</span></h2>
+          <div class="ce-sub">Vigia · Coordenador — pergunte qualquer coisa ao Coordenador</div>
+        </div>
+        <div class="ce-atualizado" id="eq-atualizado">carregando…</div>
+      </div>
+      <div class="eq-bots" id="eq-bots"></div>
+      <div class="eq-grid">
+        <div class="ce-panel eq-chat">
+          <div class="ce-panel-head"><div class="ce-panel-title">Conversa com o Coordenador</div></div>
+          <div class="eq-msgs" id="eq-msgs"><div class="ce-empty">Carregando…</div></div>
+          <form class="eq-form" id="eq-form" autocomplete="off">
+            <input id="eq-texto" class="ce-busca eq-input" placeholder="Ex.: como estão as automações? tem algo travado?" aria-label="Mensagem para o Coordenador">
+            <button type="submit" class="ce-chip ativo eq-enviar" id="eq-enviar">Enviar</button>
+          </form>
+        </div>
+        <div class="ce-panel eq-quadro">
+          <div class="ce-panel-head">
+            <div class="ce-panel-title">Quadro · ocorrências e tarefas</div>
+            <div class="ce-filtros" id="eq-filtros">
+              <button type="button" class="ce-chip ativo" data-f="abertas">Abertas</button>
+              <button type="button" class="ce-chip" data-f="todas">Todas</button>
+            </div>
+          </div>
+          <div id="eq-tarefas" class="eq-tarefas"><div class="ce-empty">Carregando…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-gerador">
 
     <div class="paste-zone">
       <div class="paste-zone-header">
@@ -1548,8 +1613,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-gerador','panel-tabela','panel-relatorio','panel-processos','panel-manutencao','panel-solicitacoes','panel-pc'];
-var allTabs = ['tabGerador','tabTabela','tabRelatorio','tabProcessos','tabManutencao','tabSolicitacoes','tabPC'];
+var allPanels = ['panel-equipe','panel-gerador','panel-tabela','panel-relatorio','panel-processos','panel-manutencao','panel-solicitacoes','panel-pc'];
+var allTabs = ['tabEquipe','tabGerador','tabTabela','tabRelatorio','tabProcessos','tabManutencao','tabSolicitacoes','tabPC'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1557,6 +1622,7 @@ function switchTab(panelId, tabId) {
   document.getElementById(tabId).classList.add('active');
 }
 document.getElementById('tabGerador').addEventListener('click', function() { switchTab('panel-gerador','tabGerador'); });
+document.getElementById('tabEquipe').addEventListener('click', function() { switchTab('panel-equipe','tabEquipe'); carregarEquipe(); });
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
 document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); carregarResumoTriagemMarcos(); });
@@ -2556,6 +2622,87 @@ document.addEventListener('input', function(ev) {
   if (ev.target && ev.target.id === 'ce-busca') { ceBusca = ceNormal(ev.target.value.trim()); ceRender(); }
 });
 setInterval(carregarEmpenhosAndamento, 15000);
+
+// 08/10/2026: ABA EQUIPE - bots, conversa com o Coordenador e quadro (rotas equipe-* do Worker)
+var eqDados = null, eqFiltro = 'abertas', eqEsperando = false;
+var EQ_COR = { ok: '#39FF88', atencao: '#FFD166', erro: '#FF3D71' };
+var EQ_GRAV = { alta: '#FF3D71', media: '#FFD166', baixa: '#7AA7FF' };
+var EQ_NOME = { vigia: 'Vigia', coordenador: 'Coordenador', thiago: 'Você' };
+function eqTexto(t) {
+  // markdown simples: **negrito**, listas e quebras de linha
+  return escaparHtmlProc(t || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^\s*[-•]\s+/gm, '• ').replace(/\n/g, '<br>');
+}
+function eqRender() {
+  if (!eqDados) return;
+  var agora = eqDados.agora || Date.now();
+  document.getElementById('eq-atualizado').textContent = 'atualizado ' + ceTempoRelativo(agora);
+  document.getElementById('eq-bots').innerHTML = (eqDados.bots || []).map(function(b) {
+    var parado = agora - (b.visto || 0) > 15 * 60000;
+    var cor = parado ? '#FF3D71' : (EQ_COR[b.status] || '#79899F');
+    return '<div class="eq-bot ce-cut" style="--b-cor:' + cor + '"><div class="eq-bot-top"><i></i>' + escaparHtmlProc(EQ_NOME[b.bot] || b.bot) + '<small>' + (parado ? 'sem sinal ' : 'visto ') + ceTempoRelativo(b.visto) + '</small></div>'
+      + '<div class="eq-bot-det">' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço EquipeBots pode ter parado' : (b.detalhe || '')) + '</div>'
+      + '<div class="eq-bot-papel">' + escaparHtmlProc(b.papel || '') + '</div></div>';
+  }).join('') || '<div class="ce-empty">Nenhum bot deu sinal ainda.</div>';
+  var cx = document.getElementById('eq-msgs');
+  var noFim = cx.scrollHeight - cx.scrollTop - cx.clientHeight < 60;
+  var msgs = eqDados.mensagens || [];
+  cx.innerHTML = (msgs.length ? msgs.map(function(m) {
+    var eu = m.de === 'thiago';
+    return '<div class="eq-msg ' + (eu ? 'eu' : 'bot') + '"><small>' + escaparHtmlProc(EQ_NOME[m.de] || m.de) + ' · ' + ceData(m.criado) + '</small>' + eqTexto(m.texto) + '</div>';
+  }).join('') : '<div class="ce-empty">Mande uma mensagem para o Coordenador.</div>')
+    + (eqEsperando ? '<div class="eq-msg bot pensando">Coordenador está pensando…</div>' : '');
+  if (noFim || eqEsperando) cx.scrollTop = cx.scrollHeight;
+  var ts = (eqDados.tarefas || []).filter(function(t) { return eqFiltro === 'todas' || t.status === 'aberta' || t.status === 'em_andamento'; });
+  var abertas = (eqDados.tarefas || []).filter(function(t) { return t.status === 'aberta' || t.status === 'em_andamento'; }).length;
+  var badge = document.getElementById('badgeEquipe');
+  if (badge) { badge.style.display = abertas ? '' : 'none'; badge.textContent = abertas; }
+  document.querySelectorAll('#eq-filtros .ce-chip').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === eqFiltro); });
+  document.getElementById('eq-tarefas').innerHTML = ts.length ? ts.map(function(t) {
+    var aberta = t.status === 'aberta' || t.status === 'em_andamento';
+    var cor = aberta ? (EQ_GRAV[t.gravidade] || '#00E5FF') : '#39FF88';
+    return '<div class="eq-t" style="--t-cor:' + cor + '"><div class="eq-t-top"><span class="eq-pill">' + escaparHtmlProc(t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo) + '</span><span class="eq-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
+      + '<div class="eq-t-meta">' + escaparHtmlProc((EQ_NOME[t.de] || t.de) + ' → ' + (EQ_NOME[t.para] || t.para)) + ' · aberta ' + ceData(t.criado) + ' · ' + escaparHtmlProc(t.status.replace('_', ' ')) + (t.atualizado !== t.criado ? ' · atualizada ' + ceTempoRelativo(t.atualizado) : '') + '</div>'
+      + (t.corpo ? '<div class="eq-t-corpo">' + escaparHtmlProc(t.corpo) + '</div>' : '')
+      + (t.resultado ? '<div class="eq-t-corpo">' + escaparHtmlProc(t.resultado) + '</div>' : '')
+      + (aberta ? '<div class="eq-t-acoes"><button type="button" class="ce-chip" data-eq-acao="concluir" data-id="' + t.id + '">✓ Resolvido</button><button type="button" class="ce-chip" data-eq-acao="cancelar" data-id="' + t.id + '">Ignorar</button></div>' : '')
+      + '</div>';
+  }).join('') : '<div class="ce-empty">' + (eqFiltro === 'abertas' ? 'Nenhuma ocorrência aberta — tudo certo.' : 'Quadro vazio.') + '</div>';
+}
+function carregarEquipe() {
+  if (!document.getElementById('panel-equipe').classList.contains('active')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=equipe-painel').then(function(r) { return r.json(); }).then(function(res) {
+    if (!res.ok) { document.getElementById('eq-atualizado').textContent = 'não consegui atualizar: ' + (res.error || '?'); return; }
+    if (eqEsperando && eqDados) {
+      var ultimaBot = (res.mensagens || []).filter(function(m) { return m.de !== 'thiago'; }).pop();
+      if (ultimaBot && ultimaBot.criado > eqEsperando) eqEsperando = false;
+    }
+    eqDados = res; eqRender();
+  }).catch(function() { document.getElementById('eq-atualizado').textContent = 'sem conexão com o servidor'; });
+}
+setInterval(carregarEquipe, 6000);
+setTimeout(carregarEquipe, 1200);
+document.addEventListener('submit', function(ev) {
+  if (!ev.target || ev.target.id !== 'eq-form') return;
+  ev.preventDefault();
+  var inp = document.getElementById('eq-texto'), texto = inp.value.trim();
+  if (!texto) return;
+  var bt = document.getElementById('eq-enviar'); bt.disabled = true;
+  sgdFetch(SGD_WORKER_URL + '?action=equipe-enviar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: texto, para: 'coordenador' }) })
+    .then(function(r) { return r.json(); }).then(function(res) {
+      bt.disabled = false;
+      if (!res.ok) { alert(res.error || 'Não foi possível enviar.'); return; }
+      inp.value = ''; eqEsperando = Date.now(); carregarEquipe();
+    }).catch(function(e) { bt.disabled = false; alert('Erro: ' + e.message); });
+});
+document.addEventListener('click', function(ev) {
+  var f = ev.target.closest && ev.target.closest('#eq-filtros .ce-chip');
+  if (f) { eqFiltro = f.dataset.f; eqRender(); return; }
+  var a = ev.target.closest && ev.target.closest('[data-eq-acao]');
+  if (!a) return;
+  a.disabled = true;
+  sgdFetch(SGD_WORKER_URL + '?action=equipe-tarefa-acao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(a.dataset.id), acao: a.dataset.eqAcao }) })
+    .then(function(r) { return r.json(); }).then(function() { carregarEquipe(); }).catch(function() { a.disabled = false; });
+});
 
 function pararPollingProcessos() {
   if (procPollingTimer) { clearTimeout(procPollingTimer); procPollingTimer = null; }
