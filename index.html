@@ -207,6 +207,43 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-card.is-vazio::before{background:var(--text-dim);}
   .proc-card.is-fora-script{border:2px dashed #f59e0b !important;background:rgba(245,158,11,.04) !important;}
   .proc-card.is-fora-script::before{background:#f59e0b !important;width:6px !important;}
+  /* 07/10/2026: cards com mais informação - situação, origem, viagem desenhada, viagens da pessoa perto da data */
+  .proc-card.is-dup{border:2px solid var(--danger,#dc2626) !important;box-shadow:0 0 0 3px color-mix(in srgb, var(--danger,#dc2626) 18%, transparent);}
+  .proc-card.is-dup::before{background:var(--danger,#dc2626) !important;width:6px !important;}
+  .proc-head-dir{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .proc-sit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap;color:var(--text-muted);}
+  .proc-sit[data-s="a-empenhar"]{color:#16a34a;background:color-mix(in srgb,#16a34a 10%,transparent);}
+  .proc-sit[data-s="guardado"]{color:#2563eb;background:color-mix(in srgb,#2563eb 10%,transparent);}
+  .proc-sit[data-s="bloqueado"]{color:#dc2626;background:color-mix(in srgb,#dc2626 10%,transparent);}
+  .proc-sit[data-s="fora-do-script"]{color:#d97706;background:color-mix(in srgb,#d97706 10%,transparent);}
+  .proc-chegou{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .proc-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 2px;}
+  .proc-tag{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);}
+  .proc-tag.app{color:#0891b2;border-color:color-mix(in srgb,#0891b2 40%,transparent);}
+  .proc-tag.bot{color:#7c3aed;border-color:color-mix(in srgb,#7c3aed 40%,transparent);}
+  .proc-tag.manual{color:#b45309;border-color:color-mix(in srgb,#b45309 40%,transparent);}
+  .proc-tag.dup{color:#fff;background:var(--danger,#dc2626);border-color:var(--danger,#dc2626);}
+  .proc-viagem{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:10px 0 6px;padding:10px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);}
+  .proc-viagem-ponta{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .proc-viagem-ponta.dir{text-align:right;}
+  .proc-viagem-rot{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+  .proc-viagem-data{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);}
+  .proc-viagem-hora{font-size:11.5px;color:var(--text-muted);font-variant-numeric:tabular-nums;}
+  .proc-viagem-meio{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:600;color:var(--text-muted);white-space:nowrap;}
+  .proc-viagem-meio i{font-style:normal;font-size:15px;line-height:1;color:var(--accent);}
+  .proc-viagem-meio.pernoite{color:#7c3aed;}
+  .proc-destino{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--text);margin-bottom:6px;}
+  .proc-destino span{white-space:nowrap;}
+  .proc-hist{margin:8px 0;padding:8px 10px;border-radius:10px;border:1px dashed var(--border);font-size:11.5px;}
+  .proc-hist.tem-dup{border:1.5px solid var(--danger,#dc2626);background:color-mix(in srgb, var(--danger,#dc2626) 6%, transparent);}
+  .proc-hist-tit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;}
+  .proc-hist-lin{display:grid;grid-template-columns:10px 38px 50px minmax(0,1fr) auto;gap:6px;align-items:center;padding:2px 0;font-variant-numeric:tabular-nums;}
+  .proc-hist-lin b{width:8px;height:8px;border-radius:50%;background:var(--text-dim,#9ca3af);display:block;}
+  .proc-hist-lin.mesmo b{background:var(--danger,#dc2626);} .proc-hist-lin.mesmo{color:var(--danger,#dc2626);font-weight:700;}
+  .proc-hist-lin.sobre b{background:#d97706;} .proc-hist-lin.sobre{color:#b45309;font-weight:600;}
+  .proc-hist-lin .q{color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .proc-hist-vazio{color:var(--text-muted);font-size:11px;}
+  .proc-motivo-bloq{margin:6px 0;padding:6px 9px;border-radius:8px;font-size:11.5px;font-weight:600;color:var(--danger,#dc2626);background:color-mix(in srgb, var(--danger,#dc2626) 8%, transparent);}
   .proc-fora-script-box{margin:8px 0 10px;font-size:12px;color:#92400e;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .proc-script-ativo-box{margin:6px 0 8px;}
   .proc-btn-fora-script{padding:6px 12px;background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:11.5px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
@@ -662,7 +699,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.60</span>
+    <span class="header-version">v1.10.61</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2003,11 +2040,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var classeCard = p.erro ? 'is-erro' : (p.ehAgenteSaude ? 'is-agente' : (!descBase ? 'is-vazio' : ''));
     var credorNum = credorPorNome(p.servidor);
     var metaPartes = [];
-    if (credorNum) metaPartes.push('<span>🏷️ Credor <b>' + credorNum + '</b></span>');
-    if (p.placa) metaPartes.push('<span>🚗 ' + escaparHtmlProc(p.placa) + '</span>');
-    if (p.cidade) metaPartes.push('<span>📍 ' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</span>');
-    var periodo = [p.dataSaida, p.horaSaida].filter(Boolean).join(' ') + (p.dataChegada ? (' → ' + [p.dataChegada, p.horaChegada].filter(Boolean).join(' ')) : '');
-    if (periodo.trim()) metaPartes.push('<span>📅 ' + escaparHtmlProc(periodo) + '</span>');
+    // 07/10/2026: placa, destino, datas e credor foram pro bloco da viagem (procViagemHtml)
     if (p.ehRessarcimento) {
       metaPartes.push('<span style="color:#7c3aed;font-weight:600;">💵 Ressarcimento R$ ' + Number(p.valorSugerido || 0).toFixed(2).replace('.', ',') + ' (despesa e centro de custo das Agentes)</span>');
     } else if (p.ehAgenteSaude) {
@@ -2089,16 +2122,26 @@ function renderProcessosCaixa(itens, atualizadoEm) {
           + '<button type="button" class="proc-btn-fora-script" onclick="sgdToggleForaDoScript(' + idx + ')" title="Deixar este processo fora da fila do script automático de empenho">⏸️ Deixar fora do script de empenho</button>'
         + '</div>';
 
-    return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '">'
+    var temDup = (p.historico || []).some(function(h){ return h.mesmoDia; }) || (p.mesmaDataNaCaixa || []).length > 0;
+    if (temDup) classeCard += ' is-dup';
+    var origemTag = p.origem === 'app' ? '<span class="proc-tag app" title="Gerado pelo app do motorista">📱 App</span>'
+      : p.origem === 'bot' ? '<span class="proc-tag bot" title="Gerado pelo bot do Telegram">🤖 Bot</span>'
+      : p.origem === 'manual' ? '<span class="proc-tag manual" title="Feito à mão direto no 1Doc - confira nome, datas e cidade">✍️ Manual</span>' : '';
+    var tipoTag = p.ehRessarcimento ? '<span class="proc-tag">💵 Ressarcimento</span>' : (p.ehAgenteSaude ? '<span class="proc-tag">⚖️ Agente de Saúde</span>' : '<span class="proc-tag">Diária</span>');
+    return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '" data-hash="' + escaparHtmlProc(p.hash || '') + '">'
       + '<div class="proc-head">'
         + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
         + '<div class="proc-headtext">'
           + '<div class="proc-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + '</div>'
           + '<div class="proc-num">' + escaparHtmlProc(p.numeroProcesso || '?') + '</div>'
+          + (p.recebidoEm ? '<div class="proc-chegou">chegou ' + procChegouHa(p.recebidoEm) + '</div>' : '')
         + '</div>'
         + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
       + '</div>'
-      + (p.ehAgenteSaude ? '<span class="proc-badge">⚖️ Agente de Saúde</span><br>' : '')
+      + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + '</div>'
+      + procViagemHtml(p, credorNum)
+      + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
+      + procHistoricoHtml(p)
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
       + statusScriptHtml
       + avisoDuplicataHtml
@@ -2107,6 +2150,72 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     + '</div>';
   }).join('');
   fecharDescricoesEmFila(itens);
+  aplicarSituacaoNosCards();
+}
+// 07/10/2026: peças dos cards novos
+function procChegouHa(recebidoEm) {
+  var m = String(recebidoEm || '').match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if (!m) return '';
+  var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] + 3, +m[5]);
+  return ceTempoRelativo(ms) + ' (' + m[3] + '/' + m[2] + ' ' + m[4] + ':' + m[5] + ')';
+}
+function procDataMs(data, hora) {
+  var d = String(data || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!d) return null;
+  var h = String(hora || '').match(/(\d{1,2}):(\d{2})/);
+  return Date.UTC(+d[3], +d[2] - 1, +d[1], h ? +h[1] : 0, h ? +h[2] : 0);
+}
+function procViagemHtml(p, credorNum) {
+  if (!p.dataSaida && !p.cidade) return '';
+  var a = procDataMs(p.dataSaida, p.horaSaida), b = procDataMs(p.dataChegada || p.dataSaida, p.horaChegada);
+  var noites = (procDataMs(p.dataChegada || p.dataSaida) - procDataMs(p.dataSaida)) / 86400000;
+  var meio = '', pern = false;
+  if (a != null && b != null && b >= a) {
+    if (noites >= 1) { meio = noites + (noites === 1 ? ' noite' : ' noites'); pern = true; }
+    else { var hs = Math.round((b - a) / 3600000); meio = (hs ? hs + 'h · ' : '') + 'sem pernoite'; }
+  } else if (a != null && b != null) meio = '⚠ chegada antes da saída';
+  var curta = function(d) { var m = String(d || '').match(/(\d{1,2})\/(\d{1,2})/); return m ? m[1].padStart(2, '0') + '/' + m[2].padStart(2, '0') : (d || '—'); };
+  var destino = [];
+  if (p.cidade) destino.push('<span>📍 <b>' + escaparHtmlProc(p.cidade + (p.uf ? '/' + p.uf : '')) + '</b>' + (p.clinicaDestino ? ' · ' + escaparHtmlProc(p.clinicaDestino) : '') + '</span>');
+  if (p.placa) destino.push('<span>🚗 ' + escaparHtmlProc(p.placa) + '</span>');
+  if (credorNum) destino.push('<span>🏷️ Credor <b>' + credorNum + '</b></span>');
+  return '<div class="proc-viagem">'
+    + '<div class="proc-viagem-ponta"><span class="proc-viagem-rot">Saída</span><span class="proc-viagem-data">' + escaparHtmlProc(curta(p.dataSaida)) + '</span><span class="proc-viagem-hora">' + escaparHtmlProc(p.horaSaida || '—') + '</span></div>'
+    + '<div class="proc-viagem-meio' + (pern ? ' pernoite' : '') + '"><i>→</i>' + escaparHtmlProc(meio) + '</div>'
+    + '<div class="proc-viagem-ponta dir"><span class="proc-viagem-rot">Chegada</span><span class="proc-viagem-data">' + escaparHtmlProc(curta(p.dataChegada || p.dataSaida)) + '</span><span class="proc-viagem-hora">' + escaparHtmlProc(p.horaChegada || '—') + '</span></div>'
+    + '</div>'
+    + (destino.length ? '<div class="proc-destino">' + destino.join('') + '</div>' : '');
+}
+function procHistoricoHtml(p) {
+  if (p.ehRessarcimento) return '';
+  var h = p.historico || [], naCaixa = p.mesmaDataNaCaixa || [];
+  var primeiro = String(p.servidor || '').trim().split(/\s+/)[0] || 'esta pessoa';
+  var temDup = h.some(function(x){ return x.mesmoDia; }) || naCaixa.length;
+  var linhas = naCaixa.map(function(n) {
+    return '<div class="proc-hist-lin mesmo"><b></b><span>' + escaparHtmlProc((p.dataSaida || '').slice(0, 5)) + '</span><span>caixa</span><span class="q">proc. ' + escaparHtmlProc(n) + '</span><span>⛔ mesma data</span></div>';
+  }).concat(h.map(function(x) {
+    var cls = x.mesmoDia ? ' mesmo' : (x.sobrepoe ? ' sobre' : '');
+    var marca = x.mesmoDia ? '⛔ mesma data' : (x.sobrepoe ? '⚠ dentro da viagem' : (x.pago ? 'pago' : 'empenhado'));
+    return '<div class="proc-hist-lin' + cls + '" title="' + escaparHtmlProc('Empenho ' + x.empenho + ' · processo ' + (x.processo || '?') + (x.chegada ? ' · chegada ' + x.chegada : '')) + '"><b></b><span>' + escaparHtmlProc(String(x.data || '').slice(0, 5)) + '</span><span>' + escaparHtmlProc(x.empenho) + '</span><span class="q">' + escaparHtmlProc(x.cidade || '—') + '</span><span>' + marca + '</span></div>';
+  }));
+  return '<div class="proc-hist' + (temDup ? ' tem-dup' : '') + '"><div class="proc-hist-tit">Viagens de ' + escaparHtmlProc(primeiro) + ' perto de ' + escaparHtmlProc((p.dataSaida || '').slice(0, 5)) + '</div>'
+    + (linhas.length ? linhas.join('') : '<div class="proc-hist-vazio">Nenhuma outra viagem empenhada em ±20 dias.</div>') + '</div>';
+}
+var SIT_ROTULO = { 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
+function aplicarSituacaoNosCards() {
+  var mapa = window._situacaoCaixa || {};
+  document.querySelectorAll('.proc-sit[data-hash]').forEach(function(el) {
+    var s = mapa[el.dataset.hash];
+    if (!s) { el.textContent = '…'; el.removeAttribute('data-s'); return; }
+    el.dataset.s = s.situacao;
+    el.textContent = SIT_ROTULO[s.situacao] || s.situacao;
+    el.title = s.motivo || '';
+  });
+  document.querySelectorAll('.proc-motivo-bloq[data-hash-motivo]').forEach(function(el) {
+    var s = mapa[el.dataset.hashMotivo];
+    if (s && s.situacao === 'bloqueado' && s.motivo) { el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false; }
+    else el.hidden = true;
+  });
 }
 // Casa uma hash de processo com uma linha já lançada na Tabela de Controle (adicionarProcesso
 // já grava hash1doc em cada linha nova — ver pendente.hash1doc na função gerar()).
@@ -2538,6 +2647,9 @@ function atualizarResumoSituacaoCaixa() {
     if (!res || !res.ok || !res.itens) return;
     var visiveis = res.itens.filter(function(p){ return !empenhoJaLancado(p.hash); });
     if (!visiveis.some(function(p){ return p.situacao; })) return;
+    window._situacaoCaixa = {};
+    res.itens.forEach(function(p){ if (p.hash) window._situacaoCaixa[p.hash] = { situacao: p.situacao, motivo: p.motivoBloqueio || '' }; });
+    aplicarSituacaoNosCards();
     var grupos = [
       ['a-empenhar', 'a empenhar', '#16a34a'],
       ['guardado', 'empenhados, esperando encaminhar', '#2563eb'],
@@ -2555,7 +2667,7 @@ function atualizarResumoSituacaoCaixa() {
   })
   .catch(function(){});
 }
-setInterval(atualizarResumoSituacaoCaixa, 60000);
+setInterval(atualizarResumoSituacaoCaixa, 30000);
 setTimeout(atualizarResumoSituacaoCaixa, 2500);
 document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(atualizarResumoSituacaoCaixa, 800); });
 
