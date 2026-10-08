@@ -243,6 +243,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-hist-lin.sobre b{background:#d97706;} .proc-hist-lin.sobre{color:#b45309;font-weight:600;}
   .proc-hist-lin .q{color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .proc-hist-vazio{color:var(--text-muted);font-size:11px;}
+  .proc-conf{margin:8px 0;padding:7px 10px;border-radius:10px;font-size:11.5px;border:1px solid var(--border);}
+  .proc-conf summary{cursor:pointer;font-weight:700;list-style:none;}
+  .proc-conf summary::-webkit-details-marker{display:none;}
+  .proc-conf summary small{font-weight:400;color:var(--text-muted);margin-left:4px;}
+  .proc-conf ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:3px;}
+  .proc-conf li.alerta{color:var(--danger,#dc2626);font-weight:600;} .proc-conf li.atencao{color:#b45309;} .proc-conf li.ok{color:var(--text-muted);}
+  .proc-conf.ok{border-color:color-mix(in srgb,#16a34a 45%,transparent);background:color-mix(in srgb,#16a34a 6%,transparent);} .proc-conf.ok summary{color:#16a34a;}
+  .proc-conf.atencao{border-color:color-mix(in srgb,#d97706 45%,transparent);background:color-mix(in srgb,#d97706 6%,transparent);} .proc-conf.atencao summary{color:#b45309;}
+  .proc-conf.alerta{border-color:color-mix(in srgb,#dc2626 50%,transparent);background:color-mix(in srgb,#dc2626 6%,transparent);} .proc-conf.alerta summary{color:#dc2626;}
+  .proc-conf.pend{color:var(--text-muted);font-size:11px;border-style:dashed;}
   .proc-motivo-bloq{margin:6px 0;padding:6px 9px;border-radius:8px;font-size:11.5px;font-weight:600;color:var(--danger,#dc2626);background:color-mix(in srgb, var(--danger,#dc2626) 8%, transparent);}
   .proc-fora-script-box{margin:8px 0 10px;font-size:12px;color:#92400e;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .proc-script-ativo-box{margin:6px 0 8px;}
@@ -728,7 +738,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.62</span>
+    <span class="header-version">v1.10.63</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -755,7 +765,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="ce-header">
         <div>
           <h2 class="ce-title">EQUIPE DE <span>BOTS</span></h2>
-          <div class="ce-sub">Vigia · Coordenador — pergunte qualquer coisa ao Coordenador</div>
+          <div class="ce-sub">Coordenador · Vigia · Conferente · Pesquisador · Programador — fale com o Coordenador</div>
         </div>
         <div class="ce-atualizado" id="eq-atualizado">carregando…</div>
       </div>
@@ -2208,6 +2218,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
       + procViagemHtml(p, credorNum)
       + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
       + procHistoricoHtml(p)
+      + procConferenciaHtml(p)
       + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
       + statusScriptHtml
       + avisoDuplicataHtml
@@ -2266,6 +2277,18 @@ function procHistoricoHtml(p) {
   }));
   return '<div class="proc-hist' + (temDup ? ' tem-dup' : '') + '"><div class="proc-hist-tit">Viagens de ' + escaparHtmlProc(primeiro) + ' perto de ' + escaparHtmlProc((p.dataSaida || '').slice(0, 5)) + '</div>'
     + (linhas.length ? linhas.join('') : '<div class="proc-hist-vazio">Nenhuma outra viagem empenhada em ±20 dias.</div>') + '</div>';
+}
+// 08/10/2026: resultado do bot CONFERENTE (equipe) no card
+function procConferenciaHtml(p) {
+  var c = p.conferencia;
+  if (!c) return '<div class="proc-conf pend">🤖 Conferente: ainda não conferiu</div>';
+  var cls = c.status === 'pronto' ? 'ok' : (c.status === 'alerta' ? 'alerta' : 'atencao');
+  var tit = c.status === 'pronto' ? '✓ Conferido pelo Conferente — pronto pra empenhar' : (c.status === 'alerta' ? '⛔ Conferente achou problema' : '⚠ Conferente: conferir');
+  var linhas = (c.itens || []).map(function(i) {
+    var ic = i.nivel === 'ok' ? '✓' : (i.nivel === 'alerta' ? '⛔' : '⚠');
+    return '<li class="' + i.nivel + '">' + ic + ' ' + escaparHtmlProc(i.texto) + '</li>';
+  }).join('');
+  return '<details class="proc-conf ' + cls + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul></details>';
 }
 var SIT_ROTULO = { 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
 function aplicarSituacaoNosCards() {
@@ -2627,7 +2650,7 @@ setInterval(carregarEmpenhosAndamento, 15000);
 var eqDados = null, eqFiltro = 'abertas', eqEsperando = false;
 var EQ_COR = { ok: '#39FF88', atencao: '#FFD166', erro: '#FF3D71' };
 var EQ_GRAV = { alta: '#FF3D71', media: '#FFD166', baixa: '#7AA7FF' };
-var EQ_NOME = { vigia: 'Vigia', coordenador: 'Coordenador', thiago: 'Você' };
+var EQ_NOME = { vigia: 'Vigia', coordenador: 'Coordenador', conferente: 'Conferente', pesquisador: 'Pesquisador', programador: 'Programador', thiago: 'Você' };
 function eqTexto(t) {
   // markdown simples: **negrito**, listas e quebras de linha
   return escaparHtmlProc(t || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^\s*[-•]\s+/gm, '• ').replace(/\n/g, '<br>');
