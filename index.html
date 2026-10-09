@@ -808,7 +808,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.65</span>
+    <span class="header-version">v1.10.66</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3714,14 +3714,13 @@ function cpaRenderControle(r, d) {
   var roboFora = r.robo && !r.robo.fim && agora - (r.robo.em || 0) < 5 * 60000 && !(dp && dp.id === r.robo.exec);
   var t = d.tarefa, pedidoAndamento = t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0 && agora - (t.atualizadoEm || 0) < 3 * 3600000;
   var restam = Math.max(0, (g.maxHora || 3) - (g.naUltimaHora || 0));
-  var porque = !agenteOn ? 'O agente do notebook está desligado.' : !g.noExpediente ? 'Fora do expediente.' : ativo ? 'Já tem uma rodada do robô em andamento.' : roboFora ? 'O robô está rodando (iniciado à mão).'
+  var porque = !agenteOn ? 'O agente do notebook está desligado.' : ativo ? 'Já tem uma rodada do robô em andamento.' : roboFora ? 'O robô está rodando (iniciado à mão).'
     : pedidoAndamento ? 'Tem um pedido de ' + t.tipo + ' em andamento: o vigia pegaria ele.' : !restam ? 'Limite de ' + g.maxHora + ' disparos por hora.' : '';
   var bd = document.getElementById('cpa-disparar'), bp = document.getElementById('cpa-parar');
   if (!bd.dataset.enviando) { bd.disabled = !!porque; bd.title = porque || 'Abre o CP no notebook e liga o vigia. Não empenha.'; }
   if (!bp.dataset.enviando) { bp.disabled = !(dp && ['pedido', 'iniciado'].indexOf(dp.status) >= 0); bp.title = bp.disabled ? 'Nenhuma rodada disparada pelo botão em andamento.' : 'Encerra a rodada do robô no notebook.'; }
-  var ex = g.expediente || { de: 7, ate: 19 };
   var linhas = [
-    'Agente do notebook: <b>' + (agenteOn ? 'ligado' : 'desligado' + (d.agenteVistoEm ? ' (' + cpMinAtras(d.agenteVistoEm) + ')' : '')) + '</b> · expediente seg a sex, ' + ex.de + 'h às ' + ex.ate + 'h' + (g.noExpediente ? '' : ' (<b>fora agora</b>)') + ' · <b>' + restam + '</b> de ' + (g.maxHora || 3) + ' disparos livres nesta hora',
+    'Agente do notebook: <b>' + (agenteOn ? 'ligado' : 'desligado' + (d.agenteVistoEm ? ' (' + cpMinAtras(d.agenteVistoEm) + ')' : '')) + '</b> · <b>' + restam + '</b> de ' + (g.maxHora || 3) + ' disparos livres nesta hora',
     dp ? 'Último disparo ' + ceData(dp.pedidoEm) + ': <b>' + escaparHtmlProc(CPA_DISPARO_TXT[dp.status] || dp.status) + '</b>' + (dp.motivo && ['recusado', 'expirado', 'parado'].indexOf(dp.status) >= 0 ? ' — ' + escaparHtmlProc(dp.motivo) : '') : 'Nenhum disparo pelo botão ainda.',
     'O robô só abre o CP e liga o vigia. Empenho continua sendo o seu pedido em <b>Empenhar pendentes</b>.'
   ];
