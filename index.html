@@ -678,6 +678,17 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .cpa .ce-panel{margin-bottom:12px;}
   .cpa-head-dir{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .cpa-tel{grid-template-columns:repeat(4,1fr);}
+  .cpa-controle{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;}
+  .cpa-ctl-bts{display:flex;gap:8px;flex-wrap:wrap;}
+  .cpa-bt{--b:var(--ce-cyan);font-family:'Chakra Petch',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:8px 16px;border:1px solid var(--b);color:var(--b);background:color-mix(in srgb, var(--b) 12%, transparent);cursor:pointer;
+    clip-path:polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));}
+  .cpa-bt:hover:not(:disabled){background:var(--b);color:var(--ce-bg);}
+  .cpa-bt:focus-visible{outline:2px solid var(--b);outline-offset:2px;}
+  .cpa-bt:disabled{opacity:.4;cursor:not-allowed;}
+  .cpa-bt-parar{--b:var(--ce-danger);}
+  .cpa-ctl-info{flex:1;min-width:220px;font-size:.68rem;color:var(--ce-muted);line-height:1.55;}
+  .cpa-ctl-info b{color:var(--ce-text);font-weight:600;}
   .cpa-tel .ce-tile-value{font-size:1.05rem;font-family:'Chakra Petch',sans-serif;}
   .cpa-eta{font-size:.66rem;color:var(--ce-amber);font-variant-numeric:tabular-nums;}
   .cpa-eta b{color:#fff;font-weight:600;}
@@ -797,7 +808,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.64</span>
+    <span class="header-version">v1.10.65</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1296,6 +1307,14 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         </div>
       </div>
 
+      <div class="ce-panel ce-cut cpa-controle">
+        <div class="cpa-ctl-bts">
+          <button type="button" class="cpa-bt cpa-bt-ir" id="cpa-disparar">▶ Disparar robô</button>
+          <button type="button" class="cpa-bt cpa-bt-parar" id="cpa-parar">■ Parar robô</button>
+        </div>
+        <div class="cpa-ctl-info" id="cpa-ctl-info">carregando…</div>
+      </div>
+
       <div class="ce-telemetry cpa-tel">
         <div class="ce-tile" id="cpa-tile-vigia"><div class="ce-tile-label">Vigia na sessão do CP</div><div class="ce-tile-value" id="cpa-t-vigia">—</div></div>
         <div class="ce-tile" id="cpa-tile-pedido"><div class="ce-tile-label">Pedido do SGD</div><div class="ce-tile-value" id="cpa-t-pedido">—</div></div>
@@ -1345,8 +1364,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="ce-panel ce-cut">
         <div class="ce-panel-head"><div class="ce-panel-title">Histórico das rodadas</div><span class="ce-atualizado">tempos de cada etapa — é daqui que sai o tempo estimado</span></div>
         <div class="cpa-hist-wrap"><table class="cpa-hist">
-          <thead><tr><th>Início</th><th>Robô até o vigia</th><th>Lote</th><th>Feitos</th><th>Total</th><th>Resultado</th></tr></thead>
-          <tbody id="cpa-hist"><tr><td colspan="6" class="ce-empty">Carregando…</td></tr></tbody>
+          <thead><tr><th>Início</th><th>Disparo</th><th>Robô até o vigia</th><th>Lote</th><th>Feitos</th><th>Total</th><th>Resultado</th></tr></thead>
+          <tbody id="cpa-hist"><tr><td colspan="7" class="ce-empty">Carregando…</td></tr></tbody>
         </table></div>
       </div>
     </div>
@@ -3617,7 +3636,10 @@ function cpaRenderFoto(r) {
 function cpaProximoPasso(r, d) {
   var l = r.lote, robo = r.robo, t = d.tarefa;
   var vigiaOn = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000;
-  if (robo && robo.erro) return 'O robô parou em <b>' + escaparHtmlProc(robo.erroEtapa || '?') + '</b>: ' + escaparHtmlProc(robo.erro) + '. Confira a foto e rode de novo no notebook.';
+  var dp = d.disparo;
+  if (dp && dp.status === 'pedido') return 'Disparo enviado: esperando o notebook pegar (até 15 s).';
+  if (dp && dp.status === 'parar') return 'Parando o robô no notebook…';
+  if (robo && robo.erro) return 'O robô parou em <b>' + escaparHtmlProc(robo.erroEtapa || '?') + '</b>: ' + escaparHtmlProc(robo.erro) + '. Confira a foto e dispare de novo (▶ Disparar robô).';
   if (l && l.etapa === 'fim-erro') {
     var it = (l.itens || []).find(function(x) { return x.erro; }) || {};
     var e = (d.erros || [])[0] || {};
@@ -3635,7 +3657,8 @@ function cpaProximoPasso(r, d) {
     return 'Lote terminou e os empenhos já foram para o 1Doc. Nada pendente.';
   }
   if (vigiaOn) return 'Vigia ligado. Peça o lote na aba Processos (💼 Empenhar pendentes).';
-  return 'Vigia desligado. Rode o robô no notebook ou cole o comando do vigia na sessão do CP.';
+  if (robo && robo.parado) return 'Robô parado pelo botão. Para recomeçar, use ▶ Disparar robô.';
+  return 'Vigia desligado. Use ▶ Disparar robô (ou cole o comando do vigia na sessão do CP).';
 }
 function cpaRenderOcorr(r, d) {
   document.getElementById('cpa-proximo').innerHTML = '<small>Próximo passo</small>' + cpaProximoPasso(r, d);
@@ -3648,23 +3671,77 @@ function cpaRenderOcorr(r, d) {
     if (!h.erro) oc.push({ q: h.fim, cor: '#39FF88', txt: h.semLote ? 'Robô terminou sem lote' : 'Lote terminou: ' + (h.feitos != null ? h.feitos : '?') + ' de ' + (h.total != null ? h.total : '?') });
   });
   if (r.robo && r.robo.etapas && r.robo.etapas.vigia && r.robo.etapas.vigia.status === 'ok') oc.push({ q: r.robo.etapas.vigia.fim, cor: '#00E5FF', txt: 'Vigia ligado pelo robô em ' + cpaSeg(r.robo.etapas.vigia.fim - r.robo.inicio) });
+  (d.disparos || []).slice(0, 8).forEach(function(x) {
+    oc.push({ q: x.pedidoEm, cor: '#00E5FF', txt: 'Robô disparado pelo botão' });
+    if (['parado', 'expirado', 'recusado', 'cancelado'].indexOf(x.status) >= 0) oc.push({ q: x.fimEm || x.pedidoEm, cor: x.status === 'parado' || x.status === 'cancelado' ? '#FFB454' : '#FF3D71', txt: 'Disparo ' + (CPA_DISPARO_TXT[x.status] || x.status) + (x.motivo && x.status !== 'parado' ? ': ' + x.motivo : '') });
+  });
   oc.sort(function(a, b) { return (b.q || 0) - (a.q || 0); });
   document.getElementById('cpa-ocorr').innerHTML = oc.length ? oc.slice(0, 14).map(function(o) {
     return '<div class="cpa-oc" style="--o:' + o.cor + '"><small>' + ceData(o.q) + '</small>' + escaparHtmlProc(o.txt)
       + (o.jan ? '<div class="cpa-jan">Janelas abertas: ' + escaparHtmlProc(o.jan) + '</div>' : '') + '</div>';
   }).join('') : '<div class="ce-empty">Nenhuma ocorrência.</div>';
 }
+var CPA_DISPARO_TXT = { pedido: 'esperando o notebook pegar', iniciado: 'robô rodando', parar: 'parando…', parado: 'parado pelo botão', terminou: 'terminou', expirado: 'não iniciou (o notebook não pegou)', recusado: 'recusado pelo notebook', cancelado: 'cancelado antes de começar' };
+function cpaDisparoDe(d, exec) { return (d.disparos || []).find(function(x) { return x.id === exec; }) || null; }
 function cpaRenderHist(d) {
-  var h = d.historico || [];
-  document.getElementById('cpa-hist').innerHTML = h.length ? h.slice(0, 20).map(function(x) {
+  var linhas = (d.historico || []).map(function(x) { return { h: x, q: x.inicio }; });
+  // disparos que não viraram rodada (expirado, recusado, cancelado) também entram no histórico
+  (d.disparos || []).forEach(function(x) {
+    if (!(d.historico || []).some(function(h) { return h.roboExec === x.id; }) && ['expirado', 'recusado', 'cancelado'].indexOf(x.status) >= 0) linhas.push({ dp: x, q: x.pedidoEm });
+  });
+  linhas.sort(function(a, b) { return (b.q || 0) - (a.q || 0); });
+  document.getElementById('cpa-hist').innerHTML = linhas.length ? linhas.slice(0, 20).map(function(l) {
+    if (l.dp) {
+      return '<tr><td>' + ceData(l.dp.pedidoEm) + '</td><td>botão</td><td colspan="4" style="color:#79899F">—</td><td><span style="color:#FFB454">' + escaparHtmlProc(CPA_DISPARO_TXT[l.dp.status] || l.dp.status) + (l.dp.motivo ? ': ' + escaparHtmlProc(l.dp.motivo.slice(0, 80)) : '') + '</span></td></tr>';
+    }
+    var x = l.h, dp = x.roboExec ? cpaDisparoDe(d, x.roboExec) : null;
     var robo = x.etapas && Object.keys(x.etapas).length ? Object.keys(x.etapas).reduce(function(a, k) { return a + x.etapas[k]; }, 0) : null;
     var dica = x.etapas ? CPA_ETAPAS.slice(0, 6).filter(function(p) { return x.etapas[p[0]] != null; }).map(function(p) { return p[1] + ' ' + cpaSeg(x.etapas[p[0]]); }).join(' · ') : '';
-    var res = x.erro ? '<span style="color:#FF3D71">parou: ' + escaparHtmlProc(String(x.erro).slice(0, 80)) + '</span>' : (x.semLote ? '<span style="color:#79899F">sem lote</span>' : '<span style="color:#39FF88">ok</span>');
-    return '<tr><td>' + ceData(x.inicio) + '</td><td title="' + escaparHtmlProc(dica) + '">' + (robo != null ? cpaSeg(robo) : 'à mão') + '</td>'
+    var res = x.erro ? '<span style="color:#FF3D71">parou: ' + escaparHtmlProc(String(x.erro).slice(0, 80)) + '</span>'
+      : x.parado ? '<span style="color:#FFB454">parado pelo botão</span>'
+      : (x.semLote ? '<span style="color:#79899F">sem lote</span>' : '<span style="color:#39FF88">ok</span>');
+    var disp = dp ? 'botão ' + ceData(dp.pedidoEm).slice(-5) : (x.roboExec ? 'robô à mão' : 'vigia à mão');
+    return '<tr><td>' + ceData(x.inicio) + '</td><td>' + disp + '</td><td title="' + escaparHtmlProc(dica) + '">' + (robo != null ? cpaSeg(robo) : '—') + '</td>'
       + '<td>' + (x.loteInicio && x.fim ? cpaSeg(x.fim - x.loteInicio) : '—') + '</td><td>' + (x.semLote ? '—' : (x.feitos != null ? x.feitos : '?') + ' de ' + (x.total != null ? x.total : '?')) + '</td>'
       + '<td>' + cpaSeg(x.fim - x.inicio) + '</td><td>' + res + '</td></tr>';
-  }).join('') : '<tr><td colspan="6" class="ce-empty">Nenhuma rodada registrada ainda (o histórico começa com esta versão).</td></tr>';
+  }).join('') : '<tr><td colspan="7" class="ce-empty">Nenhuma rodada registrada ainda.</td></tr>';
 }
+// botões Disparar / Parar: o Worker confere tudo de novo; aqui só desabilita e explica o porquê
+function cpaRenderControle(r, d) {
+  var g = d.disparoRegras || {}, dp = d.disparo, agora = r.agora;
+  var agenteOn = d.agenteVistoEm && agora - d.agenteVistoEm < 60000;
+  var ativo = dp && ['pedido', 'iniciado', 'parar'].indexOf(dp.status) >= 0;
+  var roboFora = r.robo && !r.robo.fim && agora - (r.robo.em || 0) < 5 * 60000 && !(dp && dp.id === r.robo.exec);
+  var t = d.tarefa, pedidoAndamento = t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0 && agora - (t.atualizadoEm || 0) < 3 * 3600000;
+  var restam = Math.max(0, (g.maxHora || 3) - (g.naUltimaHora || 0));
+  var porque = !agenteOn ? 'O agente do notebook está desligado.' : !g.noExpediente ? 'Fora do expediente.' : ativo ? 'Já tem uma rodada do robô em andamento.' : roboFora ? 'O robô está rodando (iniciado à mão).'
+    : pedidoAndamento ? 'Tem um pedido de ' + t.tipo + ' em andamento: o vigia pegaria ele.' : !restam ? 'Limite de ' + g.maxHora + ' disparos por hora.' : '';
+  var bd = document.getElementById('cpa-disparar'), bp = document.getElementById('cpa-parar');
+  if (!bd.dataset.enviando) { bd.disabled = !!porque; bd.title = porque || 'Abre o CP no notebook e liga o vigia. Não empenha.'; }
+  if (!bp.dataset.enviando) { bp.disabled = !(dp && ['pedido', 'iniciado'].indexOf(dp.status) >= 0); bp.title = bp.disabled ? 'Nenhuma rodada disparada pelo botão em andamento.' : 'Encerra a rodada do robô no notebook.'; }
+  var ex = g.expediente || { de: 7, ate: 19 };
+  var linhas = [
+    'Agente do notebook: <b>' + (agenteOn ? 'ligado' : 'desligado' + (d.agenteVistoEm ? ' (' + cpMinAtras(d.agenteVistoEm) + ')' : '')) + '</b> · expediente seg a sex, ' + ex.de + 'h às ' + ex.ate + 'h' + (g.noExpediente ? '' : ' (<b>fora agora</b>)') + ' · <b>' + restam + '</b> de ' + (g.maxHora || 3) + ' disparos livres nesta hora',
+    dp ? 'Último disparo ' + ceData(dp.pedidoEm) + ': <b>' + escaparHtmlProc(CPA_DISPARO_TXT[dp.status] || dp.status) + '</b>' + (dp.motivo && ['recusado', 'expirado', 'parado'].indexOf(dp.status) >= 0 ? ' — ' + escaparHtmlProc(dp.motivo) : '') : 'Nenhum disparo pelo botão ainda.',
+    'O robô só abre o CP e liga o vigia. Empenho continua sendo o seu pedido em <b>Empenhar pendentes</b>.'
+  ];
+  if (porque && agenteOn) linhas.splice(1, 0, '<span style="color:#FFB454">' + escaparHtmlProc(porque) + '</span>');
+  document.getElementById('cpa-ctl-info').innerHTML = linhas.join('<br>');
+}
+function cpaAcaoRobo(acao, botao) {
+  var txt = acao === 'cp-robo-disparar'
+    ? 'Abrir o CP e ligar o vigia?\n\nO robô abre a sessão no notebook, entra no CP e liga o vigia (uns 2 a 3 min). Ele NÃO empenha: depois que o vigia ligar, peça o lote em "Empenhar pendentes".'
+    : 'Parar o robô agora?\n\nA rodada no notebook é encerrada. Se um lote já estiver rodando no CP, o vigia continua nele até terminar.';
+  if (!confirm(txt)) return;
+  botao.disabled = true; botao.dataset.enviando = '1';
+  sgdFetch(SGD_WORKER_URL + '?action=' + acao, { method: 'POST' }).then(function(r) { return r.json(); }).then(function(res) {
+    delete botao.dataset.enviando;
+    if (!res.ok) alert(res.error || 'Não foi possível.');
+    cpaCarregar();
+  }).catch(function(e) { delete botao.dataset.enviando; botao.disabled = false; alert('Erro: ' + e.message); });
+}
+document.getElementById('cpa-disparar').addEventListener('click', function() { cpaAcaoRobo('cp-robo-disparar', this); });
+document.getElementById('cpa-parar').addEventListener('click', function() { cpaAcaoRobo('cp-robo-parar', this); });
 function cpaRenderTiles(r, d) {
   var on = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000, t = d.tarefa, l = r.lote;
   var tile = function(id, txt, cor) { document.getElementById('cpa-t-' + id).textContent = txt; document.getElementById('cpa-tile-' + id).style.setProperty('--tile-glow', cor); };
@@ -3698,6 +3775,7 @@ function cpaRender() {
   if (!cpaDados) return;
   var d = cpaDados, r = cpaRodada(d), passos = cpaPassos(r, d);
   document.getElementById('cpa-atualizado').textContent = 'atualizado ' + ceTempoRelativo(d.agora);
+  cpaRenderControle(r, d);
   cpaRenderTiles(r, d);
   cpaRenderTrilha(r, d, passos);
   cpaRenderProcs(r);
