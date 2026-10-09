@@ -674,6 +674,65 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eq-t-acoes{display:flex;gap:6px;margin-top:6px;}
   .eq-t-acoes button{font-size:.6rem;padding:3px 8px;}
   @media (max-width:860px){ .eq-grid{grid-template-columns:1fr;} .eq-msgs{height:340px;} }
+  /* 10/10/2026: aba Acompanhamento do CP (tokens da Central de Empenhos; tudo preso em .cpa) */
+  .cpa .ce-panel{margin-bottom:12px;}
+  .cpa-head-dir{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .cpa-tel{grid-template-columns:repeat(4,1fr);}
+  .cpa-tel .ce-tile-value{font-size:1.05rem;font-family:'Chakra Petch',sans-serif;}
+  .cpa-eta{font-size:.66rem;color:var(--ce-amber);font-variant-numeric:tabular-nums;}
+  .cpa-eta b{color:#fff;font-weight:600;}
+  .cpa-trilha{list-style:none;margin:0;padding:12px 14px 10px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px;}
+  .cpa-step{--s:#4B5A6F;position:relative;padding:9px 10px 8px 13px;background:rgba(255,255,255,.025);border:1px solid color-mix(in srgb, var(--s) 45%, transparent);
+    clip-path:polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));min-height:74px;display:flex;flex-direction:column;justify-content:space-between;}
+  .cpa-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--s);box-shadow:0 0 8px var(--s);}
+  .cpa-step-n{font-size:.56rem;color:var(--ce-muted);letter-spacing:.06em;}
+  .cpa-step-nome{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:.8rem;color:#fff;}
+  .cpa-step-rod{display:flex;justify-content:space-between;gap:4px;font-size:.6rem;margin-top:4px;white-space:nowrap;}
+  .cpa-step-rod span:first-child{color:var(--ce-amber);font-variant-numeric:tabular-nums;}
+  .cpa-step-rod span:last-child{color:var(--s);font-family:'Chakra Petch',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.04em;text-align:right;}
+  .cpa-step.ok{--s:var(--ce-ok);}
+  .cpa-step.cur{--s:var(--ce-warn);background:color-mix(in srgb, var(--ce-warn) 9%, transparent);}
+  .cpa-step.cur::before{animation:ce-pulse 1.3s ease-in-out infinite;}
+  .cpa-step.fail{--s:var(--ce-danger);background:color-mix(in srgb, var(--ce-danger) 10%, transparent);}
+  .cpa-step.voce{--s:var(--ce-amber);}
+  .cpa-step.pulou{--s:#4B5A6F;opacity:.55;}
+  .cpa-step.pend{opacity:.6;}
+  .cpa-barra{height:4px;margin:0 14px 12px;background:rgba(255,255,255,.06);overflow:hidden;}
+  .cpa-barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ce-ok),var(--ce-cyan),var(--ce-amber));box-shadow:0 0 8px rgba(0,229,255,.6);transition:width .5s;}
+  .cpa-grid{display:grid;grid-template-columns:1.15fr 1.25fr 1fr;gap:12px;align-items:stretch;}
+  .cpa-grid > .ce-panel{display:flex;flex-direction:column;min-height:420px;}
+  .cpa-procs,.cpa-ocorr{flex:1;overflow-y:auto;max-height:520px;}
+  .cpa-proc{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);position:relative;font-size:.74rem;}
+  .cpa-proc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--p);box-shadow:0 0 8px var(--p);}
+  .cpa-proc-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+  .cpa-proc-top b{font-family:'Orbitron',sans-serif;font-size:.74rem;color:#fff;}
+  .cpa-proc-top small{color:var(--ce-muted);font-size:.62rem;}
+  .cpa-proc-serv{color:var(--ce-text);margin:2px 0 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cpa-pills{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;}
+  .cpa-pill{--c:#79899F;font-family:'Chakra Petch',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.03em;padding:3px 7px;
+    border:1px solid color-mix(in srgb, var(--c) 45%, transparent);color:var(--c);background:color-mix(in srgb, var(--c) 10%, transparent);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cpa-pill.ok{--c:var(--ce-ok);} .cpa-pill.cur{--c:var(--ce-warn);animation:ce-pulse 1.6s ease-in-out infinite;}
+  .cpa-pill.fail{--c:var(--ce-danger);} .cpa-pill.voce{--c:var(--ce-amber);}
+  .cpa-foto{flex:1;display:flex;align-items:center;justify-content:center;background:#020408;position:relative;min-height:260px;}
+  .cpa-foto img{max-width:100%;max-height:440px;display:block;cursor:zoom-in;}
+  .cpa-foto-tag{position:absolute;right:10px;bottom:10px;font-size:.62rem;padding:3px 9px;background:rgba(7,9,13,.88);border:1px solid var(--t,var(--ce-amber));color:var(--t,var(--ce-amber));}
+  .cpa-foto-nota{font-size:.6rem;color:var(--ce-muted);padding:8px 14px;border-top:1px solid rgba(255,255,255,.06);line-height:1.45;}
+  .cpa-proximo{margin:12px 14px 6px;padding:10px 12px;border:1px solid var(--ce-cyan);background:linear-gradient(135deg, rgba(0,229,255,.1), rgba(255,180,84,.05));
+    clip-path:polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));font-size:.74rem;color:#fff;line-height:1.45;}
+  .cpa-proximo small{display:block;font-family:'Chakra Petch',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ce-amber);margin-bottom:3px;}
+  .cpa-oc{margin:6px 14px;padding:7px 10px;border-left:2px solid var(--o);background:rgba(255,255,255,.025);font-size:.68rem;line-height:1.4;}
+  .cpa-oc small{display:block;color:var(--ce-muted);font-size:.58rem;margin-bottom:2px;}
+  .cpa-oc .cpa-jan{margin-top:4px;color:var(--ce-muted);font-size:.6rem;}
+  .cpa-hist-wrap{overflow-x:auto;}
+  .cpa-hist{width:100%;border-collapse:collapse;font-size:.7rem;font-variant-numeric:tabular-nums;}
+  .cpa .cpa-hist thead{background:transparent;}
+  .cpa .cpa-hist tr:hover td{background:rgba(0,229,255,.04);}
+  .cpa .cpa-hist th{background:rgba(255,255,255,.03);font-family:'Chakra Petch',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ce-muted);text-align:left;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .cpa-hist td{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ce-text);white-space:nowrap;}
+  @media (max-width:1300px){ .cpa-trilha{grid-template-columns:repeat(4,1fr);} .cpa-grid{grid-template-columns:1fr 1fr;} .cpa-grid > .ce-panel:last-child{grid-column:1 / -1;} }
+  @media (max-width:760px){ .ce-telemetry.cpa-tel{grid-template-columns:repeat(2,1fr);} .cpa-trilha{grid-template-columns:repeat(2,1fr);} .cpa-grid{grid-template-columns:1fr;} .cpa-grid > .ce-panel{min-height:0;} }
+  @media (prefers-reduced-motion: reduce){ .cpa-step.cur::before,.cpa-pill.cur{animation:none;} }
 
   @media (max-width:760px){
     .ce-telemetry{grid-template-columns:1fr;}
@@ -738,7 +797,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.63</span>
+    <span class="header-version">v1.10.64</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -751,7 +810,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn" id="tabTabela">📊 Tabela de Controle <span class="tab-badge" id="badgeCount">0</span></button>
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabProcessos">📋 Processos</button>
-    <button class="tab-btn" id="tabManutencao">🔧 Manutenção</button>
+    <button class="tab-btn" id="tabAcompCP">📡 Acompanhamento CP <span class="tab-badge" id="badgeAcompCP" style="display:none"></span></button>
     <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
     <button class="tab-btn" id="tabPC">📄 Prestação de Contas <span class="tab-badge" id="badgePCCount">0</span></button>
   </div>
@@ -1221,15 +1280,74 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     </div>
   </div>
 
-  <div class="tab-panel" id="panel-manutencao">
-    <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>🔧 Manutenção — falhas de geração já investigadas</span>
-        <button id="man-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Atualizar</button>
+  <!-- 10/10/2026: ACOMPANHAMENTO DO CP no lugar da aba Manutenção (não usada mais). Robô do notebook
+       (sessão → vigia), lote do CP e anexo no 1Doc numa tela só. Dados: rota cp-acompanhamento. -->
+  <div class="tab-panel" id="panel-acomp-cp">
+    <div class="ce cpa" id="cpa">
+      <div class="ce-header">
+        <div>
+          <h2 class="ce-title">ACOMPANHAMENTO DO <span>CP</span></h2>
+          <div class="ce-sub">Robô · vigia · lote · 1Doc — cada rodada ao vivo</div>
+        </div>
+        <div class="cpa-head-dir">
+          <button type="button" class="ce-chip" id="cpa-avisos" title="Aviso do navegador quando o vigia liga, sai empenho, dá erro ou o lote termina (só com o SGD aberto; o Telegram avisa sempre)">🔔 Avisos: desligados</button>
+          <button type="button" class="ce-chip" id="cpa-ir-processos" title="Pedir o lote ou a prestação de contas">Pedir lote ›</button>
+          <span class="ce-atualizado" id="cpa-atualizado">carregando…</span>
+        </div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px;">Quando uma diária falha ao gerar processo automaticamente, o achado (causa) e o fix proposto aparecem aqui pra revisão — nada é aplicado sozinho.</p>
-      <div id="man-lista" style="max-height:65vh;overflow-y:auto;">
-        <p style="color:var(--text-muted);">Clique em 🔄 Atualizar para carregar.</p>
+
+      <div class="ce-telemetry cpa-tel">
+        <div class="ce-tile" id="cpa-tile-vigia"><div class="ce-tile-label">Vigia na sessão do CP</div><div class="ce-tile-value" id="cpa-t-vigia">—</div></div>
+        <div class="ce-tile" id="cpa-tile-pedido"><div class="ce-tile-label">Pedido do SGD</div><div class="ce-tile-value" id="cpa-t-pedido">—</div></div>
+        <div class="ce-tile" id="cpa-tile-lote"><div class="ce-tile-label">Lote · feitos</div><div class="ce-tile-value" id="cpa-t-lote">—</div></div>
+        <div class="ce-tile" id="cpa-tile-tempo" style="--tile-glow:#FFB454"><div class="ce-tile-label">Rodada · decorrido</div><div class="ce-tile-value" id="cpa-t-tempo">—</div></div>
+      </div>
+
+      <div class="ce-panel ce-cut cpa-trilha-painel">
+        <div class="ce-panel-head">
+          <div class="ce-panel-title">Trilha da rodada</div>
+          <div class="cpa-eta" id="cpa-eta">—</div>
+        </div>
+        <ol class="cpa-trilha" id="cpa-trilha"></ol>
+        <div class="cpa-barra"><i id="cpa-barra"></i></div>
+      </div>
+
+      <div class="cpa-grid">
+        <div class="ce-panel ce-cut">
+          <div class="ce-panel-head">
+            <div class="ce-panel-title">Processos do lote</div>
+            <div class="ce-legend">
+              <span style="color:#39FF88"><i style="background:#39FF88"></i>Feito</span>
+              <span style="color:#FFD166"><i style="background:#FFD166"></i>Agora</span>
+              <span style="color:#FFB454"><i style="background:#FFB454"></i>Com você</span>
+              <span style="color:#FF3D71"><i style="background:#FF3D71"></i>Falhou</span>
+            </div>
+          </div>
+          <div class="cpa-procs" id="cpa-procs"><div class="ce-empty">Carregando…</div></div>
+        </div>
+
+        <div class="ce-panel ce-cut">
+          <div class="ce-panel-head">
+            <div class="ce-panel-title">Última foto da etapa</div>
+            <span class="ce-atualizado" id="cpa-foto-quando"></span>
+          </div>
+          <div class="cpa-foto" id="cpa-foto"><div class="ce-empty">Sem foto nesta rodada.</div></div>
+          <div class="cpa-foto-nota">Tela do navegador do robô no notebook, só para conferência. Dentro da sessão do CP não se tira foto (o antivírus da Prefeitura bloqueia); lá vale o texto das janelas abertas, nas ocorrências.</div>
+        </div>
+
+        <div class="ce-panel ce-cut">
+          <div class="ce-panel-head"><div class="ce-panel-title">Ocorrências e próximo passo</div></div>
+          <div class="cpa-proximo" id="cpa-proximo"></div>
+          <div class="cpa-ocorr" id="cpa-ocorr"></div>
+        </div>
+      </div>
+
+      <div class="ce-panel ce-cut">
+        <div class="ce-panel-head"><div class="ce-panel-title">Histórico das rodadas</div><span class="ce-atualizado">tempos de cada etapa — é daqui que sai o tempo estimado</span></div>
+        <div class="cpa-hist-wrap"><table class="cpa-hist">
+          <thead><tr><th>Início</th><th>Robô até o vigia</th><th>Lote</th><th>Feitos</th><th>Total</th><th>Resultado</th></tr></thead>
+          <tbody id="cpa-hist"><tr><td colspan="6" class="ce-empty">Carregando…</td></tr></tbody>
+        </table></div>
       </div>
     </div>
   </div>
@@ -1623,8 +1741,8 @@ function formatarHora(s){ return s||''; }
 // ═══════════════════════════════════════════════════════
 // ABAS
 // ═══════════════════════════════════════════════════════
-var allPanels = ['panel-equipe','panel-gerador','panel-tabela','panel-relatorio','panel-processos','panel-manutencao','panel-solicitacoes','panel-pc'];
-var allTabs = ['tabEquipe','tabGerador','tabTabela','tabRelatorio','tabProcessos','tabManutencao','tabSolicitacoes','tabPC'];
+var allPanels = ['panel-equipe','panel-gerador','panel-tabela','panel-relatorio','panel-processos','panel-acomp-cp','panel-solicitacoes','panel-pc'];
+var allTabs = ['tabEquipe','tabGerador','tabTabela','tabRelatorio','tabProcessos','tabAcompCP','tabSolicitacoes','tabPC'];
 function switchTab(panelId, tabId) {
   allPanels.forEach(function(p){ document.getElementById(p).classList.remove('active'); });
   allTabs.forEach(function(t){ document.getElementById(t).classList.remove('active'); });
@@ -1636,7 +1754,7 @@ document.getElementById('tabEquipe').addEventListener('click', function() { swit
 document.getElementById('tabTabela').addEventListener('click', function() { switchTab('panel-tabela','tabTabela'); renderTabela(); });
 document.getElementById('tabRelatorio').addEventListener('click', function() { switchTab('panel-relatorio','tabRelatorio'); renderRelatorio(); });
 document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); carregarResumoTriagemMarcos(); });
-document.getElementById('tabManutencao').addEventListener('click', function() { switchTab('panel-manutencao','tabManutencao'); carregarManutencao(); });
+document.getElementById('tabAcompCP').addEventListener('click', function() { switchTab('panel-acomp-cp','tabAcompCP'); cpaCarregar(); cpaCarregarCentral(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 
 // ═══════════════════════════════════════════════════════
@@ -3324,63 +3442,305 @@ function escanearCaixaMarcos() {
 }
 document.getElementById('btn-triagem-marcos') && document.getElementById('btn-triagem-marcos').addEventListener('click', escanearCaixaMarcos);
 
-function carregarManutencao() {
-  var lista = document.getElementById('man-lista');
-  lista.innerHTML = '<p style="color:var(--text-muted);">Carregando...</p>';
-  sgdFetch(SGD_WORKER_URL + '?action=manutencao-listar')
-  .then(function(r){ return r.json(); })
-  .then(function(res){
-    if (!res.ok || !res.itens || res.itens.length === 0) {
-      lista.innerHTML = '<p style="color:var(--text-muted);">Nenhuma falha investigada ainda — apareceria aqui assim que o diagnóstico automático terminasse.</p>';
-      return;
-    }
-    var corPorStatus = {
-      pendente: '#f59e0b', aprovado: '#16a34a', rejeitado: '#dc2626', aplicado: '#2563eb'
-    };
-    lista.innerHTML = res.itens.map(function(m){
-      var cor = corPorStatus[m.status] || 'var(--text-muted)';
-      var origemTag = m.origem === 'saudefrota' ? '📱 App' : '🤖 Bot';
-      var quando = m.criadoEm ? new Date(m.criadoEm).toLocaleString('pt-BR') : '';
-      return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">'
-          +'<div>'
-            +'<span style="font-weight:600;">'+(m.nome||'?')+'</span> '
-            +'<span style="color:var(--text-muted);font-size:12px;">'+(m.dataSaida||'')+' · '+(m.cidade||'')+' · '+origemTag+'</span>'
-          +'</div>'
-          +'<span style="background:'+cor+'22;color:'+cor+';border:1px solid '+cor+'55;font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;white-space:nowrap;">'+(m.status||'pendente')+'</span>'
-        +'</div>'
-        +(m.erro ? '<div style="margin-top:8px;font-size:12px;color:var(--danger);"><b>Erro:</b> '+m.erro.replace(/</g,'&lt;').slice(0,300)+'</div>' : '')
-        +(m.diagnostico ? '<div style="margin-top:6px;font-size:12px;"><b>Diagnóstico:</b> '+m.diagnostico.replace(/</g,'&lt;')+'</div>' : '')
-        +(m.fixProposto ? '<pre style="margin-top:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;">'+m.fixProposto.replace(/</g,'&lt;')+'</pre>' : '')
-        +'<div style="margin-top:8px;font-size:11px;color:var(--text-dim);">'+quando+'</div>'
-        +(m.status === 'pendente' ? (
-          '<div style="margin-top:8px;display:flex;gap:6px;">'
-            +'<button onclick="marcarManutencao(\''+m.chave+'\',\'aprovado\')" style="padding:6px 12px;background:rgba(22,163,74,.12);color:#16a34a;border:1px solid rgba(22,163,74,.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">✅ Aprovado — vou aplicar</button>'
-            +'<button onclick="marcarManutencao(\''+m.chave+'\',\'rejeitado\')" style="padding:6px 12px;background:var(--surface2);color:var(--danger);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">❌ Não aplicar</button>'
-          +'</div>'
-        ) : '')
-      +'</div>';
-    }).join('');
-  })
-  .catch(function(e){
-    lista.innerHTML = '<p style="color:var(--danger);">Erro ao carregar: '+e.message+'</p>';
+// 10/10/2026: ABA ACOMPANHAMENTO DO CP (no lugar da Manutenção). Junta numa tela o robô do notebook
+// (sessão → vigia, cp_robo_status), o lote do CP (cp_lote_status com os itens), as ocorrências
+// (cp_lote_erro) e o anexo no 1Doc (Central de Empenhos). Atualiza a cada 4 s com a aba aberta.
+var CPA_ETAPAS = [
+  ['sessao', 'Sessão'], ['impressora', 'Impressora'], ['cp', 'CP'], ['login', 'Login'],
+  ['emissao', 'Emissão'], ['vigia', 'Vigia'], ['lote', 'Lote'], ['onedoc', '1Doc']
+];
+var cpaDados = null, cpaCentral = null, cpaFotoEm = null, cpaFotoUrl = null, cpaAnterior = null;
+function cpaAtiva() { var p = document.getElementById('panel-acomp-cp'); return p && p.classList.contains('active'); }
+function cpaSeg(ms) {
+  if (ms == null || ms < 0) return '—';
+  var s = Math.round(ms / 1000);
+  if (s < 60) return s + ' s';
+  var m = Math.floor(s / 60), r = s % 60;
+  if (m < 60) return m + ' min' + (r ? ' ' + String(r).padStart(2, '0') + ' s' : '');
+  return Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') + ' min';
+}
+function cpaCurto(ms) {
+  if (ms == null || ms < 0) return '--';
+  var s = Math.round(ms / 1000);
+  return s < 60 ? s + 's' : s < 3600 ? Math.floor(s / 60) + 'm' + String(s % 60).padStart(2, '0') + 's' : Math.floor(s / 3600) + 'h' + String(Math.floor(s / 60) % 60).padStart(2, '0');
+}
+function cpaNumEmp(v) { return String(v || '').replace(/\D/g, '').replace(/^0+/, ''); }
+function cpaItemCentral(empenho) {
+  var n = cpaNumEmp(empenho);
+  if (!n || !cpaCentral) return null;
+  return (cpaCentral.itens || []).find(function(it) { return cpaNumEmp(it.empenho) === n; }) || null;
+}
+// A rodada atual: o robô (se rodou nas últimas 3 h) e/ou o lote que começou junto ou depois dele.
+function cpaRodada(d) {
+  var agora = d.agora || Date.now();
+  var robo = d.robo && agora - (d.robo.inicio || 0) < 3 * 3600000 ? d.robo : null;
+  var lote = d.lote && d.lote.inicio && (!robo || d.lote.inicio >= robo.inicio - 60000) && agora - d.lote.inicio < 12 * 3600000 ? d.lote : null;
+  var inicio = robo ? robo.inicio : (lote ? lote.inicio : null);
+  return { robo: robo, lote: lote, inicio: inicio, agora: agora };
+}
+// Tempos médios por etapa das últimas rodadas (histórico do Worker) - base do tempo estimado.
+function cpaMedias(hist) {
+  var soma = {}, n = {}, porProc = [], fim1doc = null;
+  (hist || []).slice(0, 10).forEach(function(h) {
+    Object.keys(h.etapas || {}).forEach(function(k) { soma[k] = (soma[k] || 0) + h.etapas[k]; n[k] = (n[k] || 0) + 1; });
+    if (h.feitos && h.fim && h.loteInicio && !h.erro) porProc.push((h.fim - h.loteInicio) / h.feitos);
   });
+  var m = {};
+  Object.keys(soma).forEach(function(k) { m[k] = soma[k] / n[k]; });
+  m.porProcesso = porProc.length ? porProc.reduce(function(a, b) { return a + b; }, 0) / porProc.length : 120000;
+  return m;
 }
-function marcarManutencao(chave, status) {
-  sgdFetch(SGD_WORKER_URL + '?action=manutencao-marcar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chave: chave, status: status })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(res){
-    if (res.ok) { carregarManutencao(); }
-    else { alert('Erro ao marcar: ' + (res.error||'desconhecido')); }
-  })
-  .catch(function(e){ alert('Erro ao marcar: ' + e.message); });
+function cpaPassos(r, d) {
+  var vigiaOn = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000;
+  var passos = {};
+  CPA_ETAPAS.slice(0, 6).forEach(function(par) {
+    var k = par[0], e = r.robo && r.robo.etapas && r.robo.etapas[k];
+    if (!r.robo) passos[k] = k === 'vigia' && vigiaOn ? { cls: 'ok', txt: 'ligado à mão', t: null } : { cls: 'pulou', txt: k === 'vigia' ? 'desligado' : 'sem robô', t: null };
+    else if (!e) passos[k] = r.robo.fim ? { cls: 'pulou', txt: 'não rodou', t: null } : { cls: 'pend', txt: 'pendente', t: null };
+    else if (e.status === 'erro') passos[k] = { cls: 'fail', txt: 'parou', t: (e.fim || r.agora) - e.inicio };
+    else if (e.status === 'ok') passos[k] = { cls: 'ok', txt: 'ok', t: e.fim - e.inicio };
+    else passos[k] = { cls: r.robo.fim ? 'fail' : 'cur', txt: r.robo.fim ? 'interrompido' : 'agora', t: (r.robo.fim || r.agora) - e.inicio, ativo: !r.robo.fim, desde: e.inicio };
+  });
+  var l = r.lote, t = d.tarefa;
+  if (l) {
+    var fl = l.feitos != null ? l.feitos : '?', tl = l.total != null ? l.total : '?';
+    if (l.etapa === 'fim') passos.lote = { cls: 'ok', txt: fl + '/' + tl, t: l.em - l.inicio };
+    else if (l.etapa === 'fim-erro') passos.lote = { cls: 'fail', txt: 'parou', t: l.em - l.inicio };
+    else passos.lote = { cls: 'cur', txt: fl + '/' + tl, t: r.agora - l.inicio, ativo: true, desde: l.inicio };
+  } else if (t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0 && r.agora - (t.atualizadoEm || 0) < 3 * 3600000) {
+    passos.lote = { cls: 'cur', txt: CP_STATUS_TXT[t.status] || t.status, t: r.agora - t.solicitadoEm, ativo: true, desde: t.solicitadoEm };
+  } else {
+    passos.lote = { cls: vigiaOn ? 'voce' : 'pend', txt: vigiaOn ? 'peça o lote' : 'pendente', t: null };
+  }
+  // 1Doc: os empenhos do lote saem do CP guardados; anexo/assinatura/envio é no botão "Encaminhar"
+  var comEmp = l ? (l.itens || []).filter(function(it) { return it.empenho; }) : [];
+  if (!comEmp.length) passos.onedoc = { cls: 'pend', txt: 'pendente', t: null };
+  else {
+    var enviados = comEmp.filter(function(it) { var c = cpaItemCentral(it.empenho); return c && c.etapas && c.etapas.enviado; }).length;
+    var falhou = comEmp.some(function(it) { var c = cpaItemCentral(it.empenho); return c && c.falhaEnvio; });
+    if (falhou) passos.onedoc = { cls: 'fail', txt: 'falhou', t: null };
+    else if (enviados === comEmp.length) passos.onedoc = { cls: 'ok', txt: enviados + '/' + comEmp.length, t: null };
+    else passos.onedoc = { cls: l.ativo ? 'pend' : 'voce', txt: l.ativo ? enviados + '/' + comEmp.length : 'com você', t: null };
+  }
+  return passos;
 }
-window.marcarManutencao = marcarManutencao;
-document.getElementById('man-atualizar') && document.getElementById('man-atualizar').addEventListener('click', carregarManutencao);
+function cpaRenderTrilha(r, d, passos) {
+  document.getElementById('cpa-trilha').innerHTML = CPA_ETAPAS.map(function(par, i) {
+    var p = passos[par[0]];
+    return '<li class="cpa-step ' + p.cls + '"><span class="cpa-step-n">ETAPA ' + String(i + 1).padStart(2, '0') + '</span>'
+      + '<span class="cpa-step-nome">' + par[1] + '</span>'
+      + '<span class="cpa-step-rod"><span>' + cpaCurto(p.t) + '</span><span>' + escaparHtmlProc(p.txt) + '</span></span></li>';
+  }).join('');
+  // tempo estimado: média das últimas rodadas pras etapas que faltam (o lote conta por processo)
+  var m = cpaMedias(d.historico), estimado = 0, decorrido = r.inicio ? r.agora - r.inicio : 0, restante = 0, temBase = false;
+  var finalizada = r.lote ? !r.lote.ativo : (r.robo ? !!r.robo.fim : true);
+  CPA_ETAPAS.slice(0, 7).forEach(function(par) {
+    var k = par[0], p = passos[k];
+    if (p.cls === 'pulou') return;
+    var med = k === 'lote' ? (r.lote && r.lote.total ? m.porProcesso * r.lote.total : null) : m[k];
+    if (med == null) return;
+    temBase = true;
+    estimado += med;
+    if (p.cls === 'pend' || p.cls === 'voce') restante += med;
+    else if (p.ativo) restante += Math.max(0, med - (r.agora - p.desde));
+  });
+  var eta = document.getElementById('cpa-eta');
+  if (!r.inicio) eta.textContent = 'nenhuma rodada nas últimas horas';
+  else if (finalizada) eta.innerHTML = 'Rodada encerrada · durou <b>' + cpaSeg((r.lote && !r.lote.ativo ? r.lote.em : (r.robo && r.robo.fim) || r.agora) - r.inicio) + '</b>';
+  else eta.innerHTML = (temBase ? 'Estimado <b>' + cpaSeg(estimado) + '</b> · ' : '') + 'Decorrido <b>' + cpaSeg(decorrido) + '</b>' + (temBase ? ' · Restante <b>~' + cpaSeg(restante) + '</b>' : '');
+  var feitas = CPA_ETAPAS.filter(function(par) { var c = passos[par[0]].cls; return c === 'ok' || c === 'pulou'; }).length;
+  var pct = finalizada && r.inicio ? 100 : (temBase && estimado ? Math.min(99, 100 * (estimado - restante) / estimado) : 100 * feitas / CPA_ETAPAS.length);
+  document.getElementById('cpa-barra').style.width = (r.inicio ? pct : 0).toFixed(1) + '%';
+}
+// Pílulas de cada processo, a partir do texto de etapa que o lote manda ("empenho: preenchendo",
+// "liquidacao: gravando", "processo: concluido"...). O Documento de Viagens não tem marcador próprio:
+// fica entre a liquidação gravada e o "processo: concluido"; erro com a janela dele aberta = falhou nele.
+function cpaPills(it, lote) {
+  var et = String(it.etapa || ''), erroEt = String(it.erroEtapa || ''), noDocV = /Documento de Viagens|Lei Autorizativa|Ato da Concess/i.test((it.janelas || '') + ' ' + (it.erro || ''));
+  var atual = lote.ativo && lote.processo === it.processo;
+  var emp, liq, docv, umdoc;
+  if (it.empenho) emp = ['ok', 'Empenho ' + it.empenho];
+  else if (it.erro) emp = ['fail', 'Empenho: falhou'];
+  else emp = [atual ? 'cur' : '', 'Empenho: ' + (atual ? 'emitindo' : 'na fila')];
+  if (it.concluido || (it.erro && noDocV)) liq = ['ok', 'Liquidação: ok'];
+  else if (it.erro && /liquidacao/.test(erroEt)) liq = ['fail', 'Liquidação: falhou'];
+  else if (/^liquidacao/.test(et)) liq = [atual ? 'cur' : '', 'Liquidação: ' + (et.indexOf('gravando') >= 0 ? 'gravando' : 'conferindo')];
+  else liq = ['', 'Liquidação: aguardando'];
+  if (it.concluido) docv = ['ok', 'Doc. Viagens: ok'];
+  else if (it.erro && noDocV) docv = ['fail', 'Doc. Viagens: à mão'];
+  else if (atual && et.indexOf('gravando') >= 0) docv = ['cur', 'Doc. Viagens: a seguir'];
+  else docv = ['', 'Doc. Viagens: aguardando'];
+  var c = cpaItemCentral(it.empenho);
+  if (c && c.falhaEnvio) umdoc = ['fail', '1Doc: ' + c.falhaEnvio];
+  else if (c && c.etapas && c.etapas.autor) umdoc = ['ok', '1Doc: assinado'];
+  else if (c && c.etapas && c.etapas.enviado) umdoc = ['ok', '1Doc: anexado'];
+  else if (it.empenho && !lote.ativo) umdoc = ['voce', '1Doc: encaminhar'];
+  else umdoc = ['', '1Doc: aguardando'];
+  return [emp, liq, docv, umdoc];
+}
+function cpaRenderProcs(r) {
+  var cont = document.getElementById('cpa-procs'), l = r.lote;
+  var itens = l ? (l.itens || []) : [];
+  if (!l) { cont.innerHTML = '<div class="ce-empty">Nenhum lote nesta rodada.</div>'; return; }
+  if (!itens.length) { cont.innerHTML = '<div class="ce-empty">' + (l.ativo ? 'Lote começando…' : 'Este lote é de antes da aba existir — os processos dele não foram guardados um a um.') + '</div>'; return; }
+  cont.innerHTML = itens.slice().reverse().map(function(it) {
+    var ps = cpaPills(it, l);
+    var cor = ps.some(function(p) { return p[0] === 'fail'; }) ? '#FF3D71' : ps.some(function(p) { return p[0] === 'cur'; }) ? '#FFD166' : ps.some(function(p) { return p[0] === 'voce'; }) ? '#FFB454' : ps.every(function(p) { return p[0] === 'ok'; }) ? '#39FF88' : '#4B5A6F';
+    return '<div class="cpa-proc" style="--p:' + cor + '"><div class="cpa-proc-top"><b>' + escaparHtmlProc(it.processo) + '</b><small>' + ceTempoRelativo(it.em) + '</small></div>'
+      + '<div class="cpa-proc-serv">' + escaparHtmlProc(it.servidor || '—') + '</div>'
+      + '<div class="cpa-pills">' + ps.map(function(p) { return '<span class="cpa-pill ' + p[0] + '" title="' + escaparHtmlProc(p[1]) + '">' + escaparHtmlProc(p[1]) + '</span>'; }).join('') + '</div>'
+      + (it.erro ? '<div class="ce-detalhe-inline">⚠ ' + escaparHtmlProc(it.erro) + '</div>' : '') + '</div>';
+  }).join('');
+}
+function cpaRenderFoto(r) {
+  var box = document.getElementById('cpa-foto'), quando = document.getElementById('cpa-foto-quando');
+  var f = r.robo && r.robo.foto;
+  if (!f) { box.innerHTML = '<div class="ce-empty">' + (r.robo ? 'O robô ainda não mandou foto nesta rodada.' : 'Sem robô nesta rodada (vigia ligado à mão não manda foto).') + '</div>'; quando.textContent = ''; cpaFotoEm = null; return; }
+  // erro: a foto do erro fica fixada (a do minuto seguinte não passa por cima)
+  var qual = r.robo.erro ? 'erro' : 'ultima';
+  var chave = qual + ':' + f.em;
+  quando.textContent = ceData(f.em) + ' · ' + (f.nome || f.etapa || '');
+  if (cpaFotoEm === chave) return;
+  cpaFotoEm = chave;
+  sgdFetch(SGD_WORKER_URL + '?action=cp-robo-foto' + (qual === 'erro' ? '&qual=erro' : '')).then(function(res) {
+    if (!res.ok) throw new Error('sem foto');
+    return res.blob();
+  }).then(function(blob) {
+    if (cpaFotoUrl) URL.revokeObjectURL(cpaFotoUrl);
+    cpaFotoUrl = URL.createObjectURL(blob);
+    var rotulo = r.robo.erro ? 'PAROU EM ' + (r.robo.erroEtapa || '?').toUpperCase() + ': ' + r.robo.erro : 'ETAPA ' + String(f.etapa || '').toUpperCase();
+    box.innerHTML = '<img src="' + cpaFotoUrl + '" alt="Tela do robô do CP: ' + escaparHtmlProc(f.nome || f.etapa || '') + '" title="Abrir em tamanho real">'
+      + '<span class="cpa-foto-tag" style="--t:' + (r.robo.erro ? '#FF3D71' : '#FFB454') + '">' + escaparHtmlProc(rotulo.slice(0, 120)) + '</span>';
+    box.querySelector('img').onclick = function() { window.open(cpaFotoUrl, '_blank'); };
+  }).catch(function() { cpaFotoEm = null; box.innerHTML = '<div class="ce-empty">Não consegui baixar a foto.</div>'; });
+}
+function cpaProximoPasso(r, d) {
+  var l = r.lote, robo = r.robo, t = d.tarefa;
+  var vigiaOn = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000;
+  if (robo && robo.erro) return 'O robô parou em <b>' + escaparHtmlProc(robo.erroEtapa || '?') + '</b>: ' + escaparHtmlProc(robo.erro) + '. Confira a foto e rode de novo no notebook.';
+  if (l && l.etapa === 'fim-erro') {
+    var it = (l.itens || []).find(function(x) { return x.erro; }) || {};
+    var e = (d.erros || [])[0] || {};
+    var msg = it.erro || e.mensagem || '', jan = (it.janelas || e.janelas || '');
+    if (/Documento de Viagens|Lei Autorizativa|Ato da Concess/i.test(jan + ' ' + msg)) return 'O Documento de Viagens do empenho <b>' + escaparHtmlProc(it.empenho || e.empenho || '?') + '</b> ficou aberto: complete à mão no CP e depois encaminhe no 1Doc.';
+    return 'O lote parou no processo <b>' + escaparHtmlProc(it.processo || e.processo || '?') + '</b> (' + escaparHtmlProc(it.erroEtapa || e.etapa || '?') + '). Confira no CP se o empenho foi gravado antes de pedir de novo.';
+  }
+  if (l && l.ativo && r.agora - (l.em || 0) > 10 * 60000) return 'O lote está sem sinal há ' + cpMinAtras(l.em).replace('há ', '') + '. A sessão pode ter caído: confira o CP.';
+  if (l && l.ativo) return 'Lote rodando: ' + (l.feitos != null ? l.feitos : '?') + ' de ' + (l.total != null ? l.total : '?') + '. Nada a fazer por enquanto.';
+  if (robo && !robo.fim) return 'O robô está na etapa <b>' + escaparHtmlProc((CPA_ETAPAS.find(function(p) { return p[0] === robo.atual; }) || [0, robo.atual])[1]) + '</b>. Espere o vigia ligar.';
+  if (t && ['pendente', 'pegou', 'abrindo_tela'].indexOf(t.status) >= 0) return 'Pedido feito: ' + escaparHtmlProc(CP_STATUS_TXT[t.status] || t.status) + '.';
+  if (l && l.etapa === 'fim') {
+    var guardados = (l.itens || []).filter(function(x) { var c = cpaItemCentral(x.empenho); return x.empenho && !(c && c.etapas && c.etapas.enviado); }).length;
+    if (guardados) return 'Lote terminou: <b>' + guardados + '</b> empenho(s) guardado(s). Encaminhe na aba Processos (📎 Encaminhar empenhos guardados).';
+    return 'Lote terminou e os empenhos já foram para o 1Doc. Nada pendente.';
+  }
+  if (vigiaOn) return 'Vigia ligado. Peça o lote na aba Processos (💼 Empenhar pendentes).';
+  return 'Vigia desligado. Rode o robô no notebook ou cole o comando do vigia na sessão do CP.';
+}
+function cpaRenderOcorr(r, d) {
+  document.getElementById('cpa-proximo').innerHTML = '<small>Próximo passo</small>' + cpaProximoPasso(r, d);
+  var oc = [];
+  if (r.robo && r.robo.erro) oc.push({ q: r.robo.fim, cor: '#FF3D71', txt: 'Robô parou em ' + (r.robo.erroEtapa || '?') + ': ' + r.robo.erro });
+  (d.erros || []).forEach(function(e) {
+    oc.push({ q: e.quando, cor: '#FF3D71', txt: 'Lote parou · processo ' + (e.processo || '?') + (e.servidor ? ' (' + e.servidor + ')' : '') + (e.empenho ? ' · empenho ' + e.empenho : '') + ' · ' + (e.etapa || '?') + ': ' + (e.mensagem || ''), jan: e.janelas });
+  });
+  (d.historico || []).slice(0, 8).forEach(function(h) {
+    if (!h.erro) oc.push({ q: h.fim, cor: '#39FF88', txt: h.semLote ? 'Robô terminou sem lote' : 'Lote terminou: ' + (h.feitos != null ? h.feitos : '?') + ' de ' + (h.total != null ? h.total : '?') });
+  });
+  if (r.robo && r.robo.etapas && r.robo.etapas.vigia && r.robo.etapas.vigia.status === 'ok') oc.push({ q: r.robo.etapas.vigia.fim, cor: '#00E5FF', txt: 'Vigia ligado pelo robô em ' + cpaSeg(r.robo.etapas.vigia.fim - r.robo.inicio) });
+  oc.sort(function(a, b) { return (b.q || 0) - (a.q || 0); });
+  document.getElementById('cpa-ocorr').innerHTML = oc.length ? oc.slice(0, 14).map(function(o) {
+    return '<div class="cpa-oc" style="--o:' + o.cor + '"><small>' + ceData(o.q) + '</small>' + escaparHtmlProc(o.txt)
+      + (o.jan ? '<div class="cpa-jan">Janelas abertas: ' + escaparHtmlProc(o.jan) + '</div>' : '') + '</div>';
+  }).join('') : '<div class="ce-empty">Nenhuma ocorrência.</div>';
+}
+function cpaRenderHist(d) {
+  var h = d.historico || [];
+  document.getElementById('cpa-hist').innerHTML = h.length ? h.slice(0, 20).map(function(x) {
+    var robo = x.etapas && Object.keys(x.etapas).length ? Object.keys(x.etapas).reduce(function(a, k) { return a + x.etapas[k]; }, 0) : null;
+    var dica = x.etapas ? CPA_ETAPAS.slice(0, 6).filter(function(p) { return x.etapas[p[0]] != null; }).map(function(p) { return p[1] + ' ' + cpaSeg(x.etapas[p[0]]); }).join(' · ') : '';
+    var res = x.erro ? '<span style="color:#FF3D71">parou: ' + escaparHtmlProc(String(x.erro).slice(0, 80)) + '</span>' : (x.semLote ? '<span style="color:#79899F">sem lote</span>' : '<span style="color:#39FF88">ok</span>');
+    return '<tr><td>' + ceData(x.inicio) + '</td><td title="' + escaparHtmlProc(dica) + '">' + (robo != null ? cpaSeg(robo) : 'à mão') + '</td>'
+      + '<td>' + (x.loteInicio && x.fim ? cpaSeg(x.fim - x.loteInicio) : '—') + '</td><td>' + (x.semLote ? '—' : (x.feitos != null ? x.feitos : '?') + ' de ' + (x.total != null ? x.total : '?')) + '</td>'
+      + '<td>' + cpaSeg(x.fim - x.inicio) + '</td><td>' + res + '</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="ce-empty">Nenhuma rodada registrada ainda (o histórico começa com esta versão).</td></tr>';
+}
+function cpaRenderTiles(r, d) {
+  var on = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000, t = d.tarefa, l = r.lote;
+  var tile = function(id, txt, cor) { document.getElementById('cpa-t-' + id).textContent = txt; document.getElementById('cpa-tile-' + id).style.setProperty('--tile-glow', cor); };
+  tile('vigia', on ? 'ligado' : (d.vigiaVivoEm ? 'off · ' + cpMinAtras(d.vigiaVivoEm) : 'desligado'), on ? '#39FF88' : '#79899F');
+  tile('pedido', t && r.agora - (t.atualizadoEm || 0) < 12 * 3600000 ? (t.tipo === 'empenho' ? 'Empenho' : 'Prestação') + ' · ' + (CP_STATUS_TXT[t.status] || t.status) : 'nenhum', t && t.status === 'erro' ? '#FF3D71' : t && t.status === 'concluido' ? '#39FF88' : '#00E5FF');
+  tile('lote', l ? (l.feitos != null ? l.feitos : '?') + ' de ' + (l.total != null ? l.total : '?') : '—', l && l.etapa === 'fim-erro' ? '#FF3D71' : l && !l.ativo ? '#39FF88' : '#FFD166');
+  document.getElementById('cpa-t-tempo').textContent = r.inicio ? cpaSeg(((r.lote && !r.lote.ativo ? r.lote.em : null) || (r.robo && r.robo.fim && !(r.lote && r.lote.ativo) ? r.robo.fim : null) || r.agora) - r.inicio) : '—';
+}
+// Avisos do navegador nos marcos (vigia ligado, empenho gerado, erro, lote concluído). Só com o SGD aberto.
+function cpaAvisosLigados() { try { return localStorage.getItem('cpaAvisos') === '1' && 'Notification' in window && Notification.permission === 'granted'; } catch (e) { return false; } }
+function cpaAvisar(txt) { if (cpaAvisosLigados()) { try { new Notification('SGD · CP', { body: txt, tag: 'sgd-cp-' + txt.slice(0, 30) }); } catch (e) {} } }
+function cpaMarcos(r, d) {
+  var vigiaOk = !!(r.robo && r.robo.etapas && r.robo.etapas.vigia && r.robo.etapas.vigia.status === 'ok');
+  var emps = r.lote ? (r.lote.itens || []).filter(function(x) { return x.empenho; }).map(function(x) { return x.empenho; }) : [];
+  var atual = { exec: r.robo && r.robo.exec, vigiaOk: vigiaOk, roboErro: r.robo && r.robo.erro, loteId: r.lote && r.lote.loteId, loteEtapa: r.lote && r.lote.etapa, emps: emps };
+  var a = cpaAnterior;
+  cpaAnterior = atual;
+  var badge = document.getElementById('badgeAcompCP');
+  var problema = (r.robo && r.robo.erro) || (r.lote && r.lote.etapa === 'fim-erro');
+  badge.style.display = problema ? '' : 'none'; badge.textContent = '!';
+  if (!a) return;
+  if (vigiaOk && !(a.exec === atual.exec && a.vigiaOk)) cpaAvisar('Vigia ligado pelo robô. Pode pedir o lote.');
+  if (atual.roboErro && atual.roboErro !== a.roboErro) cpaAvisar('Robô parou: ' + atual.roboErro);
+  if (atual.loteId === a.loteId) {
+    emps.filter(function(n) { return a.emps.indexOf(n) < 0; }).forEach(function(n) { cpaAvisar('Empenho ' + n + ' gerado no CP.'); });
+    if (atual.loteEtapa !== a.loteEtapa && atual.loteEtapa === 'fim') cpaAvisar('Lote do CP terminou: ' + emps.length + ' empenho(s).');
+    if (atual.loteEtapa !== a.loteEtapa && atual.loteEtapa === 'fim-erro') cpaAvisar('Lote do CP parou. Veja o próximo passo no SGD.');
+  }
+}
+function cpaRender() {
+  if (!cpaDados) return;
+  var d = cpaDados, r = cpaRodada(d), passos = cpaPassos(r, d);
+  document.getElementById('cpa-atualizado').textContent = 'atualizado ' + ceTempoRelativo(d.agora);
+  cpaRenderTiles(r, d);
+  cpaRenderTrilha(r, d, passos);
+  cpaRenderProcs(r);
+  cpaRenderFoto(r);
+  cpaRenderOcorr(r, d);
+  cpaRenderHist(d);
+}
+// roda mesmo com a aba fechada (a cada 20 s) só pra manter os avisos e o "!" da aba; aberta, a cada 4 s
+var cpaUltimaCarga = 0;
+function cpaCarregar() {
+  cpaUltimaCarga = Date.now();
+  sgdFetch(SGD_WORKER_URL + '?action=cp-acompanhamento').then(function(r) { return r.json(); }).then(function(res) {
+    if (!res.ok) { document.getElementById('cpa-atualizado').textContent = 'não consegui atualizar: ' + (res.error || '?'); return; }
+    cpaDados = res;
+    cpaMarcos(cpaRodada(res), res);
+    if (cpaAtiva()) cpaRender();
+  }).catch(function() { document.getElementById('cpa-atualizado').textContent = 'sem conexão com o servidor'; });
+}
+function cpaCarregarCentral() {
+  sgdFetch(SGD_WORKER_URL + '?action=central-empenhos').then(function(r) { return r.json(); }).then(function(res) {
+    if (res.ok) { cpaCentral = res; if (cpaAtiva()) cpaRender(); }
+  }).catch(function() {});
+}
+setInterval(function() {
+  if (!sgdGetToken()) return;
+  if (cpaAtiva() || Date.now() - cpaUltimaCarga > 20000) cpaCarregar();
+}, 4000);
+setInterval(function() { if (cpaAtiva()) cpaCarregarCentral(); }, 20000);
+setInterval(function() { if (cpaAtiva() && cpaDados) { cpaDados.agora = (cpaDados.agora || Date.now()) + 1000; cpaRender(); } }, 1000);
+function cpaAtualizarBotaoAvisos() {
+  document.getElementById('cpa-avisos').textContent = cpaAvisosLigados() ? '🔔 Avisos: ligados' : '🔕 Avisos: desligados';
+}
+document.getElementById('cpa-avisos').addEventListener('click', function() {
+  if (!('Notification' in window)) { alert('Este navegador não mostra avisos.'); return; }
+  if (cpaAvisosLigados()) { try { localStorage.setItem('cpaAvisos', '0'); } catch (e) {} cpaAtualizarBotaoAvisos(); return; }
+  Notification.requestPermission().then(function(p) {
+    if (p !== 'granted') { alert('O navegador não deu permissão para avisos.'); return; }
+    try { localStorage.setItem('cpaAvisos', '1'); } catch (e) {}
+    cpaAtualizarBotaoAvisos();
+  });
+});
+document.getElementById('cpa-ir-processos').addEventListener('click', function() { document.getElementById('tabProcessos').click(); });
+cpaAtualizarBotaoAvisos();
 
 document.getElementById('tabSolicitacoes').addEventListener('click', function() { switchTab('panel-solicitacoes','tabSolicitacoes'); carregarSolicitacoesBot(); });
 
