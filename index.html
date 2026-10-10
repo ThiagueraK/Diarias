@@ -20,7 +20,7 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
 <title>SGD — Gerador de Diárias</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
   :root {
     /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -645,35 +645,132 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .ce-sit small{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:0.62rem;color:var(--ce-muted);margin-top:2px;}
   .ce-atualizado{font-size:0.62rem;color:var(--ce-muted);font-family:'IBM Plex Mono',monospace;}
   @media (prefers-reduced-motion: reduce){ .ce-node.cur b,.ce-dot.ce-pulse{animation:none;} }
-  /* 08/10/2026: aba Equipe (usa os tokens da Central de Empenhos) */
-  .eq-bots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:14px;}
-  .eq-bot{padding:11px 14px;background:var(--ce-glass);border:1px solid color-mix(in srgb, var(--b-cor) 45%, transparent);}
-  .eq-bot-top{display:flex;align-items:center;gap:8px;font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.04em;}
-  .eq-bot-top i{width:8px;height:8px;border-radius:50%;background:var(--b-cor);box-shadow:0 0 8px var(--b-cor);}
-  .eq-bot-top small{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.62rem;color:var(--ce-muted);letter-spacing:0;}
-  .eq-bot-papel{font-size:.66rem;color:var(--ce-muted);margin-top:6px;line-height:1.45;}
-  .eq-bot-det{font-size:.7rem;color:var(--b-cor);margin-top:5px;font-family:'Chakra Petch',sans-serif;font-weight:600;}
-  .eq-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;align-items:start;}
-  .eq-msgs{height:420px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
-  .eq-msg{max-width:88%;padding:9px 12px;font-size:.78rem;line-height:1.5;white-space:normal;word-wrap:break-word;}
-  .eq-msg small{display:block;font-size:.6rem;color:var(--ce-muted);margin-bottom:3px;font-family:'Chakra Petch',sans-serif;letter-spacing:.06em;text-transform:uppercase;}
-  .eq-msg.eu{align-self:flex-end;background:color-mix(in srgb, var(--ce-cyan) 14%, transparent);border:1px solid color-mix(in srgb, var(--ce-cyan) 40%, transparent);}
-  .eq-msg.bot{align-self:flex-start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);}
-  .eq-msg.pensando{opacity:.7;font-style:italic;}
-  .eq-form{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);}
-  .eq-input{max-width:none;flex:1;}
-  .eq-enviar{flex-shrink:0;}
-  .eq-tarefas{max-height:470px;overflow-y:auto;}
-  .eq-t{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);position:relative;font-size:.74rem;}
-  .eq-t::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--t-cor);box-shadow:0 0 8px var(--t-cor);}
-  .eq-t-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
-  .eq-t-tit{color:#fff;font-weight:600;flex:1;min-width:0;}
-  .eq-pill{font-family:'Chakra Petch',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--t-cor);color:var(--t-cor);}
-  .eq-t-meta{font-size:.62rem;color:var(--ce-muted);margin-top:3px;}
-  .eq-t-corpo{margin-top:6px;white-space:pre-wrap;font-size:.68rem;color:var(--ce-text);background:rgba(0,0,0,.25);padding:6px 8px;max-height:160px;overflow:auto;}
-  .eq-t-acoes{display:flex;gap:6px;margin-top:6px;}
-  .eq-t-acoes button{font-size:.6rem;padding:3px 8px;}
-  @media (max-width:860px){ .eq-grid{grid-template-columns:1fr;} .eq-msgs{height:340px;} }
+  /* 10/10/2026: aba Equipe no visual do Stitch ("Hermes Command Center", DESIGN.md) adaptado ao SGD.
+     Widget escuro próprio (como a Central de Empenhos): não deriva do tema claro/escuro do resto do site.
+     Tudo preso em .eqx. Cor por agente: Coordenador violeta, Vigia laranja, Conferente âmbar,
+     Pesquisador ciano, Programador lima, Caçador local esmeralda. */
+  .eqx{
+    --x-bg:#0e1321; --x-low:#161b2a; --x-card:rgba(22,27,42,.78); --x-card2:#1a1f2e; --x-hi:#252a39;
+    --x-line:rgba(148,163,184,.12); --x-line2:rgba(148,163,184,.22);
+    --x-text:#dee2f6; --x-muted:#9aa3b8; --x-dim:#6b7489;
+    --x-ok:#4edea3; --x-warn:#f59e0b; --x-danger:#f87171; --x-violeta:#8b5cf6;
+    --f-x-disp:'Space Grotesk','Segoe UI',system-ui,sans-serif; --f-x-body:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+    position:relative; color:var(--x-text); font-family:var(--f-x-body); font-size:14px; line-height:1.5;
+    background:
+      radial-gradient(ellipse 800px 420px at 8% -8%, rgba(139,92,246,.14), transparent 60%),
+      radial-gradient(ellipse 700px 420px at 100% 0%, rgba(6,182,212,.10), transparent 60%),
+      var(--x-bg);
+    border-radius:14px; padding:22px 22px 26px; margin:0 0 16px; overflow:hidden;
+  }
+  .eqx *{box-sizing:border-box;}
+  .eqx .x-lbl{font-family:var(--f-x-disp); font-size:10.5px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--x-muted);}
+  .eqx .x-num{font-family:var(--f-x-disp); font-variant-numeric:tabular-nums;}
+  .eqx .x-head{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:space-between; margin-bottom:18px;}
+  .eqx .x-eyebrow{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px;}
+  .eqx .x-tag{font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(139,92,246,.14); color:#c4b5fd; border:1px solid rgba(139,92,246,.3);}
+  .eqx .x-tag.ok{background:rgba(78,222,163,.1); color:var(--x-ok); border-color:rgba(78,222,163,.3);}
+  .eqx h2.x-title{margin:0; font-family:var(--f-x-disp); font-weight:700; font-size:clamp(22px,3vw,30px); line-height:1.15; letter-spacing:-.01em; text-wrap:balance; color:#fff;}
+  .eqx .x-sub{margin-top:6px; color:var(--x-muted); font-size:13.5px; max-width:64ch;}
+  .eqx .x-atual{font-size:11.5px; color:var(--x-dim);}
+
+  .eqx .x-kpis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:16px;}
+  .eqx .x-kpi{background:var(--x-card); border:1px solid var(--x-line); border-radius:8px; padding:14px 16px; backdrop-filter:blur(14px);}
+  .eqx .x-kpi .v{font-family:var(--f-x-disp); font-weight:700; font-size:26px; line-height:1.1; margin-top:8px; color:#fff; font-variant-numeric:tabular-nums;}
+  .eqx .x-kpi .v small{font-size:14px; color:var(--x-dim); font-weight:600; margin-left:2px;}
+  .eqx .x-kpi .d{font-size:12px; color:var(--x-muted); margin-top:4px;}
+  .eqx .x-kpi.alerta{border-color:rgba(245,158,11,.55); box-shadow:0 0 22px -8px rgba(245,158,11,.45);}
+  .eqx .x-kpi.alerta .v{color:var(--x-warn);}
+  .eqx .x-barra{height:4px; border-radius:4px; background:rgba(255,255,255,.06); margin-top:10px; overflow:hidden;}
+  .eqx .x-barra i{display:block; height:100%; background:var(--x-ok); border-radius:4px;}
+
+  /* aguardando você */
+  .eqx .x-aguarda{border:1px solid rgba(245,158,11,.5); background:linear-gradient(135deg, rgba(245,158,11,.1), rgba(22,27,42,.85)); border-radius:8px; padding:14px 16px; margin-bottom:16px;}
+  .eqx .x-aguarda h3{margin:0 0 8px; font-family:var(--f-x-disp); font-size:15px; color:var(--x-warn);}
+  .eqx .x-prop{border-top:1px solid var(--x-line); padding:10px 0;}
+  .eqx .x-prop:first-of-type{border-top:0; padding-top:2px;}
+  .eqx .x-prop b{font-family:var(--f-x-disp); font-weight:600;}
+  .eqx .x-prop pre{margin:6px 0 8px; white-space:pre-wrap; font:11.5px/1.5 ui-monospace,Menlo,Consolas,monospace; color:#cbd2e3; background:rgba(0,0,0,.28); border-radius:6px; padding:8px 10px; max-height:160px; overflow:auto;}
+
+  /* cartões dos agentes */
+  .eqx .x-sec{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:6px 0 12px;}
+  .eqx .x-sec h3{margin:0; font-family:var(--f-x-disp); font-size:19px; font-weight:600; color:#fff;}
+  .eqx .x-agentes{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:18px;}
+  .eqx .x-ag{--a:#8b5cf6; position:relative; background:linear-gradient(160deg, color-mix(in srgb, var(--a) 9%, rgba(22,27,42,.86)), rgba(22,27,42,.86) 55%);
+    border:1px solid color-mix(in srgb, var(--a) 26%, transparent); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0;}
+  .eqx .x-ag.parado{--a:#6b7489; opacity:.85;}
+  .eqx .x-ag-top{display:flex; gap:12px; align-items:flex-start;}
+  .eqx .x-ico{width:42px; height:42px; flex:0 0 42px; border-radius:8px; display:grid; place-items:center; color:var(--a); background:color-mix(in srgb, var(--a) 14%, transparent); border:1px solid color-mix(in srgb, var(--a) 35%, transparent);}
+  .eqx .x-ico svg{width:22px; height:22px;}
+  .eqx .x-ag-nome{flex:1; min-width:0;}
+  .eqx .x-ag-nome small{display:block; font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--a);}
+  .eqx .x-ag-nome b{display:block; font-family:var(--f-x-disp); font-size:17px; font-weight:600; color:#fff; line-height:1.25;}
+  .eqx .x-ag-nome span{display:block; font-size:12px; color:var(--x-muted);}
+  .eqx .x-chip{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:4px; font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; color:var(--c); background:color-mix(in srgb, var(--c) 12%, transparent); border:1px solid color-mix(in srgb, var(--c) 35%, transparent);}
+  .eqx .x-chip i{width:6px; height:6px; border-radius:50%; background:var(--c); box-shadow:0 0 0 0 var(--c); animation:x-ping 2s ease-out infinite;}
+  @keyframes x-ping{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--c) 60%, transparent);}80%,100%{box-shadow:0 0 0 6px transparent;}}
+  .eqx .x-papel{font-size:12.5px; color:#bcc4d8; margin:0;}
+  .eqx .x-metricas{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:rgba(0,0,0,.22); border:1px solid var(--x-line); border-radius:6px;}
+  .eqx .x-metricas div{padding:8px 6px; text-align:center; min-width:0;}
+  .eqx .x-metricas div + div{border-left:1px solid var(--x-line);}
+  .eqx .x-metricas span{display:block; font-size:10.5px; line-height:1.3; color:var(--x-muted); min-height:2.6em;}
+  .eqx .x-metricas b{display:block; font-family:var(--f-x-disp); font-size:17px; font-weight:700; color:var(--a); font-variant-numeric:tabular-nums;}
+  .eqx .x-agora{border:1px solid var(--x-line); border-radius:6px; padding:8px 10px; background:rgba(255,255,255,.02);}
+  .eqx .x-agora .x-lbl{color:var(--a); display:flex; justify-content:space-between; gap:8px;}
+  .eqx .x-agora .x-lbl span{color:var(--x-dim); font-weight:500; letter-spacing:.02em; text-transform:none;}
+  .eqx .x-agora p{margin:4px 0 0; font-size:12.5px; color:var(--x-text); overflow-wrap:anywhere;}
+
+  /* conversa + fluxo */
+  .eqx .x-grid2{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:14px; align-items:start; margin-bottom:14px;}
+  .eqx .x-painel{background:var(--x-card); border:1px solid var(--x-line); border-radius:8px; overflow:hidden; backdrop-filter:blur(14px); min-width:0;}
+  .eqx .x-ph{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:12px 14px; border-bottom:1px solid var(--x-line);}
+  .eqx .x-ph h4{margin:0; font-family:var(--f-x-disp); font-size:14.5px; font-weight:600; color:#fff;}
+  .eqx .x-msgs{height:380px; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:10px;}
+  .eqx .x-msg{max-width:88%; padding:9px 12px; border-radius:8px; font-size:13px; line-height:1.55; overflow-wrap:anywhere;}
+  .eqx .x-msg small{display:block; font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--x-muted); margin-bottom:3px;}
+  .eqx .x-msg.eu{align-self:flex-end; background:rgba(139,92,246,.16); border:1px solid rgba(139,92,246,.35);}
+  .eqx .x-msg.bot{align-self:flex-start; background:rgba(255,255,255,.04); border:1px solid var(--x-line);}
+  .eqx .x-msg.pensando{opacity:.7; font-style:italic;}
+  .eqx .x-form{display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--x-line); background:rgba(9,14,28,.6);}
+  .eqx .x-prompt{flex:1; min-width:0; display:flex; align-items:center; gap:8px; background:rgba(10,15,29,.9); border:1px solid var(--x-line2); border-radius:6px; padding:0 10px;}
+  .eqx .x-prompt:focus-within{border-color:var(--x-violeta);}
+  .eqx .x-prompt b{color:#a78bfa; font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .eqx .x-prompt input{flex:1; min-width:0; background:transparent; border:0; outline:none; color:var(--x-text); font:13px var(--f-x-body); padding:9px 0;}
+  .eqx .x-bt{font-family:var(--f-x-disp); font-size:11.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:8px 14px; border-radius:4px; cursor:pointer; border:1px solid rgba(148,163,184,.25); background:rgba(30,41,59,.6); color:#cbd2e3;}
+  .eqx .x-bt:hover:not(:disabled){color:#fff; border-color:rgba(148,163,184,.5);}
+  .eqx .x-bt.prim{background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:rgba(255,255,255,.2);}
+  .eqx .x-bt.prim:hover:not(:disabled){box-shadow:0 0 14px rgba(139,92,246,.55);}
+  .eqx .x-bt.ok{background:rgba(78,222,163,.12); color:var(--x-ok); border-color:rgba(78,222,163,.45);}
+  .eqx .x-bt.no{background:rgba(248,113,113,.1); color:#fca5a5; border-color:rgba(248,113,113,.45);}
+  .eqx .x-bt:disabled{opacity:.5; cursor:default;}
+  .eqx .x-bt:focus-visible, .eqx .x-filtro:focus-visible{outline:2px solid #a78bfa; outline-offset:2px;}
+  .eqx .x-filtros{display:flex; gap:4px; flex-wrap:wrap;}
+  .eqx .x-filtro{font-family:var(--f-x-disp); font-size:10.5px; font-weight:600; letter-spacing:.05em; padding:4px 9px; border-radius:4px; cursor:pointer; background:transparent; color:var(--x-muted); border:1px solid transparent;}
+  .eqx .x-filtro[aria-pressed="true"]{color:#fff; background:rgba(139,92,246,.2); border-color:rgba(139,92,246,.45);}
+  .eqx .x-fluxo{max-height:428px; overflow-y:auto;}
+  .eqx .x-ev{display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--x-line); font-size:12.5px;}
+  .eqx .x-ev p{grid-column:1 / -1;}
+  .eqx .x-ev:nth-child(even){background:rgba(255,255,255,.015);}
+  .eqx .x-ev time{color:var(--x-dim); font-size:11.5px; white-space:nowrap;}
+  .eqx .x-rota{display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
+  .eqx .x-de{font-family:var(--f-x-disp); font-size:9.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; padding:2px 6px; border-radius:3px; color:var(--c); background:color-mix(in srgb, var(--c) 13%, transparent); white-space:nowrap;}
+  .eqx .x-ev p{margin:0; color:#cbd2e3; overflow-wrap:anywhere;}
+  .eqx .x-vazio{padding:22px 14px; text-align:center; color:var(--x-dim); font-size:12.5px;}
+
+  /* quadro */
+  .eqx .x-tarefas{max-height:460px; overflow-y:auto;}
+  .eqx .x-t{position:relative; padding:11px 14px 11px 17px; border-bottom:1px solid var(--x-line); font-size:13px;}
+  .eqx .x-t::before{content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--c);}
+  .eqx .x-t-top{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;}
+  .eqx .x-t-tit{color:#fff; font-weight:600; flex:1; min-width:0;}
+  .eqx .x-t-meta{font-size:11.5px; color:var(--x-dim); margin-top:3px;}
+  .eqx .x-t-corpo{margin-top:6px; white-space:pre-wrap; font-size:12px; color:#cbd2e3; background:rgba(0,0,0,.22); border-radius:6px; padding:7px 9px; max-height:150px; overflow:auto;}
+  .eqx .x-t-acoes{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  .eqx .x-t-acoes .x-bt{padding:5px 10px; font-size:10.5px;}
+
+  @media (max-width:1180px){ .eqx .x-agentes{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:900px){ .eqx .x-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} .eqx .x-grid2{grid-template-columns:1fr;} .eqx .x-msgs{height:320px;} }
+  @media (max-width:620px){ .eqx{padding:16px 14px 20px;} .eqx .x-agentes{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){ .eqx .x-chip i{animation:none;} }
   /* 10/10/2026: credores do CP (aba Processos) */
   .cred-linha{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
   .cred-linha:first-child{border-top:none;}
@@ -816,7 +913,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.71</span>
+    <span class="header-version">v1.10.72</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -839,35 +936,54 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <!-- ══════════════════════════════════════ -->
   <!-- 08/10/2026: EQUIPE DE BOTS - conversa com o Coordenador e quadro de ocorrências/tarefas -->
   <div class="tab-panel active" id="panel-equipe">
-    <div class="ce" id="equipe">
-      <div class="ce-header">
+    <!-- 10/10/2026: aba Equipe no visual do Stitch (Hermes Command Center) adaptado: só números reais do quadro -->
+    <div class="eqx" id="equipe">
+      <div class="x-head">
         <div>
-          <h2 class="ce-title">EQUIPE DE <span>BOTS</span></h2>
-          <div class="ce-sub">Coordenador · Vigia · Conferente · Pesquisador · Programador — fale com o Coordenador</div>
+          <div class="x-eyebrow"><span class="x-tag">Equipe autônoma do SGD</span><span class="x-tag ok" id="eq-tag-no-ar">—</span></div>
+          <h2 class="x-title">Equipe de bots</h2>
+          <div class="x-sub">Vigiam, caçam erros e corrigem sozinhos, com linhas vermelhas fixas. Só chamam você para o que mexe em dinheiro, assinatura ou senha.</div>
         </div>
-        <div class="ce-atualizado" id="eq-atualizado">carregando…</div>
+        <div class="x-atual" id="eq-atualizado">carregando…</div>
       </div>
-      <div class="eq-bots" id="eq-bots"></div>
-      <div class="eq-grid">
-        <div class="ce-panel eq-chat">
-          <div class="ce-panel-head"><div class="ce-panel-title">Conversa com o Coordenador</div></div>
-          <div class="eq-msgs" id="eq-msgs"><div class="ce-empty">Carregando…</div></div>
-          <form class="eq-form" id="eq-form" autocomplete="off">
-            <input id="eq-texto" class="ce-busca eq-input" placeholder="Ex.: como estão as automações? tem algo travado?" aria-label="Mensagem para o Coordenador">
-            <button type="submit" class="ce-chip ativo eq-enviar" id="eq-enviar">Enviar</button>
+
+      <div class="x-kpis">
+        <div class="x-kpi"><div class="x-lbl">Agentes no ar</div><div class="v" id="eq-k-ar">—</div><div class="x-barra"><i id="eq-k-ar-barra" style="width:0"></i></div></div>
+        <div class="x-kpi"><div class="x-lbl">Ocorrências abertas</div><div class="v" id="eq-k-oc">—</div><div class="d" id="eq-k-oc-d"></div></div>
+        <div class="x-kpi"><div class="x-lbl">Correções publicadas · 7 dias</div><div class="v" id="eq-k-cor">—</div><div class="d" id="eq-k-cor-d"></div></div>
+        <div class="x-kpi" id="eq-k-ag-box"><div class="x-lbl">Aguardando você</div><div class="v" id="eq-k-ag">—</div><div class="d" id="eq-k-ag-d"></div></div>
+      </div>
+
+      <section class="x-aguarda" id="eq-aguarda" hidden aria-label="Propostas esperando sua aprovação"></section>
+
+      <div class="x-sec"><h3>Agentes</h3><span class="x-lbl">cada cartão: o que faz, o que está fazendo e os números do quadro</span></div>
+      <div class="x-agentes" id="eq-bots"></div>
+
+      <div class="x-grid2">
+        <section class="x-painel" aria-labelledby="eq-t-conv">
+          <div class="x-ph"><h4 id="eq-t-conv">Conversa com o Coordenador</h4><span class="x-lbl">ele distribui para os outros</span></div>
+          <div class="x-msgs" id="eq-msgs"><div class="x-vazio">Carregando…</div></div>
+          <form class="x-form" id="eq-form" autocomplete="off">
+            <label class="x-prompt"><b>&gt;</b><input id="eq-texto" placeholder="Ex.: tem algo travado? corrija o erro da varredura" aria-label="Mensagem para o Coordenador"></label>
+            <button type="submit" class="x-bt prim" id="eq-enviar">Enviar</button>
           </form>
-        </div>
-        <div class="ce-panel eq-quadro">
-          <div class="ce-panel-head">
-            <div class="ce-panel-title">Quadro · ocorrências e tarefas</div>
-            <div class="ce-filtros" id="eq-filtros">
-              <button type="button" class="ce-chip ativo" data-f="abertas">Abertas</button>
-              <button type="button" class="ce-chip" data-f="todas">Todas</button>
-            </div>
-          </div>
-          <div id="eq-tarefas" class="eq-tarefas"><div class="ce-empty">Carregando…</div></div>
-        </div>
+        </section>
+        <section class="x-painel" aria-labelledby="eq-t-fluxo">
+          <div class="x-ph"><h4 id="eq-t-fluxo">Fluxo entre os agentes</h4><div class="x-filtros" id="eq-fluxo-filtros"></div></div>
+          <div class="x-fluxo" id="eq-fluxo"><div class="x-vazio">Carregando…</div></div>
+        </section>
       </div>
+
+      <section class="x-painel" aria-labelledby="eq-t-quadro">
+        <div class="x-ph">
+          <h4 id="eq-t-quadro">Quadro · ocorrências e tarefas</h4>
+          <div class="x-filtros" id="eq-filtros">
+            <button type="button" class="x-filtro" data-f="abertas" aria-pressed="true">Abertas</button>
+            <button type="button" class="x-filtro" data-f="todas" aria-pressed="false">Todas</button>
+          </div>
+        </div>
+        <div id="eq-tarefas" class="x-tarefas"><div class="x-vazio">Carregando…</div></div>
+      </section>
     </div>
   </div>
 
@@ -2814,51 +2930,125 @@ document.addEventListener('input', function(ev) {
 setInterval(carregarEmpenhosAndamento, 15000);
 
 // 08/10/2026: ABA EQUIPE - bots, conversa com o Coordenador e quadro (rotas equipe-* do Worker)
-var eqDados = null, eqFiltro = 'abertas', eqEsperando = false;
-var EQ_COR = { ok: '#39FF88', atencao: '#FFD166', erro: '#FF3D71' };
-var EQ_GRAV = { alta: '#FF3D71', media: '#FFD166', baixa: '#7AA7FF' };
-var EQ_NOME = { vigia: 'Vigia', coordenador: 'Coordenador', conferente: 'Conferente', pesquisador: 'Pesquisador', programador: 'Programador', thiago: 'Você' };
+// 10/10/2026: visual novo (Stitch, adaptado): indicadores, propostas aguardando, cartão por agente com números
+// tirados do próprio quadro, fluxo entre agentes. Nada inventado: tudo vem do equipe-painel.
+var eqDados = null, eqFiltro = 'abertas', eqEsperando = false, eqFluxoAgente = 'todos';
+var EQ_GRAV = { alta: '#f87171', media: '#f59e0b', baixa: '#7AA7FF' };
+var EQ_AG = {
+  coordenador: { nome: 'Coordenador', papel: 'Conversa com você e distribui o trabalho', cor: '#8b5cf6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M12 11.5 6.4 16.2M12 11.5l5.6 4.7"/></svg>' },
+  vigia: { nome: 'Vigia', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>' },
+  conferente: { nome: 'Conferente', papel: 'Confere cada processo da caixa: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 4.4 3.4 8.1 8 9 4.6-.9 8-4.6 8-9V6l-8-3Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>' },
+  pesquisador: { nome: 'Pesquisador', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>' },
+  programador: { nome: 'Programador', papel: 'Corrige sozinho (Claude Sonnet 5) com revisor, linhas vermelhas e reversão', cor: '#84cc16', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M12.5 15h4"/></svg>' },
+  cacador: { nome: 'Caçador local', papel: 'IA no notebook, sem custo: classifica os erros novos dos logs a cada 5 min', cor: '#10b981', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>' }
+};
+var EQ_ORDEM = ['coordenador', 'vigia', 'conferente', 'pesquisador', 'programador', 'cacador'];
+var EQ_NOME = { thiago: 'Você' };
+Object.keys(EQ_AG).forEach(function(k) { EQ_NOME[k] = EQ_AG[k].nome; });
 function eqTexto(t) {
   // markdown simples: **negrito**, listas e quebras de linha
   return escaparHtmlProc(t || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^\s*[-•]\s+/gm, '• ').replace(/\n/g, '<br>');
 }
+function eqCor(bot) { return (EQ_AG[bot] && EQ_AG[bot].cor) || (bot === 'thiago' ? '#e9ddff' : '#9aa3b8'); }
+function eqAberta(t) { return t.status === 'aberta' || t.status === 'em_andamento' || t.status === 'aguardando'; }
+// números de cada agente, contados no próprio quadro (tarefas e mensagens)
+function eqMetricas(bot, ts, msgs, agora) {
+  var d1 = agora - 86400000, d7 = agora - 7 * 86400000;
+  var n = function(f) { return ts.filter(f).length; };
+  var res = function(t) { return String(t.resultado || ''); };
+  if (bot === 'coordenador') return [['Conversas hoje', msgs.filter(function(m) { return m.de === 'thiago' && m.criado > d1; }).length], ['Pedidos 7 dias', n(function(t) { return t.de === 'coordenador' && t.criado > d7; })], ['Respostas hoje', msgs.filter(function(m) { return m.de === 'coordenador' && m.criado > d1; }).length]];
+  if (bot === 'vigia') return [['Abertas', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t); })], ['Graves', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t) && t.gravidade === 'alta'; })], ['Resolvidas 24 h', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && t.status === 'resolvida' && t.atualizado > d1; })]];
+  if (bot === 'pesquisador') return [['Pesquisas 7 dias', n(function(t) { return t.para === 'pesquisador' && t.criado > d7; })], ['Em andamento', n(function(t) { return t.para === 'pesquisador' && eqAberta(t); })], ['Concluídas', n(function(t) { return t.para === 'pesquisador' && t.status === 'concluida' && t.criado > d7; })]];
+  if (bot === 'programador') return [['Corrigiu 7 dias', n(function(t) { return t.para === 'programador' && /^✅/.test(res(t)) && t.atualizado > d7; })], ['Sem bug achado', n(function(t) { return t.para === 'programador' && /^🧐/.test(res(t)) && t.atualizado > d7; })], ['Descartou', n(function(t) { return t.para === 'programador' && /^❌/.test(res(t)) && t.atualizado > d7; })]];
+  if (bot === 'cacador') { var p = /(\d+) bug, (\d+) passageiro, (\d+) externo, (\d+) ruído · (\d+) enviado/.exec(eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'cacador'; }).map(function(b) { return b.detalhe; })[0] || ''); return [['Bugs 24 h', p ? p[1] : '—'], ['Passageiros', p ? +p[2] + +p[3] : '—'], ['Ao Programador', p ? p[5] : '—']]; }
+  if (bot === 'conferente') { var c = /(\d+) processo\(s\) na caixa; (\d+) conferido/.exec(((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'conferente'; })[0]) || {}).detalhe || ''); return [['Na caixa', c ? c[1] : '—'], ['Conferidos agora', c ? c[2] : '—'], ['A cada', '5 min']]; }
+  return [];
+}
 function eqRender() {
   if (!eqDados) return;
   var agora = eqDados.agora || Date.now();
+  var ts = eqDados.tarefas || [], msgs = eqDados.mensagens || [];
+  var porBot = {}; (eqDados.bots || []).forEach(function(b) { porBot[b.bot] = b; });
   document.getElementById('eq-atualizado').textContent = 'atualizado ' + ceTempoRelativo(agora);
-  document.getElementById('eq-bots').innerHTML = (eqDados.bots || []).map(function(b) {
-    var parado = agora - (b.visto || 0) > 15 * 60000;
-    var cor = parado ? '#FF3D71' : (EQ_COR[b.status] || '#79899F');
-    return '<div class="eq-bot ce-cut" style="--b-cor:' + cor + '"><div class="eq-bot-top"><i></i>' + escaparHtmlProc(EQ_NOME[b.bot] || b.bot) + '<small>' + (parado ? 'sem sinal ' : 'visto ') + ceTempoRelativo(b.visto) + '</small></div>'
-      + '<div class="eq-bot-det">' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço EquipeBots pode ter parado' : (b.detalhe || '')) + '</div>'
-      + '<div class="eq-bot-papel">' + escaparHtmlProc(b.papel || '') + '</div></div>';
-  }).join('') || '<div class="ce-empty">Nenhum bot deu sinal ainda.</div>';
+  // indicadores
+  var vivos = EQ_ORDEM.filter(function(k) { return porBot[k] && agora - (porBot[k].visto || 0) <= 15 * 60000; }).length;
+  document.getElementById('eq-k-ar').innerHTML = vivos + '<small>/ ' + EQ_ORDEM.length + '</small>';
+  document.getElementById('eq-k-ar-barra').style.width = (100 * vivos / EQ_ORDEM.length) + '%';
+  document.getElementById('eq-tag-no-ar').textContent = vivos === EQ_ORDEM.length ? 'todos no ar' : (EQ_ORDEM.length - vivos) + ' sem sinal';
+  var oc = ts.filter(function(t) { return t.tipo === 'ocorrencia' && eqAberta(t); });
+  document.getElementById('eq-k-oc').textContent = oc.length;
+  var graves = oc.filter(function(t) { return t.gravidade === 'alta'; }).length;
+  document.getElementById('eq-k-oc-d').textContent = graves ? graves + ' grave(s)' : 'nenhuma grave';
+  var d7 = agora - 7 * 86400000;
+  var cor = ts.filter(function(t) { return t.para === 'programador' && /^✅/.test(String(t.resultado || '')) && t.atualizado > d7; }).length;
+  document.getElementById('eq-k-cor').textContent = cor;
+  document.getElementById('eq-k-cor-d').textContent = 'publicadas sozinhas, com revisor e observação';
+  var ag = ts.filter(function(t) { return t.status === 'aguardando'; });
+  document.getElementById('eq-k-ag').textContent = ag.length;
+  document.getElementById('eq-k-ag-d').textContent = ag.length ? 'proposta(s) em linha vermelha' : 'nada esperando você';
+  document.getElementById('eq-k-ag-box').classList.toggle('alerta', ag.length > 0);
+  var badge = document.getElementById('badgeEquipe');
+  var abertasTot = ts.filter(eqAberta).length;
+  if (badge) { badge.style.display = (ag.length || abertasTot) ? '' : 'none'; badge.textContent = ag.length ? '!' + ag.length : abertasTot; }
+  // propostas aguardando
+  var boxAg = document.getElementById('eq-aguarda');
+  boxAg.hidden = !ag.length;
+  boxAg.innerHTML = ag.length ? '<h3>Aguardando você</h3>' + ag.map(function(t) {
+    var texto = String(t.resultado || t.corpo || '');
+    return '<div class="x-prop"><b>#' + t.id + ' · ' + escaparHtmlProc(t.titulo) + '</b><pre>' + escaparHtmlProc(texto.slice(0, 2500)) + '</pre>'
+      + '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-acao="aprovar" data-id="' + t.id + '">Aprovar e publicar</button><button type="button" class="x-bt no" data-eq-acao="recusar" data-id="' + t.id + '">Recusar</button></div></div>';
+  }).join('') : '';
+  // cartões dos agentes
+  document.getElementById('eq-bots').innerHTML = EQ_ORDEM.map(function(k) {
+    var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
+    var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Trabalhando', '#f59e0b'] : ['No ar', '#4edea3'];
+    var met = eqMetricas(k, ts, msgs, agora);
+    return '<article class="x-ag' + (parado ? ' parado' : '') + '" style="--a:' + a.cor + '">'
+      + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
+      + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
+      + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
+      + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
+      + '<div class="x-agora"><div class="x-lbl">Agora<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
+      + '</article>';
+  }).join('');
+  // conversa
   var cx = document.getElementById('eq-msgs');
   var noFim = cx.scrollHeight - cx.scrollTop - cx.clientHeight < 60;
-  var msgs = eqDados.mensagens || [];
   cx.innerHTML = (msgs.length ? msgs.map(function(m) {
     var eu = m.de === 'thiago';
-    return '<div class="eq-msg ' + (eu ? 'eu' : 'bot') + '"><small>' + escaparHtmlProc(EQ_NOME[m.de] || m.de) + ' · ' + ceData(m.criado) + '</small>' + eqTexto(m.texto) + '</div>';
-  }).join('') : '<div class="ce-empty">Mande uma mensagem para o Coordenador.</div>')
-    + (eqEsperando ? '<div class="eq-msg bot pensando">Coordenador está pensando…</div>' : '');
+    return '<div class="x-msg ' + (eu ? 'eu' : 'bot') + '"><small>' + escaparHtmlProc(EQ_NOME[m.de] || m.de) + ' · ' + ceData(m.criado) + '</small>' + eqTexto(m.texto) + '</div>';
+  }).join('') : '<div class="x-vazio">Mande uma mensagem para o Coordenador.</div>')
+    + (eqEsperando ? '<div class="x-msg bot pensando">Coordenador está pensando…</div>' : '');
   if (noFim || eqEsperando) cx.scrollTop = cx.scrollHeight;
-  // 10/10/2026: 'aguardando' = proposta do Programador esperando o Thiago aprovar no Telegram
-  var ehAberta = function(t) { return t.status === 'aberta' || t.status === 'em_andamento' || t.status === 'aguardando'; };
-  var ts = (eqDados.tarefas || []).filter(function(t) { return eqFiltro === 'todas' || ehAberta(t); });
-  var abertas = (eqDados.tarefas || []).filter(ehAberta).length;
-  var badge = document.getElementById('badgeEquipe');
-  if (badge) { badge.style.display = abertas ? '' : 'none'; badge.textContent = abertas; }
-  document.querySelectorAll('#eq-filtros .ce-chip').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === eqFiltro); });
-  document.getElementById('eq-tarefas').innerHTML = ts.length ? ts.map(function(t) {
-    var aberta = ehAberta(t);
-    var cor = aberta ? (EQ_GRAV[t.gravidade] || '#00E5FF') : '#39FF88';
-    return '<div class="eq-t" style="--t-cor:' + cor + '"><div class="eq-t-top"><span class="eq-pill">' + escaparHtmlProc(t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo) + '</span><span class="eq-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
-      + '<div class="eq-t-meta">' + escaparHtmlProc((EQ_NOME[t.de] || t.de) + ' → ' + (EQ_NOME[t.para] || t.para)) + ' · aberta ' + ceData(t.criado) + ' · ' + escaparHtmlProc(t.status.replace('_', ' ')) + (t.atualizado !== t.criado ? ' · atualizada ' + ceTempoRelativo(t.atualizado) : '') + '</div>'
-      + (t.corpo ? '<div class="eq-t-corpo">' + escaparHtmlProc(t.corpo) + '</div>' : '')
-      + (t.resultado ? '<div class="eq-t-corpo">' + escaparHtmlProc(t.resultado) + '</div>' : '')
-      + (aberta ? '<div class="eq-t-acoes"><button type="button" class="ce-chip" data-eq-acao="concluir" data-id="' + t.id + '">✓ Resolvido</button><button type="button" class="ce-chip" data-eq-acao="cancelar" data-id="' + t.id + '">Ignorar</button></div>' : '')
+  // fluxo entre agentes (tarefas criadas/atualizadas e mensagens dos bots)
+  var evs = [];
+  ts.forEach(function(t) {
+    evs.push({ q: t.criado, de: t.de, para: t.para, txt: t.titulo });
+    if (t.atualizado && t.atualizado !== t.criado && !eqAberta(t)) evs.push({ q: t.atualizado, de: t.para, para: t.de, txt: (t.status === 'resolvida' ? 'Resolvida: ' : t.status === 'concluida' ? 'Concluída: ' : t.status + ': ') + String(t.resultado || t.titulo).split('\n')[0].slice(0, 160) });
+  });
+  msgs.forEach(function(m) { if (m.de !== 'thiago') evs.push({ q: m.criado, de: m.de, para: m.para, txt: String(m.texto).replace(/\*\*/g, '').split('\n')[0].slice(0, 160) }); });
+  evs.sort(function(a, b) { return (b.q || 0) - (a.q || 0); });
+  var agentesNoFluxo = ['todos'].concat(EQ_ORDEM.filter(function(k) { return evs.some(function(e) { return e.de === k || e.para === k; }); }));
+  document.getElementById('eq-fluxo-filtros').innerHTML = agentesNoFluxo.map(function(k) { return '<button type="button" class="x-filtro" data-fluxo="' + k + '" aria-pressed="' + (eqFluxoAgente === k) + '">' + (k === 'todos' ? 'Todos' : EQ_AG[k].nome) + '</button>'; }).join('');
+  var evf = evs.filter(function(e) { return eqFluxoAgente === 'todos' || e.de === eqFluxoAgente || e.para === eqFluxoAgente; }).slice(0, 60);
+  document.getElementById('eq-fluxo').innerHTML = evf.length ? evf.map(function(e) {
+    return '<div class="x-ev"><time>' + ceTempoRelativo(e.q) + '</time><span class="x-rota"><span class="x-de" style="--c:' + eqCor(e.de) + '">' + escaparHtmlProc(EQ_NOME[e.de] || e.de) + '</span>→<span class="x-de" style="--c:' + eqCor(e.para) + '">' + escaparHtmlProc(EQ_NOME[e.para] || e.para) + '</span></span><p>' + escaparHtmlProc(e.txt) + '</p></div>';
+  }).join('') : '<div class="x-vazio">Nada no fluxo ainda.</div>';
+  // quadro
+  document.querySelectorAll('#eq-filtros .x-filtro').forEach(function(b) { b.setAttribute('aria-pressed', b.dataset.f === eqFiltro); });
+  var lista = ts.filter(function(t) { return eqFiltro === 'todas' || eqAberta(t); });
+  document.getElementById('eq-tarefas').innerHTML = lista.length ? lista.map(function(t) {
+    var aberta = eqAberta(t);
+    var c = t.status === 'aguardando' ? '#f59e0b' : aberta ? (EQ_GRAV[t.gravidade] || eqCor(t.para)) : '#4edea3';
+    var rot = t.status === 'aguardando' ? 'aguardando você' : t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo;
+    return '<div class="x-t" style="--c:' + c + '"><div class="x-t-top"><span class="x-chip" style="--c:' + c + '"><i></i>' + escaparHtmlProc(rot) + '</span><span class="x-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
+      + '<div class="x-t-meta">' + escaparHtmlProc((EQ_NOME[t.de] || t.de) + ' → ' + (EQ_NOME[t.para] || t.para)) + ' · aberta ' + ceData(t.criado) + ' · ' + escaparHtmlProc(t.status.replace('_', ' ')) + (t.atualizado !== t.criado ? ' · atualizada ' + ceTempoRelativo(t.atualizado) : '') + '</div>'
+      + (t.corpo ? '<div class="x-t-corpo">' + escaparHtmlProc(t.corpo) + '</div>' : '')
+      + (t.resultado ? '<div class="x-t-corpo">' + escaparHtmlProc(t.resultado) + '</div>' : '')
+      + (t.status === 'aguardando' ? '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-acao="aprovar" data-id="' + t.id + '">Aprovar e publicar</button><button type="button" class="x-bt no" data-eq-acao="recusar" data-id="' + t.id + '">Recusar</button></div>'
+        : aberta ? '<div class="x-t-acoes"><button type="button" class="x-bt" data-eq-acao="concluir" data-id="' + t.id + '">✓ Resolvido</button><button type="button" class="x-bt" data-eq-acao="cancelar" data-id="' + t.id + '">Ignorar</button></div>' : '')
       + '</div>';
-  }).join('') : '<div class="ce-empty">' + (eqFiltro === 'abertas' ? 'Nenhuma ocorrência aberta — tudo certo.' : 'Quadro vazio.') + '</div>';
+  }).join('') : '<div class="x-vazio">' + (eqFiltro === 'abertas' ? 'Nenhuma ocorrência aberta — tudo certo.' : 'Quadro vazio.') + '</div>';
 }
 function carregarEquipe() {
   if (!document.getElementById('panel-equipe').classList.contains('active')) return;
@@ -2887,13 +3077,16 @@ document.addEventListener('submit', function(ev) {
     }).catch(function(e) { bt.disabled = false; alert('Erro: ' + e.message); });
 });
 document.addEventListener('click', function(ev) {
-  var f = ev.target.closest && ev.target.closest('#eq-filtros .ce-chip');
+  var f = ev.target.closest && ev.target.closest('#eq-filtros .x-filtro');
   if (f) { eqFiltro = f.dataset.f; eqRender(); return; }
+  var fl = ev.target.closest && ev.target.closest('[data-fluxo]');
+  if (fl) { eqFluxoAgente = fl.dataset.fluxo; eqRender(); return; }
   var a = ev.target.closest && ev.target.closest('[data-eq-acao]');
   if (!a) return;
+  if (a.dataset.eqAcao === 'aprovar' && !confirm('Aprovar e publicar a proposta #' + a.dataset.id + '?\n\nO Programador publica, observa 5 min e desfaz sozinho se piorar.')) return;
   a.disabled = true;
   sgdFetch(SGD_WORKER_URL + '?action=equipe-tarefa-acao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(a.dataset.id), acao: a.dataset.eqAcao }) })
-    .then(function(r) { return r.json(); }).then(function() { carregarEquipe(); }).catch(function() { a.disabled = false; });
+    .then(function(r) { return r.json(); }).then(function(res) { if (res && res.ok === false && res.error) alert(res.error); carregarEquipe(); }).catch(function() { a.disabled = false; });
 });
 
 function pararPollingProcessos() {
