@@ -816,7 +816,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.69</span>
+    <span class="header-version">v1.10.70</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1266,10 +1266,12 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
             <input name="nome" placeholder="Nome completo (como vem no processo)" aria-label="Nome completo" style="flex:2 1 220px;">
             <input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor no CP" style="width:110px;">
             <input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">
+            <input name="cargo" list="cred-cargos" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo" style="flex:1 1 200px;">
             <button type="submit">Salvar</button>
           </form>
         </details>
-        <datalist id="cred-centros"><option value="35">35 · motorista</option><option value="36">36 · demais servidores</option><option value="148">148 · agente de saúde / agente de endemias</option></datalist>
+        <datalist id="cred-centros"><option value="35">35 · motorista</option><option value="36">36 · demais servidores</option></datalist>
+        <datalist id="cred-cargos"><option value="AGENTE DE COMBATE AS ENDEMIAS"><option value="AGENTE COMUNITARIO DE SAUDE"><option value="MOTORISTA"><option value="TECNICO DE ENFERMAGEM"><option value="ENFERMEIRO"></datalist>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
@@ -3274,6 +3276,7 @@ function credLinha(nome, detalhe, aviso) {
     + '<span class="cred-nome"><b>' + escaparHtmlProc(nome) + '</b><small' + (aviso ? ' class="cred-aviso"' : '') + '>' + detalhe + '</small></span>'
     + '<input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor de ' + escaparHtmlProc(nome) + '" style="width:110px;">'
     + '<input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">'
+    + '<input name="cargo" list="cred-cargos" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo de ' + escaparHtmlProc(nome) + '" style="flex:1 1 200px;">'
     + '<button type="submit">Salvar</button></form>';
 }
 function credRender() {
@@ -3302,7 +3305,8 @@ function credRender() {
 function credRenderCadastro() {
   document.getElementById('cred-n-cad').textContent = credCadastro.length;
   document.getElementById('cred-cadastrados').innerHTML = credCadastro.length ? credCadastro.map(function(c) {
-    return '<div class="cred-linha"><span class="cred-nome"><b>' + escaparHtmlProc(c.nome) + '</b><small>credor ' + escaparHtmlProc(c.credor) + ' · centro ' + escaparHtmlProc(c.centro || '—') + ' · ' + ceData(c.em) + '</small></span>'
+    return '<div class="cred-linha"><span class="cred-nome"><b>' + escaparHtmlProc(c.nome) + '</b><small>credor ' + escaparHtmlProc(c.credor) + ' · centro ' + escaparHtmlProc(c.centro || '—') + ' · cargo ' + (c.cargo ? escaparHtmlProc(c.cargo) : '<span class="cred-aviso">não informado</span>') + ' · ' + ceData(c.em) + '</small></span>'
+      + '<button type="button" data-cred-editar="' + escaparHtmlProc(c.nome) + '">Editar</button>'
       + '<button type="button" data-cred-remover="' + escaparHtmlProc(c.nome) + '">Remover</button></div>';
   }).join('') : '<div style="color:var(--text-muted);">Ninguém cadastrado pelo SGD ainda (' + (credTotalScript ? 'os ' + credTotalScript + ' nomes' : 'os nomes') + ' da tabela do lote continuam valendo).</div>';
 }
@@ -3312,11 +3316,11 @@ function credCarregar() {
   }).catch(function() {});
 }
 function credSalvar(form, nome) {
-  var credor = form.credor.value.trim(), centro = form.centro.value.trim();
+  var credor = form.credor.value.trim(), centro = form.centro.value.trim(), cargo = form.cargo ? form.cargo.value.trim() : '';
   if (!nome || !credor || !centro) { alert('Preencha nome, número do credor e centro de custo.'); return; }
-  if (!confirm('Cadastrar ' + nome + ' como credor ' + credor + ' (centro ' + centro + ')?\n\nConfira o número no Cadastro de Credor do CP: o lote vai empenhar com ele.')) return;
+  if (!confirm('Cadastrar ' + nome + ' como credor ' + credor + ' (centro ' + centro + (cargo ? ', cargo ' + cargo : '') + ')?\n\nConfira o número no Cadastro de Credor do CP: o lote vai empenhar com ele.' + (cargo ? '' : '\n\nSem cargo: se o CP não tiver o cargo dessa pessoa, o Documento de Viagens não grava.'))) return;
   var bt = form.querySelector('button'); bt.disabled = true;
-  sgdFetch(SGD_WORKER_URL + '?action=credores-salvar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, credor: credor, centro: centro }) })
+  sgdFetch(SGD_WORKER_URL + '?action=credores-salvar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, credor: credor, centro: centro, cargo: cargo }) })
     .then(function(r) { return r.json(); }).then(function(res) {
       bt.disabled = false;
       if (!res.ok) { alert(res.error || 'Não foi possível salvar.'); return; }
@@ -3329,6 +3333,12 @@ document.addEventListener('submit', function(ev) {
   else if (f.id === 'cred-form-livre') { ev.preventDefault(); credSalvar(f, f.nome.value.trim()); }
 });
 document.addEventListener('click', function(ev) {
+  var e = ev.target.closest && ev.target.closest('[data-cred-editar]');
+  if (e) {
+    var c = credCadastro.find(function(x) { return x.nome === e.dataset.credEditar; }), f = document.getElementById('cred-form-livre');
+    if (c && f) { f.nome.value = c.nome; f.credor.value = c.credor; f.centro.value = c.centro || ''; f.cargo.value = c.cargo || ''; f.cargo.focus(); }
+    return;
+  }
   var b = ev.target.closest && ev.target.closest('[data-cred-remover]');
   if (!b || !confirm('Remover o cadastro de ' + b.dataset.credRemover + '?')) return;
   sgdFetch(SGD_WORKER_URL + '?action=credores-remover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: b.dataset.credRemover }) })
