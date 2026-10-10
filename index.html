@@ -935,7 +935,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.73</span>
+    <span class="header-version">v1.10.74</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3097,7 +3097,7 @@ function eqRenderTelemetria(mt, agora) {
       var qtd = f[0] === 'claude' ? x.n + ' execução(ões)' : f[0] === 'local' ? x.n + ' classificação(ões)' : x.n + ' chamada(s)';
       return '<div class="x-linha" style="--c:' + f[2] + '"><b><i></i>' + f[1] + '</b><span class="x-val">' + eqTok(t) + '</span><small>' + qtd + ' · ' + extra + '</small></div>';
     }).join('');
-  var lat = mt.lat || {}, itensLat = [['robo', 'Robô do 1Doc (/health)', 500], ['worker', 'Worker do SGD', 1500], ['ia_local', 'IA local por lote', 30000], ['coordenador', 'Coordenador responder', 60000], ['claude', 'Claude por execução', 15 * 60000]];
+  var lat = mt.lat || {}, itensLat = [['robo', 'Robô do 1Doc (/health)', 500], ['worker', 'Worker do SGD', 1500], ['ia_local', 'IA local por lote', 30000], ['coordenador', 'Coordenador responder', 60000], ['claude', 'Claude por execução', 15 * 60000], ['deepseek_codigo', 'DeepSeek por execução (fallback)', 15 * 60000]];
   document.getElementById('eq-lat').innerHTML = itensLat.map(function(it) {
     var v = lat[it[0]], c = !v ? '#6b7489' : v.mediana <= it[2] ? '#4edea3' : v.mediana <= it[2] * 3 ? '#f59e0b' : '#f87171';
     return '<div class="x-linha" style="--c:' + c + '"><b><i></i>' + it[1] + '</b><span class="x-val">' + (v ? eqDur(v.mediana) : '—') + '</span>' + (v ? '<small>última ' + eqDur(v.ultimo) + ' · ' + v.amostras + ' medição(ões)</small>' : '<small>ainda sem medição</small>') + '</div>';
