@@ -683,6 +683,27 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .x-barra{height:4px; border-radius:4px; background:rgba(255,255,255,.06); margin-top:10px; overflow:hidden;}
   .eqx .x-barra i{display:block; height:100%; background:var(--x-ok); border-radius:4px;}
 
+  /* telemetria */
+  .eqx .x-tele{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; margin-bottom:16px;}
+  .eqx .x-tlarga{grid-column:1 / -1;}
+  .eqx .x-tbody{padding:10px 14px 12px;}
+  .eqx .x-linha{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; align-items:baseline; padding:6px 0; border-bottom:1px solid var(--x-line); font-size:12.5px;}
+  .eqx .x-linha:last-child{border-bottom:0;}
+  .eqx .x-linha b{font-family:var(--f-x-disp); font-weight:600; color:#fff; display:flex; align-items:center; gap:7px;}
+  .eqx .x-linha b i{width:8px; height:8px; border-radius:2px; background:var(--c); display:inline-block;}
+  .eqx .x-linha .x-val{font-family:var(--f-x-disp); font-weight:700; font-size:15px; color:var(--c, #fff); font-variant-numeric:tabular-nums; text-align:right;}
+  .eqx .x-linha small{grid-column:1 / -1; color:var(--x-muted); font-size:11.5px;}
+  .eqx .x-pilha{display:flex; height:6px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,.06); margin:4px 0 6px;}
+  .eqx .x-pilha i{display:block; height:100%;}
+  .eqx .x-tbody svg{display:block; width:100%; height:auto;}
+  .eqx .x-eixo{font-family:var(--f-x-disp); font-size:10px; fill:var(--x-dim);}
+  .eqx .x-carga{display:flex; flex-direction:column; gap:4px;}
+  .eqx .x-carga .x-lbl{display:flex; justify-content:space-between; gap:8px; color:var(--x-muted);}
+  .eqx .x-carga .x-lbl b{color:var(--a); font-weight:700;}
+  .eqx .x-carga .x-barra{margin-top:0;}
+  .eqx .x-carga .x-barra i{background:var(--a);}
+  @media (max-width:620px){ .eqx .x-tele{grid-template-columns:1fr;} }
+
   /* aguardando você */
   .eqx .x-aguarda{border:1px solid rgba(245,158,11,.5); background:linear-gradient(135deg, rgba(245,158,11,.1), rgba(22,27,42,.85)); border-radius:8px; padding:14px 16px; margin-bottom:16px;}
   .eqx .x-aguarda h3{margin:0 0 8px; font-family:var(--f-x-disp); font-size:15px; color:var(--x-warn);}
@@ -698,10 +719,11 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .x-ag{--a:#8b5cf6; position:relative; background:linear-gradient(160deg, color-mix(in srgb, var(--a) 9%, rgba(22,27,42,.86)), rgba(22,27,42,.86) 55%);
     border:1px solid color-mix(in srgb, var(--a) 26%, transparent); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0;}
   .eqx .x-ag.parado{--a:#6b7489; opacity:.85;}
-  .eqx .x-ag-top{display:flex; gap:12px; align-items:flex-start;}
+  .eqx .x-ag-top{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:flex-start;}
+  .eqx .x-ag-top .x-chip{margin-left:auto;}
   .eqx .x-ico{width:42px; height:42px; flex:0 0 42px; border-radius:8px; display:grid; place-items:center; color:var(--a); background:color-mix(in srgb, var(--a) 14%, transparent); border:1px solid color-mix(in srgb, var(--a) 35%, transparent);}
   .eqx .x-ico svg{width:22px; height:22px;}
-  .eqx .x-ag-nome{flex:1; min-width:0;}
+  .eqx .x-ag-nome{flex:1; min-width:130px;}
   .eqx .x-ag-nome small{display:block; font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--a);}
   .eqx .x-ag-nome b{display:block; font-family:var(--f-x-disp); font-size:17px; font-weight:600; color:#fff; line-height:1.25;}
   .eqx .x-ag-nome span{display:block; font-size:12px; color:var(--x-muted);}
@@ -913,7 +935,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.72</span>
+    <span class="header-version">v1.10.73</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -952,6 +974,12 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <div class="x-kpi"><div class="x-lbl">Ocorrências abertas</div><div class="v" id="eq-k-oc">—</div><div class="d" id="eq-k-oc-d"></div></div>
         <div class="x-kpi"><div class="x-lbl">Correções publicadas · 7 dias</div><div class="v" id="eq-k-cor">—</div><div class="d" id="eq-k-cor-d"></div></div>
         <div class="x-kpi" id="eq-k-ag-box"><div class="x-lbl">Aguardando você</div><div class="v" id="eq-k-ag">—</div><div class="d" id="eq-k-ag-d"></div></div>
+      </div>
+
+      <div class="x-tele">
+        <section class="x-painel" aria-labelledby="eq-t-ia"><div class="x-ph"><h4 id="eq-t-ia">Uso de IA hoje</h4><span class="x-lbl" id="eq-ia-total"></span></div><div class="x-tbody" id="eq-ia"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
+        <section class="x-painel" aria-labelledby="eq-t-lat"><div class="x-ph"><h4 id="eq-t-lat">Tempos de resposta</h4><span class="x-lbl">mediana das últimas medições</span></div><div class="x-tbody" id="eq-lat"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
+        <section class="x-painel x-tlarga" aria-labelledby="eq-t-ativ"><div class="x-ph"><h4 id="eq-t-ativ">Atividade · últimas 24 h</h4><span class="x-lbl"><span style="color:#f87171">■</span> erros nos logs &nbsp;<span style="color:#a78bfa">■</span> ações dos bots</span></div><div class="x-tbody" id="eq-ativ"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
       </div>
 
       <section class="x-aguarda" id="eq-aguarda" hidden aria-label="Propostas esperando sua aprovação"></section>
@@ -2998,6 +3026,8 @@ function eqRender() {
     return '<div class="x-prop"><b>#' + t.id + ' · ' + escaparHtmlProc(t.titulo) + '</b><pre>' + escaparHtmlProc(texto.slice(0, 2500)) + '</pre>'
       + '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-acao="aprovar" data-id="' + t.id + '">Aprovar e publicar</button><button type="button" class="x-bt no" data-eq-acao="recusar" data-id="' + t.id + '">Recusar</button></div></div>';
   }).join('') : '';
+  eqRenderTelemetria(eqDados.metricas, agora);
+  var cargas = (eqDados.metricas && eqDados.metricas.carga) || {};
   // cartões dos agentes
   document.getElementById('eq-bots').innerHTML = EQ_ORDEM.map(function(k) {
     var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
@@ -3008,6 +3038,7 @@ function eqRender() {
       + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
       + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
       + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
+      + (cargas[k] ? '<div class="x-carga"><div class="x-lbl">' + escaparHtmlProc(cargas[k].texto) + '<b>' + cargas[k].pct + '%</b></div><div class="x-barra"><i style="width:' + cargas[k].pct + '%"></i></div></div>' : '')
       + '<div class="x-agora"><div class="x-lbl">Agora<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
       + '</article>';
   }).join('');
@@ -3049,6 +3080,44 @@ function eqRender() {
         : aberta ? '<div class="x-t-acoes"><button type="button" class="x-bt" data-eq-acao="concluir" data-id="' + t.id + '">✓ Resolvido</button><button type="button" class="x-bt" data-eq-acao="cancelar" data-id="' + t.id + '">Ignorar</button></div>' : '')
       + '</div>';
   }).join('') : '<div class="x-vazio">' + (eqFiltro === 'abertas' ? 'Nenhuma ocorrência aberta — tudo certo.' : 'Quadro vazio.') + '</div>';
+}
+// 10/10/2026: telemetria REAL medida no notebook (metricas.mjs -> equipe-metricas)
+function eqTok(n) { n = n || 0; return n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' M' : n >= 1e3 ? Math.round(n / 1e3) + ' mil' : String(n); }
+function eqDur(ms) { if (ms == null) return '—'; if (ms < 1000) return Math.round(ms) + ' ms'; var s = ms / 1000; return s < 60 ? s.toFixed(s < 10 ? 1 : 0).replace('.', ',') + ' s' : (s / 60).toFixed(1).replace('.', ',') + ' min'; }
+function eqRenderTelemetria(mt, agora) {
+  if (!mt || !mt.ia) return;
+  var velho = agora - (mt.em || 0) > 15 * 60000;
+  var ia = mt.ia, fontes = [['claude', 'Claude (Sonnet 5)', '#84cc16'], ['deepseek', 'DeepSeek', '#06b6d4'], ['local', 'IA local (Qwen 3B)', '#10b981']];
+  var totTok = fontes.reduce(function(a, f) { var x = ia[f[0]] || {}; return a + (x.tin || 0) + (x.tout || 0) + (x.tcache || 0); }, 0);
+  document.getElementById('eq-ia-total').textContent = eqTok(totTok) + ' tokens' + (velho ? ' · medição antiga' : '');
+  document.getElementById('eq-ia').innerHTML = '<div class="x-pilha">' + fontes.map(function(f) { var x = ia[f[0]] || {}, t = (x.tin || 0) + (x.tout || 0) + (x.tcache || 0); return t ? '<i style="width:' + (100 * t / Math.max(1, totTok)) + '%;background:' + f[2] + '"></i>' : ''; }).join('') + '</div>'
+    + fontes.map(function(f) {
+      var x = ia[f[0]] || {}, t = (x.tin || 0) + (x.tout || 0) + (x.tcache || 0);
+      var extra = f[0] === 'claude' ? (x.usd ? 'US$ ' + x.usd.toFixed(2).replace('.', ',') + ' em valor de API — coberto pelo seu plano' : 'coberto pelo seu plano') : f[0] === 'local' ? 'grátis, na placa de vídeo do notebook' : 'pago por uso (centavos)';
+      var qtd = f[0] === 'claude' ? x.n + ' execução(ões)' : f[0] === 'local' ? x.n + ' classificação(ões)' : x.n + ' chamada(s)';
+      return '<div class="x-linha" style="--c:' + f[2] + '"><b><i></i>' + f[1] + '</b><span class="x-val">' + eqTok(t) + '</span><small>' + qtd + ' · ' + extra + '</small></div>';
+    }).join('');
+  var lat = mt.lat || {}, itensLat = [['robo', 'Robô do 1Doc (/health)', 500], ['worker', 'Worker do SGD', 1500], ['ia_local', 'IA local por lote', 30000], ['coordenador', 'Coordenador responder', 60000], ['claude', 'Claude por execução', 15 * 60000]];
+  document.getElementById('eq-lat').innerHTML = itensLat.map(function(it) {
+    var v = lat[it[0]], c = !v ? '#6b7489' : v.mediana <= it[2] ? '#4edea3' : v.mediana <= it[2] * 3 ? '#f59e0b' : '#f87171';
+    return '<div class="x-linha" style="--c:' + c + '"><b><i></i>' + it[1] + '</b><span class="x-val">' + (v ? eqDur(v.mediana) : '—') + '</span>' + (v ? '<small>última ' + eqDur(v.ultimo) + ' · ' + v.amostras + ' medição(ões)</small>' : '<small>ainda sem medição</small>') + '</div>';
+  }).join('');
+  // atividade por hora, 24 h
+  var serie = mt.serie || {}, horas = [];
+  for (var i = 23; i >= 0; i--) {
+    var d = new Date(agora - 3 * 3600000 - i * 3600000), k = d.toISOString().slice(0, 13), b = serie[k] || {};
+    horas.push({ h: d.getUTCHours(), erros: b.erros || 0, acoes: (b.ocorrencias || 0) + (b.conferencias || 0) + (b.classificados || 0) + (b.correcoes || 0) + (b.acoes_vigia || 0) + (b.mensagens || 0) });
+  }
+  var W = 760, H = 170, ml = 28, mb = 20, mtp = 8, max = Math.max(4, Math.max.apply(null, horas.map(function(x) { return Math.max(x.erros, x.acoes); })));
+  var y = function(v) { return mtp + (H - mtp - mb) * (1 - v / max); }, x = function(i) { return ml + i * (W - ml - 6) / 23; };
+  var area = function(campo) { return horas.map(function(o, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(o[campo]).toFixed(1); }).join(' '); };
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Erros nos logs e ações dos bots por hora nas últimas 24 horas">';
+  [0, 0.5, 1].forEach(function(f) { var v = Math.round(max * f); svg += '<line x1="' + ml + '" x2="' + (W - 6) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="rgba(148,163,184,.08)"/><text class="x-eixo" x="' + (ml - 5) + '" y="' + (y(v) + 3) + '" text-anchor="end">' + v + '</text>'; });
+  svg += '<path d="' + area('acoes') + ' L' + x(23) + ' ' + y(0) + ' L' + x(0) + ' ' + y(0) + 'Z" fill="rgba(167,139,250,.18)"/><path d="' + area('acoes') + '" fill="none" stroke="#a78bfa" stroke-width="1.6"/>';
+  svg += '<path d="' + area('erros') + '" fill="none" stroke="#f87171" stroke-width="1.6" stroke-dasharray="4 3"/>';
+  horas.forEach(function(o, i) { if (i % 6 === 0 || i === 23) svg += '<text class="x-eixo" x="' + x(i) + '" y="' + (H - 5) + '" text-anchor="middle">' + String(o.h).padStart(2, '0') + 'h</text>'; });
+  var ult = horas[23]; svg += '<circle cx="' + x(23) + '" cy="' + y(ult.acoes) + '" r="3" fill="#a78bfa"/>';
+  document.getElementById('eq-ativ').innerHTML = svg + '</svg>';
 }
 function carregarEquipe() {
   if (!document.getElementById('panel-equipe').classList.contains('active')) return;
