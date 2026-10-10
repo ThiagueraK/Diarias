@@ -808,7 +808,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.66</span>
+    <span class="header-version">v1.10.67</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3711,7 +3711,7 @@ function cpaRenderControle(r, d) {
   var g = d.disparoRegras || {}, dp = d.disparo, agora = r.agora;
   var agenteOn = d.agenteVistoEm && agora - d.agenteVistoEm < 60000;
   var ativo = dp && ['pedido', 'iniciado', 'parar'].indexOf(dp.status) >= 0;
-  var roboFora = r.robo && !r.robo.fim && agora - (r.robo.em || 0) < 5 * 60000 && !(dp && dp.id === r.robo.exec);
+  var roboFora = r.robo && !r.robo.fim && agora - (r.robo.inicio || 0) < 40 * 60000 && !(dp && dp.id === r.robo.exec);
   var t = d.tarefa, pedidoAndamento = t && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0 && agora - (t.atualizadoEm || 0) < 3 * 3600000;
   var restam = Math.max(0, (g.maxHora || 3) - (g.naUltimaHora || 0));
   var porque = !agenteOn ? 'O agente do notebook está desligado.' : ativo ? 'Já tem uma rodada do robô em andamento.' : roboFora ? 'O robô está rodando (iniciado à mão).'
