@@ -674,6 +674,14 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eq-t-acoes{display:flex;gap:6px;margin-top:6px;}
   .eq-t-acoes button{font-size:.6rem;padding:3px 8px;}
   @media (max-width:860px){ .eq-grid{grid-template-columns:1fr;} .eq-msgs{height:340px;} }
+  /* 10/10/2026: credores do CP (aba Processos) */
+  .cred-linha{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
+  .cred-linha:first-child{border-top:none;}
+  .cred-linha input{padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;font-variant-numeric:tabular-nums;min-width:0;}
+  .cred-linha button{padding:5px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);}
+  .cred-nome{flex:2 1 220px;min-width:0;}
+  .cred-nome small{display:block;color:var(--text-muted);}
+  .cred-aviso{color:#b45309;}
   /* 10/10/2026: aba Acompanhamento do CP (tokens da Central de Empenhos; tudo preso em .cpa) */
   .cpa .ce-panel{margin-bottom:12px;}
   .cpa-head-dir{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -808,7 +816,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.67</span>
+    <span class="header-version">v1.10.68</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1242,6 +1250,26 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           </label>
         </div>
         <div id="cp-vigia-andamento" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+      <!-- 10/10/2026: credores do CP. Quem espera empenho e não está na tabela do lote é cadastrado aqui
+           (número do credor + centro de custo); o lote usa o cadastro pelo nome exato. -->
+      <div id="cred-painel" style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:0 0 10px;background:var(--surface2);">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
+          <b style="font-size:13px;">👤 Credores no CP</b>
+          <span id="cred-resumo" style="font-size:12px;color:var(--text-muted);">carregando…</span>
+        </div>
+        <div id="cred-pendentes" style="margin-top:8px;"></div>
+        <details id="cred-cadastrados-box" style="margin-top:8px;font-size:12px;">
+          <summary style="cursor:pointer;color:var(--text-muted);">Cadastrados pelo SGD (<span id="cred-n-cad">0</span>) · cadastrar outra pessoa</summary>
+          <div id="cred-cadastrados" style="margin-top:6px;"></div>
+          <form id="cred-form-livre" class="cred-linha" autocomplete="off" style="margin-top:8px;">
+            <input name="nome" placeholder="Nome completo (como vem no processo)" aria-label="Nome completo" style="flex:2 1 220px;">
+            <input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor no CP" style="width:110px;">
+            <input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">
+            <button type="submit">Salvar</button>
+          </form>
+        </details>
+        <datalist id="cred-centros"><option value="35">35 · motorista</option><option value="36">36 · demais servidores</option></datalist>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
       <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
@@ -3226,6 +3254,7 @@ function cpAtualizarContagens() {
   sgdFetch(SGD_WORKER_URL + '?action=empenho-pendentes-listar', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok) return;
     var n = (res.itens || []).length;
+    credItens = res.itens || []; credRender();
     document.getElementById('cp-cont-empenho').textContent = n + ' pendente(s)';
     var inp = document.getElementById('cp-qtd-empenho'); if (!inp.dataset.mexido) inp.value = n || '';
   }).catch(function(){});
@@ -3236,6 +3265,76 @@ function cpAtualizarContagens() {
     var inp = document.getElementById('cp-qtd-prestacao'); if (!inp.dataset.mexido) inp.value = sem || '';
   }).catch(function(){});
 }
+// 10/10/2026: CREDORES DO CP - quem espera empenho sem credor na tabela do lote (semCredor) ou que a tabela
+// só achou pelo começo do nome (credorPorPrefixo). O cadastro (credores-salvar) vale pelo nome exato.
+var credItens = null, credCadastro = [], credAssinatura = '', credTotalScript = null;
+function credNorm(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w\s]/g, ' ').toUpperCase().replace(/\s+/g, ' ').trim(); }
+function credLinha(nome, detalhe, aviso) {
+  return '<form class="cred-linha cred-form" autocomplete="off" data-nome="' + escaparHtmlProc(nome) + '">'
+    + '<span class="cred-nome"><b>' + escaparHtmlProc(nome) + '</b><small' + (aviso ? ' class="cred-aviso"' : '') + '>' + detalhe + '</small></span>'
+    + '<input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor de ' + escaparHtmlProc(nome) + '" style="width:110px;">'
+    + '<input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">'
+    + '<button type="submit">Salvar</button></form>';
+}
+function credRender() {
+  if (!credItens) return;
+  var grupos = {};
+  credItens.forEach(function(it) {
+    if (!it.semCredor && !it.credorPorPrefixo) return;
+    var k = credNorm(it.servidor);
+    (grupos[k] = grupos[k] || { nome: it.servidor, procs: [], prefixo: it.credorPorPrefixo ? it.credorNomeTabela : null }).procs.push(it.numeroProcesso);
+  });
+  var lista = Object.keys(grupos).sort().map(function(k) { return grupos[k]; });
+  var sem = lista.filter(function(g) { return !g.prefixo; }).length, pref = lista.length - sem;
+  document.getElementById('cred-resumo').innerHTML = !lista.length ? '✅ todos os pendentes têm credor'
+    : (sem ? '<b style="color:var(--danger,#dc2626);">' + sem + ' sem credor</b> (ficam fora do lote)' : '') + (sem && pref ? ' · ' : '') + (pref ? '<span class="cred-aviso">' + pref + ' para conferir</span>' : '');
+  // não redesenha enquanto a lista é a mesma (não apaga o que está sendo digitado)
+  var assin = lista.map(function(g) { return g.nome + g.procs.join() + g.prefixo; }).join('|');
+  if (assin === credAssinatura) return;
+  credAssinatura = assin;
+  document.getElementById('cred-pendentes').innerHTML = lista.map(function(g) {
+    var procs = 'proc. ' + g.procs.join(', ');
+    return g.prefixo
+      ? credLinha(g.nome, procs + ' · a tabela achou pelo começo do nome: <b>' + escaparHtmlProc(g.prefixo) + '</b>. Se for outra pessoa, cadastre o credor certo.', true)
+      : credLinha(g.nome, procs + ' · não está na tabela de credores', false);
+  }).join('');
+}
+function credRenderCadastro() {
+  document.getElementById('cred-n-cad').textContent = credCadastro.length;
+  document.getElementById('cred-cadastrados').innerHTML = credCadastro.length ? credCadastro.map(function(c) {
+    return '<div class="cred-linha"><span class="cred-nome"><b>' + escaparHtmlProc(c.nome) + '</b><small>credor ' + escaparHtmlProc(c.credor) + ' · centro ' + escaparHtmlProc(c.centro || '—') + ' · ' + ceData(c.em) + '</small></span>'
+      + '<button type="button" data-cred-remover="' + escaparHtmlProc(c.nome) + '">Remover</button></div>';
+  }).join('') : '<div style="color:var(--text-muted);">Ninguém cadastrado pelo SGD ainda (' + (credTotalScript ? 'os ' + credTotalScript + ' nomes' : 'os nomes') + ' da tabela do lote continuam valendo).</div>';
+}
+function credCarregar() {
+  sgdFetch(SGD_WORKER_URL + '?action=credores-listar').then(function(r) { return r.json(); }).then(function(res) {
+    if (res.ok) { credCadastro = res.cadastro || []; credTotalScript = res.totalScript; credRenderCadastro(); }
+  }).catch(function() {});
+}
+function credSalvar(form, nome) {
+  var credor = form.credor.value.trim(), centro = form.centro.value.trim();
+  if (!nome || !credor || !centro) { alert('Preencha nome, número do credor e centro de custo.'); return; }
+  if (!confirm('Cadastrar ' + nome + ' como credor ' + credor + ' (centro ' + centro + ')?\n\nConfira o número no Cadastro de Credor do CP: o lote vai empenhar com ele.')) return;
+  var bt = form.querySelector('button'); bt.disabled = true;
+  sgdFetch(SGD_WORKER_URL + '?action=credores-salvar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, credor: credor, centro: centro }) })
+    .then(function(r) { return r.json(); }).then(function(res) {
+      bt.disabled = false;
+      if (!res.ok) { alert(res.error || 'Não foi possível salvar.'); return; }
+      form.reset(); credAssinatura = ''; credCarregar(); cpAtualizarContagens();
+    }).catch(function(e) { bt.disabled = false; alert('Erro: ' + e.message); });
+}
+document.addEventListener('submit', function(ev) {
+  var f = ev.target;
+  if (f.classList && f.classList.contains('cred-form')) { ev.preventDefault(); credSalvar(f, f.dataset.nome); }
+  else if (f.id === 'cred-form-livre') { ev.preventDefault(); credSalvar(f, f.nome.value.trim()); }
+});
+document.addEventListener('click', function(ev) {
+  var b = ev.target.closest && ev.target.closest('[data-cred-remover]');
+  if (!b || !confirm('Remover o cadastro de ' + b.dataset.credRemover + '?')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=credores-remover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: b.dataset.credRemover }) })
+    .then(function() { credAssinatura = ''; credCarregar(); cpAtualizarContagens(); });
+});
+document.getElementById('tabProcessos').addEventListener('click', function() { setTimeout(credCarregar, 700); });
 function cpAtualizarEstado() {
   var painel = document.getElementById('panel-processos');
   if (!painel || !painel.classList.contains('active')) return;
