@@ -793,6 +793,127 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   @media (max-width:900px){ .eqx .x-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} .eqx .x-grid2{grid-template-columns:1fr;} .eqx .x-msgs{height:320px;} }
   @media (max-width:620px){ .eqx{padding:16px 14px 20px;} .eqx .x-agentes{grid-template-columns:1fr;} }
   @media (prefers-reduced-motion: reduce){ .eqx .x-chip i{animation:none;} }
+  /* 10/10/2026: aba Processos no mesmo visual (.eqx) - "Central de Empenhos & Diárias" do Stitch, adaptado.
+     .prx redefine as variáveis do tema do site só aqui dentro, pra os cards da caixa, Rodar no CP e
+     Credores (que usam var(--surface)/var(--text)...) ficarem escuros sem reescrever cada um. */
+  .eqx.prx{
+    --surface:#1a1f2e; --surface2:#141927; --card:#1a1f2e; --border:rgba(148,163,184,.16); --border-strong:rgba(148,163,184,.3);
+    --text:#dee2f6; --text-muted:#9aa3b8; --text-dim:#6b7489;
+    --accent:#8b5cf6; --accent2:#06b6d4; --brand-deep:#6d3bd7; --accent-light:rgba(139,92,246,.18); --accent-soft:rgba(6,182,212,.14);
+    --success:#4edea3; --ok-soft:rgba(78,222,163,.1); --warning:#f59e0b; --warn-soft:rgba(245,158,11,.1); --danger:#f87171;
+    --shadow-sm:none; --shadow-md:0 10px 28px -12px rgba(0,0,0,.7);
+  }
+  .prx input, .prx select{color-scheme:dark;}
+  .prx .prx-acoes{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end;}
+  .prx .prx-acoes .x-atual{flex-basis:100%; text-align:right;}
+  .prx .x-kpi .v small{font-size:13px;}
+  .prx #proc-contador-fora-num{color:var(--x-warn); font-weight:600;}
+  .prx .prx-grid{display:grid; grid-template-columns:minmax(0,1fr); gap:14px; align-items:start;}
+  /* a página tem ~900px de largura: resumo (motivo, servidores, feed) numa faixa acima da esteira */
+  .prx .prx-lado{order:-1; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; align-items:start; min-width:0;}
+  .prx .prx-lado .x-painel{height:100%;}
+  .prx .prx-serv, .prx .prx-feed{max-height:300px; overflow-y:auto;}
+  .prx .prx-busca{width:min(260px,100%); background:rgba(10,15,29,.9); border:1px solid var(--x-line2); border-radius:6px; padding:7px 10px; color:var(--x-text); font:12.5px var(--f-x-body);}
+  .prx .prx-busca:focus{border-color:var(--x-violeta); box-shadow:none;}
+  .prx .prx-abas{display:flex; flex-wrap:wrap; gap:2px; padding:0 10px; border-bottom:1px solid var(--x-line); scrollbar-width:thin;}
+  .prx .prx-aba{flex:0 0 auto; font-family:var(--f-x-disp); font-size:11.5px; font-weight:600; letter-spacing:.03em; padding:11px 10px 10px; background:none; border:0; border-bottom:2px solid transparent; color:var(--x-muted); cursor:pointer; white-space:nowrap;}
+  .prx .prx-aba b{display:inline-block; min-width:20px; margin-left:4px; padding:0 6px; border-radius:10px; background:rgba(255,255,255,.07); color:#fff; font-size:10.5px; text-align:center;}
+  .prx .prx-aba:hover{color:#fff;}
+  .prx .prx-aba[aria-pressed="true"]{color:#fff; border-bottom-color:#a78bfa;}
+  .prx .prx-aba[data-f="alerta"] b{background:rgba(248,113,113,.18); color:#fca5a5;}
+  .prx .prx-aba:focus-visible, .prx .prx-cat:focus-visible{outline:2px solid #a78bfa; outline-offset:-2px;}
+  .prx .prx-cats{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px;}
+  .prx .prx-cat{--c:#a78bfa; display:inline-flex; align-items:center; gap:6px; font-family:var(--f-x-disp); font-size:11px; font-weight:600; padding:4px 10px; border-radius:4px; cursor:pointer; background:transparent; color:var(--x-muted); border:1px solid var(--x-line2);}
+  .prx .prx-cat i{width:7px; height:7px; border-radius:2px; background:var(--c);}
+  .prx .prx-cat b{color:#fff; font-weight:700;}
+  .prx .prx-cat[aria-pressed="true"]{color:#fff; border-color:var(--c); background:color-mix(in srgb, var(--c) 16%, transparent);}
+  .prx .prx-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; padding:4px 14px 14px;}
+  .prx .prx-card{position:relative; background:linear-gradient(160deg, color-mix(in srgb, var(--c) 7%, #1a1f2e), #171c2a 60%); border:1px solid var(--x-line); border-radius:8px; padding:13px 14px 12px 16px; display:flex; flex-direction:column; gap:10px; min-width:0;}
+  .prx .prx-card::before{content:''; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:0 3px 3px 0; background:var(--c);}
+  .prx .prx-c-top{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px;}
+  .prx .prx-c-num{font-family:var(--f-x-disp); font-weight:700; font-size:14px; color:#fff; font-variant-numeric:tabular-nums;}
+  .prx .prx-c-proc{font-size:11.5px; color:var(--x-dim); font-variant-numeric:tabular-nums;}
+  .prx .prx-c-top .x-chip{margin-left:auto; height:20px; font-size:9.5px;}
+  .prx .prx-c-top .x-chip i{display:none;}
+  .prx .prx-c-mid{display:flex; gap:10px; align-items:flex-end; justify-content:space-between;}
+  .prx .prx-c-quem{min-width:0;}
+  .prx .prx-c-quem b{display:block; font-weight:600; font-size:13.5px; color:var(--x-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .prx .prx-c-quem span{display:block; font-size:11.5px; color:var(--x-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .prx .prx-c-valor{font-family:var(--f-x-disp); font-weight:700; font-size:18px; color:#fff; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .prx .prx-trilha{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr));}
+  .prx .prx-trilha li{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; min-width:0; --n:#3a4154;}
+  .prx .prx-trilha li::before{content:''; position:absolute; top:6px; right:50%; width:100%; height:2px; background:var(--l, #2a3042);}
+  .prx .prx-trilha li:first-child::before{display:none;}
+  .prx .prx-trilha li b{position:relative; width:14px; height:14px; border-radius:50%; background:#141927; border:2px solid var(--n);}
+  .prx .prx-trilha li span{font-family:var(--f-x-disp); font-size:9.5px; font-weight:600; letter-spacing:.03em; color:var(--x-dim); max-width:100%; overflow:hidden; text-overflow:ellipsis;}
+  .prx .prx-trilha li small{font-size:9.5px; color:var(--x-dim); font-variant-numeric:tabular-nums; min-height:13px;}
+  .prx .prx-trilha li.ok, .prx .prx-trilha li.imp{--n:#4edea3; --l:#4edea3;}
+  .prx .prx-trilha li.ok b{background:#4edea3;}
+  .prx .prx-trilha li.imp b{background:color-mix(in srgb,#4edea3 35%,#141927);}
+  .prx .prx-trilha li.ok span, .prx .prx-trilha li.imp span{color:#bfe9d6;}
+  .prx .prx-trilha li.cur{--n:#06b6d4; --l:#4edea3;}
+  .prx .prx-trilha li.cur b{background:#06b6d4; box-shadow:0 0 0 0 rgba(6,182,212,.6); animation:prx-ping 2s ease-out infinite;}
+  .prx .prx-trilha li.cur span, .prx .prx-trilha li.cur small{color:#67e8f9;}
+  .prx .prx-trilha li.fail{--n:#f87171;}
+  .prx .prx-trilha li.fail b{background:#f87171;}
+  .prx .prx-trilha li.fail span, .prx .prx-trilha li.fail small{color:#fca5a5;}
+  @keyframes prx-ping{0%{box-shadow:0 0 0 0 rgba(6,182,212,.55);}80%,100%{box-shadow:0 0 0 7px rgba(6,182,212,0);}}
+  .prx .prx-c-sit{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--x-muted);}
+  .prx .prx-c-sit i{width:7px; height:7px; border-radius:50%; background:var(--c); flex:0 0 7px;}
+  .prx .prx-c-alerta{font-size:12px; color:#fca5a5; background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.3); border-radius:6px; padding:6px 9px;}
+  .prx .prx-mais{padding:0 14px 14px; text-align:center;}
+  .prx .prx-dist{padding:12px 14px; display:grid; grid-template-columns:96px minmax(0,1fr); gap:12px; align-items:center;}
+  .prx .prx-dist > .x-vazio{grid-column:1 / -1;}
+  .prx .prx-rosca svg{display:block; width:100%; height:auto;}
+  .prx .prx-rosca-v{font-family:var(--f-x-disp); font-weight:700; font-size:14px; fill:#fff;}
+  .prx .prx-leg .x-linha{padding:4px 0; font-size:12px;}
+  .prx .prx-leg .x-linha .x-val{font-size:13px;}
+  .prx .prx-leg .x-linha small{font-size:11px;}
+  .prx .prx-serv{padding:6px 14px 10px;}
+  .prx .prx-s{display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid var(--x-line);}
+  .prx .prx-s:last-child{border-bottom:0;}
+  .prx .prx-s-av{width:30px; height:30px; border-radius:6px; display:grid; place-items:center; font-family:var(--f-x-disp); font-size:11px; font-weight:700; color:#c4b5fd; background:rgba(139,92,246,.16); border:1px solid rgba(139,92,246,.35);}
+  .prx .prx-s-nome{min-width:0;}
+  .prx .prx-s-nome b{display:block; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .prx .prx-s-nome .x-barra{margin-top:5px; height:3px;}
+  .prx .prx-s-nome .x-barra i{background:#8b5cf6;}
+  .prx .prx-s-num{text-align:right;}
+  .prx .prx-s-num b{display:block; font-family:var(--f-x-disp); font-size:15px; color:#fff;}
+  .prx .prx-s-num small{font-size:10.5px; color:var(--x-muted); white-space:nowrap;}
+  .prx .prx-feed{max-height:360px;}
+  .prx .prx-feed .x-ev p b{color:#fff;}
+  /* caixa SGD */
+  .prx .prx-ops{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; margin-bottom:12px; align-items:start;}
+  .prx .prx-box{background:var(--x-card); border:1px solid var(--x-line); border-radius:8px; padding:12px 14px; margin:0 0 12px; min-width:0;}
+  .prx .prx-ops .prx-box{margin:0;}
+  .prx .prx-box-tit{font-family:var(--f-x-disp); font-size:14.5px; font-weight:600; color:#fff;}
+  .prx .prx-box button{font-family:var(--f-x-disp); font-weight:600; letter-spacing:.02em;}
+  .prx .prx-linha-caixa{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 12px;}
+  .prx #proc-resumo-situacao:not([hidden]){display:flex; flex-wrap:wrap; gap:6px; font-size:12px;}
+  .prx #proc-resumo-situacao span{background:rgba(255,255,255,.03) !important;}
+  .prx .prx-ultimo:not([hidden]){display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.45); border-radius:8px; padding:6px 12px; font-size:12.5px;}
+  .prx .prx-lista{max-height:72vh; overflow-y:auto;}
+  .prx .proc-card{background:linear-gradient(160deg, rgba(139,92,246,.06), #1a1f2e 55%); border-color:var(--x-line); border-radius:8px;}
+  .prx .proc-card:hover{transform:none; border-color:var(--x-line2);}
+  .prx .proc-card.is-fora-script{background:rgba(245,158,11,.06) !important;}
+  .prx .proc-avatar{border-radius:8px; font-family:var(--f-x-disp); color:#c4b5fd;}
+  .prx .proc-nome, .prx .proc-viagem-data{font-family:var(--f-x-disp);}
+  .prx .proc-fora-script-box{color:#fcd34d; background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.5);}
+  .prx .proc-btn-fora-script:hover{background:rgba(245,158,11,.12); color:#fcd34d;}
+  .prx .proc-sit[data-s="a-empenhar"]{color:#4edea3;} .prx .proc-sit[data-s="guardado"]{color:#7AA7FF;}
+  .prx .proc-sit[data-s="bloqueado"]{color:#f87171;} .prx .proc-sit[data-s="fora-do-script"]{color:#fbbf24;}
+  .prx .proc-tag.app{color:#22d3ee;} .prx .proc-tag.bot{color:#c4b5fd;} .prx .proc-tag.manual{color:#fbbf24;}
+  .prx .proc-meta span[style*="#2563eb"]{color:#7AA7FF !important;} .prx .proc-meta span[style*="#7c3aed"]{color:#c4b5fd !important;}
+  .prx .proc-meta span[style*="#16a34a"], .prx .proc-meta span[style*="#059669"]{color:#4edea3 !important;}
+  .prx .proc-meta span[style*="#b45309"], .prx .proc-meta span[style*="#b8860b"]{color:#fbbf24 !important;}
+  .prx .proc-conf.atencao summary, .prx .proc-conf li.atencao, .prx .proc-hist-lin.sobre{color:#fbbf24;}
+  .prx .proc-conf.ok summary{color:#4edea3;}
+  .prx .proc-viagem-meio.pernoite{color:#c4b5fd;}
+  .prx .proc-copy-btn{background:linear-gradient(135deg,#8b5cf6,#7c3aed);}
+  .prx .proc-copy-btn.copiado{background:#059669;}
+  @media (max-width:900px){ .prx .prx-ops{grid-template-columns:1fr;} .prx .prx-acoes{justify-content:flex-start;} .prx .prx-acoes .x-atual{text-align:left;} }
+  @media (max-width:620px){ .prx .prx-cards{grid-template-columns:1fr; padding:4px 10px 12px;} .prx .prx-busca{width:100%;} .prx .prx-dist{grid-template-columns:100px minmax(0,1fr);} .prx .prx-trilha li span{font-size:8.5px;} }
+  @media (prefers-reduced-motion: reduce){ .prx .prx-trilha li.cur b{animation:none;} }
   /* 10/10/2026: credores do CP (aba Processos) */
   .cred-linha{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
   .cred-linha:first-child{border-top:none;}
@@ -935,7 +1056,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.74</span>
+    <span class="header-version">v1.10.75</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1320,62 +1441,74 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   </div>
 
   <div class="tab-panel" id="panel-processos">
-
-    <!-- 10/09/2026: painel permanente de andamento (não só durante processamento ativo) -->
-    <div class="ce" id="central-empenhos">
-      <div class="ce-header">
+    <!-- 10/10/2026: aba Processos no visual do Stitch ("Central de Empenhos & Concessão de Diárias") adaptado:
+         mesmo design da aba Equipe (.eqx). Só dados reais: Tabela de Controle (processos), rota central-empenhos e
+         a caixa SGD. Ficaram de fora a dotação orçamentária, CNH, SIAFEM e a "auditoria IA de rotas" do mockup.
+         Todos os ids e funções antigos (varrer, Rodar no CP, credores, encaminhar, cards da caixa) continuam. -->
+    <div class="eqx prx" id="central-empenhos">
+      <div class="x-head">
         <div>
-          <h2 class="ce-title">CENTRAL DE <span>EMPENHOS</span></h2>
-          <div class="ce-sub">Tupanciretã · SGD-Diárias · do CP à prestação de contas</div>
+          <div class="x-eyebrow"><span class="x-tag">Tupanciretã · SGD-Diárias</span><span class="x-tag ok" id="prx-tag-mes">—</span></div>
+          <h2 class="x-title">Central de Empenhos &amp; Diárias</h2>
+          <div class="x-sub">Da caixa do 1Doc ao CP, às assinaturas, ao pagamento e à prestação de contas, num lugar só.</div>
         </div>
-        <div class="ce-atualizado" id="ce-atualizado">carregando…</div>
-      </div>
-      <div class="ce-telemetry ce-tel2" id="ce-tiles">
-        <button type="button" class="ce-tile" data-f="cp" style="--tile-glow:#7AA7FF"><div class="ce-tile-label">No CP · guardados</div><div class="ce-tile-value" id="ce-t-cp">—</div></button>
-        <button type="button" class="ce-tile" data-f="sua" style="--tile-glow:#FF3D71"><div class="ce-tile-label">Sua assinatura</div><div class="ce-tile-value" id="ce-t-sua">—</div></button>
-        <button type="button" class="ce-tile" data-f="saude" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Secretária</div><div class="ce-tile-value" id="ce-t-saude">—</div></button>
-        <button type="button" class="ce-tile" data-f="adm" style="--tile-glow:#00E5FF"><div class="ce-tile-label">Secretário Adm</div><div class="ce-tile-value" id="ce-t-adm">—</div></button>
-        <button type="button" class="ce-tile" data-f="pago" style="--tile-glow:#FFB454"><div class="ce-tile-label">Autorizado · a pagar</div><div class="ce-tile-value" id="ce-t-pagar">—</div></button>
-        <button type="button" class="ce-tile" data-f="pc" style="--tile-glow:#FFD166"><div class="ce-tile-label">Pago · sem prestação</div><div class="ce-tile-value" id="ce-t-pc">—</div></button>
-        <button type="button" class="ce-tile" data-f="pagos7" style="--tile-glow:#39FF88"><div class="ce-tile-label">Pagos em 7 dias</div><div class="ce-tile-value" id="ce-t-pagos">—</div></button>
-        <div class="ce-tile fixo" style="--tile-glow:#C9A8FF"><div class="ce-tile-label">Ciclo médio CP→pago</div><div class="ce-tile-value" id="ce-t-ciclo">—</div></div>
-      </div>
-      <div class="ce-panel">
-        <div class="ce-panel-head">
-          <div class="ce-filtros" id="ce-filtros">
-            <button type="button" class="ce-chip ativo" data-f="todos">Todos</button>
-            <button type="button" class="ce-chip" data-f="alerta">⚠ Com alerta <span id="ce-n-alerta"></span></button>
-            <button type="button" class="ce-chip" data-f="andamento">Em andamento</button>
-            <button type="button" class="ce-chip" data-f="concluidos">Concluídos</button>
-            <input type="search" class="ce-busca" id="ce-busca" placeholder="servidor, processo ou empenho" aria-label="Buscar na Central de Empenhos">
-          </div>
-          <div class="ce-legend">
-            <span style="color:#39FF88"><i style="background:#39FF88"></i>Feito</span>
-            <span style="color:#00E5FF"><i style="background:#00E5FF"></i>Esperando</span>
-            <span style="color:#FF3D71"><i style="background:#FF3D71"></i>Falhou</span>
-          </div>
+        <div class="prx-acoes">
+          <button type="button" class="x-bt" id="proc-atualizar" title="Varre a sua caixa SGD no 1Doc agora">🔄 Varrer caixa agora</button>
+          <button type="button" class="x-bt" id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h)">📥 Varrer caixa do Marcos</button>
+          <button type="button" class="x-bt" id="btn-checkpoint-empenho" title="Os empenhos gerados no CP ficam guardados aqui. Ao clicar, todos são anexados, enviados pra assinatura da Secretária e do Secretário de Administração e encaminhados no 1Doc de uma vez (assim a Secretária assina em lote)">📎 Encaminhar empenhos guardados</button>
+          <div class="x-atual" id="ce-atualizado">carregando…</div>
         </div>
-        <div class="ce-row ce-r2 ce-head-row">
-          <div>Empenho · processo</div><div>Servidor · viagem</div><div>Etapas</div><div style="text-align:right;">Situação</div>
-        </div>
-        <div id="ce-linhas" style="max-height:520px;overflow-y:auto;"><div class="ce-empty">Carregando…</div></div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>📋 Processos — caixa SGD pendentes de empenho</span>
-        <span style="display:flex;gap:8px;">
-          <button id="proc-atualizar" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">🔄 Varrer caixa agora</button>
-          <button id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h) — resultado aparece no painel SaúdeFrota" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📥 Varrer caixa do Marcos</button>
-          <button id="btn-checkpoint-empenho" title="Os empenhos gerados no CP ficam guardados aqui. Ao clicar, todos são anexados, enviados pra assinatura da Secretária e do Secretário de Administração e encaminhados no 1Doc de uma vez (assim a Secretária assina em lote)" style="padding:6px 14px;background:var(--surface2);color:var(--text);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;">📎 Encaminhar empenhos guardados</button>
-        </span>
+      <div class="x-kpis">
+        <div class="x-kpi"><div class="x-lbl" id="prx-k-mes-lbl">Empenhado no mês</div><div class="v" id="prx-k-mes">—</div><div class="d" id="prx-k-mes-d"></div><div class="x-barra" title="Comparado com o mês passado inteiro"><i id="prx-k-mes-barra" style="width:0"></i></div></div>
+        <div class="x-kpi"><div class="x-lbl">Na esteira (CP → prestação)</div><div class="v" id="prx-k-esteira">—</div><div class="d" id="prx-k-esteira-d"></div></div>
+        <div class="x-kpi"><div class="x-lbl">Caixa SGD · a empenhar</div><div class="v"><span id="proc-contador-num">0</span></div><div class="d"><span id="proc-contador-fora-num" style="display:none;"></span> <span>compare com o total no 1Doc</span></div></div>
+        <div class="x-kpi"><div class="x-lbl">Ciclo médio CP → pago</div><div class="v" id="ce-t-ciclo">—</div><div class="d">pagos em 7 dias: <b id="ce-t-pagos">—</b></div></div>
       </div>
-      <!-- 03/10/2026: rodar o CP pelo SGD. Um vigia aberto na sessão do CP pega o pedido, abre a
-           tela (Emissão de Empenho / Prestação de Contas) e roda o lote; andamento ao vivo aqui. -->
-      <div id="cp-vigia-painel" style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:6px 0 10px;background:var(--surface2);">
+
+      <div class="prx-grid">
+        <section class="x-painel prx-esteira" aria-labelledby="prx-t-esteira">
+          <div class="x-ph">
+            <h4 id="prx-t-esteira">Esteira de empenhos</h4>
+            <input type="search" class="prx-busca" id="ce-busca" placeholder="servidor, processo ou empenho" aria-label="Buscar na esteira de empenhos">
+          </div>
+          <div class="prx-abas" id="ce-tiles" role="group" aria-label="Filtrar por etapa">
+            <button type="button" class="prx-aba" data-f="todos">Todos</button>
+            <button type="button" class="prx-aba" data-f="alerta">⚠ Com alerta <b id="ce-n-alerta"></b></button>
+            <button type="button" class="prx-aba" data-f="cp">No CP · guardados <b id="ce-t-cp">—</b></button>
+            <button type="button" class="prx-aba" data-f="sua">Sua assinatura <b id="ce-t-sua">—</b></button>
+            <button type="button" class="prx-aba" data-f="saude">Secretária <b id="ce-t-saude">—</b></button>
+            <button type="button" class="prx-aba" data-f="adm">Secretário Adm <b id="ce-t-adm">—</b></button>
+            <button type="button" class="prx-aba" data-f="pago">A pagar <b id="ce-t-pagar">—</b></button>
+            <button type="button" class="prx-aba" data-f="pc">Pago · sem prestação <b id="ce-t-pc">—</b></button>
+            <button type="button" class="prx-aba" data-f="concluidos">Concluídos</button>
+          </div>
+          <div class="prx-cats" id="ce-filtros" role="group" aria-label="Filtrar por motivo"></div>
+          <div class="prx-cards" id="ce-linhas"><div class="x-vazio">Carregando…</div></div>
+          <div class="prx-mais" id="prx-mais" hidden><button type="button" class="x-bt" id="prx-mais-bt">Mostrar mais</button></div>
+        </section>
+        <aside class="prx-lado">
+          <section class="x-painel" aria-labelledby="prx-t-dist">
+            <div class="x-ph"><h4 id="prx-t-dist">Por motivo · <span id="prx-dist-mes">mês</span></h4><span class="x-lbl">valor empenhado</span></div>
+            <div class="prx-dist" id="prx-dist"><div class="x-vazio">Carregando…</div></div>
+          </section>
+          <section class="x-painel" aria-labelledby="prx-t-serv">
+            <div class="x-ph"><h4 id="prx-t-serv">Servidores no mês</h4><span class="x-lbl">diárias · valor</span></div>
+            <div class="prx-serv" id="prx-serv"><div class="x-vazio">Carregando…</div></div>
+          </section>
+          <section class="x-painel" aria-labelledby="prx-t-feed">
+            <div class="x-ph"><h4 id="prx-t-feed">Acontecendo agora</h4><span class="x-lbl">últimos passos da esteira</span></div>
+            <div class="x-fluxo prx-feed" id="prx-feed"><div class="x-vazio">Carregando…</div></div>
+          </section>
+        </aside>
+      </div>
+
+      <div class="x-sec" style="margin-top:20px;"><h3>Caixa SGD · a empenhar</h3><span class="x-lbl">cada cartão é um processo de diária na sua caixa do 1Doc, com a descrição pronta pra colar no empenho (nunca cita paciente)</span></div>
+      <div class="prx-ops">
+      <div id="cp-vigia-painel" class="prx-box">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
-          <b style="font-size:13px;">🖥️ Rodar no CP</b>
+          <b class="prx-box-tit">Rodar no CP</b>
           <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span id="cp-vigia-online" style="font-size:12px;color:var(--text-muted);">verificando o vigia…</span>
             <button id="cp-btn-copiar-vigia" title="Copia o comando que liga o vigia. Cole no PowerShell da sessão do CP e deixe a janela aberta." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📋 Copiar comando do vigia</button>
@@ -1395,11 +1528,9 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         </div>
         <div id="cp-vigia-andamento" style="font-size:12px;margin-top:8px;display:none;"></div>
       </div>
-      <!-- 10/10/2026: credores do CP. Quem espera empenho e não está na tabela do lote é cadastrado aqui
-           (número do credor + centro de custo); o lote usa o cadastro pelo nome exato. -->
-      <div id="cred-painel" style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:0 0 10px;background:var(--surface2);">
+      <div id="cred-painel" class="prx-box">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
-          <b style="font-size:13px;">👤 Credores no CP</b>
+          <b class="prx-box-tit">Credores no CP</b>
           <span id="cred-resumo" style="font-size:12px;color:var(--text-muted);">carregando…</span>
         </div>
         <div id="cred-pendentes" style="margin-top:8px;"></div>
@@ -1417,14 +1548,9 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <datalist id="cred-centros"><option value="35">35 · motorista</option><option value="36">36 · demais servidores</option></datalist>
         <datalist id="cred-cargos"><option value="AGENTE DE COMBATE AS ENDEMIAS"><option value="AGENTE COMUNITARIO DE SAUDE"><option value="MOTORISTA"><option value="TECNICO DE ENFERMAGEM"><option value="ENFERMEIRO"></datalist>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin:4px 0 4px;">Cada card é um processo de diária na sua caixa do 1Doc, com a descrição já pronta pra colar no empenho — sem IA, nunca cita nome de paciente.</p>
-      <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 4px;display:none;"></p>
-      <!-- 22/09/2026: resumo do último escaneamento da caixa do Marcos DENTRO da aba Processos
-           (pedido do usuário: ele não abre mais o painel do SaúdeFrota). Antes só existia um
-           "N processo(s) encontrado(s)" que contava candidato que FALHOU ao abrir como
-           encontrado — daí "17 encontrados" sem nenhum processo aproveitável. O resumo separa
-           os baldes e lista o que deu pra ler. Ver renderResumoTriagemMarcos(). -->
-      <div id="tm-resumo" hidden style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin:0 0 10px;background:var(--surface2);">
+      </div>
+      <p id="triagem-marcos-status" style="font-size:12px;margin:0 0 8px;display:none;"></p>
+      <div id="tm-resumo" hidden class="prx-box">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
           <span style="font-size:12px;font-weight:700;color:var(--text);">📥 Caixa do Marcos no 1Doc (setor SMS-STL)</span>
           <span id="tm-quando" style="font-size:11px;color:var(--text-dim);"></span>
@@ -1432,34 +1558,19 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <div id="tm-pilulas" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
         <div id="tm-lista" style="max-height:240px;overflow-y:auto;font-size:12px;"></div>
       </div>
-      <!-- 09/09/2026: painel de acompanhamento ao vivo do "Processar anexos pendentes" -
-           pedido explícito do usuário depois de não gostar do alert() único no final ("quero
-           acompanhar cada etapa enquanto ocorre"). Ver processarCheckpointEmpenho(). -->
-      <div id="checkpoint-progresso" style="display:none;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin:0 0 10px;background:var(--surface2);">
+      <div id="checkpoint-progresso" class="prx-box" style="display:none;">
         <div id="checkpoint-progresso-titulo" style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;"></div>
         <div id="checkpoint-progresso-lista" style="display:flex;flex-direction:column;gap:4px;max-height:240px;overflow-y:auto;font-size:12px;"></div>
       </div>
-      <!-- 31/08/2026: pedido do usuário — contador bem visível pra comparar de olho com o
-           total mostrado direto no 1Doc e ter certeza que a varredura puxou tudo.
-           01/09/2026: 2 ajustes pedidos — (1) o número precisa cair sozinho quando um card
-           some da tela (empenho vinculado / duplicata confirmada), sem precisar de refresh;
-           (2) card ao lado com número/credor/cidade do ÚLTIMO processo que sumiu — o usuário
-           precisa desses dados pra continuar a liquidação logo depois, e sem isso a
-           informação some da tela junto com o card. Ver marcarProcessoRemovidoDaLista(). -->
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 10px;align-items:stretch;">
-        <div id="proc-contador" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
-          <span style="font-size:20px;font-weight:800;color:var(--accent2);" id="proc-contador-num">0</span>
-          <span>processos nessa varredura — compare com o total no 1Doc</span>
-          <span id="proc-contador-fora-num" style="display:none;margin-left:6px;font-size:12px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.12);padding:2px 8px;border-radius:12px;border:1px solid rgba(245,158,11,0.3);"></span>
-        </div>
-        <div id="proc-resumo-situacao" hidden style="display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;"></div>
-        <div id="proc-ultimo-removido" hidden style="display:inline-flex;align-items:center;gap:8px;background:rgba(37,99,235,.1);border:1.5px solid var(--accent2);border-radius:10px;padding:6px 14px;font-size:13px;color:var(--text);">
-          <span style="font-size:16px;">➡️</span>
+      <div class="prx-linha-caixa">
+        <div id="proc-resumo-situacao" hidden></div>
+        <div id="proc-ultimo-removido" hidden class="prx-ultimo">
+          <span>➡️</span>
           <span>Último p/ liquidação: <b id="proc-ultimo-removido-texto"></b></span>
         </div>
+        <span id="proc-atualizado-em" class="x-atual"></span>
       </div>
-      <p id="proc-atualizado-em" style="font-size:11px;color:var(--text-dim);margin:0 0 12px;"></p>
-      <div id="proc-lista" style="max-height:65vh;overflow-y:auto;">
+      <div id="proc-lista" class="prx-lista">
         <p style="color:var(--text-muted);">Carregando...</p>
       </div>
     </div>
@@ -2851,12 +2962,53 @@ window.sgdConfirmarDuplicataProcesso = sgdConfirmarDuplicataProcesso;
 window.sgdAdicionarProcessoManual = adicionarProcesso;
 
 var procPollingTimer = null;
-// 10/09/2026: "Central de Empenhos" - painel permanente, atualiza sozinho a cada 8s
+// 10/09/2026: "Central de Empenhos" - painel permanente, atualiza sozinho a cada 15s
 // enquanto a aba Processos estiver aberta (sem gastar request enquanto o usuário está
 // em outra aba - o guard de 'active' no início da função cuida disso).
 // 07/10/2026: Central COMPLETA (rota central-empenhos) - cada empenho do CP à prestação de contas.
+// 10/10/2026: visual do Stitch adaptado (.eqx .prx): cartão por empenho com a esteira desenhada, abas por
+// etapa, filtro por motivo (lido da descrição do empenho na Tabela de Controle), valor do mês, distribuição
+// por motivo, servidores do mês e os últimos passos. Nada inventado: Tabela (processos) + central-empenhos.
 var CE_ETAPAS = [['cp', 'CP'], ['enviado', '1Doc'], ['autor', 'Você'], ['saude', 'Secretária'], ['adm', 'Adm'], ['pago', 'Pago'], ['pc', 'PC']];
-var ceDados = null, ceFiltro = 'todos', ceBusca = '';
+var ceDados = null, ceFiltro = 'todos', ceBusca = '', ceCat = 'todos', prxLimite = 24;
+var PRX_CATS = [
+  ['ressarcimento', 'Ressarcimento', '#e879f9', /ressarc/],
+  ['agentes', 'Agentes · indenização', '#84cc16', /indeniza|agente (comunitari|de saude|de combate)/],
+  ['renal', 'Clínica renal', '#8b5cf6', /renal|hemodi|dialise/],
+  ['vigilancia', 'Vigilância em saúde', '#4edea3', /vigiagua|vigilanc|coleta de agua|endemia|dengue|vacina/],
+  ['veiculo', 'Veículo · manutenção', '#f97316', /manutenc|oficina|conserto|pneu|revisao d|retirar (o |a )?veiculo|buscar (o |a )?veiculo/],
+  ['capacitacao', 'Capacitação · reuniões', '#f59e0b', /capacita|curso|reuniao|treinament|congress|seminari|conferencia|encontro|forum|palestra/],
+  ['pacientes', 'Transporte de pacientes', '#06b6d4', /paciente|consulta|interna|exame|avalia|tratamento|hospital|atendimento|cirurgi|hemocentro|clinica/],
+  ['outros', 'Outros', '#94a3b8', null]
+];
+var PRX_COR = {}; PRX_CATS.forEach(function(c) { PRX_COR[c[0]] = c; });
+function prxCategoria(texto) {
+  var t = ceNormal(texto);
+  if (!t) return 'outros';
+  for (var i = 0; i < PRX_CATS.length; i++) if (PRX_CATS[i][3] && PRX_CATS[i][3].test(t)) return PRX_CATS[i][0];
+  return 'outros';
+}
+function prxValor(v) {
+  if (typeof v === 'number') return v;
+  var s = String(v || '').replace(/[^\d.,-]/g, '');
+  if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+  var n = parseFloat(s);
+  return isFinite(n) ? n : 0;
+}
+function prxReais(n) { return 'R$ ' + (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function prxReaisCurto(n) { return n >= 10000 ? 'R$ ' + (n / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : prxReais(n); }
+function prxMesDe(r) {
+  if (r.empenhadoEm) { var d = new Date(Number(r.empenhadoEm) - 3 * 3600000); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); }
+  return String(r.diaRef || '').slice(0, 7);
+}
+var PRX_MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+// descrição de um item da esteira: Tabela de Controle (pelo empenho) ou, se ainda não chegou lá, o card da caixa (pela hash)
+function prxDescricaoItem(it, tabPorEmp) {
+  var r = tabPorEmp[String(it.empenho)];
+  if (r && r.descricao) return r.descricao;
+  var p = it.hash && (processosCaixaAtual || []).find(function(x) { return x.hash === it.hash; });
+  return p ? (p.descricaoCompletaBase || p.descricaoSugerida || '') : '';
+}
 function ceTempoRelativo(ms) {
   if (!ms) return '—';
   var diffSeg = Math.max(0, Math.round((Date.now() - ms) / 1000));
@@ -2872,7 +3024,7 @@ function ceData(v) {
   var d = new Date(v - 3 * 3600 * 1000);
   return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
 }
-function ceNormal(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function ceNormal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
 function cePassaFiltro(it) {
   var f = ceFiltro, e = it.etapas;
   if (f === 'alerta' && !it.alerta) return false;
@@ -2890,21 +3042,84 @@ function cePassaFiltro(it) {
 }
 function ceTrilha(it) {
   var e = it.etapas, imp = it.implicitas || [];
-  return '<div class="ce-track">' + CE_ETAPAS.map(function(par) {
-    var k = par[0], cls = 'off', dica = par[1];
-    if (k === 'autor' && e.autorFalhou && !e.autor) { cls = 'fail'; dica = 'Sua assinatura não entrou'; }
-    else if (k === 'enviado' && it.falhaEnvio) { cls = 'fail'; dica = 'Falhou: ' + it.falhaEnvio; }
-    else if (e[k]) { cls = 'ok'; dica = par[1] + ' · ' + ceData(e[k]); }
-    else if (imp.indexOf(k) >= 0) { cls = 'imp'; dica = par[1] + ' · feito (sem data registrada)'; }
-    else if (k === it.proxima) { cls = 'cur'; dica = 'Esperando: ' + it.proximaNome; }
+  return '<ol class="prx-trilha">' + CE_ETAPAS.map(function(par) {
+    var k = par[0], cls = 'off', dica = par[1], quando = '';
+    if (k === 'autor' && e.autorFalhou && !e.autor) { cls = 'fail'; dica = 'Sua assinatura não entrou'; quando = 'falhou'; }
+    else if (k === 'enviado' && it.falhaEnvio) { cls = 'fail'; dica = 'Falhou: ' + it.falhaEnvio; quando = 'falhou'; }
+    else if (e[k]) { cls = 'ok'; dica = par[1] + ' · ' + ceData(e[k]); quando = typeof e[k] === 'number' ? ceData(e[k]).slice(0, 5) : '✓'; }
+    else if (imp.indexOf(k) >= 0) { cls = 'imp'; dica = par[1] + ' · feito (sem data registrada)'; quando = '✓'; }
+    else if (k === it.proxima) { cls = 'cur'; dica = 'Esperando: ' + it.proximaNome; quando = 'agora'; }
     else if (k === 'autor') { dica = 'Sua assinatura · sem registro'; }
-    return '<div class="ce-node ' + cls + '" title="' + escaparHtmlProc(dica) + '"><b></b><span>' + par[1] + '</span></div>';
-  }).join('') + '</div>';
+    return '<li class="' + cls + '" title="' + escaparHtmlProc(dica) + '"><b></b><span>' + par[1] + '</span><small>' + escaparHtmlProc(quando) + '</small></li>';
+  }).join('') + '</ol>';
+}
+function prxCard(it, cat) {
+  var c = PRX_COR[cat] || PRX_COR.outros;
+  var cor = it.alerta ? '#f87171' : (it.proxima ? '#06b6d4' : '#4edea3');
+  var sit = it.proxima ? 'Esperando ' + (it.proxima === 'autor' ? 'sua assinatura' : it.proximaNome) : 'Concluído';
+  var desde = it.proxima && it.desde ? (it.diasParado >= 1 ? ' · parado há ' + it.diasParado + (it.diasParado === 1 ? ' dia' : ' dias') : ' · desde ' + ceData(it.desde)) : '';
+  var viagem = [it.dataSaida, it.cidade].filter(Boolean).join(' · ');
+  return '<article class="prx-card" style="--c:' + cor + '">'
+    + '<div class="prx-c-top"><span class="prx-c-num">Empenho ' + escaparHtmlProc(it.empenho || '—') + '</span>'
+    + '<span class="prx-c-proc">' + escaparHtmlProc(it.processo || 'sem processo') + '</span>'
+    + '<span class="x-chip" style="--c:' + c[2] + '">' + escaparHtmlProc(c[1]) + '</span></div>'
+    + '<div class="prx-c-mid"><div class="prx-c-quem"><b>' + escaparHtmlProc(it.servidor || '—') + '</b><span>' + escaparHtmlProc(viagem || (it.manual ? 'registro manual' : '')) + '</span></div>'
+    + '<div class="prx-c-valor">' + (it.valor ? prxReais(prxValor(it.valor)) : '—') + '</div></div>'
+    + ceTrilha(it)
+    + '<div class="prx-c-sit"><i></i>' + escaparHtmlProc(sit + desde) + '</div>'
+    + (it.alerta ? '<div class="prx-c-alerta">⚠ ' + escaparHtmlProc(it.alerta) + '</div>' : '')
+    + '</article>';
+}
+function prxRosca(fatias, total) {
+  var R = 52, C = 2 * Math.PI * R, acc = 0;
+  var arcos = fatias.map(function(f) {
+    var len = total ? C * f.v / total : 0;
+    var s = '<circle r="' + R + '" cx="70" cy="70" fill="none" stroke="' + f.cor + '" stroke-width="18" stroke-dasharray="' + Math.max(0, len - 1.5).toFixed(2) + ' ' + C.toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 70 70)"><title>' + escaparHtmlProc(f.nome + ': ' + prxReais(f.v)) + '</title></circle>';
+    acc += len; return s;
+  }).join('');
+  return '<svg viewBox="0 0 140 140" role="img" aria-label="Valor empenhado no mês por motivo"><circle r="' + R + '" cx="70" cy="70" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="18"/>' + arcos
+    + '<text x="70" y="66" text-anchor="middle" class="prx-rosca-v">' + escaparHtmlProc(prxReaisCurto(total)) + '</text><text x="70" y="84" text-anchor="middle" class="x-eixo">no mês</text></svg>';
+}
+function prxRenderLado(mesAtual) {
+  var doMes = (processos || []).filter(function(r) { return r.empenho && prxMesDe(r) === mesAtual; });
+  // distribuição por motivo
+  var porCat = {};
+  doMes.forEach(function(r) { var k = prxCategoria(r.descricao); porCat[k] = (porCat[k] || 0) + prxValor(r.valor); });
+  var fatias = PRX_CATS.filter(function(c) { return porCat[c[0]] > 0; }).map(function(c) { return { nome: c[1], cor: c[2], v: porCat[c[0]] }; }).sort(function(a, b) { return b.v - a.v; });
+  var total = fatias.reduce(function(a, f) { return a + f.v; }, 0);
+  document.getElementById('prx-dist').innerHTML = !fatias.length ? '<div class="x-vazio">Nenhum empenho neste mês ainda.</div>'
+    : '<div class="prx-rosca">' + prxRosca(fatias, total) + '</div><div class="prx-leg">' + fatias.map(function(f) {
+      return '<div class="x-linha" style="--c:' + f.cor + '"><b><i></i>' + escaparHtmlProc(f.nome) + '</b><span class="x-val">' + Math.round(100 * f.v / total) + '%</span><small>' + prxReais(f.v) + '</small></div>';
+    }).join('') + '</div>';
+  // servidores do mês
+  var porServ = {};
+  doMes.forEach(function(r) { var n = String(r.servidor || '?').trim().toUpperCase(); var s = (porServ[n] = porServ[n] || { nome: r.servidor || '?', n: 0, v: 0 }); s.n++; s.v += prxValor(r.valor); });
+  var servs = Object.keys(porServ).map(function(k) { return porServ[k]; }).sort(function(a, b) { return b.n - a.n || b.v - a.v; });
+  var maxN = servs.length ? servs[0].n : 1;
+  document.getElementById('prx-serv').innerHTML = !servs.length ? '<div class="x-vazio">Ninguém ainda neste mês.</div>'
+    : servs.slice(0, 8).map(function(s) {
+      return '<div class="prx-s"><span class="prx-s-av">' + escaparHtmlProc(iniciaisDoNome(s.nome)) + '</span><div class="prx-s-nome"><b title="' + escaparHtmlProc(s.nome) + '">' + escaparHtmlProc(s.nome) + '</b><div class="x-barra"><i style="width:' + (100 * s.n / maxN) + '%"></i></div></div><div class="prx-s-num"><b>' + s.n + '</b><small>' + prxReaisCurto(s.v) + '</small></div></div>';
+    }).join('') + (servs.length > 8 ? '<div class="x-vazio" style="padding:8px">e mais ' + (servs.length - 8) + ' servidor(es)</div>' : '');
+}
+function prxRenderFeed() {
+  var NOMES = { cp: 'empenhado no CP', autor: 'você assinou', saude: 'Secretária assinou', adm: 'Secretário Adm assinou', pago: 'pago' };
+  var COR = { cp: '#7AA7FF', autor: '#a78bfa', saude: '#06b6d4', adm: '#06b6d4', pago: '#4edea3', falha: '#f87171' };
+  var ev = [];
+  (ceDados.itens || []).forEach(function(it) {
+    Object.keys(NOMES).forEach(function(k) { var t = it.etapas[k]; if (typeof t === 'number') ev.push({ t: t, k: k, it: it }); });
+    if (it.falhaEnvio && it.etapas.cp) ev.push({ t: it.etapas.cp + 1, k: 'falha', it: it });
+  });
+  ev.sort(function(a, b) { return b.t - a.t; });
+  document.getElementById('prx-feed').innerHTML = !ev.length ? '<div class="x-vazio">Nada registrado ainda.</div>' : ev.slice(0, 25).map(function(e) {
+    var txt = e.k === 'falha' ? 'falhou no envio ao 1Doc' : NOMES[e.k];
+    return '<div class="x-ev"><span class="x-de" style="--c:' + COR[e.k] + '">' + escaparHtmlProc(txt) + '</span><time title="' + escaparHtmlProc(ceData(e.t)) + '">' + ceTempoRelativo(e.t) + '</time>'
+      + '<p>Empenho <b>' + escaparHtmlProc(e.it.empenho || '—') + '</b> · ' + escaparHtmlProc(e.it.servidor || '—') + (e.it.valor ? ' · ' + prxReais(prxValor(e.it.valor)) : '') + '</p></div>';
+  }).join('');
 }
 function ceRender() {
   if (!ceDados) return;
   var t = ceDados.telemetria || {};
-  var pad = function(n) { return n == null ? '—' : String(n).padStart(2, '0'); };
+  var pad = function(n) { return n == null ? '—' : String(n); };
   document.getElementById('ce-t-cp').textContent = pad(t.noCp);
   document.getElementById('ce-t-sua').textContent = pad(t.suaAssinatura);
   document.getElementById('ce-t-saude').textContent = pad(t.secretaria);
@@ -2913,27 +3128,54 @@ function ceRender() {
   document.getElementById('ce-t-pc').textContent = pad(t.semPc);
   document.getElementById('ce-t-pagos').textContent = pad(t.pagos7d);
   document.getElementById('ce-t-ciclo').innerHTML = t.cicloMedioDias == null ? '—' : String(t.cicloMedioDias).replace('.', ',') + '<small>dias</small>';
-  document.getElementById('ce-n-alerta').textContent = t.alertas ? '(' + t.alertas + ')' : '';
-  document.querySelectorAll('#ce-tiles .ce-tile[data-f]').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === ceFiltro); });
-  document.querySelectorAll('#ce-filtros .ce-chip').forEach(function(b) { b.classList.toggle('ativo', b.dataset.f === ceFiltro); });
+  document.getElementById('ce-n-alerta').textContent = t.alertas ? String(t.alertas) : '';
+  document.querySelectorAll('#ce-tiles .prx-aba').forEach(function(b) { b.setAttribute('aria-pressed', String(b.dataset.f === ceFiltro)); });
   document.getElementById('ce-atualizado').textContent = 'atualizado ' + ceTempoRelativo(ceDados.geradoEm);
-  var lista = (ceDados.itens || []).filter(cePassaFiltro);
+
+  // indicadores do mês (Tabela de Controle)
+  var agoraBr = new Date(Date.now() - 3 * 3600000);
+  var mesAtual = agoraBr.getUTCFullYear() + '-' + String(agoraBr.getUTCMonth() + 1).padStart(2, '0');
+  var ant = new Date(Date.UTC(agoraBr.getUTCFullYear(), agoraBr.getUTCMonth() - 1, 1));
+  var mesAnt = ant.getUTCFullYear() + '-' + String(ant.getUTCMonth() + 1).padStart(2, '0');
+  var somaMes = 0, nMes = 0, somaAnt = 0;
+  var tabPorEmp = {};
+  (processos || []).forEach(function(r) {
+    if (!r.empenho) return;
+    tabPorEmp[String(r.empenho)] = r;
+    var m = prxMesDe(r);
+    if (m === mesAtual) { somaMes += prxValor(r.valor); nMes++; } else if (m === mesAnt) somaAnt += prxValor(r.valor);
+  });
+  document.getElementById('prx-tag-mes').textContent = PRX_MESES[agoraBr.getUTCMonth()] + ' ' + agoraBr.getUTCFullYear();
+  document.getElementById('prx-dist-mes').textContent = PRX_MESES[agoraBr.getUTCMonth()];
+  document.getElementById('prx-k-mes').textContent = prxReaisCurto(somaMes);
+  document.getElementById('prx-k-mes-d').textContent = nMes + ' empenho(s) · ' + PRX_MESES[ant.getUTCMonth()] + ' inteiro: ' + prxReaisCurto(somaAnt);
+  document.getElementById('prx-k-mes-barra').style.width = (somaAnt ? Math.min(100, 100 * somaMes / somaAnt) : 0) + '%';
+  var itens = ceDados.itens || [];
+  var andando = itens.filter(function(i) { return i.proxima; }).length;
+  document.getElementById('prx-k-esteira').textContent = andando;
+  document.getElementById('prx-k-esteira-d').textContent = (t.alertas ? t.alertas + ' com alerta · ' : 'nenhum alerta · ') + (itens.length - andando) + ' concluídos (60 dias)';
+
+  // motivo de cada item + chips de motivo (contando o filtro de etapa atual)
+  itens.forEach(function(it) { if (!it._cat) it._cat = prxCategoria(prxDescricaoItem(it, tabPorEmp)); });
+  var naEtapa = itens.filter(cePassaFiltro);
+  var nCat = {}; naEtapa.forEach(function(it) { nCat[it._cat] = (nCat[it._cat] || 0) + 1; });
+  if (ceCat !== 'todos' && !nCat[ceCat]) ceCat = 'todos';
+  document.getElementById('ce-filtros').innerHTML = '<button type="button" class="prx-cat" data-cat="todos" aria-pressed="' + (ceCat === 'todos') + '">Todos os motivos <b>' + naEtapa.length + '</b></button>'
+    + PRX_CATS.filter(function(c) { return nCat[c[0]]; }).map(function(c) {
+      return '<button type="button" class="prx-cat" data-cat="' + c[0] + '" style="--c:' + c[2] + '" aria-pressed="' + (ceCat === c[0]) + '"><i></i>' + escaparHtmlProc(c[1]) + ' <b>' + nCat[c[0]] + '</b></button>';
+    }).join('');
+
+  var lista = naEtapa.filter(function(it) { return ceCat === 'todos' || it._cat === ceCat; });
   var cont = document.getElementById('ce-linhas');
-  if (!lista.length) { cont.innerHTML = '<div class="ce-empty">Nenhum empenho neste filtro.</div>'; return; }
-  var mais = lista.length > 150 ? '<div class="ce-empty">Mostrando 150 de ' + lista.length + ' — use a busca para achar os outros.</div>' : '';
-  cont.innerHTML = lista.slice(0, 150).map(function(it) {
-    var cor = it.alerta ? '#FF3D71' : (it.proxima ? '#00E5FF' : '#39FF88');
-    var sit = it.proxima ? 'Esperando ' + escaparHtmlProc(it.proxima === 'autor' ? 'sua assinatura' : it.proximaNome) : '✓ Concluído';
-    var desde = it.proxima && it.desde ? '<small>' + (it.diasParado >= 1 ? 'parado há ' + it.diasParado + (it.diasParado === 1 ? ' dia' : ' dias') : 'desde ' + ceData(it.desde)) + '</small>' : '';
-    var viagem = [it.dataSaida, it.cidade].filter(Boolean).join(' · ');
-    return '<div class="ce-row ce-r2" style="--row-glow:' + cor + '">'
-      + '<div><span class="ce-num">' + escaparHtmlProc(it.empenho || '—') + '</span><span class="ce-sub2">' + escaparHtmlProc(it.processo || '—') + (it.valor ? ' · R$ ' + escaparHtmlProc(it.valor) : '') + '</span></div>'
-      + '<div class="ce-servidor">' + escaparHtmlProc(it.servidor || '—') + (viagem ? '<span class="ce-sub2">' + escaparHtmlProc(viagem) + '</span>' : '') + '</div>'
-      + ceTrilha(it)
-      + '<div class="ce-sit">' + sit + desde + '</div>'
-      + (it.alerta ? '<div class="ce-detalhe-inline">⚠ ' + escaparHtmlProc(it.alerta) + '</div>' : '')
-      + '</div>';
-  }).join('') + mais;
+  var mais = document.getElementById('prx-mais');
+  if (!lista.length) { cont.innerHTML = '<div class="x-vazio">Nenhum empenho neste filtro.</div>'; mais.hidden = true; }
+  else {
+    cont.innerHTML = lista.slice(0, prxLimite).map(function(it) { return prxCard(it, it._cat); }).join('');
+    mais.hidden = lista.length <= prxLimite;
+    document.getElementById('prx-mais-bt').textContent = 'Mostrar mais (' + (lista.length - prxLimite) + ' restantes)';
+  }
+  prxRenderLado(mesAtual);
+  prxRenderFeed();
 }
 function carregarEmpenhosAndamento() {
   if (!document.getElementById('panel-processos').classList.contains('active')) return;
@@ -2947,13 +3189,14 @@ function carregarEmpenhosAndamento() {
   .catch(function(e){ document.getElementById('ce-atualizado').textContent = 'sem conexão com o servidor'; });
 }
 document.addEventListener('click', function(ev) {
-  var b = ev.target.closest('#ce-tiles .ce-tile[data-f], #ce-filtros .ce-chip');
-  if (!b) return;
-  ceFiltro = (ceFiltro === b.dataset.f && b.classList.contains('ce-tile')) ? 'todos' : b.dataset.f;
-  ceRender();
+  var b = ev.target.closest('#ce-tiles .prx-aba');
+  if (b) { ceFiltro = b.dataset.f; prxLimite = 24; ceRender(); return; }
+  var c = ev.target.closest('#ce-filtros .prx-cat');
+  if (c) { ceCat = c.dataset.cat; prxLimite = 24; ceRender(); return; }
+  if (ev.target.closest('#prx-mais-bt')) { prxLimite += 24; ceRender(); }
 });
 document.addEventListener('input', function(ev) {
-  if (ev.target && ev.target.id === 'ce-busca') { ceBusca = ceNormal(ev.target.value.trim()); ceRender(); }
+  if (ev.target && ev.target.id === 'ce-busca') { ceBusca = ceNormal(ev.target.value.trim()); prxLimite = 24; ceRender(); }
 });
 setInterval(carregarEmpenhosAndamento, 15000);
 
@@ -3504,8 +3747,7 @@ function atualizarContadorGuardados() {
     if (!res || !res.ok || btn.disabled) return;
     var n = res.total || 0;
     btn.textContent = '📎 Encaminhar empenhos guardados (' + n + ')';
-    btn.style.background = n ? '#2563eb' : 'var(--surface2)';
-    btn.style.color = n ? '#fff' : 'var(--text)';
+    btn.classList.toggle('prim', !!n); // 10/10/2026: destaque roxo só quando tem empenho guardado
     btn.title = n ? ('Guardados: ' + res.itens.map(function(i){ return (i.processo || '?') + ' (empenho ' + i.numero + (i.servidor ? ', ' + i.servidor : '') + ')'; }).join('; ') + '. Ao clicar, todos seguem pro 1Doc de uma vez.') : 'Nenhum empenho guardado esperando.';
   })
   .catch(function(){});
