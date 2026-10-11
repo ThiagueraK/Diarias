@@ -1083,7 +1083,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.77</span>
+    <span class="header-version">v1.10.78</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3348,13 +3348,14 @@ function eqRender() {
     // Se é o Operador CP e o vigia está desconectado com processos prontos
     var opAviso = '';
     if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
-      var matchP = /(\d+)\s*processo/i.exec(b.detalhe);
-      if (matchP && +matchP[1] > 0) {
-        opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + matchP[1] + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
+      var matchP = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
+      var qtdP = matchP ? (matchP[1] || matchP[2]) : '0';
+      if (+qtdP > 0) {
+        opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + qtdP + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
       }
     }
 
-    // Alerta detalhado de ocorrências ativas
+    // Alerta detalhado de ocorrências ativas ou ponto de atenção
     var ocHtml = '';
     if (ocs.length) {
       ocHtml = '<div class="x-ag-alerta ' + (ocs.some(function(o) { return o.gravidade === 'alta'; }) ? 'alta' : '') + '">'
@@ -3364,6 +3365,11 @@ function eqRender() {
             + (oc.corpo ? '<small>' + escaparHtmlProc(oc.corpo.slice(0, 140)) + '</small>' : '') + '</div>';
         }).join('')
         + '<button type="button" class="x-ag-alerta-link" onclick="eqRolarQuadro(' + ocs[0].id + ')">Ver ocorrência detalhada no quadro ↓</button>'
+        + '</div>';
+    } else if (b && (b.status === 'atencao' || b.status === 'erro') && b.detalhe && !/^(esperando pedido|tudo certo|pronto)$/i.test(b.detalhe)) {
+      ocHtml = '<div class="x-ag-alerta ' + (b.status === 'erro' ? 'alta' : '') + '">'
+        + '<div class="x-ag-alerta-tit"><span>⚠️ ' + (b.status === 'erro' ? 'Erro Identificado' : 'Ponto de Atenção') + '</span></div>'
+        + '<div class="x-ag-alerta-item"><b>' + escaparHtmlProc(b.detalhe) + '</b></div>'
         + '</div>';
     }
 
