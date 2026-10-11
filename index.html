@@ -3284,8 +3284,8 @@ function eqMetricas(bot, ts, msgs, agora) {
   if (bot === 'coordenador') return [['Conversas hoje', msgs.filter(function(m) { return m.de === 'thiago' && m.criado > d1; }).length], ['Pedidos 7 dias', n(function(t) { return t.de === 'coordenador' && t.criado > d7; })], ['Respostas hoje', msgs.filter(function(m) { return m.de === 'coordenador' && m.criado > d1; }).length]];
   if (bot === 'operador_cp') {
     var opDet = ((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'operador_cp'; })[0]) || {}).detalhe || '';
-    var prontosMatch = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
-    var prontosVal = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '0';
+    var prontosMatch = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
+    var prontosVal = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '—';
     var vigiaVivo = (/ativo/i.test(opDet) || /empenhando/i.test(opDet)) && !/desconectado/i.test(opDet);
     var roboRodando = /execução|rodando|empenhando/i.test(opDet);
     var roboStatusTxt = /empenhando/i.test(opDet) ? 'Empenhando' : roboRodando ? 'Rodando' : 'Livre';
@@ -3380,7 +3380,7 @@ function eqRender() {
     // Se é o Operador CP e o vigia está desconectado com processos prontos
     var opAviso = '';
     if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
-      var matchP = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
+      var matchP = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
       var qtdP = matchP ? (matchP[1] || matchP[2]) : '0';
       if (+qtdP > 0) {
         opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + qtdP + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
@@ -3421,14 +3421,14 @@ function eqRender() {
         + '</div>';
     } else if (k === 'operador_cp') {
       var opDet = (b && b.detalhe) || '';
-      var prontosMatch = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
-      var prontosQtd = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '0';
+      var prontosMatch = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
+      var prontosQtd = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '—';
       var vigiaVivo = (/ativo/i.test(opDet) || /empenhando/i.test(opDet)) && !/desconectado/i.test(opDet);
       var roboRodando = /execução|rodando|empenhando/i.test(opDet);
       var empenhandoLote = /empenhando/i.test(opDet);
       insightsHtml = '<div class="x-ag-insights">'
         + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (empenhandoLote ? 'ok' : vigiaVivo ? 'ok' : 'warn') + '">' + (empenhandoLote ? '⚡ Empenhando Lote' : vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
-        + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd + ' processo(s) pronto(s)') + '</b></div>'
+        + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : prontosQtd + ' processo(s) pronto(s)') + '</b></div>'
         + '<div class="x-ag-insights-row"><span>Automação:</span><b>Hermes FullCP (PyAutoGUI + OCR)</b></div>'
         + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Reconciliação e trava pré-lote</b></div>'
         + '<div class="x-ag-pills">'
