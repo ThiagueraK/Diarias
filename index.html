@@ -730,16 +730,27 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .x-chip{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:4px; font-family:var(--f-x-disp); font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; color:var(--c); background:color-mix(in srgb, var(--c) 12%, transparent); border:1px solid color-mix(in srgb, var(--c) 35%, transparent);}
   .eqx .x-chip i{width:6px; height:6px; border-radius:50%; background:var(--c); box-shadow:0 0 0 0 var(--c); animation:x-ping 2s ease-out infinite;}
   @keyframes x-ping{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--c) 60%, transparent);}80%,100%{box-shadow:0 0 0 6px transparent;}}
-  .eqx .x-papel{font-size:12.5px; color:#bcc4d8; margin:0;}
-  .eqx .x-metricas{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:rgba(0,0,0,.22); border:1px solid var(--x-line); border-radius:6px;}
-  .eqx .x-metricas div{padding:8px 6px; text-align:center; min-width:0;}
+  .eqx .x-papel{font-size:12px; color:#bcc4d8; margin:0; line-height:1.4; overflow-wrap:break-word; word-break:break-word;}
+  .eqx .x-metricas{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:rgba(0,0,0,.22); border:1px solid var(--x-line); border-radius:6px; min-width:0; overflow:hidden;}
+  .eqx .x-metricas div{padding:8px 6px; text-align:center; min-width:0; overflow:hidden;}
   .eqx .x-metricas div + div{border-left:1px solid var(--x-line);}
-  .eqx .x-metricas span{display:block; font-size:10.5px; line-height:1.3; color:var(--x-muted); min-height:2.6em;}
-  .eqx .x-metricas b{display:block; font-family:var(--f-x-disp); font-size:17px; font-weight:700; color:var(--a); font-variant-numeric:tabular-nums;}
-  .eqx .x-agora{border:1px solid var(--x-line); border-radius:6px; padding:8px 10px; background:rgba(255,255,255,.02);}
+  .eqx .x-metricas span{display:block; font-size:10.5px; line-height:1.3; color:var(--x-muted); min-height:2.6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .eqx .x-metricas b{display:block; font-family:var(--f-x-disp); font-size:15px; font-weight:700; color:var(--a); font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .eqx .x-agora{border:1px solid var(--x-line); border-radius:6px; padding:8px 10px; background:rgba(255,255,255,.02); min-width:0; overflow:hidden;}
   .eqx .x-agora .x-lbl{color:var(--a); display:flex; justify-content:space-between; gap:8px;}
   .eqx .x-agora .x-lbl span{color:var(--x-dim); font-weight:500; letter-spacing:.02em; text-transform:none;}
-  .eqx .x-agora p{margin:4px 0 0; font-size:12.5px; color:var(--x-text); overflow-wrap:anywhere;}
+  .eqx .x-agora p{margin:4px 0 0; font-size:12px; line-height:1.45; color:var(--x-text); overflow-wrap:break-word; word-break:break-word;}
+  .eqx .x-ag-alerta{border:1px solid rgba(245,158,11,.45); background:linear-gradient(135deg, rgba(245,158,11,.14), rgba(22,27,42,.9)); border-radius:6px; padding:9px 11px; display:flex; flex-direction:column; gap:5px; min-width:0; overflow:hidden;}
+  .eqx .x-ag-alerta.alta{border-color:rgba(248,113,113,.55); background:linear-gradient(135deg, rgba(248,113,113,.16), rgba(22,27,42,.9));}
+  .eqx .x-ag-alerta-tit{display:flex; align-items:center; justify-content:space-between; gap:6px; font-family:var(--f-x-disp); font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--x-warn);}
+  .eqx .x-ag-alerta.alta .x-ag-alerta-tit{color:#f87171;}
+  .eqx .x-ag-alerta-item{display:flex; flex-direction:column; gap:2px; font-size:12px; line-height:1.35; color:#f1f5f9; min-width:0; overflow:hidden;}
+  .eqx .x-ag-alerta-item b{color:#fff; font-size:12px; overflow-wrap:break-word; word-break:break-word;}
+  .eqx .x-ag-alerta-item small{color:var(--x-muted); font-size:11px; overflow-wrap:break-word; word-break:break-word;}
+  .eqx .x-ag-alerta-link{margin-top:2px; font-size:11px; font-weight:600; color:#93c5fd; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; text-align:left; font-family:var(--f-x-disp);}
+  .eqx .x-ag-alerta-link:hover{color:#bfdbfe;}
+  @keyframes x-destaque{0%,100%{outline:2px solid transparent; box-shadow:none;}50%{outline:2px solid var(--x-warn); box-shadow:0 0 16px rgba(245,158,11,.6);}}
+  .eqx .x-t.destaque{animation:x-destaque 2.5s ease-in-out;}
 
   /* conversa + fluxo */
   .eqx .x-grid2{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:14px; align-items:start; margin-bottom:14px;}
@@ -3262,17 +3273,31 @@ function eqMetricas(bot, ts, msgs, agora) {
   if (bot === 'coordenador') return [['Conversas hoje', msgs.filter(function(m) { return m.de === 'thiago' && m.criado > d1; }).length], ['Pedidos 7 dias', n(function(t) { return t.de === 'coordenador' && t.criado > d7; })], ['Respostas hoje', msgs.filter(function(m) { return m.de === 'coordenador' && m.criado > d1; }).length]];
   if (bot === 'operador_cp') {
     var opDet = ((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'operador_cp'; })[0]) || {}).detalhe || '';
-    var vigiaTxt = /Vigia: ([^|]+)/.exec(opDet);
-    var prontosTxt = /Prontos: ([^|]+)/.exec(opDet);
-    return [['Vigia CP', vigiaTxt ? vigiaTxt[1].trim() : '—'], ['Prontos', prontosTxt ? prontosTxt[1].trim() : '—'], ['Ciclo CP', 'Ativo']];
+    var prontosMatch = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
+    var prontosVal = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '0';
+    var vigiaVivo = /ativo/i.test(opDet) && !/desconectado/i.test(opDet);
+    var roboRodando = /execução|rodando/i.test(opDet);
+    return [['Prontos', prontosVal], ['Vigia CP', vigiaVivo ? 'Online' : 'Off'], ['Robô CP', roboRodando ? 'Rodando' : 'Livre']];
   }
   if (bot === 'vigia') return [['Abertas', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t); })], ['Graves', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t) && t.gravidade === 'alta'; })], ['Resolvidas 24 h', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && t.status === 'resolvida' && t.atualizado > d1; })]];
   if (bot === 'pesquisador') return [['Pesquisas 7 dias', n(function(t) { return t.para === 'pesquisador' && t.criado > d7; })], ['Em andamento', n(function(t) { return t.para === 'pesquisador' && eqAberta(t); })], ['Concluídas', n(function(t) { return t.para === 'pesquisador' && t.status === 'concluida' && t.criado > d7; })]];
   if (bot === 'programador') return [['Corrigiu 7 dias', n(function(t) { return t.para === 'programador' && /^✅/.test(res(t)) && t.atualizado > d7; })], ['Sem bug achado', n(function(t) { return t.para === 'programador' && /^🧐/.test(res(t)) && t.atualizado > d7; })], ['Descartou', n(function(t) { return t.para === 'programador' && /^❌/.test(res(t)) && t.atualizado > d7; })]];
   if (bot === 'cacador') { var p = /(\d+) bug, (\d+) passageiro, (\d+) externo, (\d+) ruído · (\d+) enviado/.exec(eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'cacador'; }).map(function(b) { return b.detalhe; })[0] || ''); return [['Bugs 24 h', p ? p[1] : '—'], ['Passageiros', p ? +p[2] + +p[3] : '—'], ['Ao Programador', p ? p[5] : '—']]; }
-  if (bot === 'conferente') { var c = /(\d+) processo\(s\) na caixa; (\d+) conferido/.exec(((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'conferente'; })[0]) || {}).detalhe || ''); return [['Na caixa', c ? c[1] : '—'], ['Conferidos agora', c ? c[2] : '—'], ['A cada', '5 min']]; }
+  if (bot === 'conferente') { var c = /(\d+) processo\(s\) na caixa; (\d+) conferido/.exec(((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'conferente'; })[0]) || {}).detalhe || ''); return [['Na caixa', c ? c[1] : '—'], ['Conferidos', c ? c[2] : '—'], ['A cada', '5 min']]; }
   return [];
 }
+window.eqRolarQuadro = function(id) {
+  var t = id ? document.getElementById('tarefa-' + id) : null;
+  if (t) {
+    t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    t.classList.remove('destaque');
+    void t.offsetWidth;
+    t.classList.add('destaque');
+  } else {
+    var q = document.getElementById('eq-tarefas');
+    if (q) q.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
 function eqRender() {
   if (!eqDados) return;
   var agora = eqDados.agora || Date.now();
@@ -3312,15 +3337,45 @@ function eqRender() {
   // cartões dos agentes
   document.getElementById('eq-bots').innerHTML = EQ_ORDEM.map(function(k) {
     var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
-    var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Trabalhando', '#f59e0b'] : ['No ar', '#4edea3'];
+    var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Atenção', '#f59e0b'] : ['No ar', '#4edea3'];
     var met = eqMetricas(k, ts, msgs, agora);
+
+    // Ocorrências abertas relacionadas a este bot
+    var ocs = ts.filter(function(t) {
+      return (t.de === k || t.para === k) && t.tipo === 'ocorrencia' && eqAberta(t);
+    });
+
+    // Se é o Operador CP e o vigia está desconectado com processos prontos
+    var opAviso = '';
+    if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
+      var matchP = /(\d+)\s*processo/i.exec(b.detalhe);
+      if (matchP && +matchP[1] > 0) {
+        opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + matchP[1] + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
+      }
+    }
+
+    // Alerta detalhado de ocorrências ativas
+    var ocHtml = '';
+    if (ocs.length) {
+      ocHtml = '<div class="x-ag-alerta ' + (ocs.some(function(o) { return o.gravidade === 'alta'; }) ? 'alta' : '') + '">'
+        + '<div class="x-ag-alerta-tit"><span>⚠️ ' + ocs.length + ' Ponto' + (ocs.length > 1 ? 's' : '') + ' de Atenção</span></div>'
+        + ocs.map(function(oc) {
+          return '<div class="x-ag-alerta-item"><b>#' + oc.id + ' · ' + escaparHtmlProc(oc.titulo) + '</b>'
+            + (oc.corpo ? '<small>' + escaparHtmlProc(oc.corpo.slice(0, 140)) + '</small>' : '') + '</div>';
+        }).join('')
+        + '<button type="button" class="x-ag-alerta-link" onclick="eqRolarQuadro(' + ocs[0].id + ')">Ver ocorrência detalhada no quadro ↓</button>'
+        + '</div>';
+    }
+
     return '<article class="x-ag' + (parado ? ' parado' : '') + '" style="--a:' + a.cor + '">'
       + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
       + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
       + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
       + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
       + (cargas[k] ? '<div class="x-carga"><div class="x-lbl">' + escaparHtmlProc(cargas[k].texto) + '<b>' + cargas[k].pct + '%</b></div><div class="x-barra"><i style="width:' + cargas[k].pct + '%"></i></div></div>' : '')
-      + '<div class="x-agora"><div class="x-lbl">Agora<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
+      + ocHtml
+      + opAviso
+      + '<div class="x-agora"><div class="x-lbl">Status Atual<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
       + '</article>';
   }).join('');
   // conversa
@@ -3353,7 +3408,7 @@ function eqRender() {
     var aberta = eqAberta(t);
     var c = t.status === 'aguardando' ? '#f59e0b' : aberta ? (EQ_GRAV[t.gravidade] || eqCor(t.para)) : '#4edea3';
     var rot = t.status === 'aguardando' ? 'aguardando você' : t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo;
-    return '<div class="x-t" style="--c:' + c + '"><div class="x-t-top"><span class="x-chip" style="--c:' + c + '"><i></i>' + escaparHtmlProc(rot) + '</span><span class="x-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
+    return '<div class="x-t" id="tarefa-' + t.id + '" style="--c:' + c + '"><div class="x-t-top"><span class="x-chip" style="--c:' + c + '"><i></i>' + escaparHtmlProc(rot) + '</span><span class="x-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
       + '<div class="x-t-meta">' + escaparHtmlProc((EQ_NOME[t.de] || t.de) + ' → ' + (EQ_NOME[t.para] || t.para)) + ' · aberta ' + ceData(t.criado) + ' · ' + escaparHtmlProc(t.status.replace('_', ' ')) + (t.atualizado !== t.criado ? ' · atualizada ' + ceTempoRelativo(t.atualizado) : '') + '</div>'
       + (t.corpo ? '<div class="x-t-corpo">' + escaparHtmlProc(t.corpo) + '</div>' : '')
       + (t.resultado ? '<div class="x-t-corpo">' + escaparHtmlProc(t.resultado) + '</div>' : '')
