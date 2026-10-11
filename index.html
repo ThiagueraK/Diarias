@@ -748,7 +748,18 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .x-ag-alerta-item b{color:#fff; font-size:12px; overflow-wrap:break-word; word-break:break-word;}
   .eqx .x-ag-alerta-item small{color:var(--x-muted); font-size:11px; overflow-wrap:break-word; word-break:break-word;}
   .eqx .x-ag-alerta-link{margin-top:2px; font-size:11px; font-weight:600; color:#93c5fd; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; text-align:left; font-family:var(--f-x-disp);}
-  .eqx .x-ag-alerta-link:hover{color:#bfdbfe;}
+  .eqx .x-ag-modelo{display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,.06); color:var(--a); border:1px solid color-mix(in srgb, var(--a) 30%, transparent); margin-top:2px; max-width:fit-content;}
+  .eqx .x-ag-insights{background:rgba(10,15,29,.75); border:1px solid rgba(255,255,255,.07); border-radius:6px; padding:10px 11px; display:flex; flex-direction:column; gap:6px; min-width:0;}
+  .eqx .x-ag-insights-tit{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--a); display:flex; align-items:center; justify-content:space-between;}
+  .eqx .x-ag-insights-row{display:flex; justify-content:space-between; align-items:center; gap:8px; color:var(--x-muted); font-size:11.5px;}
+  .eqx .x-ag-insights-row b{color:#fff; font-weight:600;}
+  .eqx .x-ag-pills{display:flex; flex-wrap:wrap; gap:4px; margin-top:1px;}
+  .eqx .x-ag-pill{font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:#cbd5e1;}
+  .eqx .x-ag-pill.ok{color:#4edea3; border-color:rgba(78,222,163,.3); background:rgba(78,222,163,.08);}
+  .eqx .x-ag-pill.warn{color:#f59e0b; border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.08);}
+  .eqx .x-ag-acoes{display:flex; gap:6px; flex-wrap:wrap; margin-top:3px;}
+  .eqx .x-ag-btn{flex:1; min-width:110px; font-family:var(--f-x-disp); font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:6px 10px; border-radius:4px; cursor:pointer; background:rgba(255,255,255,.04); border:1px solid color-mix(in srgb, var(--a) 35%, transparent); color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:5px; transition:all .15s ease;}
+  .eqx .x-ag-btn:hover{background:color-mix(in srgb, var(--a) 22%, transparent); border-color:var(--a); box-shadow:0 0 10px color-mix(in srgb, var(--a) 25%, transparent);}
   @keyframes x-destaque{0%,100%{outline:2px solid transparent; box-shadow:none;}50%{outline:2px solid var(--x-warn); box-shadow:0 0 16px rgba(245,158,11,.6);}}
   .eqx .x-t.destaque{animation:x-destaque 2.5s ease-in-out;}
 
@@ -1083,7 +1094,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.78</span>
+    <span class="header-version">v1.10.79</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3248,13 +3259,13 @@ setInterval(carregarEmpenhosAndamento, 15000);
 var eqDados = null, eqFiltro = 'abertas', eqEsperando = false, eqFluxoAgente = 'todos';
 var EQ_GRAV = { alta: '#f87171', media: '#f59e0b', baixa: '#7AA7FF' };
 var EQ_AG = {
-  coordenador: { nome: 'Coordenador', papel: 'Conversa com você e distribui o trabalho', cor: '#8b5cf6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M12 11.5 6.4 16.2M12 11.5l5.6 4.7"/></svg>' },
-  vigia: { nome: 'Vigia', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>' },
-  conferente: { nome: 'Conferente', papel: 'Confere cada processo da caixa: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 4.4 3.4 8.1 8 9 4.6-.9 8-4.6 8-9V6l-8-3Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>' },
-  pesquisador: { nome: 'Pesquisador', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>' },
-  programador: { nome: 'Programador', papel: 'Corrige sozinho (Claude Sonnet 5) com revisor, linhas vermelhas e reversão', cor: '#84cc16', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M12.5 15h4"/></svg>' },
-  cacador: { nome: 'Caçador local', papel: 'IA no notebook, sem custo: classifica os erros novos dos logs a cada 5 min', cor: '#10b981', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>' },
-  operador_cp: { nome: 'Operador CP', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR de tela e reconciliação', cor: '#3b82f6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="7 8 10 11 7 14"/><line x1="12" y1="14" x2="16" y2="14"/></svg>' }
+  coordenador: { nome: 'Coordenador', modelo: 'DeepSeek Flash · Orquestrador', papel: 'Conversa com você e distribui o trabalho', cor: '#8b5cf6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M12 11.5 6.4 16.2M12 11.5l5.6 4.7"/></svg>' },
+  operador_cp: { nome: 'Operador CP', modelo: 'Hermes FullCP · Autônomo', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR de tela e reconciliação', cor: '#3b82f6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="7 8 10 11 7 14"/><line x1="12" y1="14" x2="16" y2="14"/></svg>' },
+  vigia: { nome: 'Vigia', modelo: 'Infraestrutura · Ciclo 2 min', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>' },
+  conferente: { nome: 'Conferente', modelo: 'Regras + OCR (pdfplumber + Tesseract)', papel: 'Confere cada processo da caixa: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 4.4 3.4 8.1 8 9 4.6-.9 8-4.6 8-9V6l-8-3Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>' },
+  pesquisador: { nome: 'Pesquisador', modelo: 'Busca 1Doc + Tabela de Controle', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>' },
+  programador: { nome: 'Programador', modelo: 'Claude Sonnet 5 + DeepSeek', papel: 'Corrige sozinho com revisor 1-shot, linhas vermelhas e auto-reversão', cor: '#84cc16', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M12.5 15h4"/></svg>' },
+  cacador: { nome: 'Caçador local', modelo: 'IA Local no Notebook (Llama)', papel: 'Classifica os erros novos dos logs a cada 5 min sem custo de API', cor: '#10b981', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>' }
 };
 var EQ_ORDEM = ['coordenador', 'operador_cp', 'vigia', 'conferente', 'pesquisador', 'programador', 'cacador'];
 var EQ_NOME = { thiago: 'Você' };
@@ -3297,6 +3308,26 @@ window.eqRolarQuadro = function(id) {
     var q = document.getElementById('eq-tarefas');
     if (q) q.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+};
+window.eqFocarChat = function(texto) {
+  var cx = document.getElementById('eq-msgs');
+  var inp = document.getElementById('eq-texto');
+  if (inp) {
+    if (texto) inp.value = texto;
+    inp.focus();
+  }
+  if (cx) cx.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+window.eqDispararOrdem = function(texto) {
+  var inp = document.getElementById('eq-texto');
+  if (inp) inp.value = texto;
+  var form = document.getElementById('eq-form');
+  if (form) {
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable: true }));
+  }
+  var cx = document.getElementById('eq-msgs');
+  if (cx) cx.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 function eqRender() {
   if (!eqDados) return;
@@ -3373,15 +3404,115 @@ function eqRender() {
         + '</div>';
     }
 
+    // Detalhes técnicos, arquitetura e diagnósticos vivos por agente
+    var insightsHtml = '';
+    var acoesHtml = '';
+
+    if (k === 'coordenador') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Arquitetura & Operação</span><span class="x-ag-pill ok">Ativo</span></div>'
+        + '<div class="x-ag-insights-row"><span>Canal de Entrada:</span><b>WebChat SGD & Telegram</b></div>'
+        + '<div class="x-ag-insights-row"><span>Orquestração:</span><b>Coordena os 6 bots especialistas</b></div>'
+        + '<div class="x-ag-insights-row"><span>Comunicação:</span><b>Worker Cloudflare em tempo real</b></div>'
+        + '</div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 Falar no Chat</button>'
+        + '</div>';
+    } else if (k === 'operador_cp') {
+      var opDet = (b && b.detalhe) || '';
+      var prontosMatch = /(?:Prontos:?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
+      var prontosQtd = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '0';
+      var vigiaVivo = /ativo/i.test(opDet) && !/desconectado/i.test(opDet);
+      var roboRodando = /execução|rodando/i.test(opDet);
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">' + (vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
+        + '<div class="x-ag-insights-row"><span>Diárias Aptas:</span><b>' + prontosQtd + ' processo(s) pronto(s)</b></div>'
+        + '<div class="x-ag-insights-row"><span>Automação:</span><b>Hermes FullCP (PyAutoGUI + OCR)</b></div>'
+        + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Reconciliação e trava pré-lote</b></div>'
+        + '<div class="x-ag-pills">'
+        + '<span class="x-ag-pill ' + (+prontosQtd > 0 ? 'ok' : '') + '">Prontos: ' + prontosQtd + '</span>'
+        + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
+        + '<span class="x-ag-pill ok">Robô: ' + (roboRodando ? 'Rodando' : 'Livre') + '</span>'
+        + '</div></div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 Status CP</button>'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp validar pré-lote de diárias e conferir travas\')">📋 Validar Pré-lote</button>'
+        + '</div>';
+    } else if (k === 'vigia') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Monitoramento da Infra</span><span class="x-ag-pill ok">8 Serviços Monitorados</span></div>'
+        + '<div class="x-ag-insights-row"><span>Escopo:</span><b>Serviços Windows + Conexão 1Doc</b></div>'
+        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Ciclo automático a cada 2 min</b></div>'
+        + '<div class="x-ag-insights-row"><span>Auto-recuperação:</span><b>Religa o que parou sem intervenção</b></div>'
+        + '<div class="x-ag-pills">'
+        + '<span class="x-ag-pill ok">1Doc 8081: OK</span>'
+        + '<span class="x-ag-pill ok">Serviços: 8/8</span>'
+        + '<span class="x-ag-pill ok">Tarefas Windows: OK</span>'
+        + '</div></div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@vigia checar status de todos os serviços e tarefas agora\')">🔄 Checar Serviços</button>'
+        + '</div>';
+    } else if (k === 'conferente') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Triagem & Validação</span><span class="x-ag-pill ok">OCR r3 Ativo</span></div>'
+        + '<div class="x-ag-insights-row"><span>Critérios:</span><b>Valor, placa, servidor e duplicidade</b></div>'
+        + '<div class="x-ag-insights-row"><span>Leitura de Nota:</span><b>pdfplumber + Tesseract OCR</b></div>'
+        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Varredura 1Doc a cada 5 minutos</b></div>'
+        + '<div class="x-ag-pills">'
+        + '<span class="x-ag-pill ok">Varredura 5 min</span>'
+        + '<span class="x-ag-pill ok">OCR Anexos PDF</span>'
+        + '<span class="x-ag-pill ok">Tabela de Controle</span>'
+        + '</div></div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@conferente reconferir todos os processos da caixa agora\')">🔍 Reconferir Caixa</button>'
+        + '</div>';
+    } else if (k === 'pesquisador') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Bases de Conhecimento</span><span class="x-ag-pill ok">Indexado</span></div>'
+        + '<div class="x-ag-insights-row"><span>Fontes:</span><b>1Doc Protocolos + Tabela de Controle</b></div>'
+        + '<div class="x-ag-insights-row"><span>Capacidade:</span><b>Busca semântica e histórico de diárias</b></div>'
+        + '<div class="x-ag-insights-row"><span>Modo:</span><b>Atendimento sob demanda no chat</b></div>'
+        + '</div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'@pesquisador pesquisar no 1Doc o processo \')">🔎 Consultar 1Doc</button>'
+        + '</div>';
+    } else if (k === 'programador') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Engenharia & Correção</span><span class="x-ag-pill ok">Segurança Ativa</span></div>'
+        + '<div class="x-ag-insights-row"><span>Modelos:</span><b>Claude 3.7 Sonnet + DeepSeek</b></div>'
+        + '<div class="x-ag-insights-row"><span>Protocolo:</span><b>Revisor 1-shot + auto-rollback git</b></div>'
+        + '<div class="x-ag-insights-row"><span>Blindagem:</span><b>Arquivos críticos em linha vermelha</b></div>'
+        + '<div class="x-ag-pills">'
+        + '<span class="x-ag-pill ok">Git Rollback</span>'
+        + '<span class="x-ag-pill ok">Auditoria 5 min</span>'
+        + '<span class="x-ag-pill ok">Linhas Vermelhas</span>'
+        + '</div></div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@programador fazer diagnóstico de integridade do código\')">🩺 Diagnóstico Código</button>'
+        + '</div>';
+    } else if (k === 'cacador') {
+      insightsHtml = '<div class="x-ag-insights">'
+        + '<div class="x-ag-insights-tit"><span>Diagnóstico Local</span><span class="x-ag-pill ok">Sem Custo API</span></div>'
+        + '<div class="x-ag-insights-row"><span>Motor de IA:</span><b>Llama Local no Notebook</b></div>'
+        + '<div class="x-ag-insights-row"><span>Fontes:</span><b>EventLog Windows + Logs de Bots</b></div>'
+        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Classificação a cada 5 min</b></div>'
+        + '</div>';
+      acoesHtml = '<div class="x-ag-acoes">'
+        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@cacador resumir logs de erro das últimas 24h\')">📜 Resumo de Erros</button>'
+        + '</div>';
+    }
+
     return '<article class="x-ag' + (parado ? ' parado' : '') + '" style="--a:' + a.cor + '">'
-      + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
+      + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span class="x-ag-modelo">' + a.modelo + '</span><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
       + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
       + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
       + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
       + (cargas[k] ? '<div class="x-carga"><div class="x-lbl">' + escaparHtmlProc(cargas[k].texto) + '<b>' + cargas[k].pct + '%</b></div><div class="x-barra"><i style="width:' + cargas[k].pct + '%"></i></div></div>' : '')
+      + insightsHtml
       + ocHtml
       + opAviso
       + '<div class="x-agora"><div class="x-lbl">Status Atual<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
+      + acoesHtml
       + '</article>';
   }).join('');
   // conversa
