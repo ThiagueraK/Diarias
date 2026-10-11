@@ -3594,8 +3594,10 @@ function eqRenderTelemetria(mt, agora) {
   var ult = horas[23]; svg += '<circle cx="' + x(23) + '" cy="' + y(ult.acoes) + '" r="3" fill="#a78bfa"/>';
   document.getElementById('eq-ativ').innerHTML = svg + '</svg>';
 }
+var eqAtualizando = false;
 function carregarEquipe() {
-  if (!document.getElementById('panel-equipe').classList.contains('active')) return;
+  if (eqAtualizando || !document.getElementById('panel-equipe').classList.contains('active')) return;
+  eqAtualizando = true;
   sgdFetch(SGD_WORKER_URL + '?action=equipe-painel').then(function(r) { return r.json(); }).then(function(res) {
     if (!res.ok) { document.getElementById('eq-atualizado').textContent = 'não consegui atualizar: ' + (res.error || '?'); return; }
     if (eqEsperando && eqDados) {
@@ -3603,7 +3605,8 @@ function carregarEquipe() {
       if (ultimaBot && ultimaBot.criado > eqEsperando) eqEsperando = false;
     }
     eqDados = res; eqRender();
-  }).catch(function() { document.getElementById('eq-atualizado').textContent = 'sem conexão com o servidor'; });
+  }).catch(function() { document.getElementById('eq-atualizado').textContent = 'sem conexão com o servidor'; })
+    .finally(function() { eqAtualizando = false; });
 }
 setInterval(carregarEquipe, 6000);
 setTimeout(carregarEquipe, 1200);
