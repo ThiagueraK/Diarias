@@ -984,6 +984,22 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .cpa-oc small{display:block;color:var(--ce-muted);font-size:.58rem;margin-bottom:2px;}
   .cpa-oc .cpa-jan{margin-top:4px;color:var(--ce-muted);font-size:.6rem;}
   .cpa-hist-wrap{overflow-x:auto;}
+  /* 11/10/2026: Relação de Empenhos do CP x Tabela */
+  .cpa-rel-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px 4px;}
+  .cpa-rel-data{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--ce-muted);text-transform:none;letter-spacing:0;font-family:'IBM Plex Mono',monospace;}
+  .cpa-rel-data input{width:auto;padding:5px 8px;font:inherit;font-size:.72rem;color:var(--ce-text);background:rgba(0,0,0,.35);border:1px solid rgba(121,137,159,.4);border-radius:6px;color-scheme:dark;}
+  .cpa-rel-info{font-size:.7rem;color:var(--ce-muted);}
+  .cpa-rel-res{padding:6px 14px 14px;font-size:.74rem;}
+  .cpa-rel-resumo{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px;}
+  .cpa-rel-k{border:1px solid rgba(121,137,159,.35);border-radius:8px;padding:6px 10px;min-width:110px;}
+  .cpa-rel-k b{display:block;font-size:1.05rem;font-family:'Chakra Petch',sans-serif;color:var(--ce-text);font-variant-numeric:tabular-nums;}
+  .cpa-rel-k span{font-size:.62rem;color:var(--ce-muted);text-transform:uppercase;letter-spacing:.06em;}
+  .cpa-rel-k.ok b{color:var(--ce-ok);} .cpa-rel-k.al b{color:var(--ce-danger);}
+  .cpa-rel-grupo{margin:8px 0;border-left:3px solid var(--c,#79899F);padding:4px 0 4px 10px;}
+  .cpa-rel-grupo h5{margin:0 0 4px;font-size:.72rem;color:var(--c,#79899F);font-family:'Chakra Petch',sans-serif;letter-spacing:.04em;}
+  .cpa-rel-grupo div{padding:2px 0;color:var(--ce-text);overflow-wrap:anywhere;}
+  .cpa-rel-grupo small{color:var(--ce-muted);}
+  .cpa-rel-res details summary{cursor:pointer;color:var(--ce-muted);font-size:.7rem;margin-top:6px;}
   .cpa-hist{width:100%;border-collapse:collapse;font-size:.7rem;font-variant-numeric:tabular-nums;}
   .cpa .cpa-hist thead{background:transparent;}
   .cpa .cpa-hist tr:hover td{background:rgba(0,229,255,.04);}
@@ -1056,7 +1072,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.75</span>
+    <span class="header-version">v1.10.76</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1541,7 +1557,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
             <input name="nome" placeholder="Nome completo (como vem no processo)" aria-label="Nome completo" style="flex:2 1 220px;">
             <input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor no CP" style="width:110px;">
             <input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">
-            <input name="cargo" list="cred-cargos" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo" style="flex:1 1 200px;">
+            <input name="cargo" list="cred-cargos" maxlength="50" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo" style="flex:1 1 200px;">
             <button type="submit">Salvar</button>
           </form>
         </details>
@@ -1644,6 +1660,21 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <div class="cpa-proximo" id="cpa-proximo"></div>
           <div class="cpa-ocorr" id="cpa-ocorr"></div>
         </div>
+      </div>
+
+      <!-- 11/10/2026: Relação de Empenhos do CP (Emitidos no dia) x Tabela de Controle. O robô tira o relatório
+           sozinho às 17h30 (seg-sex) ou por este botão; o Worker compara (rota cp-relatorio-empenhos-*). -->
+      <div class="ce-panel ce-cut cpa-rel" id="cpa-rel">
+        <div class="ce-panel-head">
+          <div class="ce-panel-title">Relação de Empenhos do CP × Tabela</div>
+          <span class="ce-atualizado">sozinho às 17h30 (seg-sex) · só lê o CP, não grava nada</span>
+        </div>
+        <div class="cpa-rel-ctl">
+          <label class="cpa-rel-data">Dia <input type="date" id="cpa-rel-data" aria-label="Dia do relatório"></label>
+          <button type="button" class="cpa-bt cpa-bt-ir" id="cpa-rel-pedir">📋 Tirar relatório e comparar</button>
+          <span class="cpa-rel-info" id="cpa-rel-info"></span>
+        </div>
+        <div class="cpa-rel-res" id="cpa-rel-res"><div class="ce-empty">Nenhum relatório ainda.</div></div>
       </div>
 
       <div class="ce-panel ce-cut">
@@ -3782,7 +3813,7 @@ function credLinha(nome, detalhe, aviso) {
     + '<span class="cred-nome"><b>' + escaparHtmlProc(nome) + '</b><small' + (aviso ? ' class="cred-aviso"' : '') + '>' + detalhe + '</small></span>'
     + '<input name="credor" inputmode="numeric" placeholder="Nº do credor" aria-label="Número do credor de ' + escaparHtmlProc(nome) + '" style="width:110px;">'
     + '<input name="centro" inputmode="numeric" list="cred-centros" placeholder="Centro" aria-label="Centro de custo" style="width:80px;">'
-    + '<input name="cargo" list="cred-cargos" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo de ' + escaparHtmlProc(nome) + '" style="flex:1 1 200px;">'
+    + '<input name="cargo" list="cred-cargos" maxlength="50" placeholder="Cargo (se o CP não tiver)" aria-label="Cargo de ' + escaparHtmlProc(nome) + '" style="flex:1 1 200px;">'
     + '<button type="submit">Salvar</button></form>';
 }
 function credRender() {
@@ -4360,7 +4391,7 @@ function cpaRenderTiles(r, d) {
   var on = d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000, t = d.tarefa, l = r.lote;
   var tile = function(id, txt, cor) { document.getElementById('cpa-t-' + id).textContent = txt; document.getElementById('cpa-tile-' + id).style.setProperty('--tile-glow', cor); };
   tile('vigia', on ? 'ligado' : (d.vigiaVivoEm ? 'off · ' + cpMinAtras(d.vigiaVivoEm) : 'desligado'), on ? '#39FF88' : '#79899F');
-  tile('pedido', t && r.agora - (t.atualizadoEm || 0) < 12 * 3600000 ? (t.tipo === 'empenho' ? 'Empenho' : 'Prestação') + ' · ' + (CP_STATUS_TXT[t.status] || t.status) : 'nenhum', t && t.status === 'erro' ? '#FF3D71' : t && t.status === 'concluido' ? '#39FF88' : '#00E5FF');
+  tile('pedido', t && r.agora - (t.atualizadoEm || 0) < 12 * 3600000 ? (t.tipo === 'empenho' ? 'Empenho' : t.tipo === 'relatorio_empenhos' ? 'Relatório' : 'Prestação') + ' · ' + (CP_STATUS_TXT[t.status] || t.status) : 'nenhum', t && t.status === 'erro' ? '#FF3D71' : t && t.status === 'concluido' ? '#39FF88' : '#00E5FF');
   tile('lote', l ? (l.feitos != null ? l.feitos : '?') + ' de ' + (l.total != null ? l.total : '?') : '—', l && l.etapa === 'fim-erro' ? '#FF3D71' : l && !l.ativo ? '#39FF88' : '#FFD166');
   document.getElementById('cpa-t-tempo').textContent = r.inicio ? cpaSeg(((r.lote && !r.lote.ativo ? r.lote.em : null) || (r.robo && r.robo.fim && !(r.lote && r.lote.ativo) ? r.robo.fim : null) || r.agora) - r.inicio) : '—';
 }
@@ -4396,7 +4427,56 @@ function cpaRender() {
   cpaRenderFoto(r);
   cpaRenderOcorr(r, d);
   cpaRenderHist(d);
+  cpaRenderRelatorio(d);
 }
+// 11/10/2026: Relação de Empenhos do CP x Tabela (último relatório que o robô tirou)
+function cpaRenderRelatorio(d) {
+  var r = d.relatorioEmpenhos, box = document.getElementById('cpa-rel-res'), info = document.getElementById('cpa-rel-info');
+  var t = d.tarefa, rodando = t && t.tipo === 'relatorio_empenhos' && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(t.status) >= 0 && d.agora - (t.atualizadoEm || 0) < 3 * 3600000;
+  var disp = d.disparo, esperando = disp && disp.tarefaAuto && ['pedido', 'iniciado'].indexOf(disp.status) >= 0 && !disp.tarefaAutoCriadaEm;
+  info.textContent = rodando ? 'tirando o relatório de ' + (t.data || '?') + ' no CP (' + (CP_STATUS_TXT[t.status] || t.status) + ')…'
+    : esperando ? 'robô abrindo o CP para tirar o relatório de ' + disp.tarefaAuto.data + '…'
+    : (t && t.tipo === 'relatorio_empenhos' && t.status === 'erro' && d.agora - (t.atualizadoEm || 0) < 6 * 3600000 ? '⚠ última tentativa parou: ' + (t.mensagem || '?') : '');
+  document.getElementById('cpa-rel-pedir').disabled = !!(rodando || esperando);
+  if (!r) { box.innerHTML = '<div class="ce-empty">Nenhum relatório ainda.</div>'; return; }
+  var c = r.comparacao || {}, n = function(a) { return (a || []).length; };
+  var reais = function(v) { return v == null ? '?' : 'R$ ' + Number(v).toFixed(2).replace('.', ','); };
+  var esc = escaparHtmlProc;
+  var k = function(cls, v, rot) { return '<div class="cpa-rel-k ' + cls + '"><b>' + v + '</b><span>' + rot + '</span></div>'; };
+  var h = '<div class="cpa-rel-resumo">' + k('', esc(r.data), 'dia · tirado ' + ceTempoRelativo(r.em))
+    + k('', r.semRegistros ? 0 : r.totalCp, 'no CP') + k('ok', n(c.conferem), 'conferem')
+    + k(r.alertas ? 'al' : 'ok', r.alertas || 0, 'a conferir') + '</div>';
+  var grupo = function(cor, titulo, itens, linha) {
+    if (!itens || !itens.length) return '';
+    return '<div class="cpa-rel-grupo" style="--c:' + cor + '"><h5>' + titulo + ' (' + itens.length + ')</h5>' + itens.map(linha).join('') + '</div>';
+  };
+  if (r.formatoDesconhecido) h += '<div class="cpa-rel-grupo" style="--c:#FFD166"><h5>Não consegui ler as linhas do relatório</h5><div>O texto do CP veio num formato que eu ainda não conheço. Ficou guardado para ajustar a leitura.</div></div>';
+  if (r.semRegistros) h += '<div class="cpa-rel-grupo" style="--c:#39FF88"><h5>O CP não tem empenho emitido neste dia</h5></div>';
+  h += grupo('#FF3D71', 'Diferentes entre CP e Tabela', c.divergentes, function(x) { return '<div><b>' + esc(x.empenho) + '</b> ' + esc(x.credor) + ' <small>· ' + esc((x.problemas || []).join('; ')) + (x.processo ? ' · proc. ' + esc(x.processo) : '') + '</small></div>'; });
+  h += grupo('#FF3D71', 'No CP e não na Tabela', c.cpSemTabela, function(x) { return '<div><b>' + esc(x.empenho) + '</b> ' + esc(x.credor) + ' <small>· ' + reais(x.valor) + (x.pelaDespesa ? ' · mesma despesa das diárias' : '') + '</small></div>'; });
+  h += grupo('#FFB454', 'Na Tabela e não no CP', c.tabelaSemCp, function(x) { return '<div><b>' + esc(x.empenho) + '</b> ' + esc(x.servidor || '') + ' <small>· ' + reais(x.valor) + (x.processo ? ' · proc. ' + esc(x.processo) : '') + (x.manual ? ' · registro manual' : '') + '</small></div>'; });
+  h += grupo('#FF3D71', 'Empenho em 2+ processos da Tabela', c.duplicadosTabela, function(x) { return '<div><b>' + esc(x.empenho) + '</b> ' + esc(x.credor || '') + ' <small>· processos ' + esc((x.processos || []).join(', ')) + '</small></div>'; });
+  if (!r.alertas && !r.semRegistros) h += '<div class="cpa-rel-grupo" style="--c:#39FF88"><h5>Tudo bate com a Tabela de Controle</h5></div>';
+  if (n(c.conferem)) h += '<details><summary>Conferem (' + n(c.conferem) + ')</summary>' + c.conferem.map(function(x) { return '<div>' + esc(x.empenho) + ' · ' + esc(x.credor) + ' · ' + reais(x.valor) + (x.processo ? ' · proc. ' + esc(x.processo) : '') + '</div>'; }).join('') + '</details>';
+  if (n(c.outrosCp)) h += '<details><summary>Outros empenhos da Prefeitura no dia, fora das diárias (' + n(c.outrosCp) + ')</summary>' + c.outrosCp.map(function(x) { return '<div>' + esc(x.empenho) + ' · ' + esc(x.credor) + ' · ' + reais(x.valor) + '</div>'; }).join('') + '</details>';
+  box.innerHTML = h;
+}
+(function() {
+  var inp = document.getElementById('cpa-rel-data');
+  var hoje = new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10);
+  inp.value = hoje; inp.max = hoje;
+  document.getElementById('cpa-rel-pedir').addEventListener('click', function() {
+    var v = inp.value; if (!v) { alert('Escolha o dia.'); return; }
+    var dataBr = v.slice(8, 10) + '/' + v.slice(5, 7) + '/' + v.slice(0, 4);
+    if (!confirm('Tirar a Relação de Empenhos de ' + dataBr + ' no CP e comparar com a Tabela?\n\nSe o vigia não estiver ligado, o robô abre o CP sozinho (2 a 3 min) e fecha no fim. Só lê o CP: não grava nada.')) return;
+    var b = this; b.disabled = true;
+    sgdFetch(SGD_WORKER_URL + '?action=cp-relatorio-empenhos-pedir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: dataBr }) })
+      .then(function(r) { return r.json(); }).then(function(res) {
+        if (!res.ok) { b.disabled = false; alert(res.error || 'Não foi possível.'); }
+        cpaCarregar();
+      }).catch(function(e) { b.disabled = false; alert('Erro: ' + e.message); });
+  });
+})();
 // roda mesmo com a aba fechada (a cada 20 s) só pra manter os avisos e o "!" da aba; aberta, a cada 4 s
 var cpaUltimaCarga = 0;
 function cpaCarregar() {
