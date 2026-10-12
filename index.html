@@ -3279,12 +3279,12 @@ function eqCor(bot) { return (EQ_AG[bot] && EQ_AG[bot].cor) || (bot === 'thiago'
 function eqAberta(t) { return t.status === 'aberta' || t.status === 'em_andamento' || t.status === 'aguardando'; }
 // números de cada agente, contados no próprio quadro (tarefas e mensagens)
 function eqEstadoCp(bot) {
-  var desconhecido = { prontos: null, vigia: null, robo: null, lote: false, roboTexto: 'Sem confirmação' };
+  var desconhecido = { prontos: null, pendentes: null, vigia: null, robo: null, lote: false, roboTexto: 'Sem confirmação' };
   if (!bot || ((eqDados && eqDados.agora || Date.now()) - (bot.dadosEm || bot.visto || 0) > 90000)) return desconhecido;
   var d = bot.dados;
   if (d) {
     var fase = { pedido: 'Solicitado', iniciado: 'Abrindo / executando', parar: 'Parando' }[d.disparoStatus];
-    return { prontos: Number.isInteger(d.prontos) && d.prontos >= 0 ? d.prontos : null, vigia: typeof d.vigiaVivo === 'boolean' ? d.vigiaVivo : null, robo: typeof d.roboRodando === 'boolean' ? d.roboRodando : null, lote: d.loteAtivo === true, roboTexto: d.loteAtivo ? 'Empenhando' : fase || (d.roboRodando === true ? 'Rodando' : d.roboRodando === false ? 'Livre' : 'Sem confirmação') };
+    return { pendentes: Number.isInteger(d.pendentes) ? d.pendentes : null, prontos: Number.isInteger(d.prontos) && d.prontos >= 0 ? d.prontos : null, vigia: typeof d.vigiaVivo === 'boolean' ? d.vigiaVivo : null, robo: typeof d.roboRodando === 'boolean' ? d.roboRodando : null, lote: d.loteAtivo === true, roboTexto: d.loteAtivo ? 'Empenhando' : fase || (d.roboRodando === true ? 'Rodando' : d.roboRodando === false ? 'Livre' : 'Sem confirmação') };
   }
   if (bot.status === 'erro') return desconhecido;
   var texto = bot.detalhe || '', m = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(texto);
@@ -3437,13 +3437,13 @@ function eqRender() {
       var vigiaVivo = cp.vigia, roboRodando = cp.robo, empenhandoLote = cp.lote;
       insightsHtml = '<div class="x-ag-insights">'
         + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (empenhandoLote ? 'ok' : vigiaVivo ? 'ok' : 'warn') + '">' + (empenhandoLote ? '⚡ Empenhando Lote' : vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
-        + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : prontosQtd + ' processo(s) pronto(s)') + '</b></div>'
+        + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : (cp.pendentes == null ? '' : cp.pendentes + ' na fila · ') + prontosQtd + ' sem alertas na pré-verificação') + '</b></div>'
         + '<div class="x-ag-insights-row"><span>Automação:</span><b>Sessão CP + monitoramento + OCR</b></div>'
-        + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Reconciliação e trava pré-lote</b></div>'
+        + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Travas de execução e duplicidade</b></div>'
         + '<div class="x-ag-pills">'
         + '<span class="x-ag-pill ' + (+prontosQtd > 0 ? 'ok' : '') + '">Prontos: ' + prontosQtd + '</span>'
         + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo == null ? 'Sem confirmação' : vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
-        + '<span class="x-ag-pill ok">Robô: ' + cp.roboTexto + '</span>'
+        + '<span class="x-ag-pill ' + (cp.robo == null ? 'warn' : 'ok') + '">Robô: ' + cp.roboTexto + '</span>'
         + '</div></div>';
       acoesHtml = '<div class="x-ag-acoes">'
         + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 Status CP</button>'
