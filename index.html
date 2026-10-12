@@ -3256,7 +3256,8 @@ setInterval(carregarEmpenhosAndamento, 15000);
 // 08/10/2026: ABA EQUIPE - bots, conversa com o Coordenador e quadro (rotas equipe-* do Worker)
 // 10/10/2026: visual novo (Stitch, adaptado): indicadores, propostas aguardando, cartão por agente com números
 // tirados do próprio quadro, fluxo entre agentes. Nada inventado: tudo vem do equipe-painel.
-var eqDados = null, eqFiltro = 'abertas', eqEsperando = false, eqFluxoAgente = 'todos';
+var eqDados = null, eqFiltro = 'abertas', eqEsperando = false, eqEsperandoId = null, eqEnviando = false, eqEnvioPendente = null, eqFluxoAgente = 'todos';
+try { eqEnvioPendente = JSON.parse(sessionStorage.getItem('eq-envio-pendente') || 'null'); } catch (e) {}
 var EQ_GRAV = { alta: '#f87171', media: '#f59e0b', baixa: '#7AA7FF' };
 var EQ_AG = {
   coordenador: { nome: 'Coordenador', modelo: 'DeepSeek Flash · Orquestrador', papel: 'Conversa com você e distribui o trabalho', cor: '#8b5cf6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M12 11.5 6.4 16.2M12 11.5l5.6 4.7"/></svg>' },
@@ -3277,19 +3278,29 @@ function eqTexto(t) {
 function eqCor(bot) { return (EQ_AG[bot] && EQ_AG[bot].cor) || (bot === 'thiago' ? '#e9ddff' : '#9aa3b8'); }
 function eqAberta(t) { return t.status === 'aberta' || t.status === 'em_andamento' || t.status === 'aguardando'; }
 // números de cada agente, contados no próprio quadro (tarefas e mensagens)
+function eqEstadoCp(bot) {
+  var desconhecido = { prontos: null, vigia: null, robo: null, lote: false, roboTexto: 'Sem confirmação' };
+  if (!bot || ((eqDados && eqDados.agora || Date.now()) - (bot.dadosEm || bot.visto || 0) > 90000)) return desconhecido;
+  var d = bot.dados;
+  if (d) {
+    var fase = { pedido: 'Solicitado', iniciado: 'Abrindo / executando', parar: 'Parando' }[d.disparoStatus];
+    return { prontos: Number.isInteger(d.prontos) && d.prontos >= 0 ? d.prontos : null, vigia: typeof d.vigiaVivo === 'boolean' ? d.vigiaVivo : null, robo: typeof d.roboRodando === 'boolean' ? d.roboRodando : null, lote: d.loteAtivo === true, roboTexto: d.loteAtivo ? 'Empenhando' : fase || (d.roboRodando === true ? 'Rodando' : d.roboRodando === false ? 'Livre' : 'Sem confirmação') };
+  }
+  if (bot.status === 'erro') return desconhecido;
+  var texto = bot.detalhe || '', m = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(texto);
+  var vigia = /\bativo\b|\bconectado\b/i.test(texto) && !/desconectado|inativo|sem sinal/i.test(texto);
+  var rodando = /execução|rodando|empenhando/i.test(texto);
+  return { prontos: m ? Number(m[1] || m[2]) : null, vigia: vigia, robo: rodando, lote: /empenhando/i.test(texto), roboTexto: rodando ? 'Rodando' : 'Livre' };
+}
 function eqMetricas(bot, ts, msgs, agora) {
   var d1 = agora - 86400000, d7 = agora - 7 * 86400000;
   var n = function(f) { return ts.filter(f).length; };
   var res = function(t) { return String(t.resultado || ''); };
   if (bot === 'coordenador') return [['Conversas hoje', msgs.filter(function(m) { return m.de === 'thiago' && m.criado > d1; }).length], ['Pedidos 7 dias', n(function(t) { return t.de === 'coordenador' && t.criado > d7; })], ['Respostas hoje', msgs.filter(function(m) { return m.de === 'coordenador' && m.criado > d1; }).length]];
   if (bot === 'operador_cp') {
-    var opDet = ((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'operador_cp'; })[0]) || {}).detalhe || '';
-    var prontosMatch = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
-    var prontosVal = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '—';
-    var vigiaVivo = (/ativo/i.test(opDet) || /empenhando/i.test(opDet)) && !/desconectado/i.test(opDet);
-    var roboRodando = /execução|rodando|empenhando/i.test(opDet);
-    var roboStatusTxt = /empenhando/i.test(opDet) ? 'Empenhando' : roboRodando ? 'Rodando' : 'Livre';
-    return [['Prontos', prontosVal], ['Vigia CP', vigiaVivo ? 'Online' : 'Off'], ['Robô CP', roboStatusTxt]];
+    var op = ((eqDados && (eqDados.bots || []).filter(function(b) { return b.bot === 'operador_cp'; })[0]) || null);
+    var cp = eqEstadoCp(op);
+    return [['Prontos', cp.prontos == null ? '—' : cp.prontos], ['Vigia CP', cp.vigia == null ? '—' : cp.vigia ? 'Online' : 'Off'], ['Robô CP', cp.roboTexto]];
   }
   if (bot === 'vigia') return [['Abertas', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t); })], ['Graves', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && eqAberta(t) && t.gravidade === 'alta'; })], ['Resolvidas 24 h', n(function(t) { return t.de === 'vigia' && t.tipo === 'ocorrencia' && t.status === 'resolvida' && t.atualizado > d1; })]];
   if (bot === 'pesquisador') return [['Pesquisas 7 dias', n(function(t) { return t.para === 'pesquisador' && t.criado > d7; })], ['Em andamento', n(function(t) { return t.para === 'pesquisador' && eqAberta(t); })], ['Concluídas', n(function(t) { return t.para === 'pesquisador' && t.status === 'concluida' && t.criado > d7; })]];
@@ -3320,6 +3331,7 @@ window.eqFocarChat = function(texto) {
   if (cx) cx.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 window.eqDispararOrdem = function(texto) {
+  if (eqEnviando) return;
   var inp = document.getElementById('eq-texto');
   if (inp) inp.value = texto;
   var form = document.getElementById('eq-form');
@@ -3420,21 +3432,18 @@ function eqRender() {
         + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 Falar no Chat</button>'
         + '</div>';
     } else if (k === 'operador_cp') {
-      var opDet = (b && b.detalhe) || '';
-      var prontosMatch = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(opDet);
-      var prontosQtd = prontosMatch ? (prontosMatch[1] || prontosMatch[2]) : '—';
-      var vigiaVivo = (/ativo/i.test(opDet) || /empenhando/i.test(opDet)) && !/desconectado/i.test(opDet);
-      var roboRodando = /execução|rodando|empenhando/i.test(opDet);
-      var empenhandoLote = /empenhando/i.test(opDet);
+      var cp = eqEstadoCp(b);
+      var prontosQtd = cp.prontos == null ? '—' : String(cp.prontos);
+      var vigiaVivo = cp.vigia, roboRodando = cp.robo, empenhandoLote = cp.lote;
       insightsHtml = '<div class="x-ag-insights">'
         + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (empenhandoLote ? 'ok' : vigiaVivo ? 'ok' : 'warn') + '">' + (empenhandoLote ? '⚡ Empenhando Lote' : vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
         + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : prontosQtd + ' processo(s) pronto(s)') + '</b></div>'
-        + '<div class="x-ag-insights-row"><span>Automação:</span><b>Hermes FullCP (PyAutoGUI + OCR)</b></div>'
+        + '<div class="x-ag-insights-row"><span>Automação:</span><b>Sessão CP + monitoramento + OCR</b></div>'
         + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Reconciliação e trava pré-lote</b></div>'
         + '<div class="x-ag-pills">'
         + '<span class="x-ag-pill ' + (+prontosQtd > 0 ? 'ok' : '') + '">Prontos: ' + prontosQtd + '</span>'
-        + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
-        + '<span class="x-ag-pill ok">Robô: ' + (empenhandoLote ? '⚡ Empenhando' : roboRodando ? 'Rodando' : 'Livre') + '</span>'
+        + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo == null ? 'Sem confirmação' : vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
+        + '<span class="x-ag-pill ok">Robô: ' + cp.roboTexto + '</span>'
         + '</div></div>';
       acoesHtml = '<div class="x-ag-acoes">'
         + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 Status CP</button>'
@@ -3600,9 +3609,9 @@ function carregarEquipe() {
   eqAtualizando = true;
   sgdFetch(SGD_WORKER_URL + '?action=equipe-painel').then(function(r) { return r.json(); }).then(function(res) {
     if (!res.ok) { document.getElementById('eq-atualizado').textContent = 'não consegui atualizar: ' + (res.error || '?'); return; }
-    if (eqEsperando && eqDados) {
+    if (eqEsperando) {
       var ultimaBot = (res.mensagens || []).filter(function(m) { return m.de !== 'thiago'; }).pop();
-      if (ultimaBot && ultimaBot.criado > eqEsperando) eqEsperando = false;
+      if (eqEsperandoId ? (res.mensagens || []).some(function(m) { return Number(m.respondeA) === eqEsperandoId; }) : ultimaBot && ultimaBot.de === 'coordenador' && ultimaBot.criado >= eqEsperando) { eqEsperando = false; eqEsperandoId = null; }
     }
     eqDados = res; eqRender();
   }).catch(function() { document.getElementById('eq-atualizado').textContent = 'sem conexão com o servidor'; })
@@ -3615,13 +3624,17 @@ document.addEventListener('submit', function(ev) {
   ev.preventDefault();
   var inp = document.getElementById('eq-texto'), texto = inp.value.trim();
   if (!texto) return;
-  var bt = document.getElementById('eq-enviar'); bt.disabled = true;
-  sgdFetch(SGD_WORKER_URL + '?action=equipe-enviar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: texto, para: 'coordenador' }) })
+  if (eqEnviando) return;
+  var bt = document.getElementById('eq-enviar'); bt.disabled = true; eqEnviando = true;
+  if (!eqEnvioPendente || eqEnvioPendente.texto !== texto) eqEnvioPendente = { texto: texto, chave: crypto.randomUUID() };
+  try { sessionStorage.setItem('eq-envio-pendente', JSON.stringify(eqEnvioPendente)); } catch (e) {}
+  sgdFetch(SGD_WORKER_URL + '?action=equipe-enviar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: texto, para: 'coordenador', chaveEntrega: eqEnvioPendente.chave }), signal: AbortSignal.timeout(30000) })
     .then(function(r) { return r.json(); }).then(function(res) {
-      bt.disabled = false;
       if (!res.ok) { alert(res.error || 'Não foi possível enviar.'); return; }
-      inp.value = ''; eqEsperando = Date.now(); carregarEquipe();
-    }).catch(function(e) { bt.disabled = false; alert('Erro: ' + e.message); });
+      if (inp.value.trim() === texto) inp.value = '';
+      eqEnvioPendente = null; try { sessionStorage.removeItem('eq-envio-pendente'); } catch (e) {} eqEsperando = res.agora || Date.now(); eqEsperandoId = res.id ? Number(res.id) : null; carregarEquipe();
+    }).catch(function(e) { alert('Não consegui confirmar o envio. Tente novamente com o mesmo texto; o pedido não será duplicado. ' + e.message); })
+      .finally(function() { bt.disabled = false; eqEnviando = false; });
 });
 document.addEventListener('click', function(ev) {
   var f = ev.target.closest && ev.target.closest('#eq-filtros .x-filtro');
