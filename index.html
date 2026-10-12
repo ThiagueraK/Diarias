@@ -3261,6 +3261,7 @@ try { eqEnvioPendente = JSON.parse(sessionStorage.getItem('eq-envio-pendente') |
 var EQ_GRAV = { alta: '#f87171', media: '#f59e0b', baixa: '#7AA7FF' };
 var EQ_AG = {
   coordenador: { nome: 'Coordenador', modelo: 'DeepSeek Flash · Orquestrador', papel: 'Conversa com você e distribui o trabalho', cor: '#8b5cf6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 7.2v4.3M12 11.5 6.4 16.2M12 11.5l5.6 4.7"/></svg>' },
+  relatorios_cp: { nome: 'Relatórios CP', modelo: 'Hermes · Conciliação', papel: 'Relatórios oficiais, conferência de empenhos e avisos de pagamentos no Telegram e webapp', cor: '#0f766e', ico: '📋' },
   operador_cp: { nome: 'Operador CP', modelo: 'Hermes FullCP · Autônomo', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR de tela e reconciliação', cor: '#3b82f6', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="7 8 10 11 7 14"/><line x1="12" y1="14" x2="16" y2="14"/></svg>' },
   vigia: { nome: 'Vigia', modelo: 'Infraestrutura · Ciclo 2 min', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>' },
   conferente: { nome: 'Conferente', modelo: 'Regras + OCR (pdfplumber + Tesseract)', papel: 'Confere cada processo da caixa: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 4.4 3.4 8.1 8 9 4.6-.9 8-4.6 8-9V6l-8-3Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>' },
@@ -3268,7 +3269,7 @@ var EQ_AG = {
   programador: { nome: 'Programador', modelo: 'Claude Sonnet 5 + DeepSeek', papel: 'Corrige sozinho com revisor 1-shot, linhas vermelhas e auto-reversão', cor: '#84cc16', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7.5 9.5 3 2.5-3 2.5M12.5 15h4"/></svg>' },
   cacador: { nome: 'Caçador local', modelo: 'IA Local no Notebook (Llama)', papel: 'Classifica os erros novos dos logs a cada 5 min sem custo de API', cor: '#10b981', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>' }
 };
-var EQ_ORDEM = ['coordenador', 'operador_cp', 'vigia', 'conferente', 'pesquisador', 'programador', 'cacador'];
+var EQ_ORDEM = ['coordenador', 'relatorios_cp', 'operador_cp', 'vigia', 'conferente', 'pesquisador', 'programador', 'cacador'];
 var EQ_NOME = { thiago: 'Você' };
 Object.keys(EQ_AG).forEach(function(k) { EQ_NOME[k] = EQ_AG[k].nome; });
 function eqTexto(t) {
@@ -3425,12 +3426,14 @@ function eqRender() {
       insightsHtml = '<div class="x-ag-insights">'
         + '<div class="x-ag-insights-tit"><span>Arquitetura & Operação</span><span class="x-ag-pill ok">Ativo</span></div>'
         + '<div class="x-ag-insights-row"><span>Canal de Entrada:</span><b>WebChat SGD & Telegram</b></div>'
-        + '<div class="x-ag-insights-row"><span>Orquestração:</span><b>Coordena os 6 bots especialistas</b></div>'
+        + '<div class="x-ag-insights-row"><span>Orquestração:</span><b>Coordena os bots especialistas</b></div>'
         + '<div class="x-ag-insights-row"><span>Comunicação:</span><b>Worker Cloudflare em tempo real</b></div>'
         + '</div>';
       acoesHtml = '<div class="x-ag-acoes">'
         + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 Falar no Chat</button>'
         + '</div>';
+    } else if (k === 'relatorios_cp') {
+      acoesHtml = '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de empenhos de hoje no CP e compare com a tabela de controle\')">📋 Empenhos do dia</button><button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de pagamentos de hoje no CP\')">💰 Pagamentos do dia</button>';
     } else if (k === 'operador_cp') {
       var cp = eqEstadoCp(b);
       var prontosQtd = cp.prontos == null ? '—' : String(cp.prontos);
@@ -6526,6 +6529,7 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   // são reconhecidos como a mesma data e não escapam da checagem.
   var jaNotificados = 0;
   var doDia = doDiaTodos.filter(function(p){
+    if(p.pagamentoAvisoGerenciadoCp)return false;
     var marca = p.pagamentoNotificadoEm || '';
     if (marca.indexOf(dataBarra) !== -1) { jaNotificados++; return false; }
     return true;
@@ -7989,6 +7993,7 @@ function dataAdicaoBR(id) {
 
 // Selo mostrando se o pagamento já foi notificado ao motorista (e quando).
 function badgePagamentoAvisado(p) {
+  if(p.pagamentoAvisoGerenciadoCp){var a=p.pagamentoAvisosCp||{};return '<span class="badge-pc-ok" title="Avisos gerenciados pelo relatório oficial CP; aceito não confirma leitura">TG: '+(a.telegram==='aceito'?'aceito':'pendente')+' · App: '+(a.webapp==='aceito'?'aceito':'pendente')+'</span>';}
   if (!p.pagamentoNotificadoEm) return '<span class="td-empty">—</span>';
   var datas = p.pagamentoNotificadoEm.split(';').filter(Boolean);
   var ultima = datas[datas.length - 1] || '';
