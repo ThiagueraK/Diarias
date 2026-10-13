@@ -20,7 +20,7 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
 <title>SGD — Gerador de Diárias</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=VT323&display=swap');
   :root {
     /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -763,6 +763,277 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   @keyframes x-destaque{0%,100%{outline:2px solid transparent; box-shadow:none;}50%{outline:2px solid var(--x-warn); box-shadow:0 0 16px rgba(245,158,11,.6);}}
   .eqx .x-t.destaque{animation:x-destaque 2.5s ease-in-out;}
 
+  /* ========================================================================= */
+  /* 🛡️ TEMA SALA DE GUERRA DEFCON / NORAD RADAR (AGENTES SGD)                */
+  /* ========================================================================= */
+  .eqx .x-agentes.modo-norad { display: block; margin-bottom: 22px; }
+  
+  .norad-view-toggle { display: inline-flex; align-items: center; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 2px; gap: 3px; }
+  .norad-toggle-btn { background: none; border: none; color: var(--x-muted); font-family: var(--f-x-disp); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all .15s ease; }
+  .norad-toggle-btn:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .norad-toggle-btn.active { color: #22c55e; background: rgba(34,197,94,.16); font-weight: 700; box-shadow: 0 0 10px rgba(34,197,94,.2); }
+
+  .norad-war-room {
+    background: #021206;
+    border: 2px solid #22c55e;
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'VT323', monospace;
+    color: #22c55e;
+    box-shadow: 0 0 35px rgba(34, 197, 94, 0.22), inset 0 0 30px rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .norad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid #22c55e;
+    padding-bottom: 10px;
+    font-size: 1.25rem;
+    letter-spacing: 1.5px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .norad-htitle { font-size: 1.25rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+
+  .defcon-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  .defcon-level {
+    padding: 2px 7px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.35;
+    border-radius: 3px;
+  }
+  .defcon-level.l5 { color: #38bdf8; }
+  .defcon-level.l4 { color: #22c55e; }
+  .defcon-level.l3 { color: #eab308; }
+  .defcon-level.l2 { color: #f97316; }
+  .defcon-level.l1 {
+    color: #fff;
+    background: #ef4444;
+    opacity: 1;
+    animation: defconFlash 1.2s infinite alternate;
+    text-shadow: 0 0 8px #ef4444;
+  }
+
+  @keyframes defconFlash {
+    0% { box-shadow: 0 0 4px #ef4444; background: #991b1b; }
+    100% { box-shadow: 0 0 16px #ef4444; background: #ef4444; }
+  }
+
+  .norad-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .norad-radar-panel {
+    background: rgba(1, 20, 6, 0.9);
+    border: 1.5px solid #22c55e;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: inset 0 0 16px rgba(34, 197, 94, 0.15);
+  }
+
+  .radar-crt {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid #22c55e;
+    background: radial-gradient(circle, #052c0d 0%, #011506 80%);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 0 16px rgba(34, 197, 94, 0.35);
+  }
+
+  .radar-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(34, 197, 94, 0.35);
+    pointer-events: none;
+  }
+  .radar-ring.r1 { width: 35%; height: 35%; }
+  .radar-ring.r2 { width: 68%; height: 68%; }
+  .radar-ring.r3 { width: 96%; height: 96%; border-style: solid; }
+
+  .radar-cross-h, .radar-cross-v {
+    position: absolute;
+    background: rgba(34, 197, 94, 0.25);
+    pointer-events: none;
+  }
+  .radar-cross-h { top: 50%; left: 0; right: 0; height: 1px; }
+  .radar-cross-v { left: 50%; top: 0; bottom: 0; width: 1px; }
+
+  .radar-sweep {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(34, 197, 94, 0.45) 0deg, rgba(34, 197, 94, 0) 55deg, transparent 55deg);
+    animation: radarSweepAnim 3.2s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes radarSweepAnim {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .radar-blip {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px #22c55e;
+    animation: blipPulse 1.8s infinite ease-in-out;
+  }
+  .radar-blip.blip-warn { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+  .radar-blip.blip-err { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  .radar-blip::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 9px;
+    top: -5px;
+    font-size: 11px;
+    color: #22c55e;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  @keyframes blipPulse {
+    0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(0.85); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  }
+
+  .radar-telemetry {
+    font-size: 0.95rem;
+    width: 100%;
+    border-top: 1px dashed rgba(34, 197, 94, 0.4);
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  /* Target Grid */
+  .norad-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .norad-box {
+    background: rgba(3, 25, 8, 0.75);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    padding: 12px 14px;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-radius: 6px;
+  }
+
+  .norad-box:hover {
+    background: rgba(34, 197, 94, 0.16);
+    border-color: #22c55e;
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.45);
+    transform: translateY(-2px);
+  }
+
+  .norad-box.parado { opacity: 0.65; border-color: rgba(148, 163, 184, 0.4); color: #94a3b8; }
+  .norad-box.com-erro { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
+  .norad-box.com-atencao { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.3); }
+
+  .norad-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .norad-tag {
+    font-size: 0.85rem;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid #22c55e;
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .norad-tag.warn { border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+  .norad-tag.err { border-color: #ef4444; color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+
+  .norad-sub { font-size: 1rem; opacity: 0.85; }
+  .norad-metrics { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.95rem; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.2); }
+  .norad-bar { font-size: 0.95rem; color: #4ade80; }
+  .norad-log { font-size: 0.95rem; border-top: 1px dashed rgba(34, 197, 94, 0.3); padding-top: 5px; opacity: 0.9; }
+  
+  .norad-alert-box {
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    animation: defconFlash 1.4s infinite alternate;
+  }
+
+  .norad-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .norad-btn {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid #22c55e;
+    color: #4ade80;
+    font-family: 'VT323', monospace;
+    font-size: 1.05rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .norad-btn:hover {
+    background: #22c55e;
+    color: #021206;
+    box-shadow: 0 0 10px #22c55e;
+  }
+
+  @media (max-width: 1080px) {
+    .norad-layout { grid-template-columns: 1fr; }
+    .norad-radar-panel { max-width: 320px; margin: 0 auto; width: 100%; }
+    .norad-grid { grid-template-columns: 1fr; }
+  }
+
   /* conversa + fluxo */
   .eqx .x-grid2{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:14px; align-items:start; margin-bottom:14px;}
   .eqx .x-painel{background:var(--x-card); border:1px solid var(--x-line); border-radius:8px; overflow:hidden; backdrop-filter:blur(14px); min-width:0;}
@@ -1143,7 +1414,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
       <section class="x-aguarda" id="eq-aguarda" hidden aria-label="Propostas esperando sua aprovação"></section>
 
-      <div class="x-sec"><h3>Agentes</h3><span class="x-lbl">cada cartão: o que faz, o que está fazendo e os números do quadro</span></div>
+      <div class="x-sec">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <h3>Agentes</h3>
+          <div class="norad-view-toggle">
+            <button type="button" class="norad-toggle-btn active" id="btnModoNorad" onclick="eqAlternarVisao('norad')">🛡️ Sala de Guerra DEFCON</button>
+            <button type="button" class="norad-toggle-btn" id="btnModoClassic" onclick="eqAlternarVisao('classic')">📋 Clássico</button>
+          </div>
+        </div>
+        <span class="x-lbl">Monitoramento tático em tempo real dos 8 agentes de automação</span>
+      </div>
       <div class="x-agentes" id="eq-bots"></div>
 
       <div class="x-grid2">
@@ -3343,6 +3623,19 @@ window.eqDispararOrdem = function(texto) {
   var cx = document.getElementById('eq-msgs');
   if (cx) cx.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
+
+var eqModoVisao = localStorage.getItem('eq_modo_visao') || 'norad';
+
+function eqAlternarVisao(modo) {
+  eqModoVisao = modo;
+  localStorage.setItem('eq_modo_visao', modo);
+  var btnN = document.getElementById('btnModoNorad');
+  var btnC = document.getElementById('btnModoClassic');
+  if (btnN) btnN.classList.toggle('active', modo === 'norad');
+  if (btnC) btnC.classList.toggle('active', modo === 'classic');
+  if (window.eqDados) eqRender();
+}
+
 function eqRender() {
   if (!eqDados) return;
   var agora = eqDados.agora || Date.now();
@@ -3380,155 +3673,303 @@ function eqRender() {
   eqRenderTelemetria(eqDados.metricas, agora);
   var cargas = (eqDados.metricas && eqDados.metricas.carga) || {};
   // cartões dos agentes
-  document.getElementById('eq-bots').innerHTML = EQ_ORDEM.map(function(k) {
-    var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
-    var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Atenção', '#f59e0b'] : ['No ar', '#4edea3'];
-    var met = eqMetricas(k, ts, msgs, agora);
+  var btnN = document.getElementById('btnModoNorad');
+  var btnC = document.getElementById('btnModoClassic');
+  if (btnN) btnN.classList.toggle('active', eqModoVisao === 'norad');
+  if (btnC) btnC.classList.toggle('active', eqModoVisao === 'classic');
 
-    // Ocorrências abertas relacionadas a este bot
-    var ocs = ts.filter(function(t) {
-      return (t.de === k || t.para === k) && t.tipo === 'ocorrencia' && eqAberta(t);
-    });
+  var boxBots = document.getElementById('eq-bots');
 
-    // Se é o Operador CP e o vigia está desconectado com processos prontos
-    var opAviso = '';
-    if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
-      var matchP = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
-      var qtdP = matchP ? (matchP[1] || matchP[2]) : '0';
-      if (+qtdP > 0) {
-        opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + qtdP + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
+  if (eqModoVisao === 'norad') {
+    boxBots.className = 'x-agentes modo-norad';
+
+    var hasErro = EQ_ORDEM.some(function(k) { return porBot[k] && porBot[k].status === 'erro'; });
+    var hasAtencao = EQ_ORDEM.some(function(k) { return porBot[k] && porBot[k].status === 'atencao'; });
+    var hasMorto = vivos < EQ_ORDEM.length;
+    var defconLvl = hasErro ? 1 : (hasAtencao ? 2 : (hasMorto ? 3 : 4));
+
+    var defconStripHtml = '<div class="defcon-strip">'
+      + '<span style="opacity:0.6; font-size:0.85rem;">STATUS:</span>'
+      + '<span class="defcon-level l5 ' + (defconLvl === 5 ? 'l1' : '') + '">5</span>'
+      + '<span class="defcon-level l4 ' + (defconLvl === 4 ? 'l1' : '') + '">4</span>'
+      + '<span class="defcon-level l3 ' + (defconLvl === 3 ? 'l1' : '') + '">3</span>'
+      + '<span class="defcon-level l2 ' + (defconLvl === 2 ? 'l1' : '') + '">2</span>'
+      + '<span class="defcon-level l1">DEFCON ' + defconLvl + '</span>'
+      + '</div>';
+
+    var blipCoords = [
+      { t: '24%', l: '32%' },
+      { t: '22%', l: '66%' },
+      { t: '40%', l: '78%' },
+      { t: '65%', l: '75%' },
+      { t: '78%', l: '50%' },
+      { t: '68%', l: '25%' },
+      { t: '45%', l: '20%' },
+      { t: '32%', l: '48%' }
+    ];
+
+    var blipsHtml = EQ_ORDEM.map(function(k, idx) {
+      var b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
+      var bcls = parado ? '' : b.status === 'erro' ? ' blip-err' : b.status === 'atencao' ? ' blip-warn' : '';
+      var pos = blipCoords[idx] || { t: '50%', l: '50%' };
+      return '<div class="radar-blip' + bcls + '" style="top:' + pos.t + '; left:' + pos.l + ';" data-label="TGT-0' + (idx + 1) + '"></div>';
+    }).join('');
+
+    var noradBoxesHtml = EQ_ORDEM.map(function(k, idx) {
+      var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
+      var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Atenção', '#f59e0b'] : ['No ar', '#4edea3'];
+      var met = eqMetricas(k, ts, msgs, agora);
+      var ocs = ts.filter(function(t) { return (t.de === k || t.para === k) && t.tipo === 'ocorrencia' && eqAberta(t); });
+
+      var opAviso = '';
+      if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
+        var matchP = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
+        var qtdP = matchP ? (matchP[1] || matchP[2]) : '0';
+        if (+qtdP > 0) {
+          opAviso = '<div class="norad-alert-box">&gt; 💡 SESSÃO CP: ' + qtdP + ' processo(s) pronto(s) para empenho. Suba o vigia no notebook.</div>';
+        }
       }
-    }
 
-    // Alerta detalhado de ocorrências ativas ou ponto de atenção
-    var ocHtml = '';
-    if (ocs.length) {
-      ocHtml = '<div class="x-ag-alerta ' + (ocs.some(function(o) { return o.gravidade === 'alta'; }) ? 'alta' : '') + '">'
-        + '<div class="x-ag-alerta-tit"><span>⚠️ ' + ocs.length + ' Ponto' + (ocs.length > 1 ? 's' : '') + ' de Atenção</span></div>'
-        + ocs.map(function(oc) {
-          return '<div class="x-ag-alerta-item"><b>#' + oc.id + ' · ' + escaparHtmlProc(oc.titulo) + '</b>'
-            + (oc.corpo ? '<small>' + escaparHtmlProc(oc.corpo.slice(0, 140)) + '</small>' : '') + '</div>';
-        }).join('')
-        + '<button type="button" class="x-ag-alerta-link" onclick="eqRolarQuadro(' + ocs[0].id + ')">Ver ocorrência detalhada no quadro ↓</button>'
-        + '</div>';
-    } else if (b && (b.status === 'atencao' || b.status === 'erro') && b.detalhe && !/^(esperando pedido|tudo certo|pronto)$/i.test(b.detalhe)) {
-      ocHtml = '<div class="x-ag-alerta ' + (b.status === 'erro' ? 'alta' : '') + '">'
-        + '<div class="x-ag-alerta-tit"><span>⚠️ ' + (b.status === 'erro' ? 'Erro Identificado' : 'Ponto de Atenção') + '</span></div>'
-        + '<div class="x-ag-alerta-item"><b>' + escaparHtmlProc(b.detalhe) + '</b></div>'
-        + '</div>';
-    }
+      var ocNorad = '';
+      if (ocs.length) {
+        ocNorad = '<div class="norad-alert-box">&gt; ⚠️ ATENÇÃO: ' + ocs.length + ' ocorrência(s) em aberto no quadro</div>';
+      }
 
-    // Detalhes técnicos, arquitetura e diagnósticos vivos por agente
-    var insightsHtml = '';
-    var acoesHtml = '';
+      var acoesNorad = '';
+      if (k === 'coordenador') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 COMANDO CHAT</button>';
+      } else if (k === 'relatorios_cp') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de empenhos de hoje no CP e compare com a tabela de controle\')">📋 EMPENHOS DO DIA</button><button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de pagamentos de hoje no CP\')">💰 PAGAMENTOS</button>';
+      } else if (k === 'operador_cp') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 STATUS CP</button><button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@operador_cp validar pré-lote de diárias e conferir travas\')">📋 VALIDAR PRÉ-LOTE</button>';
+      } else if (k === 'vigia') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@vigia checar status de todos os serviços e tarefas agora\')">🔄 CHECAR SERVIÇOS</button>';
+      } else if (k === 'conferente') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@conferente reconferir todos os processos da caixa agora\')">🔍 RECONFERIR CAIXA</button>';
+      } else if (k === 'pesquisador') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqFocarChat(\'@pesquisador pesquisar no 1Doc o processo \')">🔎 CONSULTAR 1DOC</button>';
+      } else if (k === 'programador') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@programador fazer diagnóstico de integridade do código\')">🩺 DIAGNÓSTICO CÓDIGO</button>';
+      } else if (k === 'cacador') {
+        acoesNorad = '<button type="button" class="norad-btn" onclick="eqDispararOrdem(\'@cacador resumir logs de erro das últimas 24h\')">📜 RESUMO ERROS</button>';
+      }
 
-    if (k === 'coordenador') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Arquitetura & Operação</span><span class="x-ag-pill ok">Ativo</span></div>'
-        + '<div class="x-ag-insights-row"><span>Canal de Entrada:</span><b>WebChat SGD & Telegram</b></div>'
-        + '<div class="x-ag-insights-row"><span>Orquestração:</span><b>Coordena os bots especialistas</b></div>'
-        + '<div class="x-ag-insights-row"><span>Comunicação:</span><b>Worker Cloudflare em tempo real</b></div>'
-        + '</div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 Falar no Chat</button>'
-        + '</div>';
-    } else if (k === 'relatorios_cp') {
-      acoesHtml = '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de empenhos de hoje no CP e compare com a tabela de controle\')">📋 Empenhos do dia</button><button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de pagamentos de hoje no CP\')">💰 Pagamentos do dia</button>';
-    } else if (k === 'operador_cp') {
-      var cp = eqEstadoCp(b);
-      var prontosQtd = cp.prontos == null ? '—' : String(cp.prontos);
-      var vigiaVivo = cp.vigia, roboRodando = cp.robo, empenhandoLote = cp.lote;
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (empenhandoLote ? 'ok' : vigiaVivo ? 'ok' : 'warn') + '">' + (empenhandoLote ? '⚡ Empenhando Lote' : vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
-        + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : (cp.pendentes == null ? '' : cp.pendentes + ' na fila · ') + prontosQtd + ' sem alertas na pré-verificação') + '</b></div>'
-        + '<div class="x-ag-insights-row"><span>Automação:</span><b>Sessão CP + monitoramento + OCR</b></div>'
-        + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Travas de execução e duplicidade</b></div>'
-        + '<div class="x-ag-pills">'
-        + '<span class="x-ag-pill ' + (+prontosQtd > 0 ? 'ok' : '') + '">Prontos: ' + prontosQtd + '</span>'
-        + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo == null ? 'Sem confirmação' : vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
-        + '<span class="x-ag-pill ' + (cp.robo == null ? 'warn' : 'ok') + '">Robô: ' + cp.roboTexto + '</span>'
-        + '</div></div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 Status CP</button>'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp validar pré-lote de diárias e conferir travas\')">📋 Validar Pré-lote</button>'
-        + '</div>';
-    } else if (k === 'vigia') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Monitoramento da Infra</span><span class="x-ag-pill ok">8 Serviços Monitorados</span></div>'
-        + '<div class="x-ag-insights-row"><span>Escopo:</span><b>Serviços Windows + Conexão 1Doc</b></div>'
-        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Ciclo automático a cada 2 min</b></div>'
-        + '<div class="x-ag-insights-row"><span>Auto-recuperação:</span><b>Religa o que parou sem intervenção</b></div>'
-        + '<div class="x-ag-pills">'
-        + '<span class="x-ag-pill ok">1Doc 8081: OK</span>'
-        + '<span class="x-ag-pill ok">Serviços: 8/8</span>'
-        + '<span class="x-ag-pill ok">Tarefas Windows: OK</span>'
-        + '</div></div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@vigia checar status de todos os serviços e tarefas agora\')">🔄 Checar Serviços</button>'
-        + '</div>';
-    } else if (k === 'conferente') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Triagem & Validação</span><span class="x-ag-pill ok">OCR r3 Ativo</span></div>'
-        + '<div class="x-ag-insights-row"><span>Critérios:</span><b>Valor, placa, servidor e duplicidade</b></div>'
-        + '<div class="x-ag-insights-row"><span>Leitura de Nota:</span><b>pdfplumber + Tesseract OCR</b></div>'
-        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Varredura 1Doc a cada 5 minutos</b></div>'
-        + '<div class="x-ag-pills">'
-        + '<span class="x-ag-pill ok">Varredura 5 min</span>'
-        + '<span class="x-ag-pill ok">OCR Anexos PDF</span>'
-        + '<span class="x-ag-pill ok">Tabela de Controle</span>'
-        + '</div></div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@conferente reconferir todos os processos da caixa agora\')">🔍 Reconferir Caixa</button>'
-        + '</div>';
-    } else if (k === 'pesquisador') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Bases de Conhecimento</span><span class="x-ag-pill ok">Indexado</span></div>'
-        + '<div class="x-ag-insights-row"><span>Fontes:</span><b>1Doc Protocolos + Tabela de Controle</b></div>'
-        + '<div class="x-ag-insights-row"><span>Capacidade:</span><b>Busca semântica e histórico de diárias</b></div>'
-        + '<div class="x-ag-insights-row"><span>Modo:</span><b>Atendimento sob demanda no chat</b></div>'
-        + '</div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'@pesquisador pesquisar no 1Doc o processo \')">🔎 Consultar 1Doc</button>'
-        + '</div>';
-    } else if (k === 'programador') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Engenharia & Correção</span><span class="x-ag-pill ok">Segurança Ativa</span></div>'
-        + '<div class="x-ag-insights-row"><span>Modelos:</span><b>Claude 3.7 Sonnet + DeepSeek</b></div>'
-        + '<div class="x-ag-insights-row"><span>Protocolo:</span><b>Revisor 1-shot + auto-rollback git</b></div>'
-        + '<div class="x-ag-insights-row"><span>Blindagem:</span><b>Arquivos críticos em linha vermelha</b></div>'
-        + '<div class="x-ag-pills">'
-        + '<span class="x-ag-pill ok">Git Rollback</span>'
-        + '<span class="x-ag-pill ok">Auditoria 5 min</span>'
-        + '<span class="x-ag-pill ok">Linhas Vermelhas</span>'
-        + '</div></div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@programador fazer diagnóstico de integridade do código\')">🩺 Diagnóstico Código</button>'
-        + '</div>';
-    } else if (k === 'cacador') {
-      insightsHtml = '<div class="x-ag-insights">'
-        + '<div class="x-ag-insights-tit"><span>Diagnóstico Local</span><span class="x-ag-pill ok">Sem Custo API</span></div>'
-        + '<div class="x-ag-insights-row"><span>Motor de IA:</span><b>Llama Local no Notebook</b></div>'
-        + '<div class="x-ag-insights-row"><span>Fontes:</span><b>EventLog Windows + Logs de Bots</b></div>'
-        + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Classificação a cada 5 min</b></div>'
-        + '</div>';
-      acoesHtml = '<div class="x-ag-acoes">'
-        + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@cacador resumir logs de erro das últimas 24h\')">📜 Resumo de Erros</button>'
-        + '</div>';
-    }
+      var roleTags = {
+        coordenador: 'AIR COMMAND',
+        relatorios_cp: 'FINANCIAL DATA',
+        operador_cp: 'BETHA CP EXTRACTION [X]',
+        vigia: 'RADAR EARLY WARNING',
+        conferente: 'FISCAL AUDIT CORE',
+        pesquisador: '1DOC INTEL DECRYPT',
+        programador: 'CYBER WARFARE LAB',
+        cacador: 'LOCAL LOGS RECON'
+      };
 
-    return '<article class="x-ag' + (parado ? ' parado' : '') + '" style="--a:' + a.cor + '">'
-      + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span class="x-ag-modelo">' + a.modelo + '</span><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
-      + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
-      + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
-      + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
-      + (cargas[k] ? '<div class="x-carga"><div class="x-lbl">' + escaparHtmlProc(cargas[k].texto) + '<b>' + cargas[k].pct + '%</b></div><div class="x-barra"><i style="width:' + cargas[k].pct + '%"></i></div></div>' : '')
-      + insightsHtml
-      + ocHtml
-      + opAviso
-      + '<div class="x-agora"><div class="x-lbl">Status Atual<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
-      + acoesHtml
-      + '</article>';
-  }).join('');
+      var tagClass = parado ? '' : b.status === 'erro' ? ' err' : b.status === 'atencao' ? ' warn' : '';
+      var cargaTxt = cargas[k] ? ('[■■■■■■■■□□] ' + cargas[k].pct + '% CARGA') : '[■■■■■■■■■■] 100% PRONTIDÃO';
+      var boxClass = 'norad-box' + (parado ? ' parado' : '') + (b && b.status === 'erro' ? ' com-erro' : b && b.status === 'atencao' ? ' com-atencao' : '');
+
+      return '<div class="' + boxClass + '">'
+        + '<div class="norad-title">'
+        + '<span>TGT-0' + (idx + 1) + ' // ' + escaparHtmlProc(a.nome.toUpperCase()) + '</span>'
+        + '<span class="norad-tag' + tagClass + '">' + st[0].toUpperCase() + '</span>'
+        + '</div>'
+        + '<div class="norad-sub">&gt; SETOR: ' + (roleTags[k] || 'AUTOMATION') + ' // ' + escaparHtmlProc(a.modelo) + '</div>'
+        + '<div class="norad-bar">' + cargaTxt + '</div>'
+        + '<div class="norad-metrics">'
+        + met.map(function(m) { return '<span>' + m[0] + ': <b>' + m[1] + '</b></span>'; }).join(' · ')
+        + '</div>'
+        + opAviso
+        + ocNorad
+        + '<div class="norad-log">&gt; LOG: ' + escaparHtmlProc(parado ? 'Sem sinal de vida no posto' : ((b && b.detalhe) || 'Pronto para novas ordens.')) + '</div>'
+        + (acoesNorad ? '<div class="norad-actions">' + acoesNorad + '</div>' : '')
+        + '</div>';
+    }).join('');
+
+    boxBots.innerHTML = '<div class="norad-war-room">'
+      + '<div class="norad-header">'
+      + '<div style="display:flex; align-items:center; gap:10px;">'
+      + '<span style="font-size:1.4rem;">🛡️</span>'
+      + '<span class="norad-htitle">NORAD STRATEGIC WAR ROOM // AIRSPACE COMMAND</span>'
+      + '</div>'
+      + defconStripHtml
+      + '</div>'
+      + '<div class="norad-layout">'
+      + '<div class="norad-radar-panel">'
+      + '<div style="font-size:1.05rem; letter-spacing:1px; width:100%; display:flex; justify-content:space-between;">'
+      + '<span>RADAR P31 SCOPE</span>'
+      + '<span style="color:#4ade80;">● ATIVO</span>'
+      + '</div>'
+      + '<div class="radar-crt">'
+      + '<div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div>'
+      + '<div class="radar-cross-h"></div><div class="radar-cross-v"></div>'
+      + '<div class="radar-sweep"></div>'
+      + blipsHtml
+      + '</div>'
+      + '<div class="radar-telemetry">'
+      + '<div>&gt; AZIMUTH: 284° // RNG: 114 NM</div>'
+      + '<div>&gt; ALVOS: 8 AGENTES MONITORADOS</div>'
+      + '<div>&gt; CRIPTOGRAFIA: SHA-256 MIL-SPEC</div>'
+      + '<div style="color:#4ade80;">&gt; INTEGRIDADE: ' + vivos + '/' + EQ_ORDEM.length + ' OPERACIONAIS</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="norad-grid">'
+      + noradBoxesHtml
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  } else {
+    boxBots.className = 'x-agentes';
+    boxBots.innerHTML = EQ_ORDEM.map(function(k) {
+      var a = EQ_AG[k], b = porBot[k], parado = !b || agora - (b.visto || 0) > 15 * 60000;
+      var st = parado ? ['Sem sinal', '#f87171'] : b.status === 'erro' ? ['Com erro', '#f87171'] : b.status === 'atencao' ? ['Atenção', '#f59e0b'] : ['No ar', '#4edea3'];
+      var met = eqMetricas(k, ts, msgs, agora);
+
+      // Ocorrências abertas relacionadas a este bot
+      var ocs = ts.filter(function(t) {
+        return (t.de === k || t.para === k) && t.tipo === 'ocorrencia' && eqAberta(t);
+      });
+
+      // Se é o Operador CP e o vigia está desconectado com processos prontos
+      var opAviso = '';
+      if (k === 'operador_cp' && b && b.detalhe && /desconectado/i.test(b.detalhe)) {
+        var matchP = /(?:(?:Prontos|Pendentes):?\s*(\d+)|\b(\d+)\s*processo)/i.exec(b.detalhe);
+        var qtdP = matchP ? (matchP[1] || matchP[2]) : '0';
+        if (+qtdP > 0) {
+          opAviso = '<div class="x-ag-alerta"><div class="x-ag-alerta-tit"><span>💡 Sessão CP</span></div><div class="x-ag-alerta-item"><b>Vigia desconectado:</b><small>Há ' + qtdP + ' processo(s) pronto(s) para empenho. Suba o vigia no PowerShell do notebook para iniciar o lote.</small></div></div>';
+        }
+      }
+
+      // Alerta detalhado de ocorrências ativas ou ponto de atenção
+      var ocHtml = '';
+      if (ocs.length) {
+        ocHtml = '<div class="x-ag-alerta ' + (ocs.some(function(o) { return o.gravidade === 'alta'; }) ? 'alta' : '') + '">'
+          + '<div class="x-ag-alerta-tit"><span>⚠️ ' + ocs.length + ' Ponto' + (ocs.length > 1 ? 's' : '') + ' de Atenção</span></div>'
+          + ocs.map(function(oc) {
+            return '<div class="x-ag-alerta-item"><b>#' + oc.id + ' · ' + escaparHtmlProc(oc.titulo) + '</b>'
+              + (oc.corpo ? '<small>' + escaparHtmlProc(oc.corpo.slice(0, 140)) + '</small>' : '') + '</div>';
+          }).join('')
+          + '<button type="button" class="x-ag-alerta-link" onclick="eqRolarQuadro(' + ocs[0].id + ')">Ver ocorrência detalhada no quadro ↓</button>'
+          + '</div>';
+      } else if (b && (b.status === 'atencao' || b.status === 'erro') && b.detalhe && !/^(esperando pedido|tudo certo|pronto)$/i.test(b.detalhe)) {
+        ocHtml = '<div class="x-ag-alerta ' + (b.status === 'erro' ? 'alta' : '') + '">'
+          + '<div class="x-ag-alerta-tit"><span>⚠️ ' + (b.status === 'erro' ? 'Erro Identificado' : 'Ponto de Atenção') + '</span></div>'
+          + '<div class="x-ag-alerta-item"><b>' + escaparHtmlProc(b.detalhe) + '</b></div>'
+          + '</div>';
+      }
+
+      // Detalhes técnicos, arquitetura e diagnósticos vivos por agente
+      var insightsHtml = '';
+      var acoesHtml = '';
+
+      if (k === 'coordenador') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Arquitetura & Operação</span><span class="x-ag-pill ok">Ativo</span></div>'
+          + '<div class="x-ag-insights-row"><span>Canal de Entrada:</span><b>WebChat SGD & Telegram</b></div>'
+          + '<div class="x-ag-insights-row"><span>Orquestração:</span><b>Coordena os bots especialistas</b></div>'
+          + '<div class="x-ag-insights-row"><span>Comunicação:</span><b>Worker Cloudflare em tempo real</b></div>'
+          + '</div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'Coordenador, qual o status geral dos bots e processos agora?\')">💬 Falar no Chat</button>'
+          + '</div>';
+      } else if (k === 'relatorios_cp') {
+        acoesHtml = '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de empenhos de hoje no CP e compare com a tabela de controle\')">📋 Empenhos do dia</button><button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@relatorios_cp tire o relatório de pagamentos de hoje no CP\')">💰 Pagamentos do dia</button>';
+      } else if (k === 'operador_cp') {
+        var cp = eqEstadoCp(b);
+        var prontosQtd = cp.prontos == null ? '—' : String(cp.prontos);
+        var vigiaVivo = cp.vigia, roboRodando = cp.robo, empenhandoLote = cp.lote;
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Ambiente & Execução CP</span><span class="x-ag-pill ' + (empenhandoLote ? 'ok' : vigiaVivo ? 'ok' : 'warn') + '">' + (empenhandoLote ? '⚡ Empenhando Lote' : vigiaVivo ? 'Vigia CP Conectado' : 'Aguardando Vigia') + '</span></div>'
+          + '<div class="x-ag-insights-row"><span>Status da Fila:</span><b>' + (empenhandoLote ? 'Lote em andamento no CP' : prontosQtd === '—' ? 'Fila não disponível' : (cp.pendentes == null ? '' : cp.pendentes + ' na fila · ') + prontosQtd + ' sem alertas na pré-verificação') + '</b></div>'
+          + '<div class="x-ag-insights-row"><span>Automação:</span><b>Sessão CP + monitoramento + OCR</b></div>'
+          + '<div class="x-ag-insights-row"><span>Segurança:</span><b>Travas de execução e duplicidade</b></div>'
+          + '<div class="x-ag-pills">'
+          + '<span class="x-ag-pill ' + (+prontosQtd > 0 ? 'ok' : '') + '">Prontos: ' + prontosQtd + '</span>'
+          + '<span class="x-ag-pill ' + (vigiaVivo ? 'ok' : 'warn') + '">Vigia: ' + (vigiaVivo == null ? 'Sem confirmação' : vigiaVivo ? 'OK' : 'Desconectado') + '</span>'
+          + '<span class="x-ag-pill ' + (cp.robo == null ? 'warn' : 'ok') + '">Robô: ' + cp.roboTexto + '</span>'
+          + '</div></div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp informe os processos prontos para empenho e se o CP está livre\')">🔍 Status CP</button>'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@operador_cp validar pré-lote de diárias e conferir travas\')">📋 Validar Pré-lote</button>'
+          + '</div>';
+      } else if (k === 'vigia') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Monitoramento da Infra</span><span class="x-ag-pill ok">8 Serviços Monitorados</span></div>'
+          + '<div class="x-ag-insights-row"><span>Escopo:</span><b>Serviços Windows + Conexão 1Doc</b></div>'
+          + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Ciclo automático a cada 2 min</b></div>'
+          + '<div class="x-ag-insights-row"><span>Auto-recuperação:</span><b>Religa o que parou sem intervenção</b></div>'
+          + '<div class="x-ag-pills">'
+          + '<span class="x-ag-pill ok">1Doc 8081: OK</span>'
+          + '<span class="x-ag-pill ok">Serviços: 8/8</span>'
+          + '<span class="x-ag-pill ok">Tarefas Windows: OK</span>'
+          + '</div></div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@vigia checar status de todos os serviços e tarefas agora\')">🔄 Checar Serviços</button>'
+          + '</div>';
+      } else if (k === 'conferente') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Triagem & Validação</span><span class="x-ag-pill ok">OCR r3 Ativo</span></div>'
+          + '<div class="x-ag-insights-row"><span>Critérios:</span><b>Valor, placa, servidor e duplicidade</b></div>'
+          + '<div class="x-ag-insights-row"><span>Leitura de Nota:</span><b>pdfplumber + Tesseract OCR</b></div>'
+          + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Varredura 1Doc a cada 5 minutos</b></div>'
+          + '<div class="x-ag-pills">'
+          + '<span class="x-ag-pill ok">Varredura 5 min</span>'
+          + '<span class="x-ag-pill ok">OCR Anexos PDF</span>'
+          + '<span class="x-ag-pill ok">Tabela de Controle</span>'
+          + '</div></div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@conferente reconferir todos os processos da caixa agora\')">🔍 Reconferir Caixa</button>'
+          + '</div>';
+      } else if (k === 'pesquisador') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Bases de Conhecimento</span><span class="x-ag-pill ok">Indexado</span></div>'
+          + '<div class="x-ag-insights-row"><span>Fontes:</span><b>1Doc Protocolos + Tabela de Controle</b></div>'
+          + '<div class="x-ag-insights-row"><span>Capacidade:</span><b>Busca semântica e histórico de diárias</b></div>'
+          + '<div class="x-ag-insights-row"><span>Modo:</span><b>Atendimento sob demanda no chat</b></div>'
+          + '</div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqFocarChat(\'@pesquisador pesquisar no 1Doc o processo \')">🔎 Consultar 1Doc</button>'
+          + '</div>';
+      } else if (k === 'programador') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Engenharia & Correção</span><span class="x-ag-pill ok">Segurança Ativa</span></div>'
+          + '<div class="x-ag-insights-row"><span>Modelos:</span><b>Claude 3.7 Sonnet + DeepSeek</b></div>'
+          + '<div class="x-ag-insights-row"><span>Protocolo:</span><b>Revisor 1-shot + auto-rollback git</b></div>'
+          + '<div class="x-ag-insights-row"><span>Blindagem:</span><b>Arquivos críticos em linha vermelha</b></div>'
+          + '<div class="x-ag-pills">'
+          + '<span class="x-ag-pill ok">Git Rollback</span>'
+          + '<span class="x-ag-pill ok">Auditoria 5 min</span>'
+          + '<span class="x-ag-pill ok">Linhas Vermelhas</span>'
+          + '</div></div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@programador fazer diagnóstico de integridade do código\')">🩺 Diagnóstico Código</button>'
+          + '</div>';
+      } else if (k === 'cacador') {
+        insightsHtml = '<div class="x-ag-insights">'
+          + '<div class="x-ag-insights-tit"><span>Diagnóstico Local</span><span class="x-ag-pill ok">Sem Custo API</span></div>'
+          + '<div class="x-ag-insights-row"><span>Motor de IA:</span><b>Llama Local no Notebook</b></div>'
+          + '<div class="x-ag-insights-row"><span>Fontes:</span><b>EventLog Windows + Logs de Bots</b></div>'
+          + '<div class="x-ag-insights-row"><span>Frequência:</span><b>Classificação a cada 5 min</b></div>'
+          + '</div>';
+        acoesHtml = '<div class="x-ag-acoes">'
+          + '<button type="button" class="x-ag-btn" onclick="eqDispararOrdem(\'@cacador resumir logs de erro das últimas 24h\')">📜 Resumo de Erros</button>'
+          + '</div>';
+      }
+
+      return '<article class="x-ag' + (parado ? ' parado' : '') + '" style="--a:' + a.cor + '">'
+        + '<div class="x-ag-top"><span class="x-ico">' + a.ico + '</span><div class="x-ag-nome"><b>' + a.nome + '</b><span class="x-ag-modelo">' + a.modelo + '</span><span>' + (b && b.visto ? (parado ? 'último sinal ' : 'visto ') + ceTempoRelativo(b.visto) : 'nunca deu sinal') + '</span></div>'
+        + '<span class="x-chip" style="--c:' + st[1] + '"><i></i>' + st[0] + '</span></div>'
+        + '<p class="x-papel">' + escaparHtmlProc((b && b.papel) || a.papel) + '</p>'
+        + '<div class="x-metricas">' + met.map(function(m) { return '<div><span>' + m[0] + '</span><b>' + m[1] + '</b></div>'; }).join('') + '</div>'
+        + (cargas[k] ? '<div class="x-carga"><div class="x-lbl">' + escaparHtmlProc(cargas[k].texto) + '<b>' + cargas[k].pct + '%</b></div><div class="x-barra"><i style="width:' + cargas[k].pct + '%"></i></div></div>' : '')
+        + insightsHtml
+        + ocHtml
+        + opAviso
+        + '<div class="x-agora"><div class="x-lbl">Status Atual<span>' + (b && b.visto ? ceTempoRelativo(b.visto) : '') + '</span></div><p>' + escaparHtmlProc(parado ? 'Sem sinal de vida — o serviço da equipe ou o deste agente pode ter parado' : ((b && b.detalhe) || '—')) + '</p></div>'
+        + acoesHtml
+        + '</article>';
+    }).join('');
+  }
   // conversa
   var cx = document.getElementById('eq-msgs');
   var noFim = cx.scrollHeight - cx.scrollTop - cx.clientHeight < 60;

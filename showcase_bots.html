@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Showcase de Visualização dos Robôs · Temas Imersivos & Cyber · SGD Diárias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070c;
+      --bg-card: rgba(11, 18, 32, 0.88);
+      --border: rgba(148, 163, 184, 0.16);
+      --border-glow: rgba(56, 189, 248, 0.5);
+      --cyan: #38bdf8;
+      --emerald: #34d399;
+      --violet: #a78bfa;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --gold: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Background Interactive Canvas */
+    #pcb-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* Ambient CRT Scanline Filter */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%), linear-gradient(90deg, rgba(56, 189, 248, 0.015), rgba(0, 0, 0, 0.01), rgba(167, 139, 250, 0.015));
+      background-size: 100% 4px, 6px 100%;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 20;
+      padding: 16px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      background: rgba(5, 7, 12, 0.94);
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+    }
+
+    .brand-info h1 {
+      font-size: 18.5px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sim-btn {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.45);
+      transition: all 0.25s ease;
+      font-family: inherit;
+    }
+
+    .sim-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.8);
+    }
+
+    .sim-btn.running {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.6);
+      pointer-events: none;
+    }
+
+    /* Mode Selector Categories */
+    .modes-categories {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .category-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 14px;
+    }
+
+    .cat-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0 6px;
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cat-label.themes { color: #f43f5e; }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mode-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.28), rgba(129, 140, 248, 0.3));
+      color: #fff;
+      border: 1px solid var(--border-glow);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      min-height: 640px;
+    }
+
+    .view-container {
+      width: 100%;
+      max-width: 1240px;
+      min-height: 580px;
+      display: none;
+      position: relative;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .view-container.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ========================================================================= */
+    /* [FAVORITO] 9. SERVIDORES BLADE & FIBRA ÓPTICA (RACK 42U)                  */
+    /* ========================================================================= */
+    .rack-wrapper {
+      width: 100%;
+      max-width: 1020px;
+      background: linear-gradient(180deg, #090e17 0%, #05080f 100%);
+      border: 3px solid #1e293b;
+      border-radius: 20px;
+      padding: 22px 26px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9), inset 0 0 45px rgba(0,0,0,0.85);
+      position: relative;
+    }
+
+    .rack-frame-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #1e293b;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .rack-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rack-conduit-svg {
+      position: absolute;
+      top: 70px;
+      left: 12px;
+      width: 28px;
+      height: 380px;
+      pointer-events: none;
+    }
+
+    .fiber-light-pulse {
+      stroke: var(--cyan);
+      stroke-width: 2;
+      stroke-dasharray: 8 40;
+      animation: fiberBeam 1.8s linear infinite;
+    }
+
+    @keyframes fiberBeam { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
+
+    .rack-slots {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-left: 20px;
+    }
+
+    .blade-unit {
+      background: linear-gradient(90deg, #0c1426 0%, #101a33 100%);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .blade-unit:hover {
+      border-color: var(--cyan);
+      transform: translateX(6px);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+    }
+
+    .blade-unit.sim-active {
+      border-color: #38bdf8 !important;
+      background: linear-gradient(90deg, #0c2d48 0%, #143d59 100%) !important;
+      box-shadow: 0 0 45px rgba(56, 189, 248, 0.65) !important;
+      transform: scale(1.02) translateX(10px) !important;
+    }
+
+    .blade-left { display: flex; align-items: center; gap: 16px; }
+    .blade-u { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); width: 28px; }
+    .blade-icon { font-size: 22px; }
+    .blade-info h4 { font-size: 13.5px; font-weight: 700; color: #fff; }
+    .blade-info span { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .blade-lcd { background: #030712; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 6px; padding: 6px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cyan); letter-spacing: 0.04em; }
+    .blade-right-controls { display: flex; align-items: center; gap: 18px; }
+    .blade-fan { width: 22px; height: 22px; border-radius: 50%; border: 1px dashed rgba(56, 189, 248, 0.4); display: grid; place-items: center; font-size: 11px; animation: spinFan 1s linear infinite; }
+    @keyframes spinFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .blade-ports { display: flex; align-items: center; gap: 6px; }
+    .sfp-led { width: 7px; height: 7px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald); animation: ledBlink 1.4s infinite alternate; }
+    .sfp-led.act { animation-delay: 0.4s; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+    @keyframes ledBlink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* ========================================================================= */
+    /* [FAVORITO] 2. GRAFO DE FLUXO                                              */
+    /* ========================================================================= */
+    .graph-wrapper {
+      position: relative; width: 100%; height: 540px; border-radius: 20px;
+      border: 1px solid var(--border); background: rgba(10, 15, 26, 0.7); backdrop-filter: blur(14px);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .flow-path { stroke: rgba(148, 163, 184, 0.18); stroke-width: 2.5; fill: none; }
+    .flow-pulse { stroke: var(--cyan); stroke-width: 3.5; fill: none; stroke-dasharray: 10 120; animation: flowStream 3s linear infinite; }
+    .flow-pulse.fast { stroke: #34d399; animation-duration: 1.8s; stroke-dasharray: 8 90; }
+    @keyframes flowStream { from { stroke-dashoffset: 260; } to { stroke-dashoffset: 0; } }
+    .graph-nodes-layer { position: absolute; inset: 0; }
+    .graph-node {
+      position: absolute; transform: translate(-50%, -50%); width: 205px;
+      background: rgba(15, 23, 42, 0.94); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .graph-node:hover { transform: translate(-50%, -50%) translateY(-5px); border-color: var(--cyan); box-shadow: 0 16px 35px rgba(56, 189, 248, 0.3); }
+    .graph-node.sim-active {
+      transform: translate(-50%, -50%) scale(1.15) !important; border-color: #38bdf8 !important;
+      box-shadow: 0 0 50px #38bdf8, 0 12px 30px rgba(0,0,0,0.8) !important; z-index: 80 !important; background: rgba(15, 23, 42, 0.98) !important;
+    }
+    .graph-node-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+    .node-icon-title { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: #fff; }
+    .node-status-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgba(52, 211, 153, 0.15); color: var(--emerald); border: 1px solid rgba(52, 211, 153, 0.3); }
+    .graph-node p { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
+
+    /* ========================================================================= */
+    /* [FAVORITO] 3. COCKPIT TÁTICO HUD                                          */
+    /* ========================================================================= */
+    .hud-wrapper { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; perspective: 1000px; }
+    .hud-pod {
+      position: relative; background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(8, 12, 22, 0.94));
+      border: 1px solid var(--border); border-radius: 18px; padding: 20px; backdrop-filter: blur(16px);
+      overflow: hidden; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .hud-pod:hover { transform: translateY(-5px) rotateX(2deg); border-color: var(--cyan); box-shadow: 0 18px 40px rgba(56, 189, 248, 0.25); }
+    .hud-pod.sim-active { border-color: #38bdf8 !important; box-shadow: 0 0 45px rgba(56, 189, 248, 0.55) !important; transform: translateY(-8px) scale(1.05) !important; z-index: 50; }
+    .hud-pod.sim-active .wave-bar { background: #38bdf8 !important; height: 100% !important; animation-duration: 0.15s !important; }
+    .hud-pod::before { content: ''; position: absolute; top: 0; left: 0; width: 14px; height: 14px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); opacity: 0.6; }
+    .hud-pod::after { content: ''; position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); opacity: 0.6; }
+    .hud-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .hud-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cyan); }
+    .hud-frequency-vis { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+    .wave-bar { width: 3.5px; background: var(--cyan); border-radius: 2px; animation: waveBounce 1.2s ease-in-out infinite alternate; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; height: 60%; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; height: 90%; }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; height: 40%; }
+    .wave-bar:nth-child(5) { animation-delay: 0.5s; height: 75%; }
+    @keyframes waveBounce { 0% { height: 20%; opacity: 0.4; } 100% { height: 100%; opacity: 1; } }
+    .hud-identity { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .hud-avatar { width: 46px; height: 46px; border-radius: 12px; background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border); display: grid; place-items: center; font-size: 22px; }
+    .hud-meta h3 { font-size: 14.5px; font-weight: 700; color: #fff; }
+    .hud-meta span { font-size: 11.5px; color: var(--text-muted); }
+    .hud-feed { background: rgba(2, 6, 23, 0.65); border-radius: 10px; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #cbd5e1; line-height: 1.4; border-left: 2px solid var(--emerald); }
+
+    /* ========================================================================= */
+    /* [FAVORITO] 7. CIRCUITO INTEGRADO PCB                                      */
+    /* ========================================================================= */
+    .circuit-wrapper {
+      position: relative; width: 100%; height: 520px; border-radius: 20px;
+      border: 1px solid rgba(56, 189, 248, 0.25); background: radial-gradient(circle at center, rgba(16, 28, 48, 0.95), rgba(7, 12, 20, 0.98));
+      overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 30px;
+    }
+    .circuit-bus-line { position: absolute; top: 50%; left: 6%; right: 6%; height: 6px; background: rgba(56, 189, 248, 0.2); border-radius: 10px; transform: translateY(-50%); }
+    .circuit-bus-pulse { position: absolute; top: 0; left: 0; width: 140px; height: 100%; background: linear-gradient(90deg, transparent, #38bdf8, #34d399, transparent); border-radius: 10px; animation: circuitFlow 3s linear infinite; }
+    @keyframes circuitFlow { from { left: -10%; } to { left: 110%; } }
+    .circuit-chips-grid { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 16px; }
+    .circuit-chip {
+      background: #090e17; border: 2px solid #1e293b; border-radius: 14px;
+      padding: 18px 14px; width: 155px; text-align: center; cursor: pointer;
+      position: relative; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .circuit-chip::before { content: ''; position: absolute; top: -6px; left: 15px; right: 15px; height: 6px; background: repeating-linear-gradient(90deg, #d97706 0, #d97706 6px, transparent 6px, transparent 14px); }
+    .circuit-chip::after { content: ''; position: absolute; bottom: -6px; left: 15px; right: 15px; height: 6px; background: repeating-linear-gradient(90deg, #d97706 0, #d97706 6px, transparent 6px, transparent 14px); }
+    .circuit-chip:hover { transform: translateY(-8px); border-color: var(--cyan); box-shadow: 0 15px 35px rgba(56, 189, 248, 0.35); }
+    .circuit-chip.sim-active { transform: translateY(-12px) scale(1.1) !important; border-color: #38bdf8 !important; box-shadow: 0 0 50px #38bdf8 !important; background: #0f1f38 !important; }
+    .chip-code { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--amber); margin-bottom: 8px; letter-spacing: 0.05em; }
+    .chip-avatar { font-size: 26px; margin-bottom: 6px; }
+    .chip-name { font-size: 12.5px; font-weight: 700; color: #fff; }
+    .chip-led { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 10px var(--emerald); margin: 8px auto 0; }
+
+    /* ========================================================================= */
+    /* [TEMA A] 🏎️ COCKPIT DE TELEMETRIA F1 (SCUDERIA TELEMETRY DECK)            */
+    /* ========================================================================= */
+    .f1-wrapper {
+      width: 100%;
+      max-width: 1060px;
+      background: radial-gradient(circle at center, #110508 0%, #080204 80%, #000 100%);
+      border: 2px solid #ef4444;
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 25px 70px rgba(239, 68, 68, 0.25), inset 0 0 50px rgba(239, 68, 68, 0.1);
+      position: relative;
+    }
+
+    /* Shift Lights RPM Bar */
+    .f1-shift-lights {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .f1-led {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #27272a;
+      transition: all 0.2s;
+    }
+
+    .f1-led.green { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+    .f1-led.red { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
+    .f1-led.blue { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
+
+    .f1-telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .f1-pod {
+      background: rgba(24, 10, 15, 0.85);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .f1-pod:hover {
+      border-color: #ef4444;
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(239, 68, 68, 0.4);
+    }
+
+    .f1-pod.sim-active {
+      border-color: #f59e0b !important;
+      background: rgba(45, 15, 20, 0.95) !important;
+      box-shadow: 0 0 45px rgba(239, 68, 68, 0.7) !important;
+      transform: scale(1.04) translateY(-6px) !important;
+    }
+
+    .f1-pod-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #ef4444;
+      font-weight: 700;
+    }
+
+    .f1-pod-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .f1-avatar {
+      font-size: 26px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      display: grid;
+      place-items: center;
+    }
+
+    .f1-meta h4 { font-size: 14px; font-weight: 700; color: #fff; }
+    .f1-meta span { font-size: 11px; color: #fca5a5; font-family: 'JetBrains Mono', monospace; }
+
+    .f1-data-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .f1-row { display: flex; justify-content: space-between; }
+    .f1-row span { color: #9ca3af; }
+    .f1-row b { color: #fef08a; }
+
+    /* ========================================================================= */
+    /* [TEMA B] 🕹️ CYBERPUNK SYNTHWAVE 80s (NEON OUTRUN WIREFRAME)               */
+    /* ========================================================================= */
+    .synth-wrapper {
+      width: 100%;
+      height: 540px;
+      background: linear-gradient(180deg, #180026 0%, #0d001a 60%, #030008 100%);
+      border: 2px solid #ff2a6d;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 50px rgba(255, 42, 109, 0.35);
+    }
+
+    /* Synthwave Glowing Sun on Horizon */
+    .synth-sun {
+      position: absolute;
+      top: 15%;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff007f 0%, #ff8c00 70%, #ffdf00 100%);
+      box-shadow: 0 0 80px rgba(255, 0, 127, 0.7);
+      clip-path: polygon(0 0, 100% 0, 100% 60%, 0 60%, 0 65%, 100% 65%, 100% 74%, 0 74%, 0 80%, 100% 80%, 100% 88%, 0 88%, 0 94%, 100% 94%, 100% 100%, 0 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 3D Wireframe Perspective Grid Floor */
+    .synth-grid-floor {
+      position: absolute;
+      bottom: 0; left: -50%; right: -50%; height: 50%;
+      background: 
+        linear-gradient(rgba(255, 42, 109, 0.35) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(5, 217, 232, 0.35) 2px, transparent 2px);
+      background-size: 40px 40px;
+      transform: perspective(300px) rotateX(65deg);
+      animation: synthMove 4s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes synthMove {
+      from { background-position: 0 0; }
+      to { background-position: 0 40px; }
+    }
+
+    .synth-cards-container {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 90%;
+    }
+
+    .synth-card {
+      background: rgba(18, 0, 36, 0.88);
+      border: 1.5px solid #05d9e8;
+      border-radius: 14px;
+      padding: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(5, 217, 232, 0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .synth-card:hover {
+      border-color: #ff2a6d;
+      box-shadow: 0 0 35px rgba(255, 42, 109, 0.6);
+      transform: translateY(-6px) scale(1.03);
+    }
+
+    .synth-card.sim-active {
+      border-color: #ff007f !important;
+      box-shadow: 0 0 50px #ff007f !important;
+      background: rgba(45, 0, 70, 0.95) !important;
+      transform: translateY(-8px) scale(1.06) !important;
+    }
+
+    .synth-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #ff2a6d;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .synth-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .synth-avatar { font-size: 26px; }
+    .synth-name h4 { font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 0 8px #05d9e8; }
+    .synth-name span { font-size: 11px; color: #05d9e8; font-family: 'JetBrains Mono', monospace; }
+
+    /* ========================================================================= */
+    /* [TEMA C] 🛡️ DEFCON WAR ROOM (RADAR FÓSFORO VERDE MONOCROMÁTICO NORAD)     */
+    /* ========================================================================= */
+    .norad-wrapper {
+      width: 100%;
+      min-height: 560px;
+      background: #021206;
+      border: 3px solid #22c55e;
+      border-radius: 20px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'VT323', monospace;
+      color: #22c55e;
+      box-shadow: 0 0 50px rgba(34, 197, 94, 0.3), inset 0 0 40px rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .norad-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #22c55e;
+      padding-bottom: 10px;
+      font-size: 1.25rem;
+      letter-spacing: 2px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .defcon-strip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .defcon-level {
+      padding: 2px 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      opacity: 0.35;
+      border-radius: 3px;
+    }
+
+    .defcon-level.l5 { color: #38bdf8; }
+    .defcon-level.l4 { color: #22c55e; }
+    .defcon-level.l3 { color: #eab308; }
+    .defcon-level.l2 { color: #f97316; }
+    .defcon-level.l1 {
+      color: #fff;
+      background: #ef4444;
+      opacity: 1;
+      animation: defconFlash 1.2s infinite alternate;
+      text-shadow: 0 0 8px #ef4444;
+    }
+
+    @keyframes defconFlash {
+      0% { box-shadow: 0 0 4px #ef4444; background: #991b1b; }
+      100% { box-shadow: 0 0 20px #ef4444; background: #ef4444; }
+    }
+
+    .norad-layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    /* Radar CRT Screen */
+    .norad-radar-panel {
+      background: rgba(1, 20, 6, 0.9);
+      border: 1.5px solid #22c55e;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.15);
+    }
+
+    .radar-crt {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      border: 2px solid #22c55e;
+      background: radial-gradient(circle, #052c0d 0%, #011506 80%);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.35), inset 0 0 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .radar-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px dashed rgba(34, 197, 94, 0.35);
+      pointer-events: none;
+    }
+    .radar-ring.r1 { width: 35%; height: 35%; }
+    .radar-ring.r2 { width: 68%; height: 68%; }
+    .radar-ring.r3 { width: 96%; height: 96%; border-style: solid; }
+
+    .radar-cross-h, .radar-cross-v {
+      position: absolute;
+      background: rgba(34, 197, 94, 0.25);
+      pointer-events: none;
+    }
+    .radar-cross-h { top: 50%; left: 0; right: 0; height: 1px; }
+    .radar-cross-v { left: 50%; top: 0; bottom: 0; width: 1px; }
+
+    .radar-sweep {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(34, 197, 94, 0.45) 0deg, rgba(34, 197, 94, 0) 55deg, transparent 55deg);
+      animation: radarSweepAnim 3.2s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes radarSweepAnim {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .radar-blip {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px #22c55e;
+      animation: blipPulse 1.8s infinite ease-in-out;
+    }
+    .radar-blip::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 9px;
+      top: -5px;
+      font-size: 11px;
+      color: #22c55e;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes blipPulse {
+      0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(0.85); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+    }
+
+    .radar-telemetry {
+      font-size: 0.95rem;
+      width: 100%;
+      border-top: 1px dashed rgba(34, 197, 94, 0.4);
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* Target Grid */
+    .norad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .norad-box {
+      background: rgba(3, 25, 8, 0.75);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .norad-box:hover {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .norad-box.sim-active {
+      background: rgba(34, 197, 94, 0.32) !important;
+      border-color: #4ade80 !important;
+      box-shadow: 0 0 35px #22c55e, inset 0 0 15px rgba(34, 197, 94, 0.4) !important;
+      transform: scale(1.03) !important;
+    }
+
+    .norad-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .norad-tag {
+      font-size: 0.85rem;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    .norad-sub { font-size: 1rem; opacity: 0.85; margin-bottom: 4px; }
+    .norad-bar { font-size: 0.95rem; margin-bottom: 4px; color: #4ade80; }
+    .norad-log { font-size: 0.9rem; border-top: 1px dashed rgba(34, 197, 94, 0.4); padding-top: 6px; opacity: 0.9; }
+
+    /* ========================================================================= */
+    /* [TEMA D] 🧬 BIO-SINAPSE (REDE NEURAL ORGÂNICA BIOLUMINESCENTE)            */
+    /* ========================================================================= */
+    .bio-wrapper {
+      width: 100%;
+      height: 540px;
+      background: radial-gradient(circle at center, #022026 0%, #011014 60%, #000508 100%);
+      border: 2px solid #06b6d4;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 50px rgba(6, 182, 212, 0.3);
+    }
+
+    .bio-synapse-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .synapse-branch {
+      stroke: rgba(6, 182, 212, 0.25);
+      stroke-width: 3;
+      fill: none;
+      filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6));
+    }
+
+    .synapse-fire {
+      stroke: #c084fc;
+      stroke-width: 4;
+      fill: none;
+      stroke-dasharray: 12 140;
+      animation: synapseFlow 2.8s linear infinite;
+    }
+
+    @keyframes synapseFlow { from { stroke-dashoffset: 280; } to { stroke-dashoffset: 0; } }
+
+    .bio-cells-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    .bio-cell {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      background: rgba(2, 44, 53, 0.85);
+      border: 2px solid #06b6d4;
+      border-radius: 24px;
+      padding: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bio-cell:hover {
+      border-color: #c084fc;
+      box-shadow: 0 0 40px rgba(192, 132, 252, 0.5);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .bio-cell.sim-active {
+      border-color: #fff !important;
+      background: rgba(8, 70, 84, 0.95) !important;
+      box-shadow: 0 0 55px #06b6d4, 0 0 80px rgba(192, 132, 252, 0.6) !important;
+      transform: translate(-50%, -50%) scale(1.18) !important;
+      z-index: 50;
+    }
+
+    .bio-avatar { font-size: 26px; margin-bottom: 4px; }
+    .bio-name { font-size: 13.5px; font-weight: 700; color: #fff; text-shadow: 0 0 10px #06b6d4; }
+    .bio-role { font-size: 11px; color: #67e8f9; font-family: 'JetBrains Mono', monospace; }
+
+    /* ========================================================================= */
+    /* FLOATING LIVE SIMULATION BANNER                                           */
+    /* ========================================================================= */
+    .sim-banner {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(160px);
+      width: 92%;
+      max-width: 720px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.45), 0 25px 60px rgba(0, 0, 0, 0.9);
+      border-radius: 20px;
+      padding: 16px 22px;
+      backdrop-filter: blur(24px);
+      z-index: 1000;
+      transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sim-banner.active { transform: translateX(-50%) translateY(0); }
+    .sim-banner-top { display: flex; align-items: center; justify-content: space-between; }
+    .sim-badge {
+      display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--cyan);
+      background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .sim-step-badge { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--emerald); font-weight: 700; }
+    .sim-content { display: flex; align-items: center; gap: 14px; }
+    .sim-sender-avatar {
+      width: 46px; height: 46px; border-radius: 12px; background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border); display: grid; place-items: center; font-size: 24px;
+      flex-shrink: 0; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+    .sim-texts h4 { font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .sim-texts p { font-size: 12.5px; color: #cbd5e1; line-height: 1.35; font-family: 'JetBrains Mono', monospace; }
+    .sim-progress-track { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; }
+    .sim-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--emerald)); border-radius: 10px; transition: width 0.3s ease; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+      z-index: 100; display: none; place-items: center; padding: 20px;
+    }
+    .modal-overlay.open { display: grid; animation: fadeIn 0.25s ease; }
+    .modal-card {
+      width: 100%; max-width: 500px; background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border-glow); border-radius: 20px; padding: 26px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8); position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; background: transparent; border: none;
+      color: var(--text-muted); font-size: 20px; cursor: pointer;
+    }
+    .modal-close:hover { color: #fff; }
+
+    footer {
+      position: relative; z-index: 10; padding: 14px 32px; display: flex;
+      justify-content: space-between; align-items: center; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient CRT Scanline Filter -->
+  <div class="crt-overlay"></div>
+
+  <!-- Background Interactive Canvas (PCB Sparks) -->
+  <canvas id="pcb-canvas"></canvas>
+
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-info">
+          <h1>SGD Diárias · Galeria de Temas e Visualizadores</h1>
+          <p>Escolha o universo visual perfeito para a sua equipe autônoma de robôs</p>
+        </div>
+      </div>
+
+      <button class="sim-btn" id="btnSimular">
+        <span id="btnSimularIcon">⚡</span>
+        <span id="btnSimularText">Simular Ação em Rede</span>
+      </button>
+    </div>
+
+    <div class="modes-categories">
+      <!-- Seus 4 Favoritos -->
+      <div class="category-group">
+        <span class="cat-label">⭐ FAVORITOS TECH:</span>
+        <button class="mode-btn" data-mode="rack">🖥️ 9. Servidores Blade</button>
+        <button class="mode-btn" data-mode="grafo">⚡ 2. Grafo de Fluxo</button>
+        <button class="mode-btn" data-mode="hud">🛡️ 3. Cockpit HUD</button>
+        <button class="mode-btn" data-mode="circuit">⏱️ 7. Circuito PCB</button>
+      </div>
+
+      <!-- 4 Novos Temas Imersivos -->
+      <div class="category-group">
+        <span class="cat-label themes">🎨 NOVOS TEMAS VISUAIS:</span>
+        <button class="mode-btn" data-mode="f1">🏎️ Tema F1 Telemetria</button>
+        <button class="mode-btn" data-mode="synth">🕹️ Tema Synthwave 80s</button>
+        <button class="mode-btn active" data-mode="norad">🛡️ Tema DEFCON Militar</button>
+        <button class="mode-btn" data-mode="bio">🧬 Tema Bio-Sinapse</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================================================================== -->
+    <!-- [FAVORITO] 9. SERVIDORES BLADE (DATA CENTER CHASSIS)                  -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-rack">
+      <div class="rack-wrapper">
+        <div class="rack-frame-header">
+          <div class="rack-title"><span>🗄️</span> CHASSIS-SGD-42U // DATA CENTER RACK SYSTEM</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--emerald); display:flex; align-items:center; gap:6px;">
+            <span class="sfp-led"></span> POWER: NOMINAL (99.98% SLA) · FIBRA ÓPTICA ATIVA
+          </div>
+        </div>
+
+        <svg class="rack-conduit-svg" viewBox="0 0 28 380">
+          <line x1="14" y1="10" x2="14" y2="370" stroke="rgba(56, 189, 248, 0.2)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="14" y1="10" x2="14" y2="370" class="fiber-light-pulse"/>
+          <line x1="14" y1="30" x2="28" y2="30" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+          <line x1="14" y1="90" x2="28" y2="90" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+          <line x1="14" y1="150" x2="28" y2="150" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+          <line x1="14" y1="210" x2="28" y2="210" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+          <line x1="14" y1="270" x2="28" y2="270" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+          <line x1="14" y1="330" x2="28" y2="330" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+        </svg>
+
+        <div class="rack-slots">
+          <div class="blade-unit" id="blade-coordenador" onclick="abrirDetalhe('coordenador')">
+            <div class="blade-left"><span class="blade-u">1U</span><span class="blade-icon">👑</span><div class="blade-info"><h4>Coordenador Geral</h4><span>SLOT-01 // COORD-MASTER-SVC</span></div></div>
+            <div class="blade-lcd" id="lcd-coord">[STATUS: IDLE | MSG_QUEUE: 0 | CPU: 4%]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+          <div class="blade-unit" id="blade-operador_cp" onclick="abrirDetalhe('operador_cp')">
+            <div class="blade-left"><span class="blade-u">2U</span><span class="blade-icon">🖥️</span><div class="blade-info"><h4>Operador CP</h4><span>SLOT-02 // CP-AUTOMATION-BLADE</span></div></div>
+            <div class="blade-lcd" id="lcd-cp">[SESSION: READY | PORT: 491 | OCR: STANDBY]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+          <div class="blade-unit" id="blade-vigia" onclick="abrirDetalhe('vigia')">
+            <div class="blade-left"><span class="blade-u">3U</span><span class="blade-icon">👁️</span><div class="blade-info"><h4>Vigia de Infraestrutura</h4><span>SLOT-03 // WATCHDOG-SENTINEL</span></div></div>
+            <div class="blade-lcd">[WS: CONNECTED | LOCK: CLEAN | 8/8 SERVICES OK]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+          <div class="blade-unit" id="blade-conferente" onclick="abrirDetalhe('conferente')">
+            <div class="blade-left"><span class="blade-u">4U</span><span class="blade-icon">🛡️</span><div class="blade-info"><h4>Conferente de Diárias</h4><span>SLOT-04 // AUDIT-RULES-ENGINE</span></div></div>
+            <div class="blade-lcd">[TABLES: SYNCED | VALIDATIONS: PASS | 0 ERRORS]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+          <div class="blade-unit" id="blade-pesquisador" onclick="abrirDetalhe('pesquisador')">
+            <div class="blade-left"><span class="blade-u">5U</span><span class="blade-icon">🔍</span><div class="blade-info"><h4>Pesquisador 1Doc</h4><span>SLOT-05 // DOC-SCRAPER-GATE</span></div></div>
+            <div class="blade-lcd">[1DOC: AUTHENTICATED | LATENCY: 42ms]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+          <div class="blade-unit" id="blade-programador" onclick="abrirDetalhe('programador')">
+            <div class="blade-left"><span class="blade-u">6U</span><span class="blade-icon">💻</span><div class="blade-info"><h4>Codificador / Autonomia</h4><span>SLOT-06 // DEEPSEEK-SONNET-RUNNER</span></div></div>
+            <div class="blade-lcd">[BRANCH: PROD | SCRIPTS: VERIFIED | AUTO-FIX: ON]</div>
+            <div class="blade-right-controls"><div class="blade-fan">🌀</div><div class="blade-ports"><div class="sfp-led"></div><div class="sfp-led act"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [FAVORITO] 2. GRAFO DE FLUXO                                          -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-grafo">
+      <div class="graph-wrapper">
+        <svg class="graph-svg" viewBox="0 0 1000 500">
+          <path class="flow-path" d="M 120 250 L 320 250" />
+          <path class="flow-pulse fast" d="M 120 250 L 320 250" />
+          <path class="flow-path" d="M 320 250 C 440 250, 440 120, 560 120" />
+          <path class="flow-pulse" d="M 320 250 C 440 250, 440 120, 560 120" />
+          <path class="flow-path" d="M 320 250 C 440 250, 440 250, 560 250" />
+          <path class="flow-pulse fast" d="M 320 250 C 440 250, 440 250, 560 250" />
+          <path class="flow-path" d="M 320 250 C 440 250, 440 380, 560 380" />
+          <path class="flow-pulse" d="M 320 250 C 440 250, 440 380, 560 380" />
+          <path class="flow-path" d="M 760 120 C 820 120, 820 250, 880 250" />
+          <path class="flow-pulse fast" d="M 760 120 C 820 120, 820 250, 880 250" />
+          <path class="flow-path" d="M 760 250 L 880 250" />
+          <path class="flow-pulse" d="M 760 250 L 880 250" />
+          <path class="flow-path" d="M 760 380 C 820 380, 820 250, 880 250" />
+          <path class="flow-pulse fast" d="M 760 380 C 820 380, 820 250, 880 250" />
+        </svg>
+
+        <div class="graph-nodes-layer">
+          <div class="graph-node" id="gn-sgd" style="top: 50%; left: 12%;" onclick="abrirDetalhe('sgd')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>👤</span> Thiago (SGD)</div><span class="node-status-tag">Origem</span></div>
+            <p>Dispara demandas, define diretrizes e aprova empenhos.</p>
+          </div>
+          <div class="graph-node" id="gn-coordenador" style="top: 50%; left: 34%;" onclick="abrirDetalhe('coordenador')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>👑</span> Coordenador</div><span class="node-status-tag">Ativo</span></div>
+            <p>Recebe demandas, orquestra e distribui tarefas.</p>
+          </div>
+          <div class="graph-node" id="gn-operador_cp" style="top: 24%; left: 66%;" onclick="abrirDetalhe('operador_cp')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>🖥️</span> Operador CP</div><span class="node-status-tag">Livre</span></div>
+            <p>Navega no Cidade360, emite relatórios e liquidações.</p>
+          </div>
+          <div class="graph-node" id="gn-conferente" style="top: 50%; left: 66%;" onclick="abrirDetalhe('conferente')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>🛡️</span> Conferente</div><span class="node-status-tag">Ativo</span></div>
+            <p>Audita valores por km, diárias, tabelas e regras legais.</p>
+          </div>
+          <div class="graph-node" id="gn-pesquisador" style="top: 76%; left: 66%;" onclick="abrirDetalhe('pesquisador')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>🔍</span> Pesquisador</div><span class="node-status-tag">Ativo</span></div>
+            <p>Consulta processos no 1Doc e históricos arquivados.</p>
+          </div>
+          <div class="graph-node" id="gn-vigia" style="top: 50%; left: 88%;" onclick="abrirDetalhe('vigia')">
+            <div class="graph-node-head"><div class="node-icon-title"><span>👁️</span> Vigia CP</div><span class="node-status-tag">100% OK</span></div>
+            <p>Monitora locks, websockets e estabilidade da nuvem.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [FAVORITO] 3. COCKPIT TÁTICO HUD                                      -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-hud">
+      <div class="hud-wrapper">
+        <div class="hud-pod" id="hud-coordenador" onclick="abrirDetalhe('coordenador')">
+          <div class="hud-top"><span class="hud-id">BOT-01 // COORDENADOR</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">👑</div><div class="hud-meta"><h3>Coordenador Geral</h3><span>Orquestrador Estratégico</span></div></div>
+          <div class="hud-feed">"Aguardando demandas de Thiago. Equipe 100% disponível para novas tarefas."</div>
+        </div>
+        <div class="hud-pod" id="hud-operador_cp" onclick="abrirDetalhe('operador_cp')">
+          <div class="hud-top"><span class="hud-id">BOT-02 // OPERADOR CP</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">🖥️</div><div class="hud-meta"><h3>Operador CP</h3><span>Execução GO-Global</span></div></div>
+          <div class="hud-feed">"Sessão encerrada com segurança no [X]. Aguardando novo pedido do SGD."</div>
+        </div>
+        <div class="hud-pod" id="hud-vigia" onclick="abrirDetalhe('vigia')">
+          <div class="hud-top"><span class="hud-id">BOT-03 // VIGIA</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">👁️</div><div class="hud-meta"><h3>Vigia de Infraestrutura</h3><span>Sentinela de Sessão</span></div></div>
+          <div class="hud-feed">"Serviços em 100%. Nenhuma trava pendente no notebook nem fila travada."</div>
+        </div>
+        <div class="hud-pod" id="hud-conferente" onclick="abrirDetalhe('conferente')">
+          <div class="hud-top"><span class="hud-id">BOT-04 // CONFERENTE</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">🛡️</div><div class="hud-meta"><h3>Conferente de Diárias</h3><span>Auditoria e Regras</span></div></div>
+          <div class="hud-feed">"Tabelas de valores de alimentação e transporte atualizadas e validadas."</div>
+        </div>
+        <div class="hud-pod" id="hud-pesquisador" onclick="abrirDetalhe('pesquisador')">
+          <div class="hud-top"><span class="hud-id">BOT-05 // PESQUISADOR</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">🔍</div><div class="hud-meta"><h3>Pesquisador 1Doc</h3><span>Busca de Processos</span></div></div>
+          <div class="hud-feed">"Pronto para coletar dados cadastrais e viagens de servidores."</div>
+        </div>
+        <div class="hud-pod" id="hud-programador" onclick="abrirDetalhe('programador')">
+          <div class="hud-top"><span class="hud-id">BOT-06 // PROGRAMADOR</span><div class="hud-frequency-vis"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div></div>
+          <div class="hud-identity"><div class="hud-avatar">💻</div><div class="hud-meta"><h3>Programador / Codificador</h3><span>Automação e Evolução</span></div></div>
+          <div class="hud-feed">"Rotina de saída via [X] implementada e validada com 100% de sucesso!"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [FAVORITO] 7. CIRCUITO INTEGRADO PCB                                  -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-circuit">
+      <div class="circuit-wrapper">
+        <div class="circuit-bus-line"><div class="circuit-bus-pulse"></div></div>
+        <div class="circuit-chips-grid">
+          <div class="circuit-chip" id="chip-sgd" onclick="abrirDetalhe('sgd')">
+            <div class="chip-code">CORE-00 // HOST</div><div class="chip-avatar">🏛️</div><div class="chip-name">SGD Thiago</div><div class="chip-led"></div>
+          </div>
+          <div class="circuit-chip" id="chip-coordenador" onclick="abrirDetalhe('coordenador')">
+            <div class="chip-code">IC-01 // MUX-ROUTER</div><div class="chip-avatar">👑</div><div class="chip-name">Coordenador</div><div class="chip-led"></div>
+          </div>
+          <div class="circuit-chip" id="chip-operador_cp" onclick="abrirDetalhe('operador_cp')">
+            <div class="chip-code">IC-02 // CP-EXEC-SOC</div><div class="chip-avatar">🖥️</div><div class="chip-name">Operador CP</div><div class="chip-led"></div>
+          </div>
+          <div class="circuit-chip" id="chip-conferente" onclick="abrirDetalhe('conferente')">
+            <div class="chip-code">IC-03 // AUDIT-ASIC</div><div class="chip-avatar">🛡️</div><div class="chip-name">Conferente</div><div class="chip-led"></div>
+          </div>
+          <div class="circuit-chip" id="chip-pesquisador" onclick="abrirDetalhe('pesquisador')">
+            <div class="chip-code">IC-04 // 1DOC-FETCHER</div><div class="chip-avatar">🔍</div><div class="chip-name">Pesquisador</div><div class="chip-led"></div>
+          </div>
+          <div class="circuit-chip" id="chip-vigia" onclick="abrirDetalhe('vigia')">
+            <div class="chip-code">IC-05 // WATCHDOG-MCU</div><div class="chip-avatar">👁️</div><div class="chip-name">Vigia CP</div><div class="chip-led"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [TEMA A] 🏎️ COCKPIT DE TELEMETRIA F1                                   -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-f1">
+      <div class="f1-wrapper">
+        <!-- RPM Shift Lights -->
+        <div class="f1-shift-lights">
+          <div class="f1-led green"></div><div class="f1-led green"></div><div class="f1-led green"></div>
+          <div class="f1-led red"></div><div class="f1-led red"></div><div class="f1-led red"></div><div class="f1-led red"></div>
+          <div class="f1-led blue"></div><div class="f1-led blue"></div><div class="f1-led blue"></div>
+        </div>
+
+        <div class="f1-telemetry-grid">
+          <div class="f1-pod" id="f1-coordenador" onclick="abrirDetalhe('coordenador')">
+            <div class="f1-pod-top"><span>PU // V6-TURBO</span><span>GEAR: 8</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">👑</div><div class="f1-meta"><h4>Coordenador</h4><span>POWER UNIT STRATEGY</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>RPM:</span><b>12,450</b></div>
+              <div class="f1-row"><span>ERS DEPLOY:</span><b>100%</b></div>
+              <div class="f1-row"><span>DELTA:</span><b style="color:#22c55e;">-0.240s</b></div>
+            </div>
+          </div>
+
+          <div class="f1-pod" id="f1-operador_cp" onclick="abrirDetalhe('operador_cp')">
+            <div class="f1-pod-top"><span>DRIVE // GEARBOX</span><span>HYDRAULICS: OK</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">🖥️</div><div class="f1-meta"><h4>Operador CP</h4><span>BETHA TRANSMISSION</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>SPEED:</span><b>318 KM/H</b></div>
+              <div class="f1-row"><span>WINDOW [X]:</span><b>ARMED</b></div>
+              <div class="f1-row"><span>CLUTCH:</span><b>DISENGAGED</b></div>
+            </div>
+          </div>
+
+          <div class="f1-pod" id="f1-vigia" onclick="abrirDetalhe('vigia')">
+            <div class="f1-pod-top"><span>HALO // TELEMETRY</span><span>FIA WATCHDOG</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">👁️</div><div class="f1-meta"><h4>Vigia CP</h4><span>SAFETY CAR & PIT</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>SENSORS:</span><b>14/14 OK</b></div>
+              <div class="f1-row"><span>LOCK:</span><b>0 FLAGS</b></div>
+              <div class="f1-row"><span>STATUS:</span><b style="color:#22c55e;">GREEN FLAG</b></div>
+            </div>
+          </div>
+
+          <div class="f1-pod" id="f1-conferente" onclick="abrirDetalhe('conferente')">
+            <div class="f1-pod-top"><span>AERO // DOWNFORCE</span><span>BIAS: 56.4%</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">🛡️</div><div class="f1-meta"><h4>Conferente</h4><span>BRAKE AUDIT CORE</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>DISC TEMP:</span><b>640°C</b></div>
+              <div class="f1-row"><span>LIMITES:</span><b>REGULAMENTARES</b></div>
+              <div class="f1-row"><span>PUNIÇÃO:</span><b>NENHUMA</b></div>
+            </div>
+          </div>
+
+          <div class="f1-pod" id="f1-pesquisador" onclick="abrirDetalhe('pesquisador')">
+            <div class="f1-pod-top"><span>PIT-WALL // SECTORS</span><span>1DOC TIMING</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">🔍</div><div class="f1-meta"><h4>Pesquisador</h4><span>SECTOR STRATEGY</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>SECTOR 1:</span><b>28.140s</b></div>
+              <div class="f1-row"><span>SECTOR 2:</span><b>34.020s</b></div>
+              <div class="f1-row"><span>GAP:</span><b style="color:#22c55e;">LEADER</b></div>
+            </div>
+          </div>
+
+          <div class="f1-pod" id="f1-programador" onclick="abrirDetalhe('programador')">
+            <div class="f1-pod-top"><span>ECU // ENGINE MAP</span><span>TELEMETRY DEV</span></div>
+            <div class="f1-pod-title"><div class="f1-avatar">💻</div><div class="f1-meta"><h4>Codificador</h4><span>AUTONOMOUS RACE ENG</span></div></div>
+            <div class="f1-data-bars">
+              <div class="f1-row"><span>MAP:</span><b>STRAT 2</b></div>
+              <div class="f1-row"><span>DIFF:</span><b>CLEAN PASS</b></div>
+              <div class="f1-row"><span>OVERTAKE:</span><b style="color:#38bdf8;">READY</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [TEMA B] 🕹️ CYBERPUNK SYNTHWAVE 80s                                    -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-synth">
+      <div class="synth-wrapper">
+        <div class="synth-sun"></div>
+        <div class="synth-grid-floor"></div>
+
+        <div class="synth-cards-container">
+          <div class="synth-card" id="synth-coordenador" onclick="abrirDetalhe('coordenador')">
+            <div class="synth-top"><span>SYNTH-01 // COORD</span><span>120 BPM</span></div>
+            <div class="synth-body"><div class="synth-avatar">👑</div><div class="synth-name"><h4>Coordenador</h4><span>NEON MASTER</span></div></div>
+          </div>
+
+          <div class="synth-card" id="synth-operador_cp" onclick="abrirDetalhe('operador_cp')">
+            <div class="synth-top"><span>SYNTH-02 // CP-BOT</span><span>BETHA WAVE</span></div>
+            <div class="synth-body"><div class="synth-avatar">🖥️</div><div class="synth-name"><h4>Operador CP</h4><span>OUTRUN RUNNER</span></div></div>
+          </div>
+
+          <div class="synth-card" id="synth-vigia" onclick="abrirDetalhe('vigia')">
+            <div class="synth-top"><span>SYNTH-03 // VIGIA</span><span>GRID PATROL</span></div>
+            <div class="synth-body"><div class="synth-avatar">👁️</div><div class="synth-name"><h4>Vigia CP</h4><span>TRON SENTINEL</span></div></div>
+          </div>
+
+          <div class="synth-card" id="synth-conferente" onclick="abrirDetalhe('conferente')">
+            <div class="synth-top"><span>SYNTH-04 // AUDIT</span><span>RULES SYNTH</span></div>
+            <div class="synth-body"><div class="synth-avatar">🛡️</div><div class="synth-name"><h4>Conferente</h4><span>RETRO AUDITOR</span></div></div>
+          </div>
+
+          <div class="synth-card" id="synth-pesquisador" onclick="abrirDetalhe('pesquisador')">
+            <div class="synth-top"><span>SYNTH-05 // 1DOC</span><span>DATA MINER</span></div>
+            <div class="synth-body"><div class="synth-avatar">🔍</div><div class="synth-name"><h4>Pesquisador</h4><span>NEON ARCHIVE</span></div></div>
+          </div>
+
+          <div class="synth-card" id="synth-programador" onclick="abrirDetalhe('programador')">
+            <div class="synth-top"><span>SYNTH-06 // CODE</span><span>SYNTH CODER</span></div>
+            <div class="synth-body"><div class="synth-avatar">💻</div><div class="synth-name"><h4>Codificador</h4><span>CYBER HACKER</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- ===================================================================== -->
+    <!-- [TEMA C] 🛡️ DEFCON WAR ROOM (NORAD RADAR)                              -->
+    <!-- ===================================================================== -->
+    <div class="view-container active" id="view-norad">
+      <div class="norad-wrapper">
+        <div class="norad-header">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.4rem;">🛡️</span>
+            <span>NORAD STRATEGIC WAR ROOM // AIRSPACE COMMAND</span>
+          </div>
+          <div class="defcon-strip">
+            <span style="opacity:0.6; font-size:0.85rem;">ALERT LVL:</span>
+            <span class="defcon-level l5">5</span>
+            <span class="defcon-level l4">4</span>
+            <span class="defcon-level l3">3</span>
+            <span class="defcon-level l2">2</span>
+            <span class="defcon-level l1">DEFCON 1</span>
+          </div>
+        </div>
+
+        <div class="norad-layout">
+          <!-- Radar CRT Scope -->
+          <div class="norad-radar-panel">
+            <div style="font-size:1.05rem; letter-spacing:1px; width:100%; display:flex; justify-content:space-between;">
+              <span>RADAR P31 SCOPE</span>
+              <span style="color:#4ade80;">● ACTIVE</span>
+            </div>
+            
+            <div class="radar-crt">
+              <div class="radar-ring r1"></div>
+              <div class="radar-ring r2"></div>
+              <div class="radar-ring r3"></div>
+              <div class="radar-cross-h"></div>
+              <div class="radar-cross-v"></div>
+              <div class="radar-sweep"></div>
+
+              <!-- Blips for bots in radar -->
+              <div class="radar-blip" style="top:25%; left:30%;" data-label="TGT-01"></div>
+              <div class="radar-blip" style="top:35%; left:70%;" data-label="TGT-02"></div>
+              <div class="radar-blip" style="top:70%; left:25%;" data-label="TGT-03"></div>
+              <div class="radar-blip" style="top:60%; left:75%;" data-label="TGT-04"></div>
+              <div class="radar-blip" style="top:80%; left:55%;" data-label="TGT-05"></div>
+              <div class="radar-blip" style="top:18%; left:58%;" data-label="TGT-06"></div>
+              <div class="radar-blip" style="top:50%; left:50%; background:#38bdf8; box-shadow:0 0 10px #38bdf8;" data-label="CMD-00"></div>
+            </div>
+
+            <div class="radar-telemetry">
+              <div>> AZIMUTH: 284° // RNG: 114 NM</div>
+              <div>> AIRSPACE: ALL UNITS CLASSIFIED</div>
+              <div>> ENCRYPTION: SHA-256 MIL-SPEC</div>
+              <div style="color:#4ade80;">> PERIMETER INTEGRITY: 100%</div>
+            </div>
+          </div>
+
+          <!-- Target Grid -->
+          <div class="norad-grid">
+            <div class="norad-box" id="norad-coordenador" onclick="abrirDetalhe('coordenador')">
+              <div class="norad-title">
+                <span><span>👑</span> TGT-01 // COORDENADOR</span>
+                <span class="norad-tag">AIR COMMAND</span>
+              </div>
+              <div class="norad-sub">> SECTOR: COMMAND_BUNKER // STATUS: ARMED</div>
+              <div class="norad-bar">[■■■■■■■■■■] 100% READINESS</div>
+              <div class="norad-log">> DISPATCHING ORDERS TO BATTLEGROUPS...</div>
+            </div>
+
+            <div class="norad-box" id="norad-operador_cp" onclick="abrirDetalhe('operador_cp')">
+              <div class="norad-title">
+                <span><span>🖥️</span> TGT-02 // OPERADOR_CP</span>
+                <span class="norad-tag">EXTRACTION</span>
+              </div>
+              <div class="norad-sub">> SECTOR: BETHA_CITY // STATUS: SORTIE_ACTIVE</div>
+              <div class="norad-bar">[■■■■■■■■□□] 85% WINDOW [X] ARMED</div>
+              <div class="norad-log">> EXTRACTION COMPLETE. RTB VIA WINDOW [X].</div>
+            </div>
+
+            <div class="norad-box" id="norad-vigia" onclick="abrirDetalhe('vigia')">
+              <div class="norad-title">
+                <span><span>👁️</span> TGT-03 // VIGIA_SENTINEL</span>
+                <span class="norad-tag">EARLY WARNING</span>
+              </div>
+              <div class="norad-sub">> SECTOR: RADAR_DEFENSE // STATUS: NOMINAL</div>
+              <div class="norad-bar">[■■■■■■■■■■] 8/8 SERVICES OK</div>
+              <div class="norad-log">> AIRSPACE SECURE. ZERO HOSTILE LOCKS.</div>
+            </div>
+
+            <div class="norad-box" id="norad-conferente" onclick="abrirDetalhe('conferente')">
+              <div class="norad-title">
+                <span><span>🛡️</span> TGT-04 // CONFERENTE</span>
+                <span class="norad-tag">MUNITIONS AUDIT</span>
+              </div>
+              <div class="norad-sub">> SECTOR: FISCAL_AUDIT // STATUS: CLEARED</div>
+              <div class="norad-bar">[■■■■■■■■■□] 92% RULES VERIFIED</div>
+              <div class="norad-log">> ALL DIARIES CLEARED PER DIRECTIVE 2026.</div>
+            </div>
+
+            <div class="norad-box" id="norad-pesquisador" onclick="abrirDetalhe('pesquisador')">
+              <div class="norad-title">
+                <span><span>🔍</span> TGT-05 // PESQUISADOR</span>
+                <span class="norad-tag">CRYPTO INTEL</span>
+              </div>
+              <div class="norad-sub">> SECTOR: 1DOC_INTEL // STATUS: DECRYPTED</div>
+              <div class="norad-bar">[■■■■■■■■■■] 100% PROTOCOLS PARSED</div>
+              <div class="norad-log">> PROTOCOL ARCHIVES SCANNED AND PARSED.</div>
+            </div>
+
+            <div class="norad-box" id="norad-programador" onclick="abrirDetalhe('programador')">
+              <div class="norad-title">
+                <span><span>💻</span> TGT-06 // PROGRAMADOR</span>
+                <span class="norad-tag">CYBER DEV LAB</span>
+              </div>
+              <div class="norad-sub">> SECTOR: WARFARE_DEV // STATUS: COMPILED</div>
+              <div class="norad-bar">[■■■■■■■■■■] 100% LIVE HOTFIXES</div>
+              <div class="norad-log">> CODE PATCH 100% OPERATIONAL IN THE FIELD.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- [TEMA D] 🧬 BIO-SINAPSE (REDE NEURAL BIOLUMINESCENTE)                   -->
+    <!-- ===================================================================== -->
+    <div class="view-container" id="view-bio">
+      <div class="bio-wrapper">
+        <svg class="bio-synapse-svg" viewBox="0 0 1000 500">
+          <path class="synapse-branch" d="M 160 250 C 300 220, 300 130, 480 130" />
+          <path class="synapse-fire" d="M 160 250 C 300 220, 300 130, 480 130" />
+
+          <path class="synapse-branch" d="M 160 250 C 300 250, 300 250, 480 250" />
+          <path class="synapse-fire" d="M 160 250 C 300 250, 300 250, 480 250" />
+
+          <path class="synapse-branch" d="M 160 250 C 300 280, 300 370, 480 370" />
+          <path class="synapse-fire" d="M 160 250 C 300 280, 300 370, 480 370" />
+
+          <path class="synapse-branch" d="M 640 130 C 740 130, 740 250, 840 250" />
+          <path class="synapse-fire" d="M 640 130 C 740 130, 740 250, 840 250" />
+
+          <path class="synapse-branch" d="M 640 250 L 840 250" />
+          <path class="synapse-fire" d="M 640 250 L 840 250" />
+
+          <path class="synapse-branch" d="M 640 370 C 740 370, 740 250, 840 250" />
+          <path class="synapse-fire" d="M 640 370 C 740 370, 740 250, 840 250" />
+        </svg>
+
+        <div class="bio-cells-layer">
+          <div class="bio-cell" id="bio-sgd" style="top: 50%; left: 16%;" onclick="abrirDetalhe('sgd')">
+            <div class="bio-avatar">🏛️</div>
+            <div class="bio-name">Thiago Hub</div>
+            <div class="bio-role">Núcleo Central</div>
+          </div>
+
+          <div class="bio-cell" id="bio-coordenador" style="top: 26%; left: 48%;" onclick="abrirDetalhe('coordenador')">
+            <div class="bio-avatar">👑</div>
+            <div class="bio-name">Coordenador</div>
+            <div class="bio-role">Sinapse Mestre</div>
+          </div>
+
+          <div class="bio-cell" id="bio-operador_cp" style="top: 50%; left: 48%;" onclick="abrirDetalhe('operador_cp')">
+            <div class="bio-avatar">🖥️</div>
+            <div class="bio-name">Operador CP</div>
+            <div class="bio-role">Neurônio Motor</div>
+          </div>
+
+          <div class="bio-cell" id="bio-conferente" style="top: 74%; left: 48%;" onclick="abrirDetalhe('conferente')">
+            <div class="bio-avatar">🛡️</div>
+            <div class="bio-name">Conferente</div>
+            <div class="bio-role">Filtro Sináptico</div>
+          </div>
+
+          <div class="bio-cell" id="bio-pesquisador" style="top: 26%; left: 84%;" onclick="abrirDetalhe('pesquisador')">
+            <div class="bio-avatar">🔍</div>
+            <div class="bio-name">Pesquisador</div>
+            <div class="bio-role">Memória 1Doc</div>
+          </div>
+
+          <div class="bio-cell" id="bio-vigia" style="top: 50%; left: 84%;" onclick="abrirDetalhe('vigia')">
+            <div class="bio-avatar">👁️</div>
+            <div class="bio-name">Vigia CP</div>
+            <div class="bio-role">Sistema Imune</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Live Simulation Ticker -->
+  <div class="sim-banner" id="simBanner">
+    <div class="sim-banner-top">
+      <div class="sim-badge"><span>⚡</span> FLUXO AO VIVO EM EXECUÇÃO</div>
+      <div class="sim-step-badge" id="simStepText">ETAPA 1 DE 5</div>
+    </div>
+    <div class="sim-content">
+      <div class="sim-sender-avatar" id="simAvatar">👤</div>
+      <div class="sim-texts">
+        <h4 id="simSenderName">Thiago (SGD Hub)</h4>
+        <p id="simMessageText">"Disparando geração do relatório de pagamentos e conciliação de contas..."</p>
+      </div>
+    </div>
+    <div class="sim-progress-track">
+      <div class="sim-progress-bar" id="simProgress"></div>
+    </div>
+  </div>
+
+  <!-- Inspector Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
+    <div class="modal-card">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px;">
+        <div id="modalIcon" style="font-size:36px; width:64px; height:64px; border-radius:16px; background:rgba(30,41,59,0.8); display:grid; place-items:center; border:1px solid var(--border);">🤖</div>
+        <div>
+          <h2 id="modalNome" style="font-size:18px; font-weight:700;">Nome do Bot</h2>
+          <span id="modalPapel" style="font-size:13px; color:var(--cyan);">Função</span>
+        </div>
+      </div>
+      <p id="modalDesc" style="font-size:13.5px; color:var(--text-muted); line-height:1.5; margin-bottom:20px;">Descrição detalhada do agente e suas responsabilidades.</p>
+      <div style="background:rgba(2,6,23,0.5); padding:14px; border-radius:12px; border:1px solid var(--border);">
+        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; font-weight:700;">Última Ação / Status:</div>
+        <div id="modalStatus" style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--emerald);">Status ativo</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>SGD Diárias · Galeria de Temas e Visualizadores</span>
+    <span>Clique em qualquer módulo ou no fundo para emitir pulsos elétricos</span>
+  </footer>
+
+  <script>
+    const BOTS_INFO = {
+      sgd: { nome: "Thiago Kruger (Gestor)", papel: "Direção Estratégica e Aprovação", icon: "🏛️", desc: "Ponto focal de autoridade. Define parâmetros, aprova concessões e comanda as tarefas prioritárias da equipe.", status: "Ativo no comando do sistema." },
+      coordenador: { nome: "Coordenador Geral", papel: "Orquestrador da Equipe", icon: "👑", desc: "Recebe demandas no chat do SGD e distribui tarefas para os bots especialistas sem gerar empenho financeiro.", status: "Pronto para receber demandas e alinhar tarefas." },
+      operador_cp: { nome: "Operador CP", papel: "Automação do Cidade360", icon: "🖥️", desc: "Executa a navegação no sistema contábil CP (Betha/Cidade360) no notebook, exportando relatórios e gerando pré-empenhos.", status: "Sessão fechada com segurança pelo [X]. Livre." },
+      vigia: { nome: "Vigia de Infraestrutura", papel: "Sentinela do Servidor", icon: "👁️", desc: "Monitora o estado dos robôs a cada minuto, verifica portas, travas (robo.lock) e previne duplicidade de execuções.", status: "Todos os 8 serviços no ar com 100% de estabilidade." },
+      conferente: { nome: "Conferente de Diárias", papel: "Auditoria e Conformidade", icon: "🛡️", desc: "Analisa valores por quilometragem, tabelas de alimentação, notas fiscais e regras municipais de concessão.", status: "Conferência de regras atualizada e sem pendências." },
+      pesquisador: { nome: "Pesquisador 1Doc", papel: "Extração de Processos", icon: "🔍", desc: "Acessa o 1Doc em modo de leitura, pesquisa protocolos de viagens e valida matrículas e certidões.", status: "Busca de processos em dia." },
+      programador: { nome: "Programador / Codificador", papel: "Evolução e Correção Autônoma", icon: "💻", desc: "Desenvolve scripts, diagnostica erros em tempo real e aprimora a inteligência dos demais robôs.", status: "Encerramento via [X] implementado e validado." }
+    };
+
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const viewContainers = document.querySelectorAll('.view-container');
+
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.classList.remove('active'));
+        viewContainers.forEach(v => v.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetView = document.getElementById(`view-${btn.dataset.mode}`);
+        if (targetView) targetView.classList.add('active');
+      });
+    });
+
+    function abrirDetalhe(botKey) {
+      const info = BOTS_INFO[botKey];
+      if (!info) return;
+      document.getElementById('modalIcon').textContent = info.icon;
+      document.getElementById('modalNome').textContent = info.nome;
+      document.getElementById('modalPapel').textContent = info.papel;
+      document.getElementById('modalDesc').textContent = info.desc;
+      document.getElementById('modalStatus').textContent = info.status;
+      document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function fecharModal(e) {
+      if (!e || e.target.id === 'modalOverlay' || e.target.classList.contains('modal-close')) {
+        document.getElementById('modalOverlay').classList.remove('open');
+      }
+    }
+
+    // PCB Canvas
+    const canvas = document.getElementById('pcb-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, pcbNodes = [], pcbPulses = [];
+    const gridSpacing = 48;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initPCB();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    class PCBNode {
+      constructor(x, y) {
+        this.x = x; this.y = y; this.connections = []; this.active = Math.random() > 0.65;
+      }
+    }
+
+    class SignalPulse {
+      constructor(start, end, color = '#00f0ff') {
+        this.start = start; this.end = end; this.progress = 0;
+        this.speed = 0.018 + Math.random() * 0.025; this.color = color;
+      }
+      update() { this.progress += this.speed; return this.progress >= 1; }
+      draw() {
+        const x = this.start.x + (this.end.x - this.start.x) * this.progress;
+        const y = this.start.y + (this.end.y - this.start.y) * this.progress;
+        ctx.fillStyle = this.color; ctx.shadowColor = this.color; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      }
+    }
+
+    function initPCB() {
+      pcbNodes = []; pcbPulses = [];
+      for (let x = gridSpacing; x < width; x += gridSpacing) {
+        for (let y = gridSpacing; y < height; y += gridSpacing) {
+          if (Math.random() > 0.35) pcbNodes.push(new PCBNode(x + (Math.random() * 12 - 6), y + (Math.random() * 12 - 6)));
+        }
+      }
+      pcbNodes.forEach(node => {
+        pcbNodes.forEach(other => {
+          let dist = Math.hypot(node.x - other.x, node.y - other.y);
+          if (dist > gridSpacing && dist < gridSpacing * 1.6 && !node.connections.includes(other) && Math.random() > 0.65) {
+            node.connections.push(other);
+          }
+        });
+      });
+    }
+
+    function triggerSurgeWave(originX, originY) {
+      pcbNodes.forEach(node => {
+        let dist = Math.hypot(node.x - originX, node.y - originY);
+        if (dist < 220) {
+          node.connections.forEach(target => {
+            pcbPulses.push(new SignalPulse(node, target, Math.random() > 0.5 ? '#38bdf8' : '#34d399'));
+          });
+        }
+      });
+    }
+
+    function animatePCB() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineWidth = 1;
+      pcbNodes.forEach(node => {
+        node.connections.forEach(target => {
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+          ctx.beginPath(); ctx.moveTo(node.x, node.y);
+          if (Math.random() > 0.5) { ctx.lineTo(target.x, node.y); ctx.lineTo(target.x, target.y); }
+          else { ctx.lineTo(node.x, target.y); ctx.lineTo(target.x, target.y); }
+          ctx.stroke();
+        });
+      });
+
+      pcbNodes.forEach(node => {
+        ctx.fillStyle = node.active ? 'rgba(56, 189, 248, 0.45)' : 'rgba(148, 163, 184, 0.15)';
+        ctx.fillRect(node.x - 1.5, node.y - 1.5, 3, 3);
+      });
+
+      if (Math.random() > 0.3 && pcbNodes.length > 0) {
+        let rNode = pcbNodes[Math.floor(Math.random() * pcbNodes.length)];
+        if (rNode.connections.length > 0) {
+          let tNode = rNode.connections[Math.floor(Math.random() * rNode.connections.length)];
+          pcbPulses.push(new SignalPulse(rNode, tNode, Math.random() > 0.4 ? '#38bdf8' : '#34d399'));
+        }
+      }
+
+      for (let i = pcbPulses.length - 1; i >= 0; i--) {
+        let finished = pcbPulses[i].update();
+        pcbPulses[i].draw();
+        if (finished) pcbPulses.splice(i, 1);
+      }
+      requestAnimationFrame(animatePCB);
+    }
+
+    resizeCanvas();
+    animatePCB();
+
+    window.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON' && !e.target.closest('.blade-unit, .graph-node, .hud-pod, .circuit-chip, .f1-pod, .synth-card, .norad-box, .bio-cell')) {
+        triggerSurgeWave(e.clientX, e.clientY);
+      }
+    });
+
+    // SIMULATION ENGINE
+    const SIM_STEPS = [
+      { stepText: "ETAPA 1 DE 5", progress: 20, avatar: "👤", sender: "Thiago (Gestor)", botKey: "sgd", msg: "Dispara solicitação: 'Gerar relatório de pagamentos de 09/10 e conferir valores'." },
+      { stepText: "ETAPA 2 DE 5", progress: 40, avatar: "👑", sender: "Coordenador Geral", botKey: "coordenador", msg: "Recebe demanda e despacha: 'Operador CP, inicie sessão do Cidade360 e emita relatório por data'." },
+      { stepText: "ETAPA 3 DE 5", progress: 60, avatar: "🖥️", sender: "Operador CP", botKey: "operador_cp", msg: "CP autenticado! Filtro aplicado na categoria 2. Arquivo descodificado e janela fechada com sucesso no [X]." },
+      { stepText: "ETAPA 4 DE 5", progress: 80, avatar: "🛡️", sender: "Conferente de Diárias", botKey: "conferente", msg: "7 pagamentos auditados (Total: R$ 924,15). Regras municipais validadas sem inconsistências." },
+      { stepText: "ETAPA 5 DE 5", progress: 100, avatar: "👁️", sender: "Vigia de Infraestrutura", botKey: "vigia", msg: "WebSocket desconectado limpo no servidor. Trava robo.lock liberada. Ciclo 100% concluído!" }
+    ];
+
+    let simRunning = false;
+
+    function limparDestaques() {
+      document.querySelectorAll('.sim-active').forEach(el => el.classList.remove('sim-active'));
+    }
+
+    function destacarElemento(botKey) {
+      limparDestaques();
+      triggerSurgeWave(window.innerWidth / 2, window.innerHeight / 2);
+
+      // 9. Blade
+      if (botKey !== 'sgd') {
+        const bladeEl = document.getElementById(`blade-${botKey}`);
+        if (bladeEl) bladeEl.classList.add('sim-active');
+      }
+
+      // 2. Grafo
+      const gnEl = document.getElementById(botKey === 'sgd' ? 'gn-sgd' : `gn-${botKey}`);
+      if (gnEl) gnEl.classList.add('sim-active');
+
+      // 3. HUD
+      if (botKey !== 'sgd') {
+        const hudEl = document.getElementById(`hud-${botKey}`);
+        if (hudEl) hudEl.classList.add('sim-active');
+      }
+
+      // 7. Circuito
+      const chipEl = document.getElementById(botKey === 'sgd' ? 'chip-sgd' : `chip-${botKey}`);
+      if (chipEl) chipEl.classList.add('sim-active');
+
+      // F1 Telemetria
+      if (botKey !== 'sgd') {
+        const f1El = document.getElementById(`f1-${botKey}`);
+        if (f1El) f1El.classList.add('sim-active');
+      }
+
+      // Synthwave
+      if (botKey !== 'sgd') {
+        const synthEl = document.getElementById(`synth-${botKey}`);
+        if (synthEl) synthEl.classList.add('sim-active');
+      }
+
+      // NORAD DEFCON
+      if (botKey !== 'sgd') {
+        const noradEl = document.getElementById(`norad-${botKey}`);
+        if (noradEl) noradEl.classList.add('sim-active');
+      }
+
+      // Bio-Sinapse
+      const bioEl = document.getElementById(botKey === 'sgd' ? 'bio-sgd' : `bio-${botKey}`);
+      if (bioEl) bioEl.classList.add('sim-active');
+    }
+
+    document.getElementById('btnSimular').addEventListener('click', () => {
+      if (simRunning) return;
+      simRunning = true;
+
+      const btn = document.getElementById('btnSimular');
+      const btnIcon = document.getElementById('btnSimularIcon');
+      const btnText = document.getElementById('btnSimularText');
+      const banner = document.getElementById('simBanner');
+      const stepText = document.getElementById('simStepText');
+      const avatar = document.getElementById('simAvatar');
+      const sender = document.getElementById('simSenderName');
+      const message = document.getElementById('simMessageText');
+      const progress = document.getElementById('simProgress');
+
+      btn.classList.add('running');
+      btnIcon.textContent = '⏳';
+      btnText.textContent = 'Executando Fluxo...';
+      banner.classList.add('active');
+
+      let currentStep = 0;
+
+      function rodarPasso() {
+        if (currentStep >= SIM_STEPS.length) {
+          setTimeout(() => {
+            limparDestaques();
+            banner.classList.remove('active');
+            btn.classList.remove('running');
+            btnIcon.textContent = '⚡';
+            btnText.textContent = 'Simular Ação em Rede';
+            simRunning = false;
+          }, 2400);
+          return;
+        }
+
+        const data = SIM_STEPS[currentStep];
+        stepText.textContent = data.stepText;
+        avatar.textContent = data.avatar;
+        sender.textContent = data.sender;
+        message.textContent = `"${data.msg}"`;
+        progress.style.width = `${data.progress}%`;
+
+        destacarElemento(data.botKey);
+        currentStep++;
+        setTimeout(rodarPasso, 2200);
+      }
+
+      rodarPasso();
+    });
+  </script>
+</body>
+</html>
