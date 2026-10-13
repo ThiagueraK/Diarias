@@ -3229,6 +3229,7 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     return { ok: false, motivo: 'empenho-ja-usado', empenhoConflitante: { servidor: conflito.servidor || '', numProcesso: conflito.numProcesso || '' } };
   }
 
+  var diaEmpenhoIso = p.dataEmpenho ? (p.dataEmpenho.indexOf('/') !== -1 ? brParaISO(p.dataEmpenho) : p.dataEmpenho) : hojeISO();
   var dados = {
     servidor: p.servidor || '',
     numProcesso: p.numeroProcesso || '',
@@ -3238,12 +3239,14 @@ function sgdRegistrarEmpenhoPorHash(numero, valor) {
     placa: p.placa || '',
     horaSaida: p.horaSaida || '',
     horaChegada: p.horaChegada || '',
-    diaRef: hojeISO(),
+    diaRef: diaEmpenhoIso,
     hash1doc: hash,
     empenho: String(numero),
     valor: String(valor),
     descricao: p.descricaoCompletaFinal || p.descricaoCompletaBase || '',
-    empenhadoEm: Date.now()
+    empenhadoEm: Date.now(),
+    dataEmpenho: diaEmpenhoIso,
+    encaminhadoEm: Date.now()
   };
   if (p.kmCalculado) dados.km = String(p.kmCalculado);
 
@@ -4124,7 +4127,7 @@ setInterval(atualizarListaProcessosCaixaSilenciosamente, 6000);
 
 // 07/10/2026: botão "Corrigir" dos cards - edita o que a varredura leu errado. Fica guardado no
 // servidor (próxima varredura não desfaz; o script do CP já pega o corrigido). Campo vazio = volta ao lido.
-var CORRIGIR_CAMPOS = [['servidor', 'Servidor / motorista'], ['cidade', 'Cidade de destino'], ['dataSaida', 'Data de saída (DD/MM/AAAA)'], ['horaSaida', 'Hora de saída (HH:MM)'], ['dataChegada', 'Data de chegada (DD/MM/AAAA)'], ['horaChegada', 'Hora de chegada (HH:MM)'], ['placa', 'Placa']];
+var CORRIGIR_CAMPOS = [['servidor', 'Servidor / motorista'], ['cidade', 'Cidade de destino'], ['dataSaida', 'Data de saída (DD/MM/AAAA)'], ['horaSaida', 'Hora de saída (HH:MM)'], ['dataChegada', 'Data de chegada (DD/MM/AAAA)'], ['horaChegada', 'Hora de chegada (HH:MM)'], ['placa', 'Placa'], ['valorSugerido', 'Valor sugerido (R$)']];
 function abrirCorrecaoCard(idx) {
   var p = (processosCaixaAtual || [])[idx];
   if (!p || !p.hash) return;
@@ -6786,7 +6789,8 @@ function renderTabela() {
       '<td class="td-num">'+(p.km ? p.km+' km' : '<span style="color:var(--text-muted)">—</span>')+'</td>'+
       '<td>'+badgePC+'</td>'+
       '<td>'+badgePagamentoAvisado(p)+'</td>'+
-      '<td class="td-num">'+dataAdicaoBR(p.id)+'</td>'+
+      '<td class="td-num" style="font-weight:600;white-space:nowrap;" title="Data contábil de emissão do empenho no CP">'+dataEmpenhoBR(p)+'</td>'+
+      '<td class="td-num" style="font-size:11px;color:var(--text-muted);white-space:nowrap;" title="Data em que foi encaminhado/adicionado no 1Doc">'+dataEncaminhadoBR(p)+'</td>'+
       '<td><button class="btn-pc" data-id="'+p.id+'" title="Gerar Prestação de Contas">📄 PC</button></td>'+
       '<td style="display:flex;gap:4px;">'
         +(p.hash1doc ? '<a class="btn-edit-row" href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash='+p.hash1doc+'&itd=7" target="_blank" title="Abrir no 1Doc" style="text-decoration:none;">🔗</a>' : '')
@@ -6811,13 +6815,13 @@ function renderTabela() {
     '<div class="table-wrap"><table>'+
     '<thead><tr>'+
     '<th>#</th><th>Nome do Credor</th><th>Nº Processo</th><th>Nº Empenho</th>'+
-    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Pagto Avisado</th><th>Adicionado</th><th>Prest. Contas</th><th></th>'+
+    '<th>Valor</th><th>Cidade Destino</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>Status PC</th><th>Pagto Avisado</th><th>Empenhado</th><th>Encaminhado</th><th>Prest. Contas</th><th></th>'+
     '</tr></thead><tbody>'+rows+'</tbody>'+
     (totalStr ? '<tfoot><tr><td colspan="4" style="text-align:right;font-weight:700;padding:10px;color:var(--text-muted);font-size:12px;">TOTAL DO DIA:</td>'+
     '<td style="font-weight:700;color:var(--accent);padding:10px;">'+totalStr+'</td>'+
     '<td colspan="3"></td>'+
     '<td style="font-size:11px;color:var(--text-muted);padding:10px;">Pendente: R$ '+totalPendente.toFixed(2).replace('.',',')+'</td>'+
-    '<td colspan="4"></td></tr></tfoot>' : '')+
+    '<td colspan="5"></td></tr></tfoot>' : '')+
     '</table></div>';
 }
 
@@ -8244,7 +8248,8 @@ function renderRelatorio() {
       +'<td>'+statusPago+'</td>'
       +'<td>'+dataPag+'</td>'
       +'<td>'+badgePagamentoAvisado(p)+'</td>'
-      +'<td>'+dataAdicaoBR(p.id)+'</td>'
+      +'<td style="font-weight:600;white-space:nowrap;" title="Data contábil do empenho">'+dataEmpenhoBR(p)+'</td>'
+      +'<td style="font-size:11px;color:#777;white-space:nowrap;" title="Data de encaminhamento">'+dataEncaminhadoBR(p)+'</td>'
       +'<td>'+btnDesc+'</td>'
       +'</tr>'
       +descRow;
@@ -8253,7 +8258,7 @@ function renderRelatorio() {
     '<table class="rel-table"><thead><tr>'
     +'<th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th>'
     +'<th>Valor</th><th>Cidade</th><th>Dt. Saída</th><th>Dt. Chegada</th><th>Horário</th>'
-    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th><th>📄</th>'
+    +'<th>Placa</th><th>KM</th><th>PC</th><th>Status</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Empenhado</th><th>Encaminhado</th><th>📄</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table>';
 
   // Duplo clique numa linha (exceto no botão de descrição) abre o mesmo
@@ -8430,6 +8435,37 @@ function dataAdicaoBR(id) {
   var d = new Date(ts);
   if (isNaN(d.getTime())) return '—';
   return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+}
+
+// 13/10/2026: Data oficial do EMPENHO emitido no CP (fato gerador contábil principal)
+function dataEmpenhoBR(p) {
+  if (!p) return '—';
+  if (p.dataEmpenho) {
+    if (p.dataEmpenho.indexOf('/') !== -1) return p.dataEmpenho;
+    return isoParaBR(p.dataEmpenho);
+  }
+  if (p.empenhadoEm) {
+    var d = new Date(Number(p.empenhadoEm));
+    if (!isNaN(d.getTime())) {
+      return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+    }
+  }
+  if (p.diaRef && p.diaRef !== 'sem-data') {
+    return isoParaBR(p.diaRef);
+  }
+  return dataAdicaoBR(p.id);
+}
+
+// 13/10/2026: Data em que o processo foi encaminhado/adicionado no 1Doc
+function dataEncaminhadoBR(p) {
+  if (!p) return '—';
+  if (p.encaminhadoEm) {
+    var d = new Date(Number(p.encaminhadoEm));
+    if (!isNaN(d.getTime())) {
+      return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+    }
+  }
+  return dataAdicaoBR(p.id);
 }
 
 // Selo mostrando se o pagamento já foi notificado ao motorista (e quando).
@@ -8728,7 +8764,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       ? '<b style="color:#16a34a">&#128176; '+p.pagamentoNotificadoEm.split(';').pop()+'</b>'
       : '—';
     var descRow = (p.descricao && p.descricao.trim())
-      ? '<tr><td colspan="16" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
+      ? '<tr><td colspan="17" style="padding:6px 10px 10px 20px;font-size:9px;color:#555;font-family:monospace;line-height:1.6;background:#fafafa;border-bottom:2px solid #e0e0e0;white-space:pre-wrap;word-break:break-word;">'+p.descricao.trim()+'</td></tr>'
       : '';
     return '<tr><td>'+(i+1)+'</td><td>'+(p.servidor||'')+'</td><td>'+(p.numProcesso||'')+'</td>'
       +'<td>'+(p.empenho||'')+'</td><td>'+(p.valor?'R$ '+p.valor:'')+'</td>'
@@ -8736,7 +8772,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
       +'<td>'+horarioResumo(p).replace(/<[^>]+>/g,'').replace('—','-')+'</td>'
       +'<td>'+(p.placa||'')+'</td><td>'+(p.km?p.km+' km':'')+'</td>'
       +'<td>'+pc+'</td><td>'+statusPago+'</td><td>'+dataPag+'</td>'
-      +'<td>'+pagAvisado+'</td><td>'+dataAdicaoBR(p.id)+'</td></tr>'
+      +'<td>'+pagAvisado+'</td><td style="font-weight:600;">'+dataEmpenhoBR(p)+'</td><td style="font-size:11px;color:#666;">'+dataEncaminhadoBR(p)+'</td></tr>'
       +descRow;
   }).join('');
 
@@ -8783,7 +8819,7 @@ document.getElementById('rel-btn-imprimir').addEventListener('click', function()
     +'<div class="sec"><h2>&#128205; Por Cidade (Top 8)</h2>'+barrasCid+'</div>'
     +'</div>'
     +'<div class="sec"><h2>&#128203; Processos Detalhados</h2>'
-    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Adicionado</th></tr></thead>'
+    +'<table><thead><tr><th>#</th><th>Servidor</th><th>Processo</th><th>Empenho</th><th>Valor</th><th>Cidade</th><th>Data Ida</th><th>Data Volta</th><th>Horário</th><th>Placa</th><th>KM</th><th>PC</th><th>Status Pag.</th><th>Dt. Pagamento</th><th>Pagto Avisado</th><th>Empenhado</th><th>Encaminhado</th></tr></thead>'
     +'<tbody>'+linhasTabela+'</tbody></table></div>'
     +'<div style="text-align:center;font-size:9px;color:#aaa;margin-top:12px;">SGD &mdash; Setor de Gest&atilde;o de Di&aacute;rias &middot; Prefeitura Municipal de Tupanciret&atilde;/RS</div>'
     +'<script>window.onload=function(){window.print();};<\/script>'
