@@ -214,7 +214,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-sit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap;color:var(--text-muted);}
   .proc-sit[data-s="a-empenhar"]{color:#16a34a;background:color-mix(in srgb,#16a34a 10%,transparent);}
   .proc-sit[data-s="guardado"]{color:#2563eb;background:color-mix(in srgb,#2563eb 10%,transparent);}
-  .proc-sit[data-s="bloqueado"]{color:#dc2626;background:color-mix(in srgb,#dc2626 10%,transparent);}
+  .proc-sit[data-s="bloqueado"],.proc-sit[data-s="ja-empenhado"]{color:#dc2626;background:color-mix(in srgb,#dc2626 10%,transparent);}
   .proc-sit[data-s="fora-do-script"]{color:#d97706;background:color-mix(in srgb,#d97706 10%,transparent);}
   .proc-chegou{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .proc-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 2px;}
@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.80</span>
+    <span class="header-version">v1.10.81</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3045,7 +3045,7 @@ function procConferenciaHtml(p) {
   }).join('');
   return '<details class="proc-conf ' + cls + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul></details>';
 }
-var SIT_ROTULO = { 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
+var SIT_ROTULO = { 'ja-empenhado': 'Já empenhado (fora da Tabela)', 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
 function aplicarSituacaoNosCards() {
   var mapa = window._situacaoCaixa || {};
   document.querySelectorAll('.proc-sit[data-hash]').forEach(function(el) {
@@ -3057,7 +3057,8 @@ function aplicarSituacaoNosCards() {
   });
   document.querySelectorAll('.proc-motivo-bloq[data-hash-motivo]').forEach(function(el) {
     var s = mapa[el.dataset.hashMotivo];
-    if (s && s.situacao === 'bloqueado' && s.motivo) { el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false; }
+    if (s && s.situacao === 'ja-empenhado') { el.textContent = '⛔ NÃO EMPENHE: ' + (s.motivo || 'o empenho deste processo já foi anexado no 1Doc'); el.hidden = false; }
+    else if (s && s.situacao === 'bloqueado' && s.motivo) { el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false; }
     else el.hidden = true;
   });
 }
@@ -4192,6 +4193,7 @@ function atualizarResumoSituacaoCaixa() {
     var grupos = [
       ['a-empenhar', 'a empenhar', '#16a34a'],
       ['guardado', 'empenhados, esperando encaminhar', '#2563eb'],
+      ['ja-empenhado', 'já empenhados (anexo no 1Doc, fora da Tabela)', '#dc2626'],
       ['bloqueado', 'bloqueados (mesma data/reserva)', '#dc2626'],
       ['fora-do-script', 'fora do script', '#f59e0b'],
       ['sem-leitura', 'sem leitura', '#6b7280']
@@ -6572,17 +6574,35 @@ function adicionarProcesso(dados) {
 // crescente antes de desistir (cobre bem uma colisão passageira de rate limit); 2) se mesmo
 // assim falhar, mostra um banner vermelho fixo no topo (não um toast que passa despercebido)
 // — a pessoa PRECISA saber que um dado real não foi salvo.
+// 14/10/2026: o Worker agora MESCLA (antes a cópia do navegador substituía a Tabela inteira e apagava o que o
+// robô tinha registrado depois de a página abrir - 26 empenhos sumiram assim). Por isso o site conta quais linhas
+// você apagou de propósito (processosRemovidos) e, quando o Worker devolve a Tabela mesclada, usa ela.
+// "Substituir tudo" só no importar/restaurar backup (confirmados na tela).
+var processosRemovidos = [];
+var substituirProximoSalvar = false;
 function salvar() {
   atualizarBackupInfo();
   salvarComRetry(0);
 }
 function salvarComRetry(tentativa) {
+  var removidosEnviados = processosRemovidos.slice();
+  var substituir = substituirProximoSalvar;
   sgdFetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ processos: processos, meta: sgdMeta })
+    body: JSON.stringify({ processos: processos, meta: sgdMeta, removidos: removidosEnviados, substituirTudo: substituir })
   }).then(function(r){
     if (!r.ok) throw new Error('status ' + r.status);
+    return r.json().catch(function(){ return {}; });
+  }).then(function(res){
+    processosRemovidos = processosRemovidos.filter(function(id){ return removidosEnviados.indexOf(id) < 0; });
+    if (substituir) substituirProximoSalvar = false;
+    if (res && Array.isArray(res.processos)) {
+      // havia linhas registradas pelo robô que esta página não conhecia: passa a usar a Tabela mesclada
+      processos = res.processos;
+      try { atualizarBadge(); } catch (e) {}
+      try { if (typeof renderTabela === 'function') renderTabela(); } catch (e) {}
+    }
   }).catch(function(e){
     console.log('Sync KV falhou (tentativa ' + (tentativa + 1) + '):', e.message);
     if (tentativa < 3) {
@@ -6862,6 +6882,7 @@ document.addEventListener('click', function(e) {
   if (!btn) return;
   var id = Number(btn.getAttribute('data-id'));
   if (!confirm('Remover este processo da tabela?')) return;
+  processosRemovidos.push(id);
   processos = processos.filter(function(p){ return p.id !== id; });
   salvar(); atualizarBadge(); renderTabela();
 });
@@ -6871,6 +6892,7 @@ document.getElementById('btnLimparDia').addEventListener('click', function() {
   var qtd = processos.filter(function(p){ return (p.diaRef||hojeISO())===filtroAtivo; }).length;
   if (qtd===0){ alert('Nenhum processo nesta data.'); return; }
   if (!confirm('Limpar todos os '+qtd+' processos do dia '+isoParaBR(filtroAtivo)+'?')) return;
+  processos.forEach(function(p){ if ((p.diaRef||hojeISO())===filtroAtivo) processosRemovidos.push(p.id); });
   processos = processos.filter(function(p){ return (p.diaRef||hojeISO())!==filtroAtivo; });
   salvar(); atualizarBadge(); renderTabela();
 });
@@ -7996,6 +8018,7 @@ document.getElementById('importFileInput').addEventListener('change', function(e
           alert('Mesclado! ' + novos.length + ' novo(s) processo(s) adicionado(s).');
         } else {
           processos = backup.processos;
+          substituirProximoSalvar = true;
           alert('Substituido com sucesso! ' + importados + ' processo(s) carregado(s).');
         }
       } else {
@@ -8066,6 +8089,7 @@ function restaurarBackup(chave, dataBR, qtd) {
     if (!res.ok) { alert('Erro: ' + (res.error||'desconhecido')); return; }
     processos = res.processos || [];
     if (res.meta) sgdMeta = res.meta;
+    substituirProximoSalvar = true;
     salvar();
     atualizarBadge();
     atualizarBackupInfo();
