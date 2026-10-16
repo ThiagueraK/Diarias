@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.84</span>
+    <span class="header-version">v1.10.85</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4004,12 +4004,16 @@ function eqRender() {
   var lista = ts.filter(function(t) { return eqFiltro === 'todas' || eqAberta(t); });
   document.getElementById('eq-tarefas').innerHTML = lista.length ? lista.map(function(t) {
     var aberta = eqAberta(t);
-    var c = t.status === 'aguardando' ? '#f59e0b' : aberta ? (EQ_GRAV[t.gravidade] || eqCor(t.para)) : '#4edea3';
-    var rot = t.status === 'aguardando' ? 'aguardando você' : t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo;
+    // 16/10/2026: tarefa fechada mostra o DESFECHO (resolvido/parcial/falha...) em vez de só "concluída"
+    var DESF = { resolvido: ['resolvido', '#4edea3'], parcial: ['parcial', '#f59e0b'], aguardando_dado: ['aguardando dado', '#f59e0b'], recusado: ['recusado', '#ef4444'], falha_transitoria: ['falha passageira', '#60a5fa'], falha_tecnica: ['falha técnica', '#ef4444'] };
+    var df = !aberta && t.status !== 'aguardando' && t.desfecho && DESF[t.desfecho];
+    var c = t.status === 'aguardando' ? '#f59e0b' : aberta ? (EQ_GRAV[t.gravidade] || eqCor(t.para)) : df ? df[1] : '#4edea3';
+    var rot = t.status === 'aguardando' ? 'aguardando você' : df ? df[0] : t.tipo === 'ocorrencia' ? (t.gravidade || 'ocorrência') : t.tipo;
     return '<div class="x-t" id="tarefa-' + t.id + '" style="--c:' + c + '"><div class="x-t-top"><span class="x-chip" style="--c:' + c + '"><i></i>' + escaparHtmlProc(rot) + '</span><span class="x-t-tit">' + escaparHtmlProc(t.titulo) + '</span></div>'
       + '<div class="x-t-meta">' + escaparHtmlProc((EQ_NOME[t.de] || t.de) + ' → ' + (EQ_NOME[t.para] || t.para)) + ' · aberta ' + ceData(t.criado) + ' · ' + escaparHtmlProc(t.status.replace('_', ' ')) + (t.atualizado !== t.criado ? ' · atualizada ' + ceTempoRelativo(t.atualizado) : '') + '</div>'
       + (t.corpo ? '<div class="x-t-corpo">' + escaparHtmlProc(t.corpo) + '</div>' : '')
       + (t.resultado ? '<div class="x-t-corpo">' + escaparHtmlProc(t.resultado) + '</div>' : '')
+      + (df && t.proximo ? '<div class="x-t-meta"><b>Próximo passo:</b> ' + escaparHtmlProc(t.proximo) + '</div>' : '')
       + (t.status === 'aguardando' ? '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-acao="aprovar" data-id="' + t.id + '">Aprovar e publicar</button><button type="button" class="x-bt no" data-eq-acao="recusar" data-id="' + t.id + '">Recusar</button></div>'
         : aberta ? '<div class="x-t-acoes"><button type="button" class="x-bt" data-eq-acao="concluir" data-id="' + t.id + '">✓ Resolvido</button><button type="button" class="x-bt" data-eq-acao="cancelar" data-id="' + t.id + '">Ignorar</button></div>' : '')
       + '</div>';
