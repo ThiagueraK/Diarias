@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.83</span>
+    <span class="header-version">v1.10.84</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3060,7 +3060,7 @@ function aplicarSituacaoNosCards() {
     var s = mapa[el.dataset.hashMotivo];
     if (s && s.situacao === 'ja-empenhado') { el.textContent = '⛔ NÃO EMPENHE: ' + (s.motivo || 'o empenho deste processo já foi anexado no 1Doc'); el.hidden = false; }
     else if (s && s.situacao === 'bloqueado' && s.motivo) { el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false; }
-    else if (s && s.situacao === 'a-empenhar' && s.motivoFila) { el.textContent = '⏸ Fora do lote: ' + s.motivoFila; el.hidden = false; }
+    else if (s && (s.situacao === 'a-empenhar' || s.situacao === 'fora-do-script') && s.motivoFila) { el.textContent = '⏸ ' + (s.situacao === 'fora-do-script' ? '' : 'Fora do lote: ') + s.motivoFila; el.hidden = false; }
     else el.hidden = true;
   });
 }
