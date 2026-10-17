@@ -588,7 +588,7 @@ function desenharFolhaProc(p){
   ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
   sv.onclick=function(){var v=ta.value.trim().replace(/\s+/g,' ').toUpperCase();sv.disabled=true;sv.textContent='Salvando…';
     api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{descricaoSugerida:v},mesclar:true,autor:'thiago-celular',motivo:'descrição corrigida no celular'}}).then(function(j){
-      if(j.ok){toast('Descrição salva · o lote usa a nova');S.descSalva={hash:p.hash,em:Date.now()};carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n){marcarConf(n,true);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}listaProc();});}
+      if(j.ok){toast('Descrição salva · o Conferente reconfere em cerca de 1 min');S.descSalva={hash:p.hash,em:Date.now()};carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n){marcarConf(n,true);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}listaProc();});}
       else{toast('Não salvou: '+(j.error||'erro'));sv.disabled=false;sv.textContent='Salvar descrição';}
     }).catch(function(){toast('Sem conexão - não salvou');sv.disabled=false;sv.textContent='Salvar descrição';});};
   $('#confP').onclick=function(){marcarConf(p,!conferida(p));desenharFolhaProc(p);desenharProcessos();};
