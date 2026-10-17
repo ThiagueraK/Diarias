@@ -1,0 +1,14 @@
+{
+  "name": "Equipe SGD",
+  "short_name": "Equipe SGD",
+  "description": "Bots do SGD-Diárias: CP ao vivo, processos, atividade e conversa com o Coordenador.",
+  "start_url": "./equipe.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f3f30",
+  "theme_color": "#0f3f30",
+  "icons": [
+    { "src": "equipe-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "equipe-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
