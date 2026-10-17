@@ -172,6 +172,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .proc .t1{display:flex;justify-content:space-between;gap:8px;align-items:center}
 .proc .t1 b{font-size:14px;font-weight:600}
 .proc p{margin:0;font-size:12.5px;color:var(--muted)}
+/* 17/10/2026: conferir a descrição antes do lote */
+.proc[data-ph]{cursor:pointer;text-align:left;font:inherit;color:inherit}
+.proc .desc{font-size:12.5px;color:var(--ink);opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.conf{font:600 11px var(--sans);color:var(--pine);background:var(--mint-soft);border-radius:8px;padding:2px 7px;white-space:nowrap}
+.campos-p{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.campos-p span{color:var(--muted)}
+.folha textarea{width:100%;min-height:110px;border:1px solid var(--line2);border-radius:12px;padding:10px;font:15px/1.4 var(--sans);background:var(--surface2);color:var(--ink);resize:vertical}
+.cp-txt{font:12.5px/1.45 var(--mono);background:var(--surface2);border-radius:12px;padding:10px;white-space:pre-wrap;word-break:break-word}
+.rot-f{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:-6px}
 .proc code{font:12px var(--mono);color:var(--dim)}
 .mot{font-size:12.5px;color:var(--amber);background:var(--amber-soft);border-radius:8px;padding:5px 8px}
 .mot.az{color:var(--blue);background:var(--blue-soft)} .mot.vm{color:var(--red);background:var(--red-soft)}
@@ -342,6 +351,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <button type="button" role="tab" aria-selected="false" data-p="equipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5M15 15c3 0 6 1.5 6 4"/></svg>Equipe</button>
  </nav>
 
+ <div class="veu" id="veuProc" hidden><div class="folha" role="dialog" aria-label="Conferir processo"><div class="puxador"></div><div id="folhaProc" style="display:grid;gap:12px"></div></div></div>
  <div class="veu" id="veuCp" hidden><div class="folha" role="dialog" aria-label="Pedido ao CP"><div class="puxador"></div><div id="folhaCp"></div><div class="botoes"><button type="button" data-fecha="veuCp">Fechar</button></div></div></div>
  <div class="veu" id="veuPedir" hidden><div class="folha" role="dialog" aria-label="Pedir ao CP"><div class="puxador"></div><div id="folhaPedir"></div></div></div>
  <div class="toast" id="toast" hidden></div>
@@ -544,7 +554,8 @@ function desenharProcessos(){
   $('#problemas').innerHTML=(A.length?'<div class="rot">Antes do empenho · fora do lote</div>'+A.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.processo)+' · '+esc(curto(x.servidor))+'</b><span class="st-p '+x.estado+'">'+(x.estado==='conferindo'?'conferindo':'fora do lote')+'</span></div><div class="mot'+(x.estado==='conferindo'?' az':'')+'">'+esc(x.motivo)+'</div></div>';}).join(''):'')
     +(Dp.length?'<div class="rot" style="margin-top:4px">Depois do empenho</div>'+Dp.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.titulo)+'</b><span class="st-p fora">'+esc(x.tipo)+'</span></div><div class="mot '+(cor[x.tipo]||'')+'">'+esc(x.texto)+'</div></div>';}).join(''):'')
     ||'<div class="vazio">Nenhum problema a resolver ✓</div>';
-  var f=[['todos','A empenhar',pr.aEmpenhar],['pronto','Prontos',pr.prontos],['fora','Fora do lote',pr.fora],['conferindo','Conferindo',pr.conferindo]];
+  var aConf=pr.itens.filter(function(p){return p.descricao&&!conferida(p);}).length;
+  var f=[['todos','A empenhar',pr.aEmpenhar],['pronto','Prontos',pr.prontos],['fora','Fora do lote',pr.fora],['conferindo','Conferindo',pr.conferindo],['aconferir','Descrição a conferir',aConf]];
   $('#filtrosProc').innerHTML=f.map(function(x){return '<button type="button" aria-pressed="'+(S.filtroP===x[0])+'" data-pf="'+x[0]+'">'+x[1]+' · '+x[2]+'</button>';}).join('');
   $$('[data-pf]').forEach(function(b){b.onclick=function(){S.filtroP=b.dataset.pf;desenharProcessos();};});
   listaProc();
@@ -552,10 +563,37 @@ function desenharProcessos(){
 function curto(n){var p=String(n||'').split(' ');return p.length>2?p[0]+' '+p[p.length-1]:String(n||'');}
 function listaProc(){
   var P=S.painel; if(!P)return; var q=($('#busca').value||'').toLowerCase(), o={fora:0,conferindo:1,pronto:2};
-  var it=P.processos.itens.filter(function(p){return (S.filtroP==='todos'||p.estado===S.filtroP)&&(!q||(p.processo+' '+p.servidor+' '+p.cidade).toLowerCase().indexOf(q)>=0);}).sort(function(a,b){return o[a.estado]-o[b.estado];});
-  $('#listaProc').innerHTML=it.map(function(p){return '<div class="proc"><div class="t1"><b>'+esc(p.servidor)+'</b><span class="st-p '+p.estado+'">'+({pronto:'pronto',fora:'fora do lote',conferindo:'conferindo'})[p.estado]+'</span></div><p><code>'+esc(p.processo)+'</code> · '+esc(p.cidade||'?')+' · '+esc(p.saida||'')+(p.chegada&&p.chegada!==p.saida?'–'+esc(p.chegada):'')+(p.valor?' · '+real(p.valor):'')+'</p>'+(p.motivo?'<div class="mot">'+esc(p.motivo)+'</div>':'')+'</div>';}).join('')||'<div class="vazio">Nenhum processo com esse filtro.</div>';
+  var it=P.processos.itens.filter(function(p){return (S.filtroP==='todos'||p.estado===S.filtroP||S.filtroP==='aconferir'&&p.descricao&&!conferida(p))&&(!q||(p.processo+' '+p.servidor+' '+p.cidade).toLowerCase().indexOf(q)>=0);}).sort(function(a,b){return o[a.estado]-o[b.estado];});
+  $('#listaProc').innerHTML=it.map(function(p){return '<div class="proc" role="button" tabindex="0" data-ph="'+esc(p.hash)+'"><div class="t1"><b>'+esc(p.servidor)+'</b><span style="display:flex;gap:6px;align-items:center">'+(conferida(p)?'<span class="conf">✓ conferida</span>':'')+'<span class="st-p '+p.estado+'">'+({pronto:'pronto',fora:'fora do lote',conferindo:'conferindo'})[p.estado]+'</span></span></div><p><code>'+esc(p.processo)+'</code> · '+esc(p.cidade||'?')+' · '+esc(p.saida||'')+(p.chegada&&p.chegada!==p.saida?'–'+esc(p.chegada):'')+(p.valor?' · '+real(p.valor):'')+'</p>'+(p.descricao?'<div class="desc">'+esc(p.descricao)+'</div>':'<div class="mot">sem descrição lida</div>')+(p.motivo?'<div class="mot">'+esc(p.motivo)+'</div>':'')+'</div>';}).join('')||'<div class="vazio">Nenhum processo com esse filtro.</div>';
+  $$('#listaProc [data-ph]').forEach(function(el){var abre=function(){abrirProc(el.dataset.ph);};el.onclick=abre;el.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();abre();}};});
 }
 $('#busca').addEventListener('input',listaProc);
+// 17/10/2026: conferir a descrição antes do lote. "Conferida" fica guardado SÓ neste celular (por processo + texto do CP:
+// se a descrição mudar, volta a pedir conferência).
+function chaveConf(p){var t=String(p.descricaoCp||p.descricao||''),h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return 'conf:'+p.hash+':'+h;}
+function conferida(p){try{return localStorage.getItem(chaveConf(p))==='1';}catch(e){return false;}}
+function marcarConf(p,v){try{if(v)localStorage.setItem(chaveConf(p),'1');else localStorage.removeItem(chaveConf(p));}catch(e){}}
+function abrirProc(hash){var p=(S.painel.processos.itens||[]).filter(function(x){return x.hash===hash;})[0];if(!p)return;S.procAberto=hash;desenharFolhaProc(p);$('#veuProc').hidden=false;}
+function desenharFolhaProc(p){
+  var el=$('#folhaProc'), lin=function(r,v){return v?'<span>'+r+'</span><b style="font-weight:500">'+esc(v)+'</b>':'';};
+  el.innerHTML='<h3>'+esc(p.servidor)+'</h3><div class="campos-p">'+lin('Processo',p.processo)+lin('Destino',(p.cidade||'?')+(p.uf&&p.uf!=='RS'?'/'+p.uf:''))+lin('Saída',(p.saida||'')+(p.horaSaida?' '+p.horaSaida:''))+lin('Chegada',(p.chegada||'')+(p.horaChegada?' '+p.horaChegada:''))+lin('Placa',p.placa)+lin('Valor',p.valor?real(p.valor):'')+lin('Situação',({pronto:'pronto p/ lote',fora:'fora do lote',conferindo:'conferindo'})[p.estado])+'</div>'
+    +(p.motivo?'<div class="mot">'+esc(p.motivo)+'</div>':'')
+    +'<div class="rot-f">Descrição do processo'+(p.descricaoCorrigida?' · corrigida':'')+'</div><label for="descP" style="position:absolute;left:-9999px">Descrição</label><textarea id="descP" maxlength="600">'+esc(p.descricao||'')+'</textarea>'
+    +'<div class="rot-f">Vai para o CP assim</div><div class="cp-txt" id="cpP">'+esc(p.descricaoCp||'(sem descrição - o lote não monta o texto)')+'</div>'
+    +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Conferida</button>')+'</div>'
+    +'<div class="botoes">'+(p.descricaoCorrigida?'<button type="button" id="voltarP">Voltar ao lido</button>':'')+'<button type="button" id="fecharP">Fechar</button></div>';
+  var ta=$('#descP'), sv=$('#salvarP');
+  ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
+  sv.onclick=function(){var v=ta.value.trim().replace(/\s+/g,' ').toUpperCase();sv.disabled=true;sv.textContent='Salvando…';
+    api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{descricaoSugerida:v},mesclar:true,autor:'thiago-celular',motivo:'descrição corrigida no celular'}}).then(function(j){
+      if(j.ok){toast('Descrição salva · o lote usa a nova');S.descSalva={hash:p.hash,em:Date.now()};carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n){marcarConf(n,true);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}listaProc();});}
+      else{toast('Não salvou: '+(j.error||'erro'));sv.disabled=false;sv.textContent='Salvar descrição';}
+    }).catch(function(){toast('Sem conexão - não salvou');sv.disabled=false;sv.textContent='Salvar descrição';});};
+  $('#confP').onclick=function(){marcarConf(p,!conferida(p));desenharFolhaProc(p);desenharProcessos();};
+  var vt=$('#voltarP'); if(vt)vt.onclick=function(){vt.disabled=true;api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{},limpar:['descricaoSugerida'],mesclar:true,autor:'thiago-celular',motivo:'descrição voltou ao lido pelo celular'}}).then(function(j){if(j.ok){toast('Voltou à descrição lida do processo');carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);listaProc();});}else{toast('Não deu: '+(j.error||'erro'));vt.disabled=false;}});};
+  $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
+}
+$('#veuProc').addEventListener('click',function(e){if(e.target.id==='veuProc'){$('#veuProc').hidden=true;S.procAberto=null;}});
 
 // ---------- atividade ----------
 function desenharAtividade(){
