@@ -574,6 +574,8 @@ $('#busca').addEventListener('input',listaProc);
 function chaveConf(p){var t=String(p.descricaoCp||p.descricao||''),h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return 'conf:'+p.hash+':'+h;}
 function conferida(p){try{return localStorage.getItem(chaveConf(p))==='1';}catch(e){return false;}}
 function marcarConf(p,v){try{if(v)localStorage.setItem(chaveConf(p),'1');else localStorage.removeItem(chaveConf(p));}catch(e){}}
+// 17/10/2026: marcar como conferida pede ao Conferente para reconferir esse processo na hora (resposta chega na Conversa)
+function pedirConferencia(p){api('conferencia-pedir',{body:{hash:p.hash,numeroProcesso:p.processo}}).then(function(j){toast(j.ok?'✓ Conferida · o Conferente reconfere agora e responde na Conversa':'Marquei aqui, mas o pedido ao Conferente falhou: '+(j.error||'erro'));}).catch(function(){toast('Marquei aqui, mas sem conexão para avisar o Conferente');});}
 function abrirProc(hash){var p=(S.painel.processos.itens||[]).filter(function(x){return x.hash===hash;})[0];if(!p)return;S.procAberto=hash;desenharFolhaProc(p);$('#veuProc').hidden=false;}
 function desenharFolhaProc(p){
   var el=$('#folhaProc'), lin=function(r,v){return v?'<span>'+r+'</span><b style="font-weight:500">'+esc(v)+'</b>':'';};
@@ -588,10 +590,11 @@ function desenharFolhaProc(p){
   ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
   sv.onclick=function(){var v=ta.value.trim().replace(/\s+/g,' ').toUpperCase();sv.disabled=true;sv.textContent='Salvando…';
     api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{descricaoSugerida:v},mesclar:true,autor:'thiago-celular',motivo:'descrição corrigida no celular'}}).then(function(j){
-      if(j.ok){toast('Descrição salva · o Conferente reconfere em cerca de 1 min');S.descSalva={hash:p.hash,em:Date.now()};carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n){marcarConf(n,true);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}listaProc();});}
+      if(j.ok){S.descSalva={hash:p.hash,em:Date.now()};carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n){marcarConf(n,true);pedirConferencia(n);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}listaProc();});}
       else{toast('Não salvou: '+(j.error||'erro'));sv.disabled=false;sv.textContent='Salvar descrição';}
     }).catch(function(){toast('Sem conexão - não salvou');sv.disabled=false;sv.textContent='Salvar descrição';});};
-  $('#confP').onclick=function(){marcarConf(p,!conferida(p));desenharFolhaProc(p);desenharProcessos();};
+  $('#confP').onclick=function(){var marcar=!conferida(p);marcarConf(p,marcar);desenharFolhaProc(p);desenharProcessos();
+    if(marcar)pedirConferencia(p);};
   var vt=$('#voltarP'); if(vt)vt.onclick=function(){vt.disabled=true;api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{},limpar:['descricaoSugerida'],mesclar:true,autor:'thiago-celular',motivo:'descrição voltou ao lido pelo celular'}}).then(function(j){if(j.ok){toast('Voltou à descrição lida do processo');carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);listaProc();});}else{toast('Não deu: '+(j.error||'erro'));vt.disabled=false;}});};
   $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
 }
