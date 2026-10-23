@@ -585,6 +585,8 @@ function desenharFolhaProc(p){
     +'<div class="rot-f">Vai para o CP assim</div><div class="cp-txt" id="cpP">'+esc(p.descricaoCp||'(sem descrição - o lote não monta o texto)')+'</div>'
     +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Conferida</button>')+'</div>'
     +'<a class="abrir1doc" href="https://tupancireta.1doc.com.br/?pg=doc/ver&amp;hash='+encodeURIComponent(p.hash)+'&amp;itd=7" target="_blank" rel="noopener">Abrir no 1Doc ↗</a>'
+    // 23/10/2026: "✓ Nota conferida no 1Doc" - libera na hora os apontamentos de nota/roteiro/placa/valor (duplicidade e credor não)
+    +(p.confirmavel?'<div class="botoes"><button type="button" class="sim" id="notaOkP">✓ Nota conferida no 1Doc</button></div><div id="notaOkMsg" style="font-size:12px;color:#dc2626"></div>':'')
     +'<div class="botoes">'+(p.descricaoCorrigida?'<button type="button" id="voltarP">Voltar ao lido</button>':'')+'<button type="button" id="fecharP">Fechar</button></div>';
   var ta=$('#descP'), sv=$('#salvarP');
   ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
@@ -597,6 +599,13 @@ function desenharFolhaProc(p){
     if(marcar)pedirConferencia(p);};
   var vt=$('#voltarP'); if(vt)vt.onclick=function(){vt.disabled=true;api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{},limpar:['descricaoSugerida'],mesclar:true,autor:'thiago-celular',motivo:'descrição voltou ao lido pelo celular'}}).then(function(j){if(j.ok){toast('Voltou à descrição lida do processo');carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);listaProc();});}else{toast('Não deu: '+(j.error||'erro'));vt.disabled=false;}});};
   $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
+  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){nk.disabled=true;nk.textContent='Confirmando…';
+    api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo}}).then(function(j){
+      if(!j.ok){nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent=j.error||'Não foi possível confirmar.';return;}
+      p.confirmavel=false;p.conferencia=j.status;if(j.status==='pronto'){p.estado='pronto';p.motivo=null;}else if(j.restantes&&j.restantes.length)p.motivo='Conferente: '+j.restantes[0];
+      toast(j.status==='pronto'?'✓ '+p.processo+' conferido — pronto para o lote':'✓ Confirmado; ainda falta: '+((j.restantes||[])[0]||''));
+      desenharFolhaProc(p);desenharProcessos();setTimeout(function(){carregarPainel();},1500);
+    }).catch(function(){nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent='Sem conexão - não confirmou';});};
 }
 $('#veuProc').addEventListener('click',function(e){if(e.target.id==='veuProc'){$('#veuProc').hidden=true;S.procAberto=null;}});
 

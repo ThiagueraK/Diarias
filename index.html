@@ -1311,6 +1311,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     .ce-head-row{display:none;}
     .ce-time,.ce-valor{text-align:left;}
   }
+  .proc-conf-acao { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0 2px; }
+  .proc-btn-conferido { padding:6px 12px; border:none; border-radius:8px; background:#16a34a; color:#fff; font-weight:700; font-size:12px; cursor:pointer; }
+  .proc-btn-conferido:disabled { opacity:.6; cursor:default; }
+  .proc-conf-msg { font-size:11px; color:var(--danger,#dc2626); }
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -1365,7 +1369,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.96</span>
+    <span class="header-version">v1.10.97</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3048,8 +3052,35 @@ function procConferenciaHtml(p) {
     var ic = i.nivel === 'ok' ? '✓' : (i.nivel === 'alerta' ? '⛔' : '⚠');
     return '<li class="' + i.nivel + '">' + ic + ' ' + escaparHtmlProc(i.texto) + '</li>';
   }).join('');
-  return '<details class="proc-conf ' + cls + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul></details>';
+  // 23/10/2026: botão "✓ Conferido" - abriu o processo no 1Doc e a nota/roteiro/placa estão ok: vale na hora
+  var confirmavel = c.status !== 'pronto' && (c.itens || []).some(function(i){ return i.nivel !== 'ok' && CONF_REGRAS_MANUAIS.indexOf(i.codigo) >= 0; });
+  var botao = confirmavel ? '<div class="proc-conf-acao"><button type="button" class="proc-btn-conferido" data-hash="' + escaparHtmlProc(p.hash || '') + '" title="Conferi no 1Doc: libera os apontamentos de nota, roteiro, placa e valor. Duplicidade e credor continuam travando.">✓ Conferido no 1Doc</button><span class="proc-conf-msg"></span></div>' : '';
+  return '<details class="proc-conf ' + cls + '" data-conf-hash="' + escaparHtmlProc(p.hash || '') + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul>' + botao + '</details>';
 }
+// mesma lista do Conferente (equipe/conferencia_processos.mjs) e do Worker
+var CONF_REGRAS_MANUAIS = ['ROTEIRO_AUSENTE','AUTORIZACAO_AUSENTE','DESCRICAO_REVISAR','JUSTIFICATIVA_DATA_NAO_CONFIRMADA','NOTA_DATA_ILEGIVEL','NOTA_DATA_AMBIGUA','NOTA_DATA_FORA','NOTA_NAO_IDENTIFICADA','ANEXOS_LEITURA_INDISPONIVEL','PLACA_NOVA','PLACA_FORMATO','PLACA_AUSENTE','VALOR_DIVERGENTE','VALOR_MULTIPLAS_NOITES','VALOR_CIDADE_DESCONHECIDA','VIAGEM_FUTURA_JUSTIFICATIVA_AUSENTE'];
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest && e.target.closest('.proc-btn-conferido');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  var hash = b.dataset.hash, p = (processosCaixaAtual || []).filter(function(x){ return x.hash === hash; })[0];
+  var msg = b.parentNode.querySelector('.proc-conf-msg');
+  b.disabled = true; b.textContent = 'Confirmando…'; if (msg) msg.textContent = '';
+  sgdFetch(SGD_WORKER_URL + '?action=conferencia-confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, numeroProcesso: p && p.numeroProcesso }) })
+  .then(function(r){ return r.json(); }).then(function(res){
+    if (!res.ok) { b.disabled = false; b.textContent = '✓ Conferido no 1Doc'; if (msg) msg.textContent = res.error || 'Não foi possível confirmar.'; return; }
+    if (p) p.conferencia = res.conferencia;
+    var el = document.querySelector('.proc-conf[data-conf-hash="' + hash + '"]');
+    if (el && p) { var t = document.createElement('div'); t.innerHTML = procConferenciaHtml(p); el.replaceWith(t.firstChild); }
+    // a situação no lote: na hora pelo resultado; logo em seguida o Worker confirma (credor e valor também contam)
+    window._situacaoCaixa = window._situacaoCaixa || {};
+    var s = window._situacaoCaixa[hash];
+    if (s && s.situacao === 'a-empenhar') { if (res.status === 'pronto') { s.prontoLote = true; s.motivoFila = ''; } aplicarSituacaoNosCards(); }
+    _ultimaAssinaturaCaixa = null;
+    if (typeof mostrarAvisoRapido === 'function') mostrarAvisoRapido(res.status === 'pronto' ? '✓ ' + ((p && p.numeroProcesso) || 'Processo') + ' conferido — pronto para o lote' : '✓ Confirmado; ainda falta: ' + (res.restantes || [])[0]);
+    setTimeout(atualizarResumoSituacaoCaixa, 300);
+  }).catch(function(err){ b.disabled = false; b.textContent = '✓ Conferido no 1Doc'; if (msg) msg.textContent = 'Erro: ' + err.message; });
+});
 var SIT_ROTULO = { 'ja-empenhado': 'Já empenhado (fora da Tabela)', 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
 function aplicarSituacaoNosCards() {
   var mapa = window._situacaoCaixa || {};
