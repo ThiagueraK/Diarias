@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.93</span>
+    <span class="header-version">v1.10.94</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2128,6 +2128,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 // ═══════════════════════════════════════════════════════
 var SGD_WORKER_URL = 'https://diarias.aceitacoes.workers.dev';
 var SGD_TOKEN_KEY = 'sgd_token';
+// 23/10/2026: as atualizações periódicas não rodam com a aba do navegador escondida (voltam na hora ao reabrir)
+function soVisivel(fn) { return function() { if (!document.hidden) fn(); }; }
 
 function sgdGetToken() {
   return localStorage.getItem(SGD_TOKEN_KEY) || '';
@@ -3067,9 +3069,28 @@ function aplicarSituacaoNosCards() {
 }
 // Casa uma hash de processo com uma linha já lançada na Tabela de Controle (adicionarProcesso
 // já grava hash1doc em cada linha nova — ver pendente.hash1doc na função gerar()).
+// 23/10/2026: índices da Tabela pros cards da caixa (antes, processos.find nas ~3.000 linhas para cada card).
+// Refeitos se a Tabela mudou de tamanho/objeto ou a cada 1 s (edições dentro de uma linha).
+var _indicesTabela = { ref: null, n: -1, em: 0, porHash: null, porChave: null };
+function indicesTabela() {
+  var ix = _indicesTabela;
+  if (ix.ref !== processos || ix.n !== processos.length || Date.now() - ix.em > 1000) {
+    var porHash = new Map(), porChave = new Map();
+    processos.forEach(function(tc){
+      if (tc.hash1doc && !porHash.has(tc.hash1doc)) porHash.set(tc.hash1doc, tc);
+      if (tc.servidor && tc.dataSaida && tc.cidade) {
+        var k = tc.servidor.trim().toUpperCase() + '|' + tc.dataSaida + '|' + tc.cidade.trim().toUpperCase();
+        if (!porChave.has(k)) porChave.set(k, []);
+        porChave.get(k).push(tc);
+      }
+    });
+    _indicesTabela = ix = { ref: processos, n: processos.length, em: Date.now(), porHash: porHash, porChave: porChave };
+  }
+  return ix;
+}
 function empenhoJaLancado(hash) {
   if (!hash) return null;
-  return processos.find(function(tc){ return tc.hash1doc === hash; }) || null;
+  return indicesTabela().porHash.get(hash) || null;
 }
 // 30/08/2026: pedido do usuário — achar processo que PARECE já estar na Tabela de Controle
 // mas sem a hash gravada certa (ex: linha adicionada por um caminho antigo/manual, sem
@@ -3079,14 +3100,9 @@ function empenhoJaLancado(hash) {
 // mesmo dia). Decisão fica com o usuário — ver botão "Já lançado, remover" no card.
 function possivelDuplicataSemHash(p) {
   if (!p.servidor || !p.dataSaida || !p.cidade) return null;
-  return processos.find(function(tc) {
-    if (tc.hash1doc === p.hash) return false; // essa já é pega pelo empenhoJaLancado normal
-    var mesmoCred = tc.servidor && tc.servidor.trim().toUpperCase() === p.servidor.trim().toUpperCase();
-    var mesmaData = tc.dataSaida && tc.dataSaida === p.dataSaida;
-    var cidadeP = (p.cidade + (p.uf ? '/' + p.uf : '')).trim().toUpperCase();
-    var mesmaCid = tc.cidade && tc.cidade.trim().toUpperCase() === cidadeP;
-    return mesmoCred && mesmaData && mesmaCid;
-  }) || null;
+  var cidadeP = (p.cidade + (p.uf ? '/' + p.uf : '')).trim().toUpperCase();
+  var lista = indicesTabela().porChave.get(p.servidor.trim().toUpperCase() + '|' + p.dataSaida + '|' + cidadeP) || [];
+  return lista.find(function(tc) { return tc.hash1doc !== p.hash; }) || null; // a de mesma hash já é pega pelo empenhoJaLancado
 }
 
 function sgdToggleForaDoScript(alvo) {
@@ -3538,7 +3554,7 @@ document.addEventListener('click', function(ev) {
 document.addEventListener('input', function(ev) {
   if (ev.target && ev.target.id === 'ce-busca') { ceBusca = ceNormal(ev.target.value.trim()); prxLimite = 24; ceRender(); }
 });
-setInterval(carregarEmpenhosAndamento, 15000);
+setInterval(soVisivel(carregarEmpenhosAndamento), 15000);
 
 // 08/10/2026: ABA EQUIPE - bots, conversa com o Coordenador e quadro (rotas equipe-* do Worker)
 // 10/10/2026: visual novo (Stitch, adaptado): indicadores, propostas aguardando, cartão por agente com números
@@ -4072,7 +4088,7 @@ function carregarEquipe() {
   }).catch(function() { document.getElementById('eq-atualizado').textContent = 'sem conexão com o servidor'; })
     .finally(function() { eqAtualizando = false; });
 }
-setInterval(carregarEquipe, 6000);
+setInterval(soVisivel(carregarEquipe), 6000);
 setTimeout(carregarEquipe, 1200);
 document.addEventListener('submit', function(ev) {
   if (!ev.target || ev.target.id !== 'eq-form') return;
@@ -4117,6 +4133,8 @@ function atualizarListaProcessosCaixaSilenciosamente() {
   // não atualiza por cima enquanto uma varredura ativa está em andamento (o botão
   // "Varrer caixa agora" cuida do próprio ciclo de espera/renderização nesse caso).
   if (procPollingTimer) return;
+  if (_caixaListaEmVoo) return; // 23/10/2026: a anterior ainda não voltou - não empilha outra
+  _caixaListaEmVoo = true;
   sgdFetch(SGD_WORKER_URL + '?action=processos-caixa-listar')
   .then(function(r){ return r.json(); })
   .then(function(res){
@@ -4128,10 +4146,15 @@ function atualizarListaProcessosCaixaSilenciosamente() {
     _ultimaAssinaturaCaixa = assinatura;
     renderProcessosCaixa(res.itens, res.atualizadoEm);
   })
-  .catch(function(){});
+  .catch(function(){})
+  .finally(function(){ _caixaListaEmVoo = false; });
 }
-var _ultimaAssinaturaCaixa = null;
-setInterval(atualizarListaProcessosCaixaSilenciosamente, 6000);
+var _ultimaAssinaturaCaixa = null, _caixaListaEmVoo = false;
+setInterval(soVisivel(atualizarListaProcessosCaixaSilenciosamente), 6000);
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) return;
+  atualizarListaProcessosCaixaSilenciosamente(); carregarEquipe(); carregarEmpenhosAndamento(); cpAtualizarEstado(); atualizarResumoSituacaoCaixa();
+});
 
 // 07/10/2026: botão "Corrigir" dos cards - edita o que a varredura leu errado. Fica guardado no
 // servidor (próxima varredura não desfaz; o script do CP já pega o corrigido). Campo vazio = volta ao lido.
@@ -4215,7 +4238,7 @@ function atualizarResumoSituacaoCaixa() {
   })
   .catch(function(){});
 }
-setInterval(atualizarResumoSituacaoCaixa, 30000);
+setInterval(soVisivel(atualizarResumoSituacaoCaixa), 30000);
 setTimeout(atualizarResumoSituacaoCaixa, 2500);
 document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(atualizarResumoSituacaoCaixa, 800); });
 
@@ -4617,12 +4640,12 @@ document.getElementById('cp-btn-empenho').addEventListener('click', function(){ 
 document.getElementById('cp-btn-prestacao').addEventListener('click', function(){ cpPedir('prestacao'); });
 ['cp-qtd-empenho', 'cp-qtd-prestacao'].forEach(function(id){ document.getElementById(id).addEventListener('input', function(){ this.dataset.mexido = '1'; }); });
 document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(cpAtualizarEstado, 600); setTimeout(cpAtualizarContagens, 900); });
-setInterval(cpAtualizarEstado, 10000);
-setInterval(cpAtualizarContagens, 2 * 60000);
+setInterval(soVisivel(cpAtualizarEstado), 10000);
+setInterval(soVisivel(cpAtualizarContagens), 2 * 60000);
 setTimeout(function(){ cpAtualizarEstado(); cpAtualizarContagens(); }, 2000);
 setTimeout(atualizarContadorGuardados, 1500);
 // 07/10/2026: 15 s com a aba Processos aberta (antes 5 min - o botão "Encaminhar (N)" só aparecia com refresh)
-setInterval(function(){ var pp = document.getElementById('panel-processos'); if (pp && pp.classList.contains('active')) atualizarContadorGuardados(); }, 15000);
+setInterval(function(){ var pp = document.getElementById('panel-processos'); if (!document.hidden && pp && pp.classList.contains('active')) atualizarContadorGuardados(); }, 15000);
 document.addEventListener('visibilitychange', function(){ if (!document.hidden) atualizarContadorGuardados(); });
 
 // Botão "📥 Varrer caixa do Marcos" (03/09/2026) — sistema totalmente separado (backend
@@ -5168,10 +5191,12 @@ function cpaCarregarCentral() {
 }
 setInterval(function() {
   if (!sgdGetToken()) return;
-  if (cpaAtiva() || Date.now() - cpaUltimaCarga > 20000) cpaCarregar();
+  // escondida: só segue (a cada 20 s) se os avisos do navegador estão ligados - é pra isso que eles servem
+  if (document.hidden && !cpaAvisosLigados()) return;
+  if ((cpaAtiva() && !document.hidden) || Date.now() - cpaUltimaCarga > 20000) cpaCarregar();
 }, 4000);
-setInterval(function() { if (cpaAtiva()) cpaCarregarCentral(); }, 20000);
-setInterval(function() { if (cpaAtiva() && cpaDados) { cpaDados.agora = (cpaDados.agora || Date.now()) + 1000; cpaRender(); } }, 1000);
+setInterval(function() { if (cpaAtiva() && !document.hidden) cpaCarregarCentral(); }, 20000);
+setInterval(function() { if (cpaAtiva() && cpaDados && !document.hidden) { cpaDados.agora = (cpaDados.agora || Date.now()) + 1000; cpaRender(); } }, 1000);
 function cpaAtualizarBotaoAvisos() {
   document.getElementById('cpa-avisos').textContent = cpaAvisosLigados() ? '🔔 Avisos: ligados' : '🔕 Avisos: desligados';
 }
