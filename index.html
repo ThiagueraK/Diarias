@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.95</span>
+    <span class="header-version">v1.10.96</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2645,6 +2645,8 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
   var cacheado = p.hash && _fechamentoPorHash[p.hash];
   // 30/09/2026: se o valor do item mudou (ex.: pernoite por nota de hotel), refaz o texto
   if (cacheado && (cacheado.valor || null) !== (p.valorSugerido ? Number(p.valorSugerido) : null)) cacheado = null;
+  // 23/10/2026: descrição ou cidade corrigida (botão Corrigir) também refaz - antes o card só mostrava depois do F5
+  if (cacheado && (cacheado.base !== p.descricaoCompletaBase || cacheado.cidade !== p.cidade)) cacheado = null;
   if (cacheado) {
     p.kmCalculado = cacheado.km;
     p.descricaoCompletaFinal = cacheado.descricaoCompletaFinal;
@@ -2664,7 +2666,7 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     if (kmElMun) kmElMun.textContent = textoMun;
     var elMun = document.getElementById('proc-desc-' + idx);
     if (elMun) elMun.textContent = descMun;
-    if (p.hash) _fechamentoPorHash[p.hash] = { km: 0, descricaoCompletaFinal: descMun, textoKm: textoMun, valor: p.valorSugerido ? Number(p.valorSugerido) : null };
+    if (p.hash) _fechamentoPorHash[p.hash] = { base: p.descricaoCompletaBase, cidade: p.cidade, km: 0, descricaoCompletaFinal: descMun, textoKm: textoMun, valor: p.valorSugerido ? Number(p.valorSugerido) : null };
     pronto(false);
     return;
   }
@@ -2682,7 +2684,7 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
     var textoKmCap = '376 km de Tupanciretã — Capital do Estado (R$ ' + Number(p.valorSugerido || 581.52).toFixed(2).replace('.', ',') + ')';
     var kmElCap = document.getElementById('proc-km-' + idx);
     if (kmElCap) kmElCap.textContent = textoKmCap;
-    if (p.hash) _fechamentoPorHash[p.hash] = { km: 376, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKmCap, valor: p.valorSugerido ? Number(p.valorSugerido) : null };
+    if (p.hash) _fechamentoPorHash[p.hash] = { base: p.descricaoCompletaBase, cidade: p.cidade, km: 376, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKmCap, valor: p.valorSugerido ? Number(p.valorSugerido) : null };
     pronto(false);
     return;
   }
@@ -2720,7 +2722,7 @@ function fecharDescricaoProcessoComKm(idx, aoTerminar) {
         : (kmRegra > 350 ? ' — diária >350km (R$ 190,31)' : ' — diária até 350km (R$ 148,02)'))) : 'não foi possível calcular a distância — revisar classificação manualmente';
     var kmEl = document.getElementById('proc-km-' + idx);
     if (kmEl) kmEl.textContent = textoKm;
-    if (p.hash) _fechamentoPorHash[p.hash] = { km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm, valor: valorItem };
+    if (p.hash) _fechamentoPorHash[p.hash] = { base: p.descricaoCompletaBase, cidade: p.cidade, km: km, descricaoCompletaFinal: p.descricaoCompletaFinal, textoKm: textoKm, valor: valorItem };
     pronto(false);
   });
 }
@@ -4199,6 +4201,8 @@ function abrirCorrecaoCard(idx) {
       if (!res.ok) { document.getElementById('corrigir-erro').textContent = res.error || 'Não foi possível salvar.'; b.disabled = false; b.textContent = 'Salvar correção'; return; }
       div.remove();
       _ultimaAssinaturaCaixa = null;
+      if (p.hash) delete _fechamentoPorHash[p.hash];
+      _caixaListaEmVoo = false;   // a consulta de agora não pode ser pulada por uma que ainda está em voo
       if (typeof atualizarListaProcessosCaixaSilenciosamente === 'function') atualizarListaProcessosCaixaSilenciosamente();
       if (typeof mostrarAvisoRapido === 'function') mostrarAvisoRapido('✏️ Correção salva no processo ' + (p.numeroProcesso || ''));
     }).catch(function(e){ document.getElementById('corrigir-erro').textContent = 'Erro: ' + e.message; b.disabled = false; b.textContent = 'Salvar correção'; });
