@@ -1365,7 +1365,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.91</span>
+    <span class="header-version">v1.10.92</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -6587,11 +6587,61 @@ function adicionarProcesso(dados) {
 // "Substituir tudo" só no importar/restaurar backup (confirmados na tela).
 var processosRemovidos = [];
 var substituirProximoSalvar = false;
+// 23/10/2026: salvamento PARCIAL - guarda como cada linha estava no último sincronismo e manda só as que mudaram
+// (antes cada edição subia a Tabela inteira, 1,6 MB). "Substituir tudo" (backup) continua mandando tudo.
+var _linhasSincronizadas = new Map(), _metaSincronizada = null;
+function marcarSincronizado(lista, zerar) {
+  if (zerar) _linhasSincronizadas = new Map();
+  (lista || []).forEach(function(p){ if (p && p.id != null) _linhasSincronizadas.set(String(p.id), JSON.stringify(p)); });
+}
 function salvar() {
   atualizarBackupInfo();
   salvarComRetry(0);
 }
 function salvarComRetry(tentativa) {
+  if (substituirProximoSalvar || processos.some(function(p){ return !p || p.id == null; })) return salvarTudoComRetry(tentativa);
+  var removidosEnviados = processosRemovidos.slice();
+  var alterados = [], jsons = [];
+  processos.forEach(function(p){
+    var j = JSON.stringify(p);
+    if (_linhasSincronizadas.get(String(p.id)) !== j) { alterados.push(p); jsons.push(j); }
+  });
+  var metaJson = JSON.stringify(sgdMeta);
+  var corpo = { alterados: alterados, removidos: removidosEnviados, idsConhecidos: processos.map(function(p){ return p.id; }) };
+  if (metaJson !== _metaSincronizada) corpo.meta = sgdMeta;
+  if (!alterados.length && !removidosEnviados.length && corpo.meta === undefined) return;
+  sgdFetch('https://diarias.aceitacoes.workers.dev?action=salvar-parcial', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(corpo)
+  }).then(function(r){
+    if (!r.ok) throw new Error('status ' + r.status);
+    return r.json();
+  }).then(function(res){
+    if (!res || !res.ok) throw new Error((res && res.error) || 'resposta inválida');
+    alterados.forEach(function(p, i){ _linhasSincronizadas.set(String(p.id), jsons[i]); });
+    removidosEnviados.forEach(function(id){ _linhasSincronizadas.delete(String(id)); });
+    if (corpo.meta !== undefined) _metaSincronizada = metaJson;
+    processosRemovidos = processosRemovidos.filter(function(id){ return removidosEnviados.indexOf(id) < 0; });
+    if (Array.isArray(res.novos) && res.novos.length) {
+      // linhas registradas pelo robô depois que a página abriu
+      var conhecidos = new Set(processos.map(function(p){ return String(p.id); }));
+      var novos = res.novos.filter(function(p){ return !conhecidos.has(String(p.id)); });
+      processos = processos.concat(novos);
+      marcarSincronizado(novos);
+      try { atualizarBadge(); } catch (e) {}
+      try { if (typeof renderTabela === 'function') renderTabela(); } catch (e) {}
+    }
+  }).catch(function(e){
+    console.log('Sync KV falhou (tentativa ' + (tentativa + 1) + '):', e.message);
+    if (tentativa < 3) {
+      setTimeout(function(){ salvarComRetry(tentativa + 1); }, 1500 * (tentativa + 1));
+    } else {
+      avisarFalhaAoSalvar(e.message);
+    }
+  });
+}
+function salvarTudoComRetry(tentativa) {
   var removidosEnviados = processosRemovidos.slice();
   var substituir = substituirProximoSalvar;
   sgdFetch('https://diarias.aceitacoes.workers.dev?action=salvar', {
@@ -6604,16 +6654,18 @@ function salvarComRetry(tentativa) {
   }).then(function(res){
     processosRemovidos = processosRemovidos.filter(function(id){ return removidosEnviados.indexOf(id) < 0; });
     if (substituir) substituirProximoSalvar = false;
+    marcarSincronizado(processos, true); _metaSincronizada = JSON.stringify(sgdMeta);
     if (res && Array.isArray(res.processos)) {
       // havia linhas registradas pelo robô que esta página não conhecia: passa a usar a Tabela mesclada
       processos = res.processos;
+      marcarSincronizado(processos, true);
       try { atualizarBadge(); } catch (e) {}
       try { if (typeof renderTabela === 'function') renderTabela(); } catch (e) {}
     }
   }).catch(function(e){
     console.log('Sync KV falhou (tentativa ' + (tentativa + 1) + '):', e.message);
     if (tentativa < 3) {
-      setTimeout(function(){ salvarComRetry(tentativa + 1); }, 1500 * (tentativa + 1));
+      setTimeout(function(){ salvarTudoComRetry(tentativa + 1); }, 1500 * (tentativa + 1));
     } else {
       avisarFalhaAoSalvar(e.message);
     }
@@ -7655,6 +7707,7 @@ sgdFetch('https://diarias.aceitacoes.workers.dev?action=carregar')
 .then(function(data) {
   processos = data.processos || [];
   sgdMeta = data.meta || {};
+  marcarSincronizado(processos, true); _metaSincronizada = JSON.stringify(sgdMeta);
 })
 .catch(function() {
   processos = [];
