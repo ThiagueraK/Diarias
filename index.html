@@ -1369,7 +1369,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.97</span>
+    <span class="header-version">v1.10.98</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -5282,7 +5282,7 @@ function carregarSolicitacoesBot() {
       // ao adicionar um processo (credor + data de saída) — sem isso é fácil relançar a
       // mesma diária sem perceber que já tinha sido feita.
       var jaNaTabela = processos.find(function(p){
-        return p.servidor && normalizarNome(p.servidor) === normalizarNome(s.nome) && p.dataSaida === s.dataSaida;
+        return p.servidor && p.dataSaida === s.dataSaida && pessoaCanonica(p.servidor) === pessoaCanonica(s.nome);
       });
       var tabelaTag = jaNaTabela
         ? '<span onclick="abrirProcessoNaTabela('+jaNaTabela.id+')" title="Clique para ver na Tabela de Controle" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,235,.12);color:var(--accent2);border:1px solid rgba(37,99,235,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">✅ Já na tabela</span>'
@@ -6826,8 +6826,8 @@ function renderTabela() {
   var todosServs = {};
   processos.forEach(function(p){
     if (p.servidor) {
-      var chave = normalizarNome(p.servidor);
-      if (chave && !todosServs[chave]) todosServs[chave] = chave; // exibe a versão normalizada (padronizada)
+      var chave = pessoaCanonica(p.servidor);   // 23/10/2026: uma opção por pessoa (todas as grafias juntas)
+      if (chave && !todosServs[chave]) todosServs[chave] = chave;
     }
   });
   if (selectServ) {
@@ -6842,7 +6842,7 @@ function renderTabela() {
 
   if (selectedServ) {
     filtrados = filtrados.filter(function(p){
-      return p.servidor && normalizarNome(p.servidor) === selectedServ;
+      return p.servidor && pessoaCanonica(p.servidor) === selectedServ;
     });
   }
 
@@ -7145,7 +7145,7 @@ document.getElementById('btnNotificarPagamentos') && document.getElementById('bt
   // 3) Agrupar por servidor e montar resumo
   var porServidor = {};
   doDia.forEach(function(p){
-    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
+    var s = p.servidor ? pessoaCanonica(p.servidor) : 'SEM NOME';
     if (!porServidor[s]) porServidor[s] = [];
     porServidor[s].push(p);
   });
@@ -7245,7 +7245,7 @@ document.getElementById('btnNotificarEmpenhos') && document.getElementById('btnN
   // 3) Agrupar por servidor e montar resumo
   var porServidor = {};
   doDia.forEach(function(p){
-    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
+    var s = p.servidor ? pessoaCanonica(p.servidor) : 'SEM NOME';
     if (!porServidor[s]) porServidor[s] = [];
     porServidor[s].push(p);
   });
@@ -8276,7 +8276,7 @@ function getProcessosFiltradosRelatorio() {
       if (dataInicio && dia < dataInicio) return false;
       if (dataFim && dia > dataFim) return false;
     }
-    if (servidor && (!p.servidor || normalizarNome(p.servidor) !== servidor)) return false;
+    if (servidor && (!p.servidor || pessoaCanonica(p.servidor) !== servidor)) return false;
     if (cidade && (!p.cidade || p.cidade.trim().toUpperCase() !== cidade)) return false;
     if (statusPC === 'ok' && !p.pcOk) return false;
     if (statusPC === 'pendente' && p.pcOk) return false;
@@ -8290,7 +8290,7 @@ function getProcessosFiltradosRelatorio() {
 function renderRelatorio() {
   var servs = {}, cids = {};
   processos.forEach(function(p){
-    if (p.servidor) servs[normalizarNome(p.servidor)] = true;
+    if (p.servidor) servs[pessoaCanonica(p.servidor)] = true;
     if (p.cidade) cids[p.cidade.trim().toUpperCase()] = true;
   });
   var selServ = document.getElementById('rel-servidor');
@@ -8314,7 +8314,7 @@ function renderRelatorio() {
   ].map(function(x){ return '<div class="rel-card"><div class="rel-card-label">'+x.l+'</div><div class="rel-card-valor"'+x.c+'>'+x.v+'</div></div>'; }).join('');
   var porServ = {};
   filtrados.forEach(function(p){
-    var s = p.servidor ? normalizarNome(p.servidor) : 'SEM NOME';
+    var s = p.servidor ? pessoaCanonica(p.servidor) : 'SEM NOME';
     if (!porServ[s]) porServ[s]={viagens:0,valor:0};
     porServ[s].viagens++;
     porServ[s].valor += sgdValorNum(p.valor);
@@ -8514,6 +8514,35 @@ document.getElementById('rel-data-fim-wrap').style.display='none';
 var editandoId = null;
 
 // Normaliza nome para comparação: remove acentos, maiúsculas, espaços extras
+// 23/10/2026: a MESMA pessoa aparece na Tabela com várias grafias ("DÉLVIO NUNES", "Delvio Augusto Oliveira Nunes"...)
+// e os filtros/relatórios/avisos/"já lançada" separavam como pessoas diferentes. Mesma regra do Worker
+// (nomesCompativeis: 1º nome igual + sobrenomes compatíveis); conferido com os códigos de credor do CP.
+var PARTIC = {DA:1,DAS:1,DE:1,DO:1,DOS:1,E:1,MATR:1};
+function tokensNomeP(nome){ return String(nome||'').replace(/JO�O/gi,'JOAO').replace(/�/g,'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(function(x){ return x && !PARTIC[x]; }); }
+function distEd(a,b){ var d=[],i,j; for(i=0;i<=a.length;i++){d[i]=[i];} for(j=1;j<=b.length;j++)d[0][j]=j; for(i=1;i<=a.length;i++)for(j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+function sobForte(a,b){ if(a===b)return true; var m=Math.min(a.length,b.length); if(m>=3&&(a.indexOf(b)===0||b.indexOf(a)===0))return true; return m>=5&&distEd(a,b)<=(m>=7?2:1); }
+function sobCasam(a,b){ return sobForte(a,b)||(a.length===1&&b.indexOf(a)===0)||(b.length===1&&a.indexOf(b)===0); }
+function nomesCompat(x,y){ var a=tokensNomeP(x),b=tokensNomeP(y); if(!a.length||!b.length||a[0]!==b[0])return false; var ra=a.slice(1),rb=b.slice(1); if(!ra.length||!rb.length)return ra.length===rb.length; if(ra.length>rb.length){var t=ra;ra=rb;rb=t;} var ult=ra[ra.length-1]; return rb.some(function(u){return sobForte(ult,u);})&&ra.every(function(t){return rb.some(function(u){return sobCasam(t,u);});}); }
+// agrupa: mais frequente primeiro; entra no único grupo compatível (ambíguo = grupo próprio)
+function agruparNomes(contagem){ var nomes=Object.keys(contagem).sort(function(a,b){return contagem[b]-contagem[a]||a.localeCompare(b);}); var grupos=[], mapa={};
+  nomes.forEach(function(n){ var cand=grupos.filter(function(g){return g.membros.some(function(m){return nomesCompat(n,m);});}); if(cand.length===1){cand[0].membros.push(n);mapa[n]=cand[0].rep;} else {grupos.push({rep:n,membros:[n]});mapa[n]=n;} });
+  return {grupos:grupos,mapa:mapa}; }
+var _pessoasTabela = { ref: null, n: -1, em: 0, mapa: {}, reps: [] };
+function pessoaCanonica(nome) {
+  if (!nome) return '';
+  var ix = _pessoasTabela;
+  if (ix.ref !== processos || ix.n !== processos.length || Date.now() - ix.em > 5000) {
+    var cont = {};
+    processos.forEach(function(p){ if (p.servidor) { var k = normalizarNome(p.servidor); if (k) cont[k] = (cont[k] || 0) + 1; } });
+    var g = agruparNomes(cont);
+    _pessoasTabela = ix = { ref: processos, n: processos.length, em: Date.now(), mapa: g.mapa, reps: g.grupos.map(function(x){ return x.rep; }) };
+  }
+  var k = normalizarNome(nome);
+  if (ix.mapa[k]) return ix.mapa[k];
+  // nome fora da Tabela (ex.: solicitação nova): só junta se casar com UMA pessoa
+  var cand = ix.reps.filter(function(r){ return nomesCompat(k, r); });
+  return cand.length === 1 ? cand[0] : k;
+}
 function normalizarNome(nome) {
   if (!nome) return '';
   return nome.toUpperCase()
