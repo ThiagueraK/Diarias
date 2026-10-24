@@ -599,13 +599,15 @@ function desenharFolhaProc(p){
     if(marcar)pedirConferencia(p);};
   var vt=$('#voltarP'); if(vt)vt.onclick=function(){vt.disabled=true;api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{},limpar:['descricaoSugerida'],mesclar:true,autor:'thiago-celular',motivo:'descrição voltou ao lido pelo celular'}}).then(function(j){if(j.ok){toast('Voltou à descrição lida do processo');carregarPainel().then(function(){var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);listaProc();});}else{toast('Não deu: '+(j.error||'erro'));vt.disabled=false;}});};
   $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
-  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){nk.disabled=true;nk.textContent='Confirmando…';
-    api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo}}).then(function(j){
+  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){var envia=function(just){nk.disabled=true;nk.textContent='Confirmando…';
+    api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo,justificativa:just||undefined}}).then(function(j){
+      // 23/10/2026: possível diária em dobro - só com justificativa escrita
+      if(!j.ok&&j.precisaJustificativa&&!just){var t=window.prompt('⚠️ '+(j.error||'Justifique')+'\n\nJustificativa:');if(t&&t.trim().length>=15)return envia(t.trim());nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent='Não liberado: precisa de justificativa.';return;}
       if(!j.ok){nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent=j.error||'Não foi possível confirmar.';return;}
       p.confirmavel=false;p.conferencia=j.status;if(j.status==='pronto'){p.estado='pronto';p.motivo=null;}else if(j.restantes&&j.restantes.length)p.motivo='Conferente: '+j.restantes[0];
       toast(j.status==='pronto'?'✓ '+p.processo+' conferido — pronto para o lote':'✓ Confirmado; ainda falta: '+((j.restantes||[])[0]||''));
       desenharFolhaProc(p);desenharProcessos();setTimeout(function(){carregarPainel();},1500);
-    }).catch(function(){nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent='Sem conexão - não confirmou';});};
+    }).catch(function(){nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';$('#notaOkMsg').textContent='Sem conexão - não confirmou';});};envia(null);};
 }
 $('#veuProc').addEventListener('click',function(e){if(e.target.id==='veuProc'){$('#veuProc').hidden=true;S.procAberto=null;}});
 

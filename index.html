@@ -1369,7 +1369,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.10.98</span>
+    <span class="header-version">v1.10.99</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3053,21 +3053,29 @@ function procConferenciaHtml(p) {
     return '<li class="' + i.nivel + '">' + ic + ' ' + escaparHtmlProc(i.texto) + '</li>';
   }).join('');
   // 23/10/2026: botão "✓ Conferido" - abriu o processo no 1Doc e a nota/roteiro/placa estão ok: vale na hora
-  var confirmavel = c.status !== 'pronto' && (c.itens || []).some(function(i){ return i.nivel !== 'ok' && CONF_REGRAS_MANUAIS.indexOf(i.codigo) >= 0; });
+  var confirmavel = c.status !== 'pronto' && (c.itens || []).some(function(i){ return i.nivel !== 'ok' && (CONF_REGRAS_MANUAIS.indexOf(i.codigo) >= 0 || CONF_REGRAS_JUSTIFICADAS.indexOf(i.codigo) >= 0); });
   var botao = confirmavel ? '<div class="proc-conf-acao"><button type="button" class="proc-btn-conferido" data-hash="' + escaparHtmlProc(p.hash || '') + '" title="Conferi no 1Doc: libera os apontamentos de nota, roteiro, placa e valor. Duplicidade e credor continuam travando.">✓ Conferido no 1Doc</button><span class="proc-conf-msg"></span></div>' : '';
   return '<details class="proc-conf ' + cls + '" data-conf-hash="' + escaparHtmlProc(p.hash || '') + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul>' + botao + '</details>';
 }
 // mesma lista do Conferente (equipe/conferencia_processos.mjs) e do Worker
-var CONF_REGRAS_MANUAIS = ['ROTEIRO_AUSENTE','AUTORIZACAO_AUSENTE','DESCRICAO_REVISAR','JUSTIFICATIVA_DATA_NAO_CONFIRMADA','NOTA_DATA_ILEGIVEL','NOTA_DATA_AMBIGUA','NOTA_DATA_FORA','NOTA_NAO_IDENTIFICADA','ANEXOS_LEITURA_INDISPONIVEL','PLACA_NOVA','PLACA_FORMATO','PLACA_AUSENTE','VALOR_DIVERGENTE','VALOR_MULTIPLAS_NOITES','VALOR_CIDADE_DESCONHECIDA','VIAGEM_FUTURA_JUSTIFICATIVA_AUSENTE'];
+var CONF_REGRAS_JUSTIFICADAS = ['NOTA_DIA_ANTERIOR_MADRUGADA','EVIDENCIA_DATA_OUTRA_DIARIA'];   // 23/10/2026: possível diária em dobro - só com justificativa
+var CONF_REGRAS_MANUAIS = ['PEDIDO_DATA_FORA','ROTEIRO_AUSENTE','AUTORIZACAO_AUSENTE','DESCRICAO_REVISAR','JUSTIFICATIVA_DATA_NAO_CONFIRMADA','NOTA_DATA_ILEGIVEL','NOTA_DATA_AMBIGUA','NOTA_DATA_FORA','NOTA_NAO_IDENTIFICADA','ANEXOS_LEITURA_INDISPONIVEL','PLACA_NOVA','PLACA_FORMATO','PLACA_AUSENTE','VALOR_DIVERGENTE','VALOR_MULTIPLAS_NOITES','VALOR_CIDADE_DESCONHECIDA','VIAGEM_FUTURA_JUSTIFICATIVA_AUSENTE'];
 document.addEventListener('click', function(e){
   var b = e.target && e.target.closest && e.target.closest('.proc-btn-conferido');
   if (!b) return;
   e.preventDefault(); e.stopPropagation();
   var hash = b.dataset.hash, p = (processosCaixaAtual || []).filter(function(x){ return x.hash === hash; })[0];
   var msg = b.parentNode.querySelector('.proc-conf-msg');
+  var enviarConf = function(justificativa) {
   b.disabled = true; b.textContent = 'Confirmando…'; if (msg) msg.textContent = '';
-  sgdFetch(SGD_WORKER_URL + '?action=conferencia-confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, numeroProcesso: p && p.numeroProcesso }) })
+  sgdFetch(SGD_WORKER_URL + '?action=conferencia-confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, numeroProcesso: p && p.numeroProcesso, justificativa: justificativa || undefined }) })
   .then(function(r){ return r.json(); }).then(function(res){
+    // 23/10/2026: possível diária em dobro - só sai com justificativa escrita (fica na auditoria semanal)
+    if (!res.ok && res.precisaJustificativa && !justificativa) {
+      var j = window.prompt('⚠️ ' + (res.error || 'Justifique') + '\n\nJustificativa:');
+      if (j && j.trim().length >= 15) return enviarConf(j.trim());
+      b.disabled = false; b.textContent = '✓ Conferido no 1Doc'; if (msg) msg.textContent = 'Não liberado: precisa de justificativa (mín. 15 letras).'; return;
+    }
     if (!res.ok) { b.disabled = false; b.textContent = '✓ Conferido no 1Doc'; if (msg) msg.textContent = res.error || 'Não foi possível confirmar.'; return; }
     if (p) p.conferencia = res.conferencia;
     var el = document.querySelector('.proc-conf[data-conf-hash="' + hash + '"]');
@@ -3080,6 +3088,25 @@ document.addEventListener('click', function(e){
     if (typeof mostrarAvisoRapido === 'function') mostrarAvisoRapido(res.status === 'pronto' ? '✓ ' + ((p && p.numeroProcesso) || 'Processo') + ' conferido — pronto para o lote' : '✓ Confirmado; ainda falta: ' + (res.restantes || [])[0]);
     setTimeout(atualizarResumoSituacaoCaixa, 300);
   }).catch(function(err){ b.disabled = false; b.textContent = '✓ Conferido no 1Doc'; if (msg) msg.textContent = 'Erro: ' + err.message; });
+  };
+  enviarConf(null);
+});
+// 23/10/2026: card BLOQUEADO por possível desdobramento de data - liberar só com justificativa (viagens distintas reais)
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest && e.target.closest('.proc-btn-liberar-desd');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  var hash = b.dataset.hash, p = (processosCaixaAtual || []).filter(function(x){ return x.hash === hash; })[0];
+  var j = window.prompt('Liberar ' + ((p && p.numeroProcesso) || 'este processo') + ' do bloqueio de possível desdobramento de data.\n\nSó libere se foram viagens DISTINTAS de verdade (confira nota, pedido de transporte e horários no 1Doc).\nJustificativa (fica registrada no relatório semanal):');
+  if (!j) return;
+  if (j.trim().length < 15) { alert('Justificativa muito curta (mín. 15 letras).'); return; }
+  b.disabled = true; b.textContent = 'Liberando…';
+  sgdFetch(SGD_WORKER_URL + '?action=desdobramento-liberar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, numeroProcesso: p && p.numeroProcesso, servidor: p && p.servidor, justificativa: j.trim() }) })
+  .then(function(r){ return r.json(); }).then(function(res){
+    if (!res.ok) { b.disabled = false; b.textContent = '🔓 Liberar com justificativa'; alert(res.error || 'Não liberou.'); return; }
+    b.textContent = '✓ Liberado'; if (typeof mostrarAvisoRapido === 'function') mostrarAvisoRapido('🔓 ' + ((p && p.numeroProcesso) || '') + ' liberado (justificativa registrada)');
+    _ultimaAssinaturaCaixa = null; setTimeout(atualizarResumoSituacaoCaixa, 300);
+  }).catch(function(err){ b.disabled = false; b.textContent = '🔓 Liberar com justificativa'; alert('Erro: ' + err.message); });
 });
 var SIT_ROTULO = { 'ja-empenhado': 'Já empenhado (fora da Tabela)', 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
 function aplicarSituacaoNosCards() {
@@ -3095,7 +3122,10 @@ function aplicarSituacaoNosCards() {
   document.querySelectorAll('.proc-motivo-bloq[data-hash-motivo]').forEach(function(el) {
     var s = mapa[el.dataset.hashMotivo];
     if (s && s.situacao === 'ja-empenhado') { el.textContent = '⛔ NÃO EMPENHE: ' + (s.motivo || 'o empenho deste processo já foi anexado no 1Doc'); el.hidden = false; }
-    else if (s && s.situacao === 'bloqueado' && s.motivo) { el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false; }
+    else if (s && s.situacao === 'bloqueado' && s.motivo) {
+      el.textContent = '⛔ Bloqueado: ' + s.motivo; el.hidden = false;
+      if (/desdobramento/.test(s.motivo)) { var lb = document.createElement('button'); lb.type = 'button'; lb.className = 'proc-btn-liberar-desd'; lb.dataset.hash = el.dataset.hashMotivo; lb.textContent = '🔓 Liberar com justificativa'; lb.style.cssText = 'margin-left:8px;padding:3px 10px;border-radius:8px;border:1px solid #dc2626;background:transparent;color:#dc2626;font-weight:700;font-size:11px;cursor:pointer;'; el.appendChild(lb); }
+    }
     else if (s && (s.situacao === 'a-empenhar' || s.situacao === 'fora-do-script') && s.motivoFila) { el.textContent = '⏸ ' + (s.situacao === 'fora-do-script' ? '' : 'Fora do lote: ') + s.motivoFila; el.hidden = false; }
     else el.hidden = true;
   });
