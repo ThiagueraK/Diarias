@@ -233,9 +233,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .ctd{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--dim)}
 
 /* abas */
-.abas{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 8px)}
-.abas button{background:none;border:none;color:var(--dim);font-size:11px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;cursor:pointer;position:relative;border-radius:12px}
-.abas svg{width:22px;height:22px}
+.abas{display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom,0px) + 8px);gap:2px}
+.abas button{background:none;border:none;color:var(--dim);font-size:10px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;position:relative;border-radius:10px}
+.abas svg{width:20px;height:20px}
 .abas button[aria-selected="true"]{color:var(--pine);background:var(--mint-soft)}
 .badge{position:absolute;top:2px;right:calc(50% - 24px);min-width:17px;height:17px;border-radius:9px;background:var(--red);color:#fff;font:600 10px var(--sans);display:grid;place-items:center;padding:0 4px}
 
@@ -287,6 +287,40 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .login button{min-height:46px;border:none;border-radius:12px;background:var(--pine);color:var(--pine-ink);font-weight:600;font-size:15px;cursor:pointer}
 .login .err{color:var(--red);font-size:13px;min-height:18px}
 .toast{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 78px);background:var(--ink);color:var(--surface);border-radius:12px;padding:10px 12px;font-size:13.5px;z-index:8;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+/* notebook dell */
+.nb-hero{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:12px}
+.nb-head{display:flex;justify-content:space-between;align-items:center}
+.nb-title{display:flex;align-items:center;gap:10px}
+.nb-icon{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;color:var(--pine);flex:none}
+.nb-title b{font:700 16px var(--disp);display:block}
+.nb-title span{font-size:12px;color:var(--muted)}
+.nb-tag{font:600 11px var(--mono);padding:3px 8px;border-radius:999px;background:var(--mint-soft);color:var(--pine);letter-spacing:.02em}
+.nb-tag.at{background:var(--amber-soft);color:var(--amber)}
+.nb-tag.er{background:var(--red-soft);color:var(--red)}
+.nb-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nb-metric{background:var(--surface2);border-radius:12px;padding:10px 12px;display:grid;gap:4px}
+.nb-metric-label{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+.nb-metric-val{font:700 20px/1.1 var(--disp);display:flex;align-items:baseline;gap:4px}
+.nb-metric-sub{font:11.5px var(--mono);color:var(--muted)}
+.nb-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.nb-bar-fill{height:100%;border-radius:3px;background:var(--mint);transition:width .4s}
+.nb-bar-fill.at{background:var(--amber)}
+.nb-bar-fill.er{background:var(--red)}
+.nb-procs{display:grid;gap:6px}
+.nb-proc{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px}
+.nb-proc-pid{font:11px var(--mono);color:var(--dim);width:42px}
+.nb-proc-name{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb-proc-cpu{font:600 12px var(--mono);padding:2px 6px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+.nb-proc-cpu.hot{background:var(--red-soft);color:var(--red);font-weight:700}
+.nb-proc-ram{font:12px var(--mono);color:var(--muted);width:55px;text-align:right}
+.nb-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
+.nb-svc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px}
+.nb-svc span{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb-svc i{width:8px;height:8px;border-radius:50%;background:var(--mint);flex:none}
+.nb-svc.off i{background:var(--red)}
+.nb-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:grid;gap:10px}
+.nb-card-title{font:700 14px var(--disp);display:flex;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
@@ -335,6 +369,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <section class="painel" id="p-conversa" hidden></section>
 
   <section class="painel" id="p-equipe" hidden><div id="bots" style="display:grid;gap:10px"></div></section>
+  <section class="painel" id="p-notebook" hidden></section>
  </main>
 
  <footer class="entrada" id="entrada" hidden>
@@ -350,6 +385,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <button type="button" role="tab" aria-selected="false" data-p="atividade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Atividade</button>
   <button type="button" role="tab" aria-selected="false" data-p="conversa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg>Conversa</button>
   <button type="button" role="tab" aria-selected="false" data-p="equipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5M15 15c3 0 6 1.5 6 4"/></svg>Equipe</button>
+  <button type="button" role="tab" aria-selected="false" data-p="notebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="1"/></svg>Dell<span class="badge" id="badgeDell" hidden style="background:var(--amber)">!</span></button>
  </nav>
 
  <div class="veu" id="veuProc" hidden><div class="folha" role="dialog" aria-label="Conferir processo"><div class="puxador"></div><div id="folhaProc" style="display:grid;gap:12px"></div></div></div>
@@ -494,7 +530,7 @@ $$('[data-fecha]').forEach(function(b){b.addEventListener('click',function(){$('
 $$('.veu').forEach(function(v){v.addEventListener('click',function(e){if(e.target===v)v.hidden=true;});});
 
 // ---------- desenho geral ----------
-function desenharTudo(){desenharInicio();desenharProcessos();desenharAtividade();desenharConversa();desenharEquipe();desenharCp();}
+function desenharTudo(){desenharInicio();desenharProcessos();desenharAtividade();desenharConversa();desenharEquipe();desenharCp();desenharNotebook();}
 function desenharInicio(){
   var P=S.painel, E=S.equipe, d=new Date(), h=d.getHours();
   $('#ola').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', Thiago';
@@ -679,6 +715,103 @@ function desenharEquipe(){
   }).join('')||'<div class="vazio">Sem sinal dos bots.</div>';
 }
 
+// ---------- notebook dell ----------
+function desenharNotebook(){
+  var E=S.equipe, tel=E&&E.telemetriaNotebook;
+  var c=$('#p-notebook'); if(!c)return;
+  var badge=$('#badgeDell');
+  if(!tel||!tel.sistema){
+    if(badge)badge.hidden=true;
+    c.innerHTML='<div class="vazio" style="padding:32px 16px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin-bottom:8px;opacity:.5"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg><br><b>Aguardando telemetria do Notebook Dell…</b><p style="font-size:12px;margin:6px 0 0;color:var(--dim)">O serviço EquipeBots envia a cada 20 segundos.</p></div>';
+    return;
+  }
+  var agora=Date.now(), coletado=tel.coletadoEm||0, idadeSec=Math.max(0,Math.round((agora-coletado)/1000));
+  var online=idadeSec<90;
+  var sis=tel.sistema||{}, ram=sis.ram||{}, robo=tel.roboCp||{}, procs=tel.topProcessos||[], svcs=tel.servicos||{};
+
+  var cpuP=Math.round(sis.cpuPercent||0);
+  var cpuCls=cpuP>=75?'er':cpuP>=40?'at':'';
+  var ramP=Math.round(ram.percentual||0);
+  var ramCls=ramP>=85?'er':ramP>=70?'at':'';
+
+  if(badge){
+    badge.hidden=!online||(cpuP<75&&ramP<85);
+    badge.title=cpuP>=75?'CPU alta: '+cpuP+'%':'RAM alta: '+ramP+'%';
+  }
+
+  var uptime=sis.uptimeHoras?(sis.uptimeHoras<24?Math.round(sis.uptimeHoras)+' horas':(sis.uptimeHoras/24).toFixed(1)+' dias ('+Math.round(sis.uptimeHoras)+'h)'):'—';
+
+  var html='<div class="nb-hero">'
+    +'<div class="nb-head">'
+      +'<div class="nb-title">'
+        +'<div class="nb-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="1"/></svg></div>'
+        +'<div><b>'+esc(sis.hostname||'Notebook Dell')+'</b><span>'+(online?'Ligado há '+uptime:'Sem sinal há '+idadeSec+'s')+'</span></div>'
+      +'</div>'
+      +'<span class="nb-tag '+(online?(cpuP>=75||ramP>=85?'at':'ok'):'er')+'">'+(online?(cpuP>=75?'🔥 CPU alta':'● online'):'offline')+'</span>'
+    +'</div>'
+    +'<div class="nb-metrics">'
+      +'<div class="nb-metric">'
+        +'<div class="nb-metric-label">Uso de CPU</div>'
+        +'<div class="nb-metric-val" style="color:'+(cpuP>=75?'var(--red)':cpuP>=40?'var(--amber)':'var(--pine)')+'">'+cpuP+'%</div>'
+        +'<div class="nb-bar"><div class="nb-bar-fill '+cpuCls+'" style="width:'+Math.min(100,cpuP)+'%"></div></div>'
+        +'<div class="nb-metric-sub" style="margin-top:2px">'+(sis.nucleos||4)+' núcleos · '+esc((sis.modeloCpu||'').split('@')[0].replace(/CPU/g,'').trim())+'</div>'
+      +'</div>'
+      +'<div class="nb-metric">'
+        +'<div class="nb-metric-label">Memória RAM</div>'
+        +'<div class="nb-metric-val" style="color:'+(ramP>=85?'var(--red)':ramP>=70?'var(--amber)':'var(--pine)')+'">'+ramP+'%</div>'
+        +'<div class="nb-bar"><div class="nb-bar-fill '+ramCls+'" style="width:'+Math.min(100,ramP)+'%"></div></div>'
+        +'<div class="nb-metric-sub" style="margin-top:2px">'+((ram.usadaMb||0)/1024).toFixed(1)+' / '+((ram.totalMb||0)/1024).toFixed(1)+' GB</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>';
+
+  // Robô CP & Automação
+  var roboLogs=(robo.historicoLog||[]).slice(-4).map(function(l){return '<div style="font:11px var(--mono);color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:6px;word-break:break-word">'+esc(l)+'</div>';}).join('')||'<span style="font-size:12px;color:var(--dim)">Sem eventos recentes</span>';
+  html+='<div class="nb-card">'
+    +'<div class="nb-card-title"><span>Robô CP & Automação</span><span class="nb-tag '+(robo.ativo?'ok':'')+'">'+(robo.ativo?'rodando':'em espera')+'</span></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">'
+      +'<div style="background:var(--surface2);padding:8px 10px;border-radius:8px"><b>Chrome CP:</b> '+(robo.chromeAberto?'<span style="color:var(--pine);font-weight:600">Aberto</span>':'Fechado')+'</div>'
+      +'<div style="background:var(--surface2);padding:8px 10px;border-radius:8px"><b>Trava Windows:</b> '+(robo.lock?'<span style="color:var(--amber);font-weight:600">Bloqueado</span>':'Livre')+'</div>'
+    +'</div>'
+    +'<div style="display:grid;gap:4px;margin-top:4px"><div style="font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase">Últimos eventos do Robô</div>'+roboLogs+'</div>'
+  +'</div>';
+
+  // Top Processos (Ventoinha / CPU / RAM)
+  html+='<div class="nb-card">'
+    +'<div class="nb-card-title"><span>Processos em Execução (Top Consumo)</span><span style="font:11px var(--mono);color:var(--dim)">PID · CPU · RAM</span></div>'
+    +'<div class="nb-procs">'
+    +(procs.length?procs.slice(0,10).map(function(p){
+      var hot=p.cpu>=10;
+      return '<div class="nb-proc">'
+        +'<span class="nb-proc-pid">#'+p.pid+'</span>'
+        +'<span class="nb-proc-name" title="'+esc(p.nome)+'">'+esc(p.nome)+'</span>'
+        +'<span class="nb-proc-cpu '+(hot?'hot':'')+'">'+p.cpu+'%</span>'
+        +'<span class="nb-proc-ram">'+p.ramMb+' MB</span>'
+      +'</div>';
+    }).join(''):'<div style="font-size:12px;color:var(--dim)">Nenhum processo listado</div>')
+    +'</div>'
+  +'</div>';
+
+  // Serviços Windows
+  var svcEntries=Object.keys(svcs).sort();
+  html+='<div class="nb-card">'
+    +'<div class="nb-card-title"><span>Serviços Windows Monitorados ('+svcEntries.length+')</span><span style="font:11px var(--mono);color:var(--pine)">NSSM</span></div>'
+    +'<div class="nb-services">'
+    +(svcEntries.length?svcEntries.map(function(k){
+      var ok=svcs[k]==='Running';
+      return '<div class="nb-svc '+(ok?'':'off')+'">'
+        +'<span title="'+esc(k)+'">'+esc(k)+'</span>'
+        +'<i title="'+(ok?'Executando':'Parado')+'"></i>'
+      +'</div>';
+    }).join(''):'<div style="font-size:12px;color:var(--dim)">Nenhum serviço monitorado</div>')
+    +'</div>'
+  +'</div>';
+
+  html+='<div style="text-align:center;font:11px var(--mono);color:var(--dim);padding:4px">Coletado há '+idadeSec+'s · Telemetria do Notebook Dell</div>';
+
+  c.innerHTML=html;
+}
+
 // ---------- pedir ao CP ----------
 var PED={rel:'relatorio_pc_pendentes',dia:'hoje',qPc:0};
 function abrirPedir(){PED.qPc=0;passoPedir('menu');$('#veuPedir').hidden=false;}
@@ -740,7 +873,7 @@ function fimPedir(j,okTxt){
 // ---------- abas e ciclo ----------
 function aba(p){
   S.aba=p; $$('.abas [role=tab]').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.p===p));});
-  ['inicio','processos','atividade','conversa','equipe'].forEach(function(k){$('#p-'+k).hidden=k!==p;});
+  ['inicio','processos','atividade','conversa','equipe','notebook'].forEach(function(k){$('#p-'+k).hidden=k!==p;});
   $('#entrada').hidden=p!=='conversa'; $('#corpo').scrollTop=p==='conversa'?$('#corpo').scrollHeight:0;
   try{localStorage.setItem('eq_cel_aba',p);}catch(e){}
 }
@@ -761,7 +894,7 @@ setInterval(function(){
 setInterval(fresco,1000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tudo();});
 var abaSalva='inicio'; try{abaSalva=localStorage.getItem('eq_cel_aba')||'inicio';}catch(e){}
-aba(['inicio','processos','atividade','conversa','equipe'].indexOf(abaSalva)>=0?abaSalva:'inicio');
+aba(['inicio','processos','atividade','conversa','equipe','notebook'].indexOf(abaSalva)>=0?abaSalva:'inicio');
 tudo(); ultEq=ultPa=Date.now();
 })();
 </script>
