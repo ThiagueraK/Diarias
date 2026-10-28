@@ -5322,6 +5322,10 @@ function carregarSolicitacoesBot() {
       var origemTag = s.origem === 'saudefrota'
         ? '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,.12);color:#7c3aed;border:1px solid rgba(124,58,237,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">📱 App</span>'
         : '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--text-dim);font-size:11px;margin-left:6px;">🤖 Bot</span>';
+      var pacsIA = Array.isArray(s.pacientesLidosIA) ? s.pacientesLidosIA : [];
+      var pacientesIATag = pacsIA.length > 0
+        ? '<span title="Pacientes lidos pela IA: '+pacsIA.join(', ').replace(/"/g,'&quot;')+'" style="cursor:help;display:inline-flex;align-items:center;gap:4px;background:rgba(14,165,233,.12);color:#0284c7;border:1px solid rgba(14,165,233,.3);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;">👥 '+pacsIA.length+' paciente(s) IA</span>'
+        : '';
       var rowStyle = jaNaTabela
         ? 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);opacity:.65;'
         : 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);';
@@ -5329,7 +5333,7 @@ function carregarSolicitacoesBot() {
         +'<div style="min-width:0;">'
           +'<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.nome+'</div>'
           +'<div style="font-size:12px;color:var(--text-muted);">'+s.dataSaida+' · '+(s.cidade||'')+' · '+(s.placa||'')+'</div>'
-          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+erroTag+tabelaTag+origemTag+'</div>'
+          +'<div style="margin-top:3px;">'+comprovanteTag+onedocTag+erroTag+tabelaTag+origemTag+pacientesIATag+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;flex-shrink:0;">'
           +'<button onclick="usarSolicitacaoNoGerador(\''+s.chave+'\')" title="Puxar estes dados para o Gerador" style="padding:6px 10px;background:var(--accent-light);color:var(--brand-deep);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">📋 Usar no Gerador</button>'
@@ -5363,6 +5367,30 @@ function verSolicitacaoBot(chave) {
       +'<div><strong>Chegada:</strong> '+(s.dataChegada||'—')+' às '+(s.horaChegada||'—')+'</div>'
       +'<div><strong>Motivo:</strong> '+(s.motivo||'—')+'</div>'
       +'</div>';
+    var aud = s.auditoriaIA || null;
+    var pacsLidos = (Array.isArray(s.pacientesLidosIA) && s.pacientesLidosIA.length ? s.pacientesLidosIA : (aud && Array.isArray(aud.pacientes_lidos_ia) ? aud.pacientes_lidos_ia : []));
+    var clinsLidas = (aud && Array.isArray(aud.clinicas_lidas_ia) ? aud.clinicas_lidas_ia : []);
+    if (pacsLidos.length > 0 || (aud && Array.isArray(aud.comprovantes) && aud.comprovantes.length > 0)) {
+      html += '<div style="margin-top:12px;padding:10px 12px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.25);border-radius:10px;font-size:13px;line-height:1.6;">'
+        + '<div style="font-weight:700;color:#0284c7;margin-bottom:4px;">🤖 Auditoria IA dos Comprovantes</div>';
+      if (pacsLidos.length > 0) {
+        html += '<div><strong>Paciente(s) lido(s) no comprovante:</strong> ' + pacsLidos.join(', ') + '</div>';
+      }
+      if (clinsLidas.length > 0) {
+        html += '<div><strong>Clínica / Hospital lido:</strong> ' + clinsLidas.join(', ') + '</div>';
+      }
+      if (aud && Array.isArray(aud.comprovantes) && aud.comprovantes.length > 0) {
+        html += '<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">'
+          + aud.comprovantes.map(function(c){
+              return '• <strong>' + (c.categoria || 'doc').toUpperCase() + ':</strong> ' + (c.estabelecimento || '—')
+                + (c.cnpj ? ' · CNPJ ' + c.cnpj : '')
+                + (c.data ? ' · Data ' + c.data : '')
+                + (c.valor && c.valor !== '0,00' ? ' · R$ ' + c.valor : '');
+            }).join('<br>')
+          + '</div>';
+      }
+      html += '</div>';
+    }
     var comprovantes = s.comprovantes || [];
     if (comprovantes.length > 0) {
       html += '<div style="margin-top:14px;font-weight:600;">📎 Comprovantes ('+comprovantes.length+')</div>'
