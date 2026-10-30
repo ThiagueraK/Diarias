@@ -321,6 +321,31 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .nb-svc.off i{background:var(--red)}
 .nb-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:grid;gap:10px}
 .nb-card-title{font:700 14px var(--disp);display:flex;align-items:center;justify-content:space-between}
+
+/* 30/10/2026: visualizador de anexos no celular - tela cheia, pinça, toque duplo, deslizar */
+@keyframes vxSobe{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes vxFade{from{opacity:0}to{opacity:1}}
+@keyframes vxShim{from{background-position:200% 0}to{background-position:-200% 0}}
+.abrirAx{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;border-radius:14px;border:1px dashed var(--line2);background:var(--surface2);color:inherit;font:inherit;font-weight:600;font-size:15px}
+.vx{position:fixed;inset:0;z-index:9999;background:#05080d;color:#fff;display:flex;flex-direction:column;animation:vxSobe .3s cubic-bezier(.2,.8,.2,1) both;touch-action:none}
+.vx-top{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;background:rgba(5,8,13,.85)}
+.vx-top b{flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vx-top small{opacity:.7;font-size:12px}
+.vx-b{min-width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:15px}
+.vx-palco{flex:1;position:relative;overflow:hidden}
+.vx-palco img{position:absolute;left:0;top:0;max-width:none;user-select:none;-webkit-user-drag:none;animation:vxFade .3s ease both}
+.vx-palco img.anim{transition:left .25s ease,top .25s ease,width .25s ease}
+.vx-sk{position:absolute;inset:18% 12%;border-radius:16px;background:linear-gradient(90deg,#141b26 0%,#243041 45%,#141b26 90%);background-size:200% 100%;animation:vxShim 1.1s linear infinite}
+.vx-msg{position:absolute;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:14px;color:#c9d2de}
+.vx-pdf{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 26px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#fff;text-decoration:none;font-weight:600}
+.vx-baixo{padding:8px 12px calc(env(safe-area-inset-bottom,0px) + 10px);background:rgba(5,8,13,.85);display:grid;gap:8px}
+.vx-dots{display:flex;justify-content:center;gap:6px}
+.vx-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:width .25s,background .25s}
+.vx-dots i.on{width:20px;border-radius:5px;background:#3ddc97}
+.vx-nome{font-size:12px;opacity:.75;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vx-mot{font-size:12.5px;line-height:1.4;color:#ffd38a;background:rgba(255,190,80,.1);border-radius:10px;padding:8px 10px}
+.vx-ok{min-height:46px;border-radius:14px;border:0;background:#2f7d5d;color:#fff;font:inherit;font-weight:700;font-size:15px}
+@media (prefers-reduced-motion: reduce){.vx,.vx-palco img,.vx-sk,.vx-dots i{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -612,6 +637,101 @@ function conferida(p){try{return localStorage.getItem(chaveConf(p))==='1';}catch
 function marcarConf(p,v){try{if(v)localStorage.setItem(chaveConf(p),'1');else localStorage.removeItem(chaveConf(p));}catch(e){}}
 // 17/10/2026: marcar como conferida pede ao Conferente para reconferir esse processo na hora (resposta chega na Conversa)
 function pedirConferencia(p){api('conferencia-pedir',{body:{hash:p.hash,numeroProcesso:p.processo}}).then(function(j){toast(j.ok?'✓ Conferida · o Conferente reconfere agora e responde na Conversa':'Marquei aqui, mas o pedido ao Conferente falhou: '+(j.error||'erro'));}).catch(function(){toast('Marquei aqui, mas sem conexão para avisar o Conferente');});}
+// 30/10/2026: VISUALIZADOR DE ANEXOS (celular) - mesmas ações do site (processo-anexos / processo-anexo), só leitura,
+// nada fica guardado. Pinça = zoom, toque duplo = ampliar no ponto, um dedo arrasta quando ampliado, deslizar troca.
+var VX={cache:{},ordem:[],st:null};
+function vxGuardar(k,v){VX.cache[k]=v;VX.ordem.push(k);while(VX.ordem.length>24){var o=VX.ordem.shift();if(VX.cache[o]){try{URL.revokeObjectURL(VX.cache[o].url);}catch(e){}delete VX.cache[o];}}}
+function vxHeic(){if(window.heic2any)return Promise.resolve(window.heic2any);if(VX.heicP)return VX.heicP;VX.heicP=new Promise(function(ok,f){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';sc.onload=function(){ok(window.heic2any);};sc.onerror=function(){VX.heicP=null;f(new Error('não carregou o conversor de HEIC'));};document.head.appendChild(sc);});return VX.heicP;}
+function vxBaixar(hash,i){
+  var k=hash+'|'+i; if(VX.cache[k])return Promise.resolve(VX.cache[k]);
+  return fetch(W+'?action=processo-anexo&hash='+encodeURIComponent(hash)+'&i='+i,{headers:{'Authorization':'Bearer '+token()},cache:'no-store'}).then(function(r){
+    if(r.status===401){mostrarLogin('Sessão expirada. Entre de novo.');throw new Error('não autenticado');}
+    if(!r.ok)return r.json().catch(function(){return{};}).then(function(j){throw new Error(j.error||('erro '+r.status));});
+    var nome=decodeURIComponent(r.headers.get('X-Anexo-Nome')||''),tipo=(r.headers.get('Content-Type')||'').split(';')[0];
+    return r.blob().then(function(b){
+      var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+      if((/heic|heif/i.test(tipo)||/\.(heic|heif)$/i.test(nome))&&!ios)return vxHeic().then(function(h){return h({blob:b,toType:'image/jpeg',quality:.85});}).then(function(j){return{blob:Array.isArray(j)?j[0]:j,tipo:'image/jpeg',nome:nome};});
+      return{blob:b,tipo:tipo,nome:nome};
+    });
+  }).then(function(x){var v={url:URL.createObjectURL(x.blob),tipo:x.tipo,nome:x.nome};vxGuardar(k,v);return v;});
+}
+function vxFechar(){var v=document.getElementById('vx');if(v)v.remove();VX.st=null;}
+// posição/zoom: z = escala sobre o tamanho real; x,y = canto da imagem no palco. Sem "scale" (fica nítido).
+function vxFit(){var st=VX.st,img=st&&st.img,pal=st&&st.palco;if(!img||!img.naturalWidth)return null;var r=st.giro%180!==0,w=r?img.naturalHeight:img.naturalWidth,h=r?img.naturalWidth:img.naturalHeight;return{w:w,h:h,cw:pal.clientWidth,ch:pal.clientHeight,fit:Math.min(pal.clientWidth/w,pal.clientHeight/h)};}
+function vxLimitar(){var st=VX.st,F=vxFit();if(!F)return;st.z=Math.max(F.fit,Math.min(Math.max(3,F.fit*1.01),st.z));var vw=F.w*st.z,vh=F.h*st.z;
+  st.x=vw<=F.cw?(F.cw-vw)/2:Math.min(0,Math.max(F.cw-vw,st.x));st.y=vh<=F.ch?(F.ch-vh)/2:Math.min(0,Math.max(F.ch-vh,st.y));}
+function vxPintar(anim){var st=VX.st,F=vxFit();if(!F)return;vxLimitar();var img=st.img,iw=(st.giro%180!==0?F.h:F.w)*st.z,ih=(st.giro%180!==0?F.w:F.h)*st.z,vw=F.w*st.z,vh=F.h*st.z;
+  img.classList.toggle('anim',!!anim);img.style.width=iw+'px';img.style.left=(st.x+(vw-iw)/2)+'px';img.style.top=(st.y+(vh-ih)/2)+'px';img.style.transform='rotate('+st.giro+'deg)';}
+function vxZoomEm(z,cx,cy,anim){var st=VX.st;var px=(cx-st.x)/st.z,py=(cy-st.y)/st.z;st.z=z;st.x=cx-px*st.z;st.y=cy-py*st.z;vxPintar(anim);}
+function vxIr(i,dir){
+  var st=VX.st;if(!st||!st.anexos.length)return;i=(i+st.anexos.length)%st.anexos.length;st.atual=i;st.giro=0;
+  var pal=st.palco;pal.innerHTML='<div class="vx-sk"></div>';st.img=null;vxBaixo();
+  var hash=st.hash;
+  vxBaixar(hash,i).then(function(v){
+    if(!VX.st||VX.st.hash!==hash||VX.st.atual!==i)return;
+    if(/^image\//.test(v.tipo)){
+      pal.innerHTML='<img alt="'+esc(v.nome)+'" src="'+v.url+'" draggable="false">';st.img=pal.querySelector('img');
+      if(dir)st.img.style.animation='none';
+      var pronto=function(){var F=vxFit();if(!F)return;st.z=F.fit;st.x=0;st.y=0;vxPintar(false);if(dir){st.img.animate([{transform:'translateX('+(dir*60)+'px)',opacity:0},{transform:'none',opacity:1}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'});}};
+      if(st.img.complete&&st.img.naturalWidth)pronto();else st.img.onload=pronto;
+    }else if(/pdf/.test(v.tipo)){
+      pal.innerHTML='<div class="vx-msg"><a class="vx-pdf" href="'+v.url+'" target="_blank" rel="noopener"><span style="font-size:34px">📄</span>'+esc(v.nome)+'<span style="font-weight:400;font-size:13px;opacity:.8">Toque para abrir o PDF</span></a></div>';
+    }else pal.innerHTML='<div class="vx-msg">Sem visualização para este tipo. <a href="'+v.url+'" download="'+esc(v.nome)+'" style="color:#7ff3ff">Baixar</a></div>';
+    if(st.anexos.length>1)vxBaixar(hash,(i+1)%st.anexos.length).catch(function(){});
+  }).catch(function(e){if(VX.st&&VX.st.atual===i)pal.innerHTML='<div class="vx-msg">Não consegui abrir: '+esc(e.message)+'</div>';});
+}
+function vxBaixo(){
+  var st=VX.st,el=document.getElementById('vxBaixo');if(!st||!el)return;var a=st.anexos[st.atual];
+  el.innerHTML='<div class="vx-dots">'+st.anexos.map(function(x,k){return'<i class="'+(k===st.atual?'on':'')+'"></i>';}).join('')+'</div>'
+    +'<div class="vx-nome">'+(a?esc(a.nome)+' · '+(st.atual+1)+' de '+st.anexos.length:(st.lendo?'Lendo a lista no 1Doc…':'Sem anexos'))+'</div>'
+    +(st.p.motivo?'<div class="vx-mot">🤖 '+esc(st.p.motivo)+'</div>':'')
+    +($('#notaOkP')?'<button type="button" class="vx-ok" id="vxOk">✓ Nota conferida — liberar</button>':'');
+  var ok=document.getElementById('vxOk');if(ok)ok.onclick=function(){vxFechar();var b=$('#notaOkP');if(b)b.click();};
+}
+function vxAbrir(p){
+  vxFechar();
+  var d=document.createElement('div');d.className='vx';d.id='vx';d.setAttribute('role','dialog');d.setAttribute('aria-label','Anexos do processo');
+  d.innerHTML='<div class="vx-top"><button type="button" class="vx-b" id="vxX" aria-label="Fechar">✕</button><b>'+esc(p.servidor||'')+'</b><small>'+esc(p.processo||'')+'</small><button type="button" class="vx-b" id="vxGiro" aria-label="Girar">⟳</button></div>'
+    +'<div class="vx-palco" id="vxPalco"><div class="vx-sk"></div></div><div class="vx-baixo" id="vxBaixo"></div>';
+  document.body.appendChild(d);
+  var st=VX.st={hash:p.hash,p:p,anexos:[],atual:0,giro:0,z:1,x:0,y:0,img:null,palco:d.querySelector('#vxPalco'),lendo:true};
+  d.querySelector('#vxX').onclick=vxFechar;
+  d.querySelector('#vxGiro').onclick=function(){if(!st.img)return;st.giro=(st.giro+90)%360;var F=vxFit();st.z=F.fit;vxPintar(true);};
+  vxBaixo();
+  // gestos
+  var ptrs={},ini=null,ultToque=0,pal=st.palco;
+  var pts=function(){return Object.keys(ptrs).map(function(k){return ptrs[k];});};
+  pal.addEventListener('pointerdown',function(e){
+    pal.setPointerCapture&&pal.setPointerCapture(e.pointerId);
+    var r=pal.getBoundingClientRect();ptrs[e.pointerId]={x:e.clientX-r.left,y:e.clientY-r.top};var P=pts();
+    if(P.length===1){
+      var agora=Date.now();
+      if(agora-ultToque<300&&st.img){var F=vxFit();if(st.z>F.fit*1.05){st.z=F.fit;vxPintar(true);}else vxZoomEm(Math.max(F.fit*2.5,Math.min(1,3)),P[0].x,P[0].y,true);ultToque=0;ini=null;return;}
+      ultToque=agora;ini={modo:'um',x:P[0].x,y:P[0].y,sx:st.x,sy:st.y,t:agora};
+    }else if(P.length===2&&st.img){var dx=P[0].x-P[1].x,dy=P[0].y-P[1].y;ini={modo:'pinca',d:Math.hypot(dx,dy),z:st.z,cx:(P[0].x+P[1].x)/2,cy:(P[0].y+P[1].y)/2,sx:st.x,sy:st.y};}
+  });
+  pal.addEventListener('pointermove',function(e){
+    if(!ptrs[e.pointerId]||!ini)return;var r=pal.getBoundingClientRect();ptrs[e.pointerId]={x:e.clientX-r.left,y:e.clientY-r.top};var P=pts();
+    if(ini.modo==='pinca'&&P.length>=2){var d=Math.hypot(P[0].x-P[1].x,P[0].y-P[1].y),cx=(P[0].x+P[1].x)/2,cy=(P[0].y+P[1].y)/2;
+      var z=ini.z*d/ini.d;var px=(ini.cx-ini.sx)/ini.z,py=(ini.cy-ini.sy)/ini.z;st.z=z;st.x=cx-px*z;st.y=cy-py*z;vxPintar(false);}
+    else if(ini.modo==='um'&&st.img){var F=vxFit();if(st.z>F.fit*1.02){st.x=ini.sx+(P[0].x-ini.x);st.y=ini.sy+(P[0].y-ini.y);vxPintar(false);}
+      else{st.img.style.transform='translateX('+(P[0].x-ini.x)+'px) rotate('+st.giro+'deg)';}}
+  });
+  var fim=function(e){
+    var P=pts();var era=ini;delete ptrs[e.pointerId];
+    if(era&&era.modo==='um'&&P.length===1){var dx=P[0].x-era.x;var F=vxFit();
+      if(st.img&&F&&st.z<=F.fit*1.02){if(Math.abs(dx)>60&&st.anexos.length>1){vxIr(st.atual+(dx<0?1:-1),dx<0?1:-1);}else{st.img.style.transform='rotate('+st.giro+'deg)';}}
+      else if(!st.img&&Math.abs(dx)>60&&st.anexos.length>1)vxIr(st.atual+(dx<0?1:-1),dx<0?1:-1);}
+    if(pts().length===0)ini=null;else if(pts().length===1){var Q=pts()[0];ini={modo:'um',x:Q.x,y:Q.y,sx:st.x,sy:st.y,t:Date.now()};}
+  };
+  pal.addEventListener('pointerup',fim);pal.addEventListener('pointercancel',fim);
+  fetch(W+'?action=processo-anexos&hash='+encodeURIComponent(p.hash),{headers:{'Authorization':'Bearer '+token()},cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+    if(!VX.st||VX.st.hash!==p.hash)return;st.lendo=false;
+    if(!j.ok){vxBaixo();st.palco.innerHTML='<div class="vx-msg">'+esc(j.error||'Não consegui ler os anexos.')+'</div>';return;}
+    st.anexos=j.anexos||[];if(!st.anexos.length){vxBaixo();st.palco.innerHTML='<div class="vx-msg">Este processo não tem anexos.</div>';return;}
+    vxIr(0);
+  }).catch(function(e){if(VX.st){st.lendo=false;vxBaixo();st.palco.innerHTML='<div class="vx-msg">Sem conexão: '+esc(e.message)+'</div>';}});
+}
 function abrirProc(hash){var p=(S.painel.processos.itens||[]).filter(function(x){return x.hash===hash;})[0];if(!p)return;S.procAberto=hash;desenharFolhaProc(p);$('#veuProc').hidden=false;}
 function desenharFolhaProc(p){
   var el=$('#folhaProc'), lin=function(r,v){return v?'<span>'+r+'</span><b style="font-weight:500">'+esc(v)+'</b>':'';};
@@ -620,10 +740,12 @@ function desenharFolhaProc(p){
     +'<div class="rot-f">Descrição do processo'+(p.descricaoCorrigida?' · corrigida':'')+'</div><label for="descP" style="position:absolute;left:-9999px">Descrição</label><textarea id="descP" maxlength="600">'+esc(p.descricao||'')+'</textarea>'
     +'<div class="rot-f">Vai para o CP assim</div><div class="cp-txt" id="cpP">'+esc(p.descricaoCp||'(sem descrição - o lote não monta o texto)')+'</div>'
     +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Conferida</button>')+'</div>'
+    +'<button type="button" class="abrirAx" id="verAxP">📎 Ver anexos (notas, roteiro)</button>'
     +'<a class="abrir1doc" href="https://tupancireta.1doc.com.br/?pg=doc/ver&amp;hash='+encodeURIComponent(p.hash)+'&amp;itd=7" target="_blank" rel="noopener">Abrir no 1Doc ↗</a>'
     // 23/10/2026: "✓ Nota conferida no 1Doc" - libera na hora os apontamentos de nota/roteiro/placa/valor (duplicidade e credor não)
     +(p.confirmavel?'<div class="botoes"><button type="button" class="sim" id="notaOkP">✓ Nota conferida no 1Doc</button></div><div id="notaOkMsg" style="font-size:12px;color:#dc2626"></div>':'')
     +'<div class="botoes">'+(p.descricaoCorrigida?'<button type="button" id="voltarP">Voltar ao lido</button>':'')+'<button type="button" id="fecharP">Fechar</button></div>';
+  var vx=$('#verAxP'); if(vx)vx.onclick=function(){vxAbrir(p);};
   var ta=$('#descP'), sv=$('#salvarP');
   ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
   sv.onclick=function(){var v=ta.value.trim().replace(/\s+/g,' ').toUpperCase();sv.disabled=true;sv.textContent='Salvando…';
