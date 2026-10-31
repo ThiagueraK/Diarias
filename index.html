@@ -223,6 +223,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .proc-tag.bot{color:#7c3aed;border-color:color-mix(in srgb,#7c3aed 40%,transparent);}
   .proc-tag.manual{color:#b45309;border-color:color-mix(in srgb,#b45309 40%,transparent);}
   .proc-tag.dup{color:#fff;background:var(--danger,#dc2626);border-color:var(--danger,#dc2626);}
+  .proc-tag.risco-alto{color:#fff;background:#b45309;border-color:#b45309;cursor:help;}
+  .proc-tag.risco-medio{color:#92400e;background:#fef3c7;border-color:#f59e0b;cursor:help;}
   .proc-viagem{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:10px 0 6px;padding:10px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);}
   .proc-viagem-ponta{display:flex;flex-direction:column;gap:1px;min-width:0;}
   .proc-viagem-ponta.dir{text-align:right;}
@@ -1410,7 +1412,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.11.3</span>
+    <span class="header-version">v1.11.4</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3008,6 +3010,10 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var origemTag = p.origem === 'app' ? '<span class="proc-tag app" title="Gerado pelo app do motorista">📱 App</span>'
       : p.origem === 'bot' ? '<span class="proc-tag bot" title="Gerado pelo bot do Telegram">🤖 Bot</span>'
       : p.origem === 'manual' ? '<span class="proc-tag manual" title="Feito à mão direto no 1Doc - confira nome, datas e cidade">✍️ Manual</span>' : '';
+    // 31/10/2026 (Auditor item 6): ficha de risco do servidor (90 dias, calculada no Worker) - só aviso, não trava
+    var rs = p.riscoServidor;
+    var riscoTag = (rs && (rs.nivel === 'alto' || rs.nivel === 'medio') && !p.ehAgenteSaude)
+      ? '<span class="proc-tag risco-' + rs.nivel + '" title="' + escaparHtmlProc('Ficha de risco (90 dias): ' + (rs.motivos || []).join('; ')) + '">🧭 Risco ' + (rs.nivel === 'alto' ? 'alto' : 'médio') + '</span>' : '';
     var tipoTag = p.ehRessarcimento ? '<span class="proc-tag">💵 Ressarcimento</span>' : (p.ehAgenteSaude ? '<span class="proc-tag">⚖️ Agente de Saúde</span>' : '<span class="proc-tag">Diária</span>');
     return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '" data-hash="' + escaparHtmlProc(p.hash || '') + '">'
       + '<div class="proc-head">'
@@ -3019,7 +3025,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
         + '</div>'
         + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
       + '</div>'
-      + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + '</div>'
+      + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + riscoTag + '</div>'
       + procViagemHtml(p, credorNum)
       + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
       + procHistoricoHtml(p)
@@ -3100,7 +3106,7 @@ function procConferenciaHtml(p) {
   return '<details class="proc-conf ' + cls + '" data-conf-hash="' + escaparHtmlProc(p.hash || '') + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul>' + botao + '</details>';
 }
 // mesma lista do Conferente (equipe/conferencia_processos.mjs) e do Worker
-var CONF_REGRAS_JUSTIFICADAS = ['NOTA_DIA_ANTERIOR_MADRUGADA','EVIDENCIA_DATA_OUTRA_DIARIA','NOTA_REPETIDA','MADRUGADA_PARTIDA','AMBULANCIA_DOIS_LUGARES','EQUIPE_DIVERGENTE'];   // 31/10/2026: + Auditor   // 23/10/2026: possível diária em dobro - só com justificativa
+var CONF_REGRAS_JUSTIFICADAS = ['NOTA_DIA_ANTERIOR_MADRUGADA','EVIDENCIA_DATA_OUTRA_DIARIA','NOTA_REPETIDA','MADRUGADA_PARTIDA','AMBULANCIA_DOIS_LUGARES','EQUIPE_DIVERGENTE','NOTA_FORA_DA_ROTA'];   // 31/10/2026: + Auditor   // 23/10/2026: possível diária em dobro - só com justificativa
 var CONF_REGRAS_MANUAIS = ['PEDIDO_DATA_FORA','ROTEIRO_AUSENTE','AUTORIZACAO_AUSENTE','DESCRICAO_REVISAR','JUSTIFICATIVA_DATA_NAO_CONFIRMADA','NOTA_DATA_ILEGIVEL','NOTA_DATA_AMBIGUA','NOTA_DATA_FORA','NOTA_NAO_IDENTIFICADA','ANEXOS_LEITURA_INDISPONIVEL','PLACA_NOVA','PLACA_FORMATO','PLACA_AUSENTE','VALOR_DIVERGENTE','VALOR_MULTIPLAS_NOITES','VALOR_CIDADE_DESCONHECIDA','VIAGEM_FUTURA_JUSTIFICATIVA_AUSENTE'];
 document.addEventListener('click', function(e){
   var b = e.target && e.target.closest && e.target.closest('.proc-btn-conferido');
