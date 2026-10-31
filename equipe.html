@@ -434,8 +434,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 'use strict';
 var W='https://diarias.aceitacoes.workers.dev', TK='sgd_token';
 var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-var AG={coordenador:['Coordenador','CO','#7c4ddb'],relatorios_cp:['Relatórios CP','RE','#0f766e'],operador_cp:['Operador CP','OP','#2f6fd8'],vigia:['Vigia','VI','#ea6a12'],conferente:['Conferente','CF','#c78a08'],pesquisador:['Pesquisador','PE','#0891b2'],programador:['Programador','PR','#4d8b12'],cacador:['Caçador local','CA','#059669'],thiago:['Você','TH','#1f6b4f']};
-var ORDEM=['coordenador','operador_cp','relatorios_cp','vigia','conferente','pesquisador','programador','cacador'];
+var AG={coordenador:['Coordenador','CO','#7c4ddb'],relatorios_cp:['Relatórios CP','RE','#0f766e'],operador_cp:['Operador CP','OP','#2f6fd8'],vigia:['Vigia','VI','#ea6a12'],conferente:['Conferente','CF','#c78a08'],auditor:['Auditor','Au','#e11d48'],pesquisador:['Pesquisador','PE','#0891b2'],programador:['Programador','PR','#4d8b12'],cacador:['Caçador local','CA','#059669'],thiago:['Você','TH','#1f6b4f']};
+var ORDEM=['coordenador','operador_cp','relatorios_cp','vigia','conferente','auditor','pesquisador','programador','cacador'];
 var NOME_PED={empenho:'Lote de empenho',prestacao:'Prestação de contas',relatorio_empenhos:'Relatório de empenhos',relatorio_pagamentos:'Relatório de pagamentos',relatorio_pc_pendentes:'Relatório de prestações pendentes'};
 var ATIVOS=['pendente','pegou','abrindo_tela','rodando'];
 var S={painel:null,equipe:null,cp:null,em:{},aba:'inicio',filtroP:'todos',filtroAt:'todos',enviando:null,desfeitos:{},ritmo:[]};
