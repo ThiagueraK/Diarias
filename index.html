@@ -1351,6 +1351,59 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .prx .proc-card.tkt .proc-fora-script-box{color:#92400e;background:#fef3c7;border-color:#f59e0b;}
   .prx .proc-card.tkt .proc-btn-corrigir{background:#fffdf8 !important;color:#1d2a24 !important;border-color:#c9bc9f !important;}
   .prx .proc-card.tkt .proc-km{color:#8a7b5c;}
+  /* ===== 01/11/2026 (fase 2): esteira de empenhos em QUADRO por etapa (bilhetes de papel sobre a aba escura) ===== */
+  .prx .prx-cards.kb-ce{display:block;padding:4px 14px 14px;overflow-x:auto;scrollbar-width:thin;}
+  .kb-ce .kb{position:relative;display:grid;grid-template-columns:repeat(var(--ncol,6),minmax(170px,1fr));gap:10px;min-width:calc(var(--ncol,6) * 178px);padding-top:4px;}
+  .kb-ce .kb::before{content:"";position:absolute;left:20px;right:20px;top:20px;height:3px;border-radius:3px;z-index:0;opacity:.6;
+    background:repeating-linear-gradient(90deg,#4edea3 0 10px,transparent 10px 22px);background-size:22px 100%;animation:kbFluxo 1.4s linear infinite;}
+  @keyframes kbFluxo{to{background-position:22px 0;}}
+  .kb-ce .kc{position:relative;z-index:1;display:grid;gap:7px;align-content:start;min-width:0;}
+  .kb-ce .kh{display:flex;align-items:center;gap:8px;justify-self:start;max-width:100%;background:#1a1f2e;border:1px solid rgba(148,163,184,.22);border-radius:999px;padding:4px 5px 4px 11px;}
+  .kb-ce .kh .kn{font:600 12px var(--f-x-disp,'IBM Plex Sans');letter-spacing:.02em;color:#dee2f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kb-ce .kh .kq{font:700 11px var(--mono);background:#4edea3;color:#062a1c;border-radius:999px;min-width:24px;text-align:center;padding:2px 7px;}
+  .kb-ce .kc.vazia .kq{background:rgba(148,163,184,.3);color:#dee2f6;}
+  .kb-ce .kt{font:500 11px var(--mono);color:#9aa3b8;padding-left:4px;min-height:15px;} .kb-ce .kt b{color:#dee2f6;} .kb-ce .kt.lento b{color:#fbbf24;}
+  .kb-ce .kl{display:grid;gap:7px;align-content:start;min-height:110px;padding:7px;border-radius:12px;border:1px dashed rgba(148,163,184,.2);background:rgba(255,255,255,.02);}
+  .kb-ce .km{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;gap:3px;background:#fffdf8;color:#1d2a24;border-radius:9px;padding:8px 10px 8px 13px;
+    -webkit-mask:radial-gradient(circle 6px at left 50%,transparent 98%,#000);mask:radial-gradient(circle 6px at left 50%,transparent 98%,#000);transition:transform .18s cubic-bezier(.175,.885,.32,1.275);}
+  .kb-ce .km:hover{transform:translateY(-2px) rotate(-.6deg);} .kb-ce .km:focus-visible{outline:2px solid #7AA7FF;outline-offset:2px;}
+  .kb-ce .km .n{font:600 12.5px 'IBM Plex Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .kb-ce .km .i{font:500 10.5px var(--mono);color:#8a7b5c;}
+  .kb-ce .km .r{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+  .kb-ce .km .v{font:700 11.5px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .kb-ce .km .d{font:600 10px var(--mono);color:#8a7b5c;background:#f3eee2;border-radius:999px;padding:1px 7px;white-space:nowrap;}
+  .kb-ce .km .alr{font:600 10.5px 'IBM Plex Sans',sans-serif;color:#c53030;}
+  .kb-ce .km.al{box-shadow:inset 3px 0 0 #d64545;}
+  .kb-ce .km.atr .d{color:#8a4b00;background:#fde7c4;}
+  .kb-ce .km.atr::after{content:"";position:absolute;right:7px;top:7px;width:7px;height:7px;border-radius:50%;background:#c77d18;}
+  .kb-ce .km.atr::before{content:"";position:absolute;right:7px;top:7px;width:7px;height:7px;border-radius:50%;background:#c77d18;animation:kbAnel 1.8s ease-out infinite;}
+  @keyframes kbAnel{from{transform:scale(1);opacity:.7;}to{transform:scale(2.6);opacity:0;}}
+  .kb-ce .kmais{all:unset;cursor:pointer;text-align:center;font:600 11.5px var(--mono);color:#4edea3;padding:4px;border-radius:8px;} .kb-ce .kmais:hover{background:rgba(78,222,163,.08);}
+  .kb-ce .kv{font:500 11.5px var(--mono);color:#6b7489;text-align:center;padding:24px 4px;}
+  /* extrato do empenho (modal de papel) */
+  .tkt-veu{position:fixed;inset:0;z-index:9000;background:rgba(10,14,22,.62);display:grid;place-items:center;padding:16px;}
+  .tkt-modal{background:#fffdf8;color:#1d2a24;border-radius:16px;width:min(980px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:18px;display:grid;gap:14px;box-shadow:0 30px 70px rgba(0,0,0,.45);font-family:'IBM Plex Sans',system-ui,sans-serif;}
+  .tkt-modal .topo{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;}
+  .tkt-modal h3{margin:0;font:700 19px 'IBM Plex Sans',sans-serif;} .tkt-modal .topo small{display:block;margin-top:2px;font:500 12px var(--mono);color:#8a7b5c;}
+  .tkt-modal .fechar{font:600 13px 'IBM Plex Sans',sans-serif;border:1px solid #c9bc9f;background:#fff;border-radius:9px;padding:7px 12px;cursor:pointer;color:#1d2a24;}
+  .tkt-mapa{position:relative;padding-bottom:36px;} .tkt-mapa svg{display:block;width:100%;height:auto;overflow:visible;}
+  .tkt-parada{position:absolute;transform:translate(-50%,-15px);display:grid;justify-items:center;gap:3px;z-index:2;width:96px;text-align:center;}
+  .tkt-parada .pino{width:30px;height:30px;border-radius:50%;background:#fffdf8;border:2.5px dashed #c9bc9f;display:grid;place-items:center;font:700 13px var(--mono);color:#c9bc9f;transition:all .3s;}
+  .tkt-parada .rot{font:600 11.5px 'IBM Plex Sans',sans-serif;color:#8a7b5c;line-height:1.2;} .tkt-parada .hora{font:600 10.5px var(--mono);color:#b3a585;}
+  .tkt-parada.feita .pino{border:2.5px solid #245f47;background:#245f47;color:#fff;} .tkt-parada.feita .rot{color:#1d2a24;}
+  .tkt-parada.fail .pino{border:2.5px solid #d64545;background:#fbeaea;color:#d64545;}
+  .tkt-parada.atual .pino{border:2.5px solid #2563eb;color:#2563eb;animation:tktEspera 1.6s ease-out infinite;}
+  @keyframes tktEspera{0%{box-shadow:0 0 0 0 rgba(37,99,235,.45);}100%{box-shadow:0 0 0 12px rgba(37,99,235,0);}}
+  .tkt-parada .stamp{position:absolute;top:-22px;left:58%;font:700 9.5px var(--mono);color:#245f47;border:2px solid currentColor;border-radius:5px;padding:1px 4px;transform:rotate(-12deg);opacity:.8;mix-blend-mode:multiply;white-space:nowrap;}
+  .tkt-amb{position:absolute;z-index:3;font-size:24px;line-height:1;pointer-events:none;}
+  .tkt-poeira{position:absolute;z-index:1;width:6px;height:6px;border-radius:50%;background:#ddd3bf;pointer-events:none;}
+  .tkt-emp-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;} @media (max-width:760px){ .tkt-emp-grid{grid-template-columns:1fr;} }
+  .tkt-log{font:500 12.5px var(--mono);display:grid;gap:5px;}
+  .tkt-log .ln{display:flex;gap:8px;align-items:baseline;white-space:nowrap;min-height:1.3em;} .tkt-log .ln .pt{flex:1;border-bottom:2px dotted #ddd3bf;transform:translateY(-3px);min-width:16px;}
+  .tkt-log .ln.pd{color:#b3a585;} .tkt-log .okk{color:#1f9d57;font-weight:700;} .tkt-log .fl{color:#d64545;font-weight:700;}
+  .tkt-fatos{display:grid;gap:6px;font-size:13px;} .tkt-fatos div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed #ddd3bf;padding-bottom:5px;} .tkt-fatos b{font:600 12.5px var(--mono);text-align:right;}
+  .tkt-cobrar{background:#fbf2e3;border:1px solid rgba(199,125,24,.3);color:#8a4b00;border-radius:10px;padding:8px 10px;font-size:12.5px;}
+  .tkt-cobrar.al{background:#fbeaea;border-color:rgba(214,69,69,.3);color:#a12a2a;}
   @media (max-width:900px){ .prx .prx-ops{grid-template-columns:1fr;} .prx .prx-acoes{justify-content:flex-start;} .prx .prx-acoes .x-atual{text-align:left;} }
   @media (max-width:620px){ .prx .prx-cards{grid-template-columns:1fr; padding:4px 10px 12px;} .prx .prx-busca{width:100%;} .prx .prx-dist{grid-template-columns:100px minmax(0,1fr);} .prx .prx-trilha li span{font-size:8.5px;} }
   @media (prefers-reduced-motion: reduce){ .prx .prx-trilha li.cur b{animation:none;} }
@@ -1516,7 +1569,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.12.0</span>
+    <span class="header-version">v1.13.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4091,14 +4144,108 @@ function ceRender() {
   var lista = naEtapa.filter(function(it) { return ceCat === 'todos' || it._cat === ceCat; });
   var cont = document.getElementById('ce-linhas');
   var mais = document.getElementById('prx-mais');
-  if (!lista.length) { cont.innerHTML = '<div class="x-vazio">Nenhum empenho neste filtro.</div>'; mais.hidden = true; }
-  else {
-    cont.innerHTML = lista.slice(0, prxLimite).map(function(it) { return prxCard(it, it._cat); }).join('');
-    mais.hidden = lista.length <= prxLimite;
-    document.getElementById('prx-mais-bt').textContent = 'Mostrar mais (' + (lista.length - prxLimite) + ' restantes)';
-  }
+  // 01/11/2026 (fase 2): quadro por etapa no lugar da lista de cards
+  kbRender(cont, lista); mais.hidden = true;
   prxRenderLado(mesAtual);
   prxRenderFeed();
+}
+// ===== 01/11/2026 (fase 2): esteira em quadro por etapa + extrato do empenho com a estrada =====
+var CE_COLS = [['enviado','No CP · guardado','falta enviar ao 1Doc'],['autor','Sua assinatura',''],['saude','Secretária',''],['adm','Secretário Adm',''],['pago','A pagar','Fazenda'],['pc','Pago · sem prestação','']];
+var prxExpand = {}, _kbUltCont = {}, _kbPorEmp = {};
+function kbMini(it) {
+  var d = it.diasParado || 0, atr = it.proxima && d >= 3 && it.proxima !== 'enviado';
+  var dias = !it.proxima ? 'concluído' : (d === 0 ? 'hoje' : d === 1 ? 'há 1 d' : 'há ' + d + ' d');
+  var k = String(it.empenho || it.hash || it.processo); _kbPorEmp[k] = it;
+  return '<button type="button" class="km' + (it.alerta ? ' al' : '') + (atr ? ' atr' : '') + '" data-k="' + escaparHtmlProc(k) + '" title="' + escaparHtmlProc(atr ? 'Parado nesta etapa há ' + d + ' dias' : 'Abrir o extrato do empenho') + '">'
+    + '<span class="n">' + escaparHtmlProc(it.servidor || '—') + '</span><span class="i">' + escaparHtmlProc((it.processo || 's/ proc.') + ' · emp. ' + (it.empenho || '—')) + '</span>'
+    + (it.alerta ? '<span class="alr">⚠ ' + escaparHtmlProc(it.alerta) + '</span>' : '')
+    + '<span class="r"><span class="v">' + (it.valor ? prxReais(prxValor(it.valor)) : '—') + '</span><span class="d">' + (atr ? '⏱ ' : '') + dias + '</span></span></button>';
+}
+function kbRender(cont, lista) {
+  var antes = new Map(); cont.querySelectorAll('.km').forEach(function(n){ antes.set(n.dataset.k, n.getBoundingClientRect()); });
+  var concl = ceFiltro === 'concluidos', cols = concl ? [['__fim', 'Concluídos', '']] : CE_COLS;
+  _kbPorEmp = {};
+  cont.classList.add('kb-ce');
+  cont.innerHTML = '<div class="kb" style="--ncol:' + cols.length + '">' + cols.map(function(c) {
+    var its = lista.filter(function(it){ return concl ? !it.proxima : it.proxima === c[0]; }), lim = prxExpand[c[0]] ? 999 : 4;
+    var med = its.length ? its.reduce(function(s, x){ return s + (x.diasParado || 0); }, 0) / its.length : 0;
+    return '<div class="kc' + (its.length ? '' : ' vazia') + '" data-c="' + c[0] + '"><div class="kh"><span class="kn">' + c[1] + '</span><span class="kq">' + its.length + '</span></div>'
+      + '<div class="kt' + (med >= 3 ? ' lento' : '') + '">' + (its.length && !concl ? (med < .5 ? 'em dia' : 'espera média <b>' + med.toFixed(1).replace('.', ',') + ' d</b>') : (c[2] || '&nbsp;')) + '</div>'
+      + '<div class="kl">' + (its.length ? its.slice(0, lim).map(kbMini).join('') + (its.length > lim ? '<button type="button" class="kmais" data-c="' + c[0] + '">+' + (its.length - lim) + ' mais</button>' : '') : '<div class="kv">nada aqui</div>') + '</div></div>';
+  }).join('') + '</div>';
+  cont.querySelectorAll('.kc').forEach(function(col){ var q = col.querySelector('.kq'), c = col.dataset.c;
+    if (_kbUltCont[c] !== undefined && _kbUltCont[c] !== q.textContent && !_tktReduz && q.animate) q.animate([{ transform: 'scale(1.5)' }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.175,.885,.32,1.275)' });
+    _kbUltCont[c] = q.textContent; });
+  if (_tktReduz) return;
+  var primeira = !antes.size;
+  cont.querySelectorAll('.km').forEach(function(n, i){ if (!n.animate) return; var a = antes.get(n.dataset.k), d = n.getBoundingClientRect();
+    if (a && (a.left !== d.left || a.top !== d.top)) n.animate([{ transform: 'translate(' + (a.left - d.left) + 'px,' + (a.top - d.top) + 'px)' + (Math.abs(a.left - d.left) > 40 ? ' rotate(-4deg)' : '') }, { transform: 'none' }], { duration: Math.abs(a.left - d.left) > 40 ? 650 : 380, easing: 'cubic-bezier(.2,0,0,1)' });
+    else if (!a && (primeira || antes.size)) n.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: primeira ? Math.min(i, 12) * 30 : 0, easing: 'cubic-bezier(.05,.7,.1,1)', fill: 'backwards' }); });
+}
+document.addEventListener('click', function(ev){
+  var m = ev.target.closest && ev.target.closest('.kb-ce .kmais'); if (m) { prxExpand[m.dataset.c] = true; ceRender(); return; }
+  var k = ev.target.closest && ev.target.closest('.kb-ce .km'); if (k && _kbPorEmp[k.dataset.k]) tktExtratoEmpenho(_kbPorEmp[k.dataset.k]);
+});
+// --- estrada genérica do extrato do empenho ---
+function tktPosAmb(t, c) { var p = t.path.getPointAtLength(c), p2 = t.path.getPointAtLength(Math.min(t.L, c + 2)), ang = Math.atan2(p2.y - p.y, p2.x - p.x) * 180 / Math.PI;
+  t.amb.style.left = (p.x / 10) + '%'; t.amb.style.top = (p.y / 150 * 100) + '%'; t.amb.style.transform = 'translate(-50%,-78%) rotate(' + (ang * .35) + 'deg) scaleX(-1)'; }
+function tktLinhaLog(t, k, falhou) { var ln = t.linhas[k]; if (!ln || ln.dataset.ok) return; ln.dataset.ok = '1'; ln.classList.remove('pd'); ln.querySelector('.d').textContent = t.datas[k] || '—';
+  var tx = ln.querySelector('.tx'), alvo = t.nomes[k][0].toUpperCase() + (t.nomes[k][1] ? ' · ' + t.nomes[k][1] : ''), fim = falhou ? ' <span class="fl">✗</span>' : ' <span class="okk">✓</span>';
+  if (_tktReduz) { tx.innerHTML = escaparHtmlProc(alvo) + fim; return; }
+  var i = 0, cur = document.createElement('span'); cur.style.cssText = 'display:inline-block;width:7px;height:1em;background:#1d2a24;vertical-align:-2px';
+  tx.textContent = ''; var iv = setInterval(function(){ tx.textContent = alvo.slice(0, ++i); tx.appendChild(cur); if (i >= alvo.length) { clearInterval(iv); cur.remove(); tx.insertAdjacentHTML('beforeend', fim); } }, 16); }
+function tktDirigir(t, ate) {
+  if (ate < 0) { var p0 = t.paradas[0]; if (p0) p0.classList.add('atual'); return Promise.resolve(); }
+  var de = t.pos, para = t.fr[ate] * t.L;
+  var carimbar = function(k){ var p = t.paradas[k]; if (!p || p.classList.contains('feita') || p.classList.contains('fail')) return;
+    var falhou = t.falhas[k]; p.classList.add(falhou ? 'fail' : 'feita'); p.querySelector('.pino').textContent = falhou ? '✗' : '✓'; p.querySelector('.hora').textContent = t.datas[k] || (falhou ? 'falhou' : '✓');
+    if (!falhou) { var s = document.createElement('span'); s.className = 'stamp'; s.textContent = t.stamps[k]; p.appendChild(s);
+      if (!_tktReduz) s.animate([{ transform: 'rotate(-12deg) scale(2.4)', opacity: 0 }, { transform: 'rotate(-12deg) scale(.9)', opacity: .9, offset: .7 }, { transform: 'rotate(-12deg) scale(1)', opacity: .8 }], { duration: 320, easing: 'cubic-bezier(.3,0,1,1)' }); }
+    tktLinhaLog(t, k, falhou); };
+  var fim = function(){ var prox = t.paradas[ate + 1]; if (prox && !prox.classList.contains('fail')) prox.classList.add('atual'); };
+  if (_tktReduz || para <= de) { for (var k = 0; k <= ate; k++) carimbar(k); t.feito.style.strokeDashoffset = t.L - para; t.pos = para; tktPosAmb(t, para); fim(); return Promise.resolve(); }
+  return new Promise(function(ok){ var ms = 650 + (para - de) / t.L * 1900, t0 = performance.now(), ult = 0; carimbar(0);
+    (function passo(agora){ var k = Math.min(1, (agora - t0) / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2, c = de + (para - de) * e;
+      tktPosAmb(t, c); t.feito.style.strokeDashoffset = t.L - c; t.pos = c; t.fr.forEach(function(f, idx){ if (idx <= ate && c >= f * t.L - 1) carimbar(idx); });
+      if (agora - ult > 70 && k < .95) { ult = agora; var pt = t.path.getPointAtLength(Math.max(0, c - 14)), po = document.createElement('span'); po.className = 'tkt-poeira'; po.style.left = (pt.x / 10) + '%'; po.style.top = (pt.y / 150 * 100) + '%'; t.amb.parentNode.appendChild(po);
+        po.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: .8 }, { transform: 'translate(-150%,-120%) scale(2.2)', opacity: 0 }], { duration: 600, easing: 'ease-out' }).finished.then(function(){ po.remove(); }); }
+      if (k < 1) requestAnimationFrame(passo); else ok(); })(t0); }).then(fim);
+}
+function tktExtratoEmpenho(it) {
+  var e = it.etapas || {}, imp = it.implicitas || [];
+  var nomes = [['Gravado no CP', 'robô do CP'], ['Enviado ao 1Doc', 'anexo + assinaturas'], ['Sua assinatura', ''], ['Secretária', 'Saúde'], ['Secretário Adm', 'Administração'], ['Pago', 'Fazenda'], ['Prestação de contas', 'robô do CP']];
+  var chaves = ['cp', 'enviado', 'autor', 'saude', 'adm', 'pago', 'pc'], stamps = ['GRAVADO', 'ENVIADO', 'ASSINADO', 'ASSINADO', 'ASSINADO', 'PAGO', 'PRESTADO'];
+  var feitas = chaves.map(function(k){ return !!e[k] || imp.indexOf(k) >= 0; }), falhas = chaves.map(function(k){ return (k === 'autor' && e.autorFalhou && !e.autor) || (k === 'enviado' && !!it.falhaEnvio); });
+  var datas = chaves.map(function(k){ return typeof e[k] === 'number' ? ceData(e[k]) : (feitas[chaves.indexOf(k)] ? '✓' : ''); });
+  var ate = -1; feitas.forEach(function(f, k){ if (f || falhas[k]) ate = k; });
+  var veu = document.createElement('div'); veu.className = 'tkt-veu';
+  var parado = it.proxima ? (it.diasParado >= 1 ? it.diasParado + ' dia(s)' : 'hoje') : '—';
+  veu.innerHTML = '<div class="tkt-modal" role="dialog" aria-modal="true" aria-label="Extrato do empenho ' + escaparHtmlProc(it.empenho || '') + '">'
+    + '<div class="topo"><div><h3>Empenho ' + escaparHtmlProc(it.empenho || '—') + ' · ' + escaparHtmlProc(it.servidor || '—') + '</h3><small>' + escaparHtmlProc([it.processo, it.dataSaida, it.cidade].filter(Boolean).join(' · ')) + (it.valor ? ' · ' + prxReais(prxValor(it.valor)) : '') + '</small></div><button type="button" class="fechar">Fechar</button></div>'
+    + '<div class="tkt-mapa"></div>'
+    + '<div class="tkt-emp-grid"><div><b style="font:700 10.5px var(--mono);letter-spacing:.08em;color:#8a7b5c">REGISTRO</b><div class="tkt-log"></div></div>'
+    + '<div class="tkt-fatos"><div><span>Etapa</span><b>' + escaparHtmlProc(it.proxima ? 'esperando ' + (it.proxima === 'autor' ? 'sua assinatura' : (it.proximaNome || it.proxima)) : 'concluído') + '</b></div><div><span>Parado há</span><b>' + parado + '</b></div><div><span>Valor</span><b>' + (it.valor ? prxReais(prxValor(it.valor)) : '—') + '</b></div>'
+    + (it.alerta ? '<div class="tkt-cobrar al" style="display:block">⚠ ' + escaparHtmlProc(it.alerta) + '</div>' : (it.proxima && it.diasParado >= 3 ? '<div class="tkt-cobrar" style="display:block">⏱ Parado há ' + it.diasParado + ' dias. Vale lembrar quem precisa assinar.</div>' : ''))
+    + '</div></div></div>';
+  document.body.appendChild(veu);
+  var fechar = function(){ document.removeEventListener('keydown', esc); if (_tktReduz) { veu.remove(); return; } veu.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' }).finished.then(function(){ veu.remove(); }); };
+  var esc = function(ev){ if (ev.key === 'Escape') fechar(); };
+  document.addEventListener('keydown', esc);
+  veu.addEventListener('click', function(ev){ if (ev.target === veu || ev.target.classList.contains('fechar')) fechar(); });
+  veu.querySelector('.fechar').focus();
+  if (!_tktReduz) { veu.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 }); veu.firstChild.animate([{ opacity: 0, transform: 'scale(.95) translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 320, delay: 50, easing: 'cubic-bezier(.05,.7,.1,1)', fill: 'backwards' }); }
+  var mapa = veu.querySelector('.tkt-mapa'), D = 'M50,92 C160,20 260,130 380,78 S600,20 700,84 S880,120 950,64';
+  mapa.innerHTML = '<svg viewBox="0 0 1000 150" aria-hidden="true"><path class="leito" d="' + D + '" fill="none" stroke="#efe7d6" stroke-width="18" stroke-linecap="round"/><path class="estrada" d="' + D + '" fill="none" stroke="#c9bc9f" stroke-width="2.5" stroke-dasharray="10 9" stroke-linecap="round"/><path class="feito" d="' + D + '" fill="none" stroke="#245f47" stroke-width="5" stroke-linecap="round"/></svg>';
+  var base = mapa.querySelector('.estrada'), feito = mapa.querySelector('.feito'), L = base.getTotalLength(), n = nomes.length;
+  var t = { L: L, path: base, feito: feito, pos: 0, datas: datas, stamps: stamps, nomes: nomes, falhas: falhas, fr: nomes.map(function(x, k){ return k / (n - 1); }) };
+  t.paradas = t.fr.map(function(f, k){ var pt = base.getPointAtLength(f * L), pd = document.createElement('div'); pd.className = 'tkt-parada'; pd.style.left = (pt.x / 10) + '%'; pd.style.top = (pt.y / 150 * 100) + '%';
+    pd.innerHTML = '<div class="pino">' + (k + 1) + '</div><div class="rot">' + nomes[k][0] + '</div><div class="hora">' + escaparHtmlProc(nomes[k][1]) + '</div>'; mapa.appendChild(pd); return pd; });
+  feito.setAttribute('stroke-dasharray', L + ' ' + L); feito.style.strokeDashoffset = L;
+  t.amb = document.createElement('div'); t.amb.className = 'tkt-amb'; t.amb.textContent = '🚑'; mapa.appendChild(t.amb); tktPosAmb(t, 0);
+  var log = veu.querySelector('.tkt-log'); t.linhas = nomes.map(function(p){ var ln = document.createElement('div'); ln.className = 'ln pd'; ln.innerHTML = '<span class="d">--/-- --:--</span><span class="pt"></span><span class="tx">' + p[0].toUpperCase() + ' · aguardando</span>'; log.appendChild(ln); return ln; });
+  if (!_tktReduz) { var le = mapa.querySelector('.leito'), LL = le.getTotalLength(); le.style.strokeDasharray = LL + ' ' + LL; le.animate([{ strokeDashoffset: LL }, { strokeDashoffset: 0 }], { duration: 650, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' });
+    t.paradas.forEach(function(pd, k){ pd.animate([{ opacity: 0, transform: 'translate(-50%,-15px) scale(.6)' }, { opacity: 1, transform: 'translate(-50%,-15px)' }], { duration: 280, delay: 120 + k * 90, easing: 'cubic-bezier(.175,.885,.32,1.275)', fill: 'backwards' }); }); }
+  setTimeout(function(){ tktDirigir(t, ate); }, _tktReduz ? 0 : 700);
 }
 function carregarEmpenhosAndamento() {
   if (!document.getElementById('panel-processos').classList.contains('active')) return;
