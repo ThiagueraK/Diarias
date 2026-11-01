@@ -1229,6 +1229,87 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .prx #proc-resumo-situacao span{background:rgba(255,255,255,.03) !important;}
   .prx .prx-ultimo:not([hidden]){display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.45); border-radius:8px; padding:6px 12px; font-size:12.5px;}
   .prx .prx-lista{max-height:72vh; overflow-y:auto;}
+  /* ===== 01/11/2026: caixa em BILHETES (modelo "Ticket" aprovado na demonstração) ===== */
+  #proc-lista.tkt-grade{grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:18px;padding:4px 4px 12px;}
+  @media (max-width:520px){ #proc-lista.tkt-grade{grid-template-columns:1fr;} }
+  .proc-card.tkt{display:grid;grid-template-columns:minmax(0,1fr) 128px;padding:0;background:none;border:0;border-radius:14px;box-shadow:none;overflow:visible;filter:drop-shadow(0 6px 10px rgba(60,50,30,.13));transition:transform .22s cubic-bezier(.175,.885,.32,1.275);}
+  .proc-card.tkt::before{display:none;}
+  .proc-card.tkt:hover{transform:translateY(-3px) rotate(-.3deg);box-shadow:none;}
+  .proc-card.tkt.aberto{grid-column:1/-1;} .proc-card.tkt.aberto:hover{transform:none;}
+  .tkt-corpo,.tkt-canhoto,.tkt-extrato{background:#fffdf8;position:relative;}
+  .tkt-corpo{border-radius:14px 0 0 14px;padding:14px 16px;display:grid;gap:8px;align-content:start;cursor:pointer;
+    -webkit-mask:radial-gradient(circle 11px at right top,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at right bottom,transparent 98%,#000) bottom/100% 51% no-repeat;
+            mask:radial-gradient(circle 11px at right top,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at right bottom,transparent 98%,#000) bottom/100% 51% no-repeat;}
+  .tkt-corpo:focus-visible{outline:2px solid var(--accent2);outline-offset:-3px;}
+  .tkt-canhoto{border-radius:0 14px 14px 0;border-left:2px dashed #ddd3bf;padding:14px 10px;display:grid;gap:8px;align-content:space-between;justify-items:center;text-align:center;transform-origin:0 100%;
+    -webkit-mask:radial-gradient(circle 11px at left top,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at left bottom,transparent 98%,#000) bottom/100% 51% no-repeat;
+            mask:radial-gradient(circle 11px at left top,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at left bottom,transparent 98%,#000) bottom/100% 51% no-repeat;}
+  .proc-card.tkt.aberto .tkt-corpo{border-radius:14px 0 0 0;} .proc-card.tkt.aberto .tkt-canhoto{border-radius:0 14px 0 0;}
+  .tkt-faixa{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font:700 10.5px var(--mono);letter-spacing:.07em;color:#8a7b5c;}
+  .tkt-faixa a{color:var(--accent2);text-decoration:none;} .tkt-faixa a:hover{text-decoration:underline;}
+  .tkt-rota{display:flex;align-items:center;gap:8px;font:700 20px 'IBM Plex Sans',sans-serif;letter-spacing:-.01em;color:#1d2a24;min-width:0;}
+  .tkt-rota .seta{flex:1;height:2px;min-width:22px;position:relative;background:repeating-linear-gradient(90deg,#c9bc9f 0 6px,transparent 6px 10px);}
+  .tkt-rota .seta::after{content:"🚑";position:absolute;left:0;top:-12px;font-size:15px;transform:scaleX(-1);transition:transform 1.4s cubic-bezier(.4,0,.2,1);}
+  .proc-card.tkt:hover .tkt-rota .seta::after{transform:translateX(var(--anda,60px)) scaleX(-1);}
+  .tkt-rota .dest{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tkt-nome{font-weight:600;font-size:14px;color:#1d2a24;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .tkt-nome small{font:500 11.5px var(--mono);color:#8a7b5c;margin-left:6px;}
+  .tkt-campos{display:grid;grid-template-columns:repeat(4,auto);gap:4px 14px;justify-content:start;font-size:10.5px;letter-spacing:.04em;color:#8a7b5c;}
+  @media (max-width:520px){ .tkt-campos{grid-template-columns:repeat(2,auto);} }
+  .tkt-campos b{display:block;font:600 12.5px var(--mono);letter-spacing:0;color:#1d2a24;}
+  .tkt-campos b.pern{color:#7c3aed;}
+  .tkt-dica{font:600 10.5px var(--mono);letter-spacing:.06em;color:#8a7b5c;display:flex;gap:6px;align-items:center;}
+  .tkt-dica i{font-style:normal;display:inline-block;transition:transform .3s cubic-bezier(.2,0,0,1);} .proc-card.tkt.aberto .tkt-dica i{transform:rotate(180deg);}
+  .proc-card.tkt .proc-tags{margin:0;}
+  .proc-card.tkt .proc-motivo-bloq,.proc-card.tkt .proc-aviso-duplicata,.proc-card.tkt .proc-empenho-ok,.proc-card.tkt .proc-empenho-pendente{margin:0;cursor:auto;}
+  .tkt-canhoto small{font:600 10px var(--mono);letter-spacing:.06em;color:#8a7b5c;}
+  .tkt-canhoto .valor{font:700 19px var(--mono);color:#1d2a24;font-variant-numeric:tabular-nums;}
+  .tkt-canhoto .regra{font:500 10px var(--mono);color:#8a7b5c;}
+  .tkt-barras{width:84px;height:24px;opacity:.7;background:repeating-linear-gradient(90deg,#1d2a24 0 2px,transparent 2px 4px,#1d2a24 4px 5px,transparent 5px 8px);}
+  .tkt-canhoto .proc-copy-btn{font-size:12px;}
+  .tkt-selo{position:absolute;right:14px;bottom:12px;transform:rotate(-10deg);font:700 15px 'IBM Plex Mono',monospace;letter-spacing:.06em;padding:3px 10px;border:3px solid currentColor;border-radius:8px;pointer-events:none;opacity:.8;mix-blend-mode:multiply;white-space:nowrap;z-index:3;}
+  .tkt-selo.al{color:#d64545;} .tkt-selo.fs{color:#8a7b5c;}
+  .proc-card.tkt.is-fora-script{border:0 !important;background:none !important;}
+  .proc-card.tkt.is-fora-script .tkt-corpo,.proc-card.tkt.is-fora-script .tkt-canhoto{background:repeating-linear-gradient(-45deg,#fffdf8 0 10px,#f7f2e7 10px 20px);}
+  .proc-card.tkt.is-dup{border:0 !important;box-shadow:none !important;}
+  .proc-card.tkt.is-dup .tkt-corpo{box-shadow:inset 3px 0 0 var(--danger,#dc2626);}
+  @property --tkta{syntax:'<angle>';inherits:false;initial-value:0deg;}
+  .proc-card.tkt.beam .tkt-corpo::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;background:conic-gradient(from var(--tkta),transparent 0 64%,#f3a1a1 76%,#d64545 86%,transparent 96%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:tktGira 3.2s linear infinite;}
+  @keyframes tktGira{to{--tkta:360deg;}}
+  .tkt-extrato{grid-column:1/-1;display:none;border-top:2px dashed #ddd3bf;padding:16px 18px 34px;gap:16px;
+    -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%;}
+  .proc-card.tkt.aberto .tkt-extrato{display:grid;}
+  .tkt-ext-topo{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font:700 10.5px var(--mono);letter-spacing:.08em;color:#8a7b5c;}
+  .tkt-ext-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start;}
+  @media (max-width:900px){ .tkt-ext-grid{grid-template-columns:1fr;} }
+  .tkt-blk{display:grid;gap:8px;align-content:start;min-width:0;}
+  .tkt-blk > b{font:700 10.5px var(--mono);letter-spacing:.08em;color:#8a7b5c;text-transform:uppercase;}
+  .tkt-blk .proc-conf,.tkt-blk .proc-hist,.tkt-blk .proc-desc-box,.tkt-blk .proc-meta{margin:0;}
+  .tkt-blk .proc-conf{background:#fff;font-size:12.5px;}
+  .tkt-blk .proc-conf li{padding:3px 0;}
+  .tkt-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .tkt-acoes .proc-btn-anexos{margin:0;}
+  .tkt-veredito{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;border:2px dashed currentColor;font:700 12.5px var(--mono);letter-spacing:.04em;}
+  .tkt-veredito span{font-weight:500;opacity:.8;}
+  .tkt-veredito.ok{color:#1f9d57;} .tkt-veredito.at{color:#c77d18;} .tkt-veredito.al{color:#d64545;} .tkt-veredito.pend{color:#8a7b5c;}
+  /* o dia da viagem */
+  .tkt-dia{position:relative;padding:58px 6px 40px;}
+  .tkt-dia .eixo{position:relative;height:44px;border-radius:10px;border:1px solid #ddd3bf;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),#e9e1d0 calc(10% - 1px) 10%);}
+  .tkt-dia .noite{position:absolute;top:0;bottom:0;background:rgba(29,42,36,.05);}
+  .tkt-dia .h{position:absolute;top:100%;margin-top:5px;transform:translateX(-50%);font:500 10.5px var(--mono);color:#8a7b5c;}
+  .tkt-dia .viagem{position:absolute;top:8px;height:28px;border-radius:8px;background:linear-gradient(90deg,#2f7d5d,#245f47);display:flex;align-items:center;justify-content:space-between;padding:0 8px;color:#fff;font:600 11px var(--mono);white-space:nowrap;overflow:hidden;}
+  .tkt-dia .amb2{position:absolute;top:-6px;font-size:22px;transform:translateX(-50%) scaleX(-1);z-index:3;}
+  .tkt-dia .pin{position:absolute;top:-30px;transform:translateX(-50%);display:grid;justify-items:center;z-index:4;}
+  .tkt-dia .pin b{font:700 10.5px var(--mono);padding:2px 7px;border-radius:6px;background:#1f9d57;color:#fff;white-space:nowrap;}
+  .tkt-dia .pin i{width:2px;height:58px;background:#1f9d57;}
+  .tkt-dia .pin.at b{background:#c77d18;} .tkt-dia .pin.at i{background:#c77d18;}
+  .tkt-dia .pin.al b{background:#d64545;} .tkt-dia .pin.al i{background:#d64545;}
+  .tkt-dia .pin.q b{background:#8a7b5c;} .tkt-dia .pin.q i{background:repeating-linear-gradient(#8a7b5c 0 4px,transparent 4px 8px);}
+  .tkt-dia .pin small{position:absolute;bottom:100%;margin-bottom:3px;font:600 10.5px 'IBM Plex Sans',sans-serif;color:#4b5a52;white-space:nowrap;background:#fffdf8;padding:1px 5px;border-radius:5px;border:1px solid #ddd3bf;}
+  .tkt-dia .legenda{position:absolute;left:6px;bottom:0;font:500 11px var(--mono);color:#8a7b5c;display:flex;gap:14px;flex-wrap:wrap;}
+  .tkt-dia .legenda span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#2f7d5d;}
+  .tkt-dia .legenda span.n::before{background:#1f9d57;border-radius:50%;}
+  @media (prefers-reduced-motion: reduce){ .proc-card.tkt,.proc-card.tkt *{animation:none !important;transition:none !important;} }
   .prx .proc-card{background:linear-gradient(160deg, rgba(139,92,246,.06), #1a1f2e 55%); border-color:var(--x-line); border-radius:8px;}
   .prx .proc-card:hover{transform:none; border-color:var(--x-line2);}
   .prx .proc-card.is-fora-script{background:rgba(245,158,11,.06) !important;}
@@ -1247,6 +1328,29 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .prx .proc-viagem-meio.pernoite{color:#c4b5fd;}
   .prx .proc-copy-btn{background:linear-gradient(135deg,#8b5cf6,#7c3aed);}
   .prx .proc-copy-btn.copiado{background:#059669;}
+  /* 01/11/2026: dentro do BILHETE volta o papel claro (a aba é escura; o bilhete é "papel") */
+  .prx .proc-card.tkt{--surface:#fffdf8;--surface2:#f7f2e7;--border:#ddd3bf;--border-strong:#c9bc9f;--text:#1d2a24;--text-muted:#6f6550;--text-dim:#8a7b5c;--accent-light:#e7f2ec;--card:#fffdf8;
+    background:none;border:0;border-radius:14px;color:#1d2a24;font-family:'IBM Plex Sans',system-ui,sans-serif;}
+  .prx .proc-card.tkt:hover{border:0;}
+  .prx .proc-card.tkt .proc-sit{background:#fff;}
+  .prx .proc-card.tkt .proc-sit[data-s="a-empenhar"]{color:#15803d;} .prx .proc-card.tkt .proc-sit[data-s="guardado"]{color:#2563eb;}
+  .prx .proc-card.tkt .proc-sit[data-s="bloqueado"]{color:#d64545;} .prx .proc-card.tkt .proc-sit[data-s="fora-do-script"]{color:#b45309;}
+  .prx .proc-card.tkt .proc-tag{background:#fff;color:#4b5a52;border-color:#ddd3bf;}
+  .prx .proc-card.tkt .proc-tag.app{color:#0e7490;border-color:rgba(14,116,144,.35);} .prx .proc-card.tkt .proc-tag.bot{color:#6d28d9;border-color:rgba(109,40,217,.35);} .prx .proc-card.tkt .proc-tag.manual{color:#b45309;border-color:rgba(180,83,9,.35);}
+  .prx .proc-card.tkt .proc-tag.dup{color:#fff;background:#d64545;border-color:#d64545;} .prx .proc-card.tkt .proc-tag.risco-alto{color:#fff;background:#b45309;border-color:#b45309;} .prx .proc-card.tkt .proc-tag.risco-medio{color:#92400e;background:#fef3c7;border-color:#f59e0b;}
+  .prx .proc-card.tkt .proc-meta span[style*="#2563eb"]{color:#2563eb !important;} .prx .proc-card.tkt .proc-meta span[style*="#7c3aed"]{color:#6d28d9 !important;}
+  .prx .proc-card.tkt .proc-meta span[style*="#16a34a"], .prx .proc-card.tkt .proc-meta span[style*="#059669"]{color:#15803d !important;}
+  .prx .proc-card.tkt .proc-meta span[style*="#b45309"], .prx .proc-card.tkt .proc-meta span[style*="#b8860b"]{color:#b45309 !important;}
+  .prx .proc-card.tkt .proc-conf{background:#fff;color:#1d2a24;} .prx .proc-card.tkt .proc-conf.ok summary{color:#15803d;}
+  .prx .proc-card.tkt .proc-conf.atencao summary, .prx .proc-card.tkt .proc-conf li.atencao, .prx .proc-card.tkt .proc-hist-lin.sobre{color:#b45309;}
+  .prx .proc-card.tkt .proc-hist{background:#fff;color:#4b5a52;} .prx .proc-card.tkt .proc-hist-lin .q{color:#6f6550;}
+  .prx .proc-card.tkt .proc-desc-box{background:#fff;color:#1d2a24;} .prx .proc-card.tkt .proc-desc-text{color:#1d2a24;}
+  .prx .proc-card.tkt .proc-copy-btn{background:#245f47;color:#fff;} .prx .proc-card.tkt .proc-copy-btn:hover{background:#1c4b38;} .prx .proc-card.tkt .proc-copy-btn.copiado{background:#1f9d57;}
+  .prx .proc-card.tkt .proc-btn-anexos{background:#fffdf8;color:#1d2a24;border-color:#c9bc9f;} .prx .proc-card.tkt .proc-btn-anexos:hover{background:#e7f2ec;border-color:#2f7d5d;}
+  .prx .proc-card.tkt .proc-btn-fora-script{background:#fffdf8;color:#6f6550;border-color:#ddd3bf;} .prx .proc-card.tkt .proc-btn-fora-script:hover{background:#fef3c7;color:#b45309;border-color:#f59e0b;}
+  .prx .proc-card.tkt .proc-fora-script-box{color:#92400e;background:#fef3c7;border-color:#f59e0b;}
+  .prx .proc-card.tkt .proc-btn-corrigir{background:#fffdf8 !important;color:#1d2a24 !important;border-color:#c9bc9f !important;}
+  .prx .proc-card.tkt .proc-km{color:#8a7b5c;}
   @media (max-width:900px){ .prx .prx-ops{grid-template-columns:1fr;} .prx .prx-acoes{justify-content:flex-start;} .prx .prx-acoes .x-atual{text-align:left;} }
   @media (max-width:620px){ .prx .prx-cards{grid-template-columns:1fr; padding:4px 10px 12px;} .prx .prx-busca{width:100%;} .prx .prx-dist{grid-template-columns:100px minmax(0,1fr);} .prx .prx-trilha li span{font-size:8.5px;} }
   @media (prefers-reduced-motion: reduce){ .prx .prx-trilha li.cur b{animation:none;} }
@@ -1412,7 +1516,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.11.4</span>
+    <span class="header-version">v1.12.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2903,7 +3007,8 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     lista.innerHTML = '<p style="color:var(--text-muted);">Nenhum processo ainda — clique em "🔄 Varrer caixa agora".</p>';
     return;
   }
-  lista.className = 'proc-grid';
+  lista.className = 'proc-grid tkt-grade';
+  var beamUsado = false; // 01/11/2026: borda viva só no 1º travado (uma por tela)
   lista.innerHTML = itens.map(function(p, idx){
     // 15/09/2026: fallback caso o motorista tenha sido preenchido no campo de placa por engano
     if (!p.servidor && p.placa && credorPorNome(p.placa)) {
@@ -3015,31 +3120,44 @@ function renderProcessosCaixa(itens, atualizadoEm) {
     var riscoTag = (rs && (rs.nivel === 'alto' || rs.nivel === 'medio') && !p.ehAgenteSaude)
       ? '<span class="proc-tag risco-' + rs.nivel + '" title="' + escaparHtmlProc('Ficha de risco (90 dias): ' + (rs.motivos || []).join('; ')) + '">🧭 Risco ' + (rs.nivel === 'alto' ? 'alto' : 'médio') + '</span>' : '';
     var tipoTag = p.ehRessarcimento ? '<span class="proc-tag">💵 Ressarcimento</span>' : (p.ehAgenteSaude ? '<span class="proc-tag">⚖️ Agente de Saúde</span>' : '<span class="proc-tag">Diária</span>');
-    return '<div class="proc-card ' + classeCard + '" id="proc-card-' + idx + '" data-hash="' + escaparHtmlProc(p.hash || '') + '">'
-      + '<div class="proc-head">'
-        + '<div class="proc-avatar">' + iniciaisDoNome(p.servidor) + '</div>'
-        + '<div class="proc-headtext">'
-          + '<div class="proc-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + '</div>'
-          + '<div class="proc-num">' + escaparHtmlProc(p.numeroProcesso || '?') + '</div>'
-          + (p.recebidoEm ? '<div class="proc-chegou">chegou ' + procChegouHa(p.recebidoEm) + '</div>' : '')
-        + '</div>'
-        + (p.url ? '<a href="' + p.url + '" target="_blank" class="proc-link" title="Abrir no 1Doc">↗</a>' : '')
+    // 01/11/2026: card em forma de BILHETE (corpo + canhoto picotado + extrato que abre com a conferência da viagem).
+    // Ids, classes e onclicks antigos continuam (proc-card-idx, proc-sit, proc-motivo-bloq, proc-desc-idx, proc-km-idx,
+    // proc-copybtn-idx, proc-fs-idx, proc-dup-idx, proc-emp-idx, proc-conf, proc-btn-anexos, proc-btn-corrigir).
+    var tv = tktValor(p), du = tktDuracao(p), cf = p.conferencia;
+    var corpoTkt = corpo.replace(/<button class="proc-copy-btn"[^>]*>[^<]*<\/button>/, '');
+    var beam = cf && cf.status === 'alerta' && !beamUsado; if (beam) beamUsado = true;
+    var seloTkt = p.foraDoScript ? '<div class="tkt-selo fs">FORA DO SCRIPT</div>' : (temDup ? '<div class="tkt-selo al">MESMA DATA</div>' : '');
+    var vd = !cf ? ['pend','🤖 AGUARDANDO O CONFERENTE','ainda não conferiu'] : cf.status === 'pronto' ? ['ok','✓ PRONTO PARA EMPENHO','tudo confere'] : cf.status === 'alerta' ? ['al','■ TRAVADO NA CONFERÊNCIA','veja os apontamentos'] : ['at','▲ CONFERIR ANTES','veja os apontamentos'];
+    var curtaD = function(d){ var m = String(d || '').match(/(\d{1,2})\/(\d{1,2})/); return m ? m[1].padStart(2,'0') + '/' + m[2].padStart(2,'0') : '—'; };
+    return '<div class="proc-card tkt ' + classeCard + (beam ? ' beam' : '') + '" id="proc-card-' + idx + '" data-hash="' + escaparHtmlProc(p.hash || '') + '" data-idx="' + idx + '">'
+      + '<div class="tkt-corpo" role="button" tabindex="0" aria-expanded="false" aria-label="' + escaparHtmlProc('Processo ' + (p.numeroProcesso || '?') + ' de ' + (p.servidor || '?') + ': ver a conferência da viagem') + '">'
+        + '<div class="tkt-faixa"><span>' + (p.ehRessarcimento ? 'RESSARCIMENTO' : (p.ehAgenteSaude ? 'AGENTE DE SAÚDE' : 'DIÁRIA')) + ' · PROC. ' + escaparHtmlProc(p.numeroProcesso || '?') + (p.recebidoEm ? ' · chegou ' + escaparHtmlProc(procChegouHa(p.recebidoEm)) : '') + '</span>'
+          + (p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener" title="Abrir no 1Doc">1DOC ↗</a>' : '') + '</div>'
+        + '<div class="tkt-rota"><span>TUP</span><span class="seta"></span><span class="dest" title="' + escaparHtmlProc(p.cidade || '') + '">' + escaparHtmlProc(String(p.cidade || '—').toUpperCase()) + '</span></div>'
+        + '<div class="tkt-nome" title="' + escaparHtmlProc(p.servidor || '?') + '">' + escaparHtmlProc(p.servidor || '?') + (credorNum ? '<small>credor ' + credorNum + '</small>' : '') + '</div>'
+        + '<div class="tkt-campos"><span>SAÍDA<b>' + escaparHtmlProc(curtaD(p.dataSaida) + ' ' + (p.horaSaida || '')) + '</b></span><span>CHEGADA<b>' + escaparHtmlProc(curtaD(p.dataChegada || p.dataSaida) + ' ' + (p.horaChegada || '')) + '</b></span>'
+          + '<span>DURAÇÃO<b' + (du.pern ? ' class="pern"' : '') + '>' + escaparHtmlProc(du.txt) + '</b></span><span>PLACA<b>' + escaparHtmlProc(p.placa || '—') + '</b></span></div>'
+        + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (p.clinicaDestino ? '<span class="proc-tag">📍 ' + escaparHtmlProc(p.clinicaDestino) + '</span>' : '') + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + riscoTag + '</div>'
+        + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
+        + avisoDuplicataHtml + empenhoHtml
+        + '<div class="tkt-dica"><i>▾</i> VER A CONFERÊNCIA DA VIAGEM</div>'
+        + seloTkt
       + '</div>'
-      + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + riscoTag + '</div>'
-      + procViagemHtml(p, credorNum)
-      + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
-      + procHistoricoHtml(p)
-      + procConferenciaHtml(p)
-      + (p.hash ? '<button type="button" class="proc-btn-anexos" data-hash="' + escaparHtmlProc(p.hash) + '">📎 Ver anexos</button>' : '')
-      + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
-      + statusScriptHtml
-      + avisoDuplicataHtml
-      + corpo
-      + empenhoHtml
+      + '<div class="tkt-canhoto"><small>VALOR</small><div><div class="valor">' + tv.v + '</div><div class="regra">' + escaparHtmlProc(tv.regra) + '</div></div><div class="tkt-barras"></div>'
+        + (descBase ? '<button class="proc-copy-btn" id="proc-copybtn-' + idx + '" onclick="copiarDescricaoProcesso(' + idx + ')" title="Copiar a descrição para o empenho">📋 Copiar</button>' : '') + '</div>'
+      + '<div class="tkt-extrato">'
+        + '<div class="tkt-ext-topo"><span>CONFERÊNCIA DA VIAGEM · PROC. ' + escaparHtmlProc(p.numeroProcesso || '?') + '</span><span>' + escaparHtmlProc(curtaD(p.dataSaida) + (p.dataChegada && p.dataChegada !== p.dataSaida ? ' → ' + curtaD(p.dataChegada) : '')) + '</span></div>'
+        + '<div class="tkt-dia"></div>'
+        + '<div class="tkt-ext-grid"><div class="tkt-blk"><div class="tkt-veredito ' + vd[0] + '">' + vd[1] + ' <span>· ' + vd[2] + '</span></div><b>Check-in da conferência</b>' + procConferenciaHtml(p) + procHistoricoHtml(p) + '</div>'
+        + '<div class="tkt-blk"><b>Descrição para o empenho</b>' + corpoTkt + (metaPartes.length ? '<div class="proc-meta">' + metaPartes.join('') + '</div>' : '')
+          + '<div class="tkt-acoes">' + (p.hash ? '<button type="button" class="proc-btn-anexos" data-hash="' + escaparHtmlProc(p.hash) + '">📎 Ver anexos</button>' : '') + (descBase ? '<button type="button" class="proc-copy-btn" onclick="copiarDescricaoProcesso(' + idx + ')">📋 Copiar descrição</button>' : '') + '</div>'
+          + statusScriptHtml + '</div></div>'
+      + '</div>'
     + '</div>';
   }).join('');
   fecharDescricoesEmFila(itens);
   aplicarSituacaoNosCards();
+  tktPosRender(lista);
 }
 // 07/10/2026: peças dos cards novos
 function procChegouHa(recebidoEm) {
@@ -3053,6 +3171,135 @@ function procDataMs(data, hora) {
   if (!d) return null;
   var h = String(hora || '').match(/(\d{1,2}):(\d{2})/);
   return Date.UTC(+d[3], +d[2] - 1, +d[1], h ? +h[1] : 0, h ? +h[2] : 0);
+}
+// ===== 01/11/2026: bilhetes da caixa — valor do canhoto, duração, abrir/fechar o extrato e o dia da viagem =====
+function tktValor(p) {
+  var f = function(v){ return Number(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  if (p.ehRessarcimento) return { v: f(p.valorSugerido || 0), regra: 'ressarcimento' };
+  if (p.ehAgenteSaude) return { v: '1.057,30', regra: 'Agente de Saúde' };
+  if (p.valorSugerido) return { v: f(p.valorSugerido), regra: ehCapital(p.cidade) ? 'Capital do Estado' : 'diária' };
+  if (p.revisarManual) return { v: '?', regra: 'conferir valor' };
+  if (ehCapital(p.cidade) || (!p.cidade && descricaoEhCapital(p.descricaoSugerida))) return { v: '581,52', regra: 'Capital do Estado' };
+  if (ehMesmoMunicipio(p.cidade) || (!p.cidade && descricaoEhMesmoMunicipio(p.descricaoSugerida))) return { v: '52,87', regra: 'interior município' };
+  return { v: '—', regra: '' };
+}
+function tktDuracao(p) {
+  var a = procDataMs(p.dataSaida, p.horaSaida), b = procDataMs(p.dataChegada || p.dataSaida, p.horaChegada);
+  var noites = (procDataMs(p.dataChegada || p.dataSaida) - procDataMs(p.dataSaida)) / 86400000;
+  if (a == null || b == null) return { txt: '—', pern: false };
+  if (b < a) return { txt: '⚠ chegada antes', pern: false };
+  if (noites >= 1) return { txt: noites + (noites === 1 ? ' noite' : ' noites'), pern: true };
+  var hs = Math.round((b - a) / 3600000); return { txt: hs ? hs + 'h' : '—', pern: false };
+}
+window._tktAbertos = window._tktAbertos || new Set();
+window._tktVistos = window._tktVistos || null;
+var _tktReduz = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tktPosRender(lista) {
+  var primeira = !window._tktVistos; if (primeira) window._tktVistos = new Set();
+  var n = 0;
+  lista.querySelectorAll('.proc-card.tkt').forEach(function(card) {
+    var h = card.dataset.hash;
+    if (h && window._tktAbertos.has(h)) { card.classList.add('aberto'); card.querySelector('.tkt-corpo').setAttribute('aria-expanded', 'true'); tktDesenharDia(card, false); }
+    var dest = card.querySelector('.tkt-rota .seta'); if (dest) dest.style.setProperty('--anda', Math.max(30, dest.offsetWidth - 20) + 'px');
+    if (!_tktReduz && h && !window._tktVistos.has(h) && card.animate) {
+      card.animate([{ opacity: 0, transform: 'translate(-90px,-50px) rotate(-12deg) scale(.88)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: Math.min(n++, 8) * 80, easing: 'cubic-bezier(.175,.885,.32,1.275)', fill: 'backwards' });
+    }
+    if (h) window._tktVistos.add(h);
+  });
+}
+function tktFlip(lista, mudar) {
+  var antes = new Map(); lista.querySelectorAll('.proc-card').forEach(function(n){ antes.set(n, n.getBoundingClientRect()); });
+  mudar();
+  if (_tktReduz) return;
+  lista.querySelectorAll('.proc-card').forEach(function(n){ var a = antes.get(n); if (!a || !n.animate) return; var d = n.getBoundingClientRect(), dx = a.left - d.left, dy = a.top - d.top;
+    if (dx || dy) n.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.2,0,0,1)' }); });
+}
+function tktAlternar(card) {
+  if (!card || card._tktOcupado) return;
+  var lista = card.parentNode, ext = card.querySelector('.tkt-extrato'), h = card.dataset.hash, corpo = card.querySelector('.tkt-corpo');
+  if (card.classList.contains('aberto')) {
+    card._tktOcupado = true; window._tktAbertos.delete(h); corpo.setAttribute('aria-expanded', 'false');
+    var fim = function(){ tktFlip(lista, function(){ card.classList.remove('aberto'); }); card._tktOcupado = false; };
+    if (_tktReduz || !ext.animate) fim(); else ext.animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)', transform: 'translateY(-8px)' }], { duration: 380, easing: 'cubic-bezier(.3,0,1,1)' }).finished.then(fim);
+    return;
+  }
+  lista.querySelectorAll('.proc-card.tkt.aberto').forEach(function(o){ if (o !== card) tktAlternar(o); });
+  window._tktAbertos.add(h); corpo.setAttribute('aria-expanded', 'true');
+  tktFlip(lista, function(){ card.classList.add('aberto'); });
+  var anima = !_tktReduz && ext.animate;
+  var pronto = anima ? ext.animate([{ clipPath: 'inset(0 0 100% 0)', transform: 'translateY(-6px)' }, { clipPath: 'inset(0 0 0 0)', transform: 'none' }], { duration: 800, easing: 'steps(12, end)' }).finished : Promise.resolve();
+  card._tktOcupado = true;
+  pronto.then(function(){
+    if (anima) {
+      var v = ext.querySelector('.tkt-veredito'); if (v) v.animate([{ transform: 'scale(1.25) rotate(-3deg)', opacity: 0 }, { transform: 'scale(.97)', opacity: 1, offset: .7 }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.3,0,1,1)' });
+      ext.querySelectorAll('.proc-conf li, .proc-hist-lin').forEach(function(n, k){ n.animate([{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none' }], { duration: 280, delay: 150 + k * 70, easing: 'cubic-bezier(.05,.7,.1,1)', fill: 'backwards' }); });
+    }
+    tktDesenharDia(card, anima).then(function(){ card._tktOcupado = false; });
+    var r = card.getBoundingClientRect(), lr = lista.getBoundingClientRect();
+    if (r.top < lr.top || r.top > lr.bottom - 120) card.scrollIntoView({ behavior: _tktReduz ? 'auto' : 'smooth', block: 'start' });
+  });
+}
+function tktDesenharDia(card, animar) {
+  var p = (processosCaixaAtual || [])[Number(card.dataset.idx)], alvo = card.querySelector('.tkt-dia');
+  if (!p || !alvo) return Promise.resolve();
+  var dia0 = procDataMs(p.dataSaida), diaF = procDataMs(p.dataChegada || p.dataSaida);
+  if (dia0 == null) { alvo.innerHTML = '<div class="proc-hist-vazio">Sem data de saída lida — confira no 1Doc.</div>'; return Promise.resolve(); }
+  if (diaF == null || diaF < dia0) diaF = dia0;
+  var multi = diaF > dia0, H = 3600000;
+  var ini = multi ? dia0 : dia0 + 4 * H, fim = diaF + 24 * H;
+  var pct = function(ms){ return Math.max(0, Math.min(100, (ms - ini) / (fim - ini) * 100)); };
+  var ticks = '';
+  if (multi) { for (var d = dia0; d <= diaF; d += 24 * H) { var dt = new Date(d); ticks += '<span class="h" style="left:' + pct(d + 12 * H) + '%">' + String(dt.getUTCDate()).padStart(2, '0') + '/' + String(dt.getUTCMonth() + 1).padStart(2, '0') + '</span>'; } }
+  else for (var hh = 4; hh <= 24; hh += 2) ticks += '<span class="h" style="left:' + pct(dia0 + hh * H) + '%">' + String(hh % 24).padStart(2, '0') + 'h</span>';
+  var noites = multi ? '' : '<span class="noite" style="left:0;width:' + pct(dia0 + 6 * H) + '%"></span><span class="noite" style="left:' + pct(dia0 + 19 * H) + '%;right:0"></span>';
+  var a = procDataMs(p.dataSaida, p.horaSaida), b = procDataMs(p.dataChegada || p.dataSaida, p.horaChegada);
+  if (a == null) a = dia0 + 7 * H; if (b == null || b < a) b = Math.max(a + H, dia0 + 17 * H);
+  var pa = pct(a), pb = pct(b);
+  // notas fiscais lidas pelo Conferente (data; hora quando o Conferente souber)
+  var vistos = {}, notas = [];
+  ((p.conferencia && p.conferencia.itens) || []).forEach(function(i){
+    var ev = i.evidencia || {}; if (!/^NOTA_/.test(i.codigo || '') || !ev.data) return;
+    var k = (ev.anexo || '') + ev.data; if (vistos[k]) return; vistos[k] = 1;
+    var dms = procDataMs(ev.data, ev.hora), sem = !ev.hora, pos;
+    if (dms == null) return;
+    if (sem) dms = procDataMs(ev.data) + 12 * H;
+    var dentro = procDataMs(ev.data) >= dia0 && procDataMs(ev.data) <= diaF;
+    pos = dentro ? (sem ? (multi ? pct(dms) : (pa + pb) / 2) : pct(dms)) : (procDataMs(ev.data) < dia0 ? 3 : 97);
+    var cls = i.nivel === 'ok' ? '' : (i.nivel === 'alerta' ? 'al' : 'at');
+    notas.push({ pos: pos, cls: cls, rot: (ev.hora || (ev.data || '').slice(0, 5)) + (sem && dentro && !multi ? '' : ''), txt: (ev.anexo ? String(ev.anexo).slice(0, 22) : 'nota') + (dentro ? (sem ? ' · hora não lida' : '') : ' · fora da viagem') });
+  });
+  alvo.innerHTML = '<div class="eixo">' + noites + ticks + '</div><div class="legenda"><span>viagem declarada</span><span class="n">nota fiscal lida</span></div>';
+  var eixo = alvo.firstChild;
+  var bar = document.createElement('div'); bar.className = 'viagem'; bar.style.left = pa + '%'; bar.style.width = Math.max(2, pb - pa) + '%';
+  bar.innerHTML = '<span>' + escaparHtmlProc(p.horaSaida || '') + '</span><span>' + escaparHtmlProc(p.horaChegada || '') + '</span>'; eixo.appendChild(bar);
+  var pins = notas.map(function(n){ var el = document.createElement('div'); el.className = 'pin ' + n.cls; el.style.left = n.pos + '%';
+    el.innerHTML = '<b>' + escaparHtmlProc(n.rot) + '</b><i></i><small>' + escaparHtmlProc(n.txt) + '</small>'; eixo.appendChild(el); return { el: el, pos: n.pos }; });
+  var amb = document.createElement('div'); amb.className = 'amb2'; amb.textContent = '🚑'; eixo.appendChild(amb);
+  if (!animar) { amb.style.left = pb + '%'; return Promise.resolve(); }
+  pins.forEach(function(x){ x.el.style.opacity = 0; });
+  var revela = function(x){ if (x.el.style.opacity !== '0') return; x.el.style.opacity = 1; x.el.animate([{ transform: 'translate(-50%,-14px) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,0)', opacity: 1 }], { duration: 360, easing: 'cubic-bezier(.175,.885,.32,1.275)' }); };
+  pins.filter(function(x){ return x.pos < pa; }).forEach(revela);
+  return new Promise(function(ok){ var t0 = performance.now(), ms = 1400;
+    (function passo(t){ var k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3), pos = pa + (pb - pa) * e;
+      bar.style.clipPath = 'inset(0 ' + (100 - e * 100) + '% 0 0)'; amb.style.left = pos + '%';
+      pins.forEach(function(x){ if (x.pos <= pos + .5) revela(x); });
+      if (k < 1) requestAnimationFrame(passo); else { pins.forEach(revela); ok(); } })(t0); });
+}
+document.addEventListener('click', function(e){
+  var c = e.target && e.target.closest && e.target.closest('.tkt-corpo'); if (!c) return;
+  if (e.target.closest('a,button,input,textarea,select,details,summary,label')) return;
+  tktAlternar(c.parentNode);
+});
+document.addEventListener('keydown', function(e){
+  if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('tkt-corpo')) { e.preventDefault(); tktAlternar(e.target.parentNode); }
+});
+function tktAtualizarVeredito(hash) {
+  var p = (processosCaixaAtual || []).filter(function(x){ return x.hash === hash; })[0], card = document.querySelector('.proc-card.tkt[data-hash="' + hash + '"]');
+  if (!p || !card) return; var cf = p.conferencia, v = card.querySelector('.tkt-veredito'); if (!v) return;
+  var vd = !cf ? ['pend','🤖 AGUARDANDO O CONFERENTE','ainda não conferiu'] : cf.status === 'pronto' ? ['ok','✓ PRONTO PARA EMPENHO','conferido'] : cf.status === 'alerta' ? ['al','■ TRAVADO NA CONFERÊNCIA','veja os apontamentos'] : ['at','▲ CONFERIR ANTES','veja os apontamentos'];
+  v.className = 'tkt-veredito ' + vd[0]; v.innerHTML = vd[1] + ' <span>· ' + vd[2] + '</span>';
+  if (!_tktReduz && v.animate) v.animate([{ transform: 'scale(1.25) rotate(-3deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.3,0,1,1)' });
+  if (cf && cf.status === 'pronto') card.classList.remove('beam');
 }
 function procViagemHtml(p, credorNum) {
   if (!p.dataSaida && !p.cidade) return '';
@@ -3128,6 +3375,7 @@ document.addEventListener('click', function(e){
     if (p) p.conferencia = res.conferencia;
     var el = document.querySelector('.proc-conf[data-conf-hash="' + hash + '"]');
     if (el && p) { var t = document.createElement('div'); t.innerHTML = procConferenciaHtml(p); el.replaceWith(t.firstChild); }
+    tktAtualizarVeredito(hash);
     // a situação no lote: na hora pelo resultado; logo em seguida o Worker confirma (credor e valor também contam)
     window._situacaoCaixa = window._situacaoCaixa || {};
     var s = window._situacaoCaixa[hash];
