@@ -1420,6 +1420,38 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   body.anim-eco .proc-card.tkt{filter:none;box-shadow:0 2px 6px rgba(0,0,0,.25);}
   /* ===== 01/11/2026: aba Processos INTEIRA como no mockup aprovado: tela cheia, papel; indicadores ficam no painel escuro ===== */
   .container:has(#panel-processos.active){max-width:min(1500px,100%);}
+  .container:has(#panel-equipe.active){max-width:min(1760px,100%);}
+  .eqx .x-pr{display:grid; grid-template-columns:minmax(0,1fr) minmax(310px,380px); gap:12px; align-items:start; margin-bottom:16px;}
+  .eqx #eq-bots[hidden]{display:none !important;}
+  .eqx .x-pr.sem-cena{display:block;}
+  .eqx .x-pr.sem-cena .x-cena{display:none;}
+  .eqx .x-pr.sem-cena .x-la{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);}
+  .eqx .x-la{display:grid; gap:12px; min-width:0; align-items:start;}
+  .eqx .x-la .x-aguarda{margin-bottom:0; min-width:0;}
+  .eqx .x-pr:not(.sem-cena) .x-msgs{height:240px;}
+  .eqx .x-pr:not(.sem-cena) .x-fluxo{max-height:280px;}
+  .eqx .x-pr:not(.sem-cena) .x-la .x-prop pre{max-height:180px; overflow:auto;}
+  .eqx .x-cena{min-width:0;}
+  .eqx .eqe-w{overflow-x:auto; background:#10121a; border-radius:8px;}
+  .eqx .eqe-cn{position:relative; min-width:720px;}
+  .eqx #eq-cv{display:block; width:100%; height:auto;}
+  .eqx .eqe-sa{all:unset; position:absolute; cursor:pointer;}
+  .eqx .eqe-sa:hover,.eqx .eqe-sa:focus-visible{outline:2px dashed #ffc857;}
+  .eqx .eqe-pl{position:absolute; left:50%; bottom:-2px; transform:translateX(-50%); display:flex; gap:6px; align-items:center; background:rgba(16,18,26,.86); padding:1px 7px 2px; pointer-events:none; white-space:nowrap; color:#eef1f8; font-size:12px;}
+  .eqx .eqe-pl i{width:8px; height:8px; background:var(--x-ok);}
+  .eqx .eqe-pl.at i{background:var(--x-warn);}
+  .eqx .eqe-pl.al i{background:var(--x-danger); animation:eqePisca .8s steps(1) infinite;}
+  @keyframes eqePisca{50%{opacity:.2;}}
+  body.anim-eco .eqx .eqe-pl.al i{animation:none;}
+  .eqx .eqe-nota{margin:6px 2px 0; font-size:12px; color:var(--x-muted);}
+  .eqx .eqe-nota a{color:inherit;}
+  .eqx .eqe-gv{padding:10px 14px 14px; display:grid; gap:8px;}
+  .eqx .eqe-gv p{margin:0; font-size:13px; overflow-wrap:anywhere;}
+  .eqx .eqe-gv dl{margin:0; display:grid; gap:4px;}
+  .eqx .eqe-gv dl div{display:flex; justify-content:space-between; gap:10px; font-size:12.5px;}
+  .eqx .eqe-gv dt{color:var(--x-muted);}
+  .eqx .eqe-gv dd{margin:0; font-weight:600; text-align:right;}
+  @media (max-width:1000px){ .eqx .x-pr{grid-template-columns:minmax(0,1fr);} .eqx .x-pr.sem-cena .x-la{grid-template-columns:1fr;} }
   body:has(#panel-processos.active){background-color:#efeae0;background-image:radial-gradient(rgba(36,95,71,.08) 1px,transparent 1px);background-size:18px 18px;}
   .eqx.prx{--x-bg:transparent;--x-low:#f7f2e7;--x-card:#fffdf8;--x-card2:#fffdf8;--x-hi:#f7f2e7;--x-line:#ddd3bf;--x-line2:#c9bc9f;--x-text:#1d2a24;--x-muted:#6f6550;--x-dim:#8a7b5c;--x-ok:#1f9d57;--x-warn:#c77d18;--x-danger:#d64545;--x-violeta:#245f47;
     --surface:#fffdf8;--surface2:#f7f2e7;--border:#ddd3bf;--border-strong:#c9bc9f;--text:#1d2a24;--text-muted:#6f6550;--text-dim:#8a7b5c;
@@ -1625,7 +1657,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.15.1</span>
+    <span class="header-version">v1.16.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1667,27 +1699,28 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         <div class="x-kpi" id="eq-k-ag-box"><div class="x-lbl">Aguardando você</div><div class="v" id="eq-k-ag">—</div><div class="d" id="eq-k-ag-d"></div></div>
       </div>
 
-      <div class="x-tele">
-        <section class="x-painel" aria-labelledby="eq-t-ia"><div class="x-ph"><h4 id="eq-t-ia">Uso de IA hoje</h4><span class="x-lbl" id="eq-ia-total"></span></div><div class="x-tbody" id="eq-ia"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
-        <section class="x-painel" aria-labelledby="eq-t-lat"><div class="x-ph"><h4 id="eq-t-lat">Tempos de resposta</h4><span class="x-lbl">mediana das últimas medições</span></div><div class="x-tbody" id="eq-lat"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
-        <section class="x-painel x-tlarga" aria-labelledby="eq-t-ativ"><div class="x-ph"><h4 id="eq-t-ativ">Atividade · últimas 24 h</h4><span class="x-lbl"><span style="color:#f87171">■</span> erros nos logs &nbsp;<span style="color:#a78bfa">■</span> ações dos bots</span></div><div class="x-tbody" id="eq-ativ"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
-      </div>
-
-      <section class="x-aguarda" id="eq-aguarda" hidden aria-label="Propostas esperando sua aprovação"></section>
 
       <div class="x-sec">
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
           <h3>Agentes</h3>
           <div class="norad-view-toggle">
-            <button type="button" class="norad-toggle-btn active" id="btnModoNorad" onclick="eqAlternarVisao('norad')">🛡️ Sala de Guerra DEFCON</button>
+            <button type="button" class="norad-toggle-btn active" id="btnModoEscritorio" onclick="eqAlternarVisao('escritorio')">🏢 Escritório</button>
+            <button type="button" class="norad-toggle-btn" id="btnModoNorad" onclick="eqAlternarVisao('norad')">🛡️ Sala de Guerra DEFCON</button>
             <button type="button" class="norad-toggle-btn" id="btnModoClassic" onclick="eqAlternarVisao('classic')">📋 Clássico</button>
           </div>
         </div>
-        <span class="x-lbl">Monitoramento tático em tempo real dos 8 agentes de automação</span>
+        <span class="x-lbl">Os 9 agentes em tempo real</span>
       </div>
       <div class="x-agentes" id="eq-bots"></div>
 
-      <div class="x-grid2">
+      <div class="x-pr" id="eq-palco">
+        <div class="x-cena">
+          <div class="eqe-w"><div class="eqe-cn" id="eq-cn"><canvas id="eq-cv" role="img" aria-label="Escritório animado com os nove agentes"></canvas></div></div>
+          <p class="eqe-nota">Recado novo aparece com borda laranja. Sem novidade, eles repetem recados reais das últimas 24 h. Clique em um agente para ver os detalhes. Arte: <a href="https://github.com/W17ant/Claude-Office" target="_blank" rel="noopener">Claude Office</a> (MIT).</p>
+        </div>
+        <div class="x-la">
+          <section class="x-painel" id="eq-gaveta" hidden aria-label="Detalhes do agente"></section>
+      <section class="x-aguarda" id="eq-aguarda" hidden aria-label="Propostas esperando sua aprovação"></section>
         <section class="x-painel" aria-labelledby="eq-t-conv">
           <div class="x-ph"><h4 id="eq-t-conv">Conversa com o Coordenador</h4><span class="x-lbl">ele distribui para os outros</span></div>
           <div class="x-msgs" id="eq-msgs"><div class="x-vazio">Carregando…</div></div>
@@ -1700,7 +1733,15 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <div class="x-ph"><h4 id="eq-t-fluxo">Fluxo entre os agentes</h4><div class="x-filtros" id="eq-fluxo-filtros"></div></div>
           <div class="x-fluxo" id="eq-fluxo"><div class="x-vazio">Carregando…</div></div>
         </section>
+        </div>
       </div>
+
+      <div class="x-tele">
+        <section class="x-painel" aria-labelledby="eq-t-ia"><div class="x-ph"><h4 id="eq-t-ia">Uso de IA hoje</h4><span class="x-lbl" id="eq-ia-total"></span></div><div class="x-tbody" id="eq-ia"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
+        <section class="x-painel" aria-labelledby="eq-t-lat"><div class="x-ph"><h4 id="eq-t-lat">Tempos de resposta</h4><span class="x-lbl">mediana das últimas medições</span></div><div class="x-tbody" id="eq-lat"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
+        <section class="x-painel x-tlarga" aria-labelledby="eq-t-ativ"><div class="x-ph"><h4 id="eq-t-ativ">Atividade · últimas 24 h</h4><span class="x-lbl"><span style="color:#f87171">■</span> erros nos logs &nbsp;<span style="color:#a78bfa">■</span> ações dos bots</span></div><div class="x-tbody" id="eq-ativ"><div class="x-vazio">Aguardando a primeira medição…</div></div></section>
+      </div>
+
 
       <section class="x-painel" aria-labelledby="eq-t-quadro">
         <div class="x-ph">
@@ -4465,16 +4506,244 @@ window.eqDispararOrdem = function(texto) {
   if (cx) cx.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-var eqModoVisao = localStorage.getItem('eq_modo_visao') || 'norad';
+var eqModoVisao = localStorage.getItem('eq_visao_escritorio') || 'escritorio';
 
+// 01/11/2026: escritório animado da aba Equipe. Cada recado real do fluxo vira uma caminhada até a mesa do colega.
+// Sem novidade, repete recados reais recentes; nenhum texto é inventado. Só desenha com a aba aberta e visível.
+var EQE_POS = { coordenador: [.12, .24], pesquisador: [.12, .52], programador: [.12, .8], vigia: [.42, .24], conferente: [.42, .52], auditor: [.42, .8], relatorios_cp: [.72, .24], operador_cp: [.72, .52], cacador: [.72, .8] };
+var EQE_SPRITE = { coordenador: 'Me-1', relatorios_cp: 'employee-3', operador_cp: 'Frontend-dev-1', vigia: 'employee-1', conferente: 'employee-2', auditor: 'security-audit-1', pesquisador: 'explore-1', programador: 'dev-1', cacador: 'dev-2' };
+var EQE_VA = [.1, .4, .68, .93], EQE_UA = [.27, .57, .87], EQE_RESP = ['Certo!', 'Pode deixar', 'Recebido', 'Vou ver', 'Obrigado'];
+var EQE_MAX_CONVERSAS = 3;
+var eqe = { img: {}, ag: {}, t: 0, ult: 0, pronto: false, carregando: false, fila: [], recentes: [], vistos: null, ativas: 0, espera: 0, vis: true, loop: false, porBot: {}, agora: 0, gaveta: null };
+function eqeIso(u, v) { return [37 + u * 523 + v * 663, 616 - u * 289 + v * 309]; }
+function eqeUv(p) { var dx = p[0] - 37, dy = p[1] - 616, d = 353214; return [(309 * dx - 663 * dy) / d, (289 * dx + 523 * dy) / d]; }
+function eqePerto(l, x) { return l.reduce(function(m, v) { return Math.abs(v - x) < Math.abs(m - x) ? v : m; }); }
+function eqeMesa(k) { return eqeIso(EQE_POS[k][0], EQE_POS[k][1]); }
+function eqeLugar(k) { var m = eqeMesa(k); return [m[0] + 41, m[1] + 38]; }
+function eqeRota(a, b) {
+  var A = eqeUv([a.x, a.y]), B = eqeUv(b), va = eqePerto(EQE_VA, A[1]), vb = eqePerto(EQE_VA, B[1]), ub = eqePerto(EQE_UA, B[0]);
+  return [eqeIso(A[0], va), eqeIso(ub, va), eqeIso(ub, vb), eqeIso(B[0], vb), b];
+}
+function eqeSemSinal(k) { var b = eqe.porBot[k]; return !b || eqe.agora - (b.visto || 0) > 15 * 60000; }
+function eqeLivre(k) { var a = eqe.ag[k]; return a.pose === 'trab' && !a.path.length && !a.visita && !a.conv && !eqeSemSinal(k); }
+function eqeCarregar() {
+  if (eqe.carregando) return;
+  eqe.carregando = true;
+  var nomes = ['room.jpg', 'standing-desk-left-front.png', 'typing.png', 'fire.png', 'thumb-up.png', 'sleeping.png', 'post-it.png', 'printer.png', 'monstera-plant.png', 'filling-closed.png'];
+  EQ_ORDEM.forEach(function(k) { ['front-left', 'front-right', 'rear-left'].forEach(function(d) { nomes.push(EQE_SPRITE[k] + '-' + d + '.png'); }); });
+  var falta = nomes.length;
+  nomes.forEach(function(n) {
+    var i = new Image();
+    i.onload = i.onerror = function() { if (--falta === 0) eqeIniciar(); };
+    i.src = 'escritorio/' + n;
+    eqe.img[n.replace(/\.(png|jpg)$/, '')] = i;
+  });
+}
+function eqeIniciar() {
+  var cv = document.getElementById('eq-cv');
+  cv.width = 1300; cv.height = eqe.img.room.naturalHeight || 971;
+  eqe.alt = cv.height; eqe.g = cv.getContext('2d');
+  var n = document.getElementById('eq-cn');
+  EQ_ORDEM.forEach(function(k) {
+    var s = eqeLugar(k);
+    eqe.ag[k] = { k: k, x: s[0], y: s[1], path: [], pose: 'trab', flip: false, dir: 'up', fala: null, vivo: false, conv: null, visita: null, icone: null, iconeT: 0 };
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'eqe-sa'; b.dataset.k = k;
+    b.innerHTML = '<span class="eqe-pl"><i></i><b>' + escaparHtmlProc(EQ_AG[k].nome) + '</b></span>';
+    b.addEventListener('click', function() { eqeAbrirGaveta(k); });
+    n.appendChild(b);
+  });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function(e) { eqe.vis = e[0].isIntersecting; }).observe(cv);
+  eqe.pronto = true;
+  eqeRotulos(); eqeMover(true); eqeDesenhar();
+  if (!eqe.loop) { eqe.loop = true; requestAnimationFrame(eqeLaco); }
+}
+function eqeAtivo() { return eqModoVisao === 'escritorio' && document.getElementById('panel-equipe').classList.contains('active') && !document.hidden; }
+function eqeEco() { return _tktEco || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+function eqeLaco(t) {
+  requestAnimationFrame(eqeLaco);
+  if (!eqe.pronto || !eqeAtivo() || !eqe.vis || t - eqe.ult < (eqeEco() ? 400 : 66)) return;
+  eqe.ult = t; eqePasso(); eqeDesenhar(); eqeMover(false);
+}
+function eqePasso() {
+  eqe.t++;
+  EQ_ORDEM.forEach(function(k) {
+    var a = eqe.ag[k];
+    if (a.iconeT > 0 && --a.iconeT === 0) a.icone = null;
+    if (!a.path.length) return;
+    var p = a.path[0], dx = p[0] - a.x, dy = p[1] - a.y, d = Math.hypot(dx, dy);
+    a.flip = dx > 0; a.dir = dy < 0 ? 'up' : 'down';
+    if (d <= 4) {
+      a.x = p[0]; a.y = p[1]; a.path.shift();
+      if (!a.path.length) { a.dir = 'up'; a.flip = false; var f = a.fim; a.fim = null; if (f) f(); }
+    } else { a.x += dx / d * 4; a.y += dy / d * 4; }
+  });
+  if (eqe.espera > 0) eqe.espera--;
+  else if (eqe.t % 5 === 0) eqeProxima();
+}
+function eqeProxima() {
+  if (eqeEco() || eqe.ativas >= EQE_MAX_CONVERSAS) return;
+  var i, e = null;
+  for (i = 0; i < eqe.fila.length; i++) if (eqeLivre(eqe.fila[i].de) && eqeLivre(eqe.fila[i].para)) { e = eqe.fila.splice(i, 1)[0]; break; }
+  if (!e && !eqe.fila.length && eqe.recentes.length) {
+    var c = eqe.recentes[Math.floor(Math.random() * eqe.recentes.length)];
+    if (eqeLivre(c.de) && eqeLivre(c.para)) { e = c; eqe.espera = 12 + Math.random() * 30; }
+  }
+  if (e) eqeConversar(e);
+}
+function eqeAndar(k, destino, cb) {
+  var a = eqe.ag[k];
+  a.path = eqeRota(a, destino); a.fim = cb; a.pose = 'anda';
+}
+function eqeConversar(e) {
+  var a = eqe.ag[e.de], b = eqe.ag[e.para], w = eqeLugar(e.para), lado = EQ_ORDEM.indexOf(e.para) % 3 === 2 ? -1 : 1;
+  eqe.ativas++; a.conv = e.para; b.visita = e.de; a.vivo = b.vivo = !!e.vivo;
+  eqeAndar(e.de, [w[0] + lado * 56, w[1] + 10], function() {
+    a.pose = 'conversa'; a.flip = lado < 0; a.dir = 'down';
+    b.pose = 'conversa'; b.flip = lado > 0; b.dir = 'down';
+    a.fala = e.txt;
+    setTimeout(function() {
+      a.fala = null;
+      b.fala = /^(Resolvida|Conclu)/.test(e.txt) ? 'Obrigado' : EQE_RESP[Math.floor(Math.random() * EQE_RESP.length)];
+      setTimeout(function() {
+        b.fala = null; b.pose = 'trab'; b.visita = null; a.conv = null; eqe.ativas--;
+        eqeAndar(e.de, eqeLugar(e.de), function() { a.pose = 'trab'; });
+      }, 1000);
+    }, 1100 + Math.min(e.txt.length, 44) * 35);
+  });
+}
+function eqeRotulos() {
+  EQ_ORDEM.forEach(function(k) {
+    var b = eqe.porBot[k], btn = document.querySelector('.eqe-sa[data-k="' + k + '"]');
+    if (!btn) return;
+    var sem = eqeSemSinal(k), st = sem ? 'sem sinal' : b.status === 'erro' ? 'com erro' : b.status === 'atencao' ? 'atenção' : 'no ar';
+    btn.querySelector('.eqe-pl').className = 'eqe-pl' + (sem || (b && b.status === 'erro') ? ' al' : b && b.status === 'atencao' ? ' at' : '');
+    btn.setAttribute('aria-label', EQ_AG[k].nome + ': ' + st);
+  });
+}
+function eqeMover(todos) {
+  EQ_ORDEM.forEach(function(k) {
+    var a = eqe.ag[k];
+    if (!todos && a._hx === a.x && a._hy === a.y) return;
+    a._hx = a.x; a._hy = a.y;
+    var b = document.querySelector('.eqe-sa[data-k="' + k + '"]');
+    if (!b) return;
+    b.style.left = (a.x - 45) / 13 + '%'; b.style.top = (a.y - 130) / eqe.alt * 100 + '%';
+    b.style.width = 90 / 13 + '%'; b.style.height = 142 / eqe.alt * 100 + '%';
+    b.style.zIndex = Math.round(a.y);
+  });
+}
+function eqeD(n, x, y, w, h) { var i = eqe.img[n]; if (i && i.naturalWidth) eqe.g.drawImage(i, Math.round(x), Math.round(y), w || i.naturalWidth, h || i.naturalHeight); }
+function eqePessoa(k) {
+  var g = eqe.g, a = eqe.ag[k], pre = EQE_SPRITE[k], sem = eqeSemSinal(k);
+  var i = eqe.img[pre + '-' + (a.pose === 'trab' ? 'rear-left' : 'front-' + (a.flip ? 'right' : 'left'))], h = 108;
+  if (a.pose !== 'trab' && a.dir === 'up') i = eqe.img[pre + '-rear-left'];
+  if (!i || !i.naturalWidth) return;
+  var w = i.naturalWidth * h / i.naturalHeight, nw = i.naturalWidth, nh = i.naturalHeight, x0 = a.x - w / 2, y0 = a.y - h;
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.ellipse(a.x, a.y, 18, 6, 0, 0, 6.3); g.fill();
+  if (a.path.length) {
+    var ph = Math.sin(eqe.t * .95), bob = Math.abs(ph) * 4, c = .6, l = Math.max(0, ph) * 10, r = Math.max(0, -ph) * 10, sh = ph * 4;
+    g.drawImage(i, nw / 2, nh * c, nw / 2, nh * (1 - c), a.x + sh, y0 + h * c - r - bob * .3, w / 2, h * (1 - c));
+    g.drawImage(i, 0, nh * c, nw / 2, nh * (1 - c), x0 - sh, y0 + h * c - l - bob * .3, w / 2, h * (1 - c));
+    g.drawImage(i, 0, 0, nw, nh * c + 1, x0 + ph * 2, y0 - bob, w, h * c + 1);
+  } else g.drawImage(i, x0, y0 + (a.pose === 'trab' ? Math.sin(eqe.t / 5) * .8 : 0), w, h);
+  var b = eqe.porBot[k], ic = a.icone || (sem ? 'sleeping' : b && b.status === 'erro' ? 'fire' : a.pose === 'trab' && Math.floor(eqe.t / 45 + EQ_ORDEM.indexOf(k)) % 3 === 0 ? 'typing' : null);
+  if (ic && eqe.img[ic]) g.drawImage(eqe.img[ic], a.x - 18, y0 - 38, 36, 36);
+}
+function eqeBalao(a) {
+  var g = eqe.g, t = a.fala.length > 44 ? a.fala.slice(0, 43) + '…' : a.fala;
+  g.font = '600 21px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif';
+  var l = g.measureText(t).width + 26, h = 38, x = Math.max(8, Math.min(1292 - l, a.x - l / 2)), y = Math.max(6, a.y - 158);
+  g.fillStyle = '#fff'; g.strokeStyle = a.vivo ? '#d97706' : '#1d1830'; g.lineWidth = 3;
+  g.beginPath(); g.roundRect(x, y, l, h, 9); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(a.x - 9, y + h - 1); g.lineTo(a.x, y + h + 12); g.lineTo(a.x + 9, y + h - 1); g.fill();
+  g.fillStyle = '#1d1830'; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText(t, x + 13, y + h / 2 + 1);
+}
+function eqeDesenhar() {
+  var g = eqe.g, it = [];
+  eqeD('room', 0, 0, 1300, eqe.alt);
+  EQ_ORDEM.forEach(function(k) {
+    var m = eqeMesa(k);
+    it.push({ y: m[1] + 17, f: function() {
+      var b = eqe.porBot[k], erro = b && b.status === 'erro', at = b && b.status === 'atencao';
+      if ((erro || at) && Math.floor(eqe.t / 6) % 2) { g.fillStyle = erro ? 'rgba(255,50,50,.24)' : 'rgba(245,158,11,.22)'; g.beginPath(); g.ellipse(m[0] + 24, m[1] + 31, 95, 55, 0, 0, 6.3); g.fill(); }
+      eqeD('standing-desk-left-front', m[0] - 59, m[1] - 93, 118, 148);
+    } });
+    it.push({ y: eqe.ag[k].y, f: function() { eqePessoa(k); } });
+  });
+  it.push({ y: 560, f: function() { eqeD('printer', 985, 398); } });
+  it.push({ y: 505, f: function() { var i = eqe.img['filling-closed']; eqeD('filling-closed', 335 - i.naturalWidth / 2, 505 - i.naturalHeight); } });
+  it.push({ y: 626, f: function() { var i = eqe.img['monstera-plant']; eqeD('monstera-plant', 86 - i.naturalWidth / 2, 632 - i.naturalHeight); } });
+  it.sort(function(a, b) { return a.y - b.y; }).forEach(function(i) { i.f(); });
+  EQ_ORDEM.forEach(function(k) { if (eqe.ag[k].fala) eqeBalao(eqe.ag[k]); });
+}
+// chamado a cada eqRender: recados novos vão para a fila; os das últimas 24 h podem ser repetidos
+function eqeAtualizar(porBot, evs, agora) {
+  eqe.porBot = porBot; eqe.agora = agora;
+  var palco = document.getElementById('eq-palco'), noEsc = eqModoVisao === 'escritorio';
+  palco.classList.toggle('sem-cena', !noEsc);
+  document.getElementById('eq-bots').hidden = noEsc;
+  if (!noEsc) return;
+  if (!eqe.pronto) eqeCarregar();
+  var validos = evs.filter(function(e) { return EQ_AG[e.de] && EQ_AG[e.para] && e.de !== e.para && e.txt; });
+  var chaves = {};
+  validos.forEach(function(e) {
+    var c = e.q + '|' + e.de + '|' + e.para;
+    chaves[c] = 1;
+    if (eqe.vistos && !eqe.vistos[c] && agora - (e.q || 0) < 600000 && eqeAtivo() && !eqeEco() && eqe.fila.length < 12) eqe.fila.push({ de: e.de, para: e.para, txt: e.txt, vivo: true });
+  });
+  eqe.vistos = chaves;
+  eqe.recentes = validos.filter(function(e) { return agora - (e.q || 0) < 86400000; }).slice(0, 40);
+  if (eqe.pronto) eqeRotulos();
+  if (eqe.gaveta) eqeAbrirGaveta(eqe.gaveta, true);
+}
+var EQE_ACOES = {
+  coordenador: [['eqFocarChat', 'Coordenador, qual o status geral dos bots e processos agora?', 'Perguntar status geral']],
+  relatorios_cp: [['eqDispararOrdem', '@relatorios_cp tire o relatório de empenhos de hoje no CP e compare com a tabela de controle', 'Tirar relatório de empenhos']],
+  operador_cp: [['eqDispararOrdem', '@operador_cp informe os processos prontos para empenho e se o CP está livre', 'Ver status do CP'], ['eqDispararOrdem', '@operador_cp validar pré-lote de diárias e conferir travas', 'Validar pré-lote']],
+  vigia: [['eqDispararOrdem', '@vigia checar status de todos os serviços e tarefas agora', 'Checar serviços']],
+  conferente: [['eqDispararOrdem', '@conferente reconferir todos os processos da caixa agora', 'Reconferir caixa']],
+  pesquisador: [['eqFocarChat', '@pesquisador pesquisar no 1Doc o processo ', 'Consultar 1Doc']],
+  programador: [['eqDispararOrdem', '@programador fazer diagnóstico de integridade do código', 'Diagnóstico do código']],
+  cacador: [['eqDispararOrdem', '@cacador resumir logs de erro das últimas 24h', 'Resumir erros']]
+};
+function eqeAbrirGaveta(k, soAtualizar) {
+  var g = document.getElementById('eq-gaveta');
+  if (soAtualizar && g.contains(document.activeElement) && document.activeElement.id !== 'eq-gaveta-fechar') return;
+  var a = EQ_AG[k], b = eqe.porBot[k], sem = eqeSemSinal(k), st = sem ? 'Sem sinal' : b.status === 'erro' ? 'Com erro' : b.status === 'atencao' ? 'Atenção' : 'No ar';
+  var ts = (eqDados && eqDados.tarefas) || [], msgs = (eqDados && eqDados.mensagens) || [];
+  var met = eqMetricas(k, ts, msgs, eqe.agora);
+  var ocs = ts.filter(function(t) { return (t.de === k || t.para === k) && t.tipo === 'ocorrencia' && eqAberta(t); });
+  g.innerHTML = '<div class="x-ph"><h4>' + escaparHtmlProc(a.nome) + '</h4><button type="button" class="x-bt" id="eq-gaveta-fechar">Fechar</button></div>'
+    + '<div class="eqe-gv"><p>' + escaparHtmlProc(a.papel) + '</p><dl><div><dt>Situação</dt><dd>' + st + '</dd></div><div><dt>Motor</dt><dd>' + escaparHtmlProc(a.modelo) + '</dd></div>'
+    + met.map(function(m) { return '<div><dt>' + escaparHtmlProc(m[0]) + '</dt><dd>' + escaparHtmlProc(m[1]) + '</dd></div>'; }).join('')
+    + '<div><dt>Ocorrências abertas</dt><dd>' + ocs.length + '</dd></div></dl>'
+    + '<div class="x-lbl">Agora</div><p>' + escaparHtmlProc(sem ? 'Sem sinal de vida do serviço.' : ((b && b.detalhe) || 'Pronto para novas ordens.')) + '</p>'
+    + '<div class="x-t-acoes">' + (EQE_ACOES[k] || []).map(function(c) { return '<button type="button" class="x-bt" data-eqe-fn="' + c[0] + '" data-eqe-txt="' + escaparHtmlProc(c[1]) + '">' + escaparHtmlProc(c[2]) + '</button>'; }).join('') + '</div></div>';
+  g.hidden = false; eqe.gaveta = k;
+  if (!soAtualizar) document.getElementById('eq-gaveta-fechar').focus();
+}
+document.addEventListener('click', function(ev) {
+  if (!ev.target.closest) return;
+  if (ev.target.closest('#eq-gaveta-fechar')) {
+    var k = eqe.gaveta; eqe.gaveta = null; document.getElementById('eq-gaveta').hidden = true;
+    var o = document.querySelector('.eqe-sa[data-k="' + k + '"]'); if (o) o.focus();
+    return;
+  }
+  var bt = ev.target.closest('[data-eqe-fn]');
+  if (bt) window[bt.dataset.eqeFn](bt.dataset.eqeTxt);
+});
+window.eqAlternarVisao = eqAlternarVisao;
 function eqAlternarVisao(modo) {
   eqModoVisao = modo;
-  localStorage.setItem('eq_modo_visao', modo);
+  localStorage.setItem('eq_visao_escritorio', modo);
+  var btnE = document.getElementById('btnModoEscritorio');
+  if (btnE) btnE.classList.toggle('active', modo === 'escritorio');
   var btnN = document.getElementById('btnModoNorad');
   var btnC = document.getElementById('btnModoClassic');
   if (btnN) btnN.classList.toggle('active', modo === 'norad');
   if (btnC) btnC.classList.toggle('active', modo === 'classic');
-  if (window.eqDados) eqRender();
+  if (eqDados) eqRender();
 }
 
 function eqRender() {
@@ -4518,6 +4787,8 @@ function eqRender() {
   var btnC = document.getElementById('btnModoClassic');
   if (btnN) btnN.classList.toggle('active', eqModoVisao === 'norad');
   if (btnC) btnC.classList.toggle('active', eqModoVisao === 'classic');
+  var btnEsc = document.getElementById('btnModoEscritorio');
+  if (btnEsc) btnEsc.classList.toggle('active', eqModoVisao === 'escritorio');
 
   var boxBots = document.getElementById('eq-bots');
 
@@ -4829,6 +5100,7 @@ function eqRender() {
   });
   msgs.forEach(function(m) { if (m.de !== 'thiago') evs.push({ q: m.criado, de: m.de, para: m.para, txt: String(m.texto).replace(/\*\*/g, '').split('\n')[0].slice(0, 160) }); });
   evs.sort(function(a, b) { return (b.q || 0) - (a.q || 0); });
+  eqeAtualizar(porBot, evs, agora);
   var agentesNoFluxo = ['todos'].concat(EQ_ORDEM.filter(function(k) { return evs.some(function(e) { return e.de === k || e.para === k; }); }));
   document.getElementById('eq-fluxo-filtros').innerHTML = agentesNoFluxo.map(function(k) { return '<button type="button" class="x-filtro" data-fluxo="' + k + '" aria-pressed="' + (eqFluxoAgente === k) + '">' + (k === 'todos' ? 'Todos' : EQ_AG[k].nome) + '</button>'; }).join('');
   var evf = evs.filter(function(e) { return eqFluxoAgente === 'todos' || e.de === eqFluxoAgente || e.para === eqFluxoAgente; }).slice(0, 60);
