@@ -20,7 +20,7 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
 <title>SGD — Gerador de Diárias</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=VT323&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=VT323&display=swap');
   :root {
     /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -1418,6 +1418,43 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   body.anim-eco .proc-card.tkt.beam .tkt-corpo::before,body.anim-eco .kb-ce .kb::before,body.anim-eco .kb-ce .km.atr::before,body.anim-eco .tkt-parada.atual .pino{animation:none !important;}
   body.anim-eco .proc-card.tkt,body.anim-eco .proc-card.tkt .tkt-rota .seta::after,body.anim-eco .kb-ce .km{transition:none !important;}
   body.anim-eco .proc-card.tkt{filter:none;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  /* ===== 01/11/2026: aba Processos INTEIRA como no mockup aprovado: tela cheia, papel; indicadores ficam no painel escuro ===== */
+  .container:has(#panel-processos.active){max-width:min(1500px,100%);}
+  body:has(#panel-processos.active){background-color:#efeae0;background-image:radial-gradient(rgba(36,95,71,.08) 1px,transparent 1px);background-size:18px 18px;}
+  .eqx.prx{--x-bg:transparent;--x-low:#f7f2e7;--x-card:#fffdf8;--x-card2:#fffdf8;--x-hi:#f7f2e7;--x-line:#ddd3bf;--x-line2:#c9bc9f;--x-text:#1d2a24;--x-muted:#6f6550;--x-dim:#8a7b5c;--x-ok:#1f9d57;--x-warn:#c77d18;--x-danger:#d64545;--x-violeta:#245f47;
+    --surface:#fffdf8;--surface2:#f7f2e7;--border:#ddd3bf;--border-strong:#c9bc9f;--text:#1d2a24;--text-muted:#6f6550;--text-dim:#8a7b5c;
+    --f-x-disp:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif;--f-x-body:'IBM Plex Sans',system-ui,sans-serif;
+    background:none;padding:6px 0 26px;overflow:visible;color:#1d2a24;}
+  .prx input,.prx select{color-scheme:light;}
+  .eqx.prx .x-tag{background:#fffdf8;color:#8a7b5c;border-color:#ddd3bf;} .eqx.prx .x-tag.ok{background:#e6f6ee;color:#1f9d57;border-color:rgba(31,157,87,.3);}
+  .eqx.prx h2.x-title{color:#1d2a24;font-size:30px;} .eqx.prx .x-sec h3{color:#1d2a24;font-size:22px;font-weight:700;}
+  .eqx.prx .x-bt{background:#fffdf8;color:#1d2a24;border-color:#c9bc9f;border-radius:10px;text-transform:none;letter-spacing:0;font:600 13px 'IBM Plex Sans',sans-serif;padding:9px 13px;}
+  .eqx.prx .x-bt:hover:not(:disabled){color:#1d2a24;border-color:#8a7b5c;box-shadow:0 2px 6px rgba(60,50,30,.12);}
+  .eqx.prx #btn-checkpoint-empenho{background:#245f47;border-color:#245f47;color:#fff;}
+  .anim-tgl{background:#fffdf8;color:#4b5a52;border-color:#ddd3bf;font-family:'IBM Plex Sans',sans-serif;}
+  /* painel de embarque */
+  .eqx.prx .x-kpis{--x-card:#1d242c;--x-line:transparent;--x-text:#d7dee6;--x-muted:#8c99a6;--x-dim:#8c99a6;background:#14191f;border-radius:16px;padding:14px;gap:10px;box-shadow:0 10px 24px rgba(20,25,31,.18);color:#d7dee6;}
+  .eqx.prx .x-kpi{backdrop-filter:none;border-radius:10px;padding:10px 12px;} .eqx.prx .x-kpi .x-lbl{font-family:var(--mono);letter-spacing:.1em;color:#8c99a6;}
+  .eqx.prx .x-kpi .d{color:#8c99a6;font-family:var(--mono);font-size:11.5px;} .eqx.prx .x-kpi .d b{color:#d7dee6;} .eqx.prx .x-kpi .x-barra{background:#0b0f13;} .eqx.prx .x-kpi .x-barra i{background:#f4c95d;}
+  @media (max-width:900px){ .eqx.prx .x-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  /* painéis */
+  .eqx.prx .x-painel,.eqx.prx .prx-box{background:#fffdf8;border-color:#ddd3bf;border-radius:16px;backdrop-filter:none;box-shadow:0 4px 14px rgba(60,50,30,.06);overflow:visible;}
+  .eqx.prx .x-ph h4,.eqx.prx .prx-box-tit{color:#1d2a24;font:700 16px var(--f-x-disp);} .eqx.prx .x-ph{border-color:#ddd3bf;}
+  .prx .prx-busca{background:#fff;color:#1d2a24;border-radius:999px;padding:8px 12px;font-size:14px;} .prx .prx-busca:focus{border-color:#245f47;}
+  .prx .prx-lado{order:0;grid-template-columns:repeat(3,minmax(0,1fr));} @media (max-width:980px){ .prx .prx-lado{grid-template-columns:1fr;} }
+  .prx .prx-rosca-v{fill:#1d2a24;} .prx .prx-s-num b,.prx .prx-feed .x-ev p b,.eqx.prx .x-linha b,.eqx.prx .x-linha .x-val{color:#1d2a24;} .prx .prx-s-av{color:#245f47;background:#e9e1d0;border-color:#ddd3bf;} .prx .prx-s-nome .x-barra{background:#e9e1d0;} .prx .prx-s-nome .x-barra i{background:#2f7d5d;}
+  .prx .prx-ops{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));} .prx .prx-lista{max-height:none;overflow:visible;}
+  .prx #proc-resumo-situacao span{background:#fff !important;} .prx .prx-ultimo:not([hidden]){background:#fffdf8;border-color:#ddd3bf;color:#4b5a52;}
+  /* filtros: a etapa agora é a coluna do quadro; ficam Todos, alerta, parados e concluídos */
+  .prx .prx-abas{border:0;gap:6px;padding:0 14px;} .prx .prx-aba[data-f="cp"],.prx .prx-aba[data-f="sua"],.prx .prx-aba[data-f="saude"],.prx .prx-aba[data-f="adm"],.prx .prx-aba[data-f="pago"],.prx .prx-aba[data-f="pc"]{display:none;}
+  .prx .prx-aba,.prx .prx-cat{font:600 12px 'IBM Plex Sans',sans-serif;letter-spacing:0;color:#4b5a52;background:#fff;border:1px solid #ddd3bf;border-radius:999px;padding:5px 11px;}
+  .prx .prx-aba:hover{color:#1d2a24;} .prx .prx-aba[aria-pressed="true"],.prx .prx-cat[aria-pressed="true"]{background:#1d2a24;color:#fff;border-color:#1d2a24;} .prx .prx-aba b,.prx .prx-cat b{background:none;color:inherit;}
+  .prx .x-ev,.prx .x-ev p{color:#4b5a52;} .prx .x-ev time{color:#8a7b5c;} .prx .x-ev{border-color:#ddd3bf;}
+  #proc-lista.tkt-grade{grid-auto-flow:dense;}
+  /* quadro no papel */
+  .kb-ce .kb::before{background-image:repeating-linear-gradient(90deg,#2f7d5d 0 10px,transparent 10px 22px);}
+  .kb-ce .kh{background:#fffdf8;border-color:#ddd3bf;box-shadow:0 2px 6px rgba(60,50,30,.07);} .kb-ce .kh .kn{color:#1d2a24;font:700 12.5px var(--f-x-disp);} .kb-ce .kh .kq{background:#245f47;color:#fff;} .kb-ce .kc.vazia .kq{background:#c9bc9f;color:#fff;}
+  .kb-ce .kt{color:#8a7b5c;} .kb-ce .kt b{color:#4b5a52;} .kb-ce .kt.lento b{color:#c77d18;} .kb-ce .kl{background:rgba(233,225,208,.45);border-color:#ddd3bf;} .kb-ce .km{background:#fff;} .kb-ce .kmais{color:#245f47;} .kb-ce .kmais:hover{background:#fffdf8;} .kb-ce .kv{color:#b3a585;}
   @media (max-width:900px){ .prx .prx-ops{grid-template-columns:1fr;} .prx .prx-acoes{justify-content:flex-start;} .prx .prx-acoes .x-atual{text-align:left;} }
   @media (max-width:620px){ .prx .prx-cards{grid-template-columns:1fr; padding:4px 10px 12px;} .prx .prx-busca{width:100%;} .prx .prx-dist{grid-template-columns:100px minmax(0,1fr);} .prx .prx-trilha li span{font-size:8.5px;} }
   @media (prefers-reduced-motion: reduce){ .prx .prx-trilha li.cur b{animation:none;} }
@@ -1583,7 +1620,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.14.0</span>
+    <span class="header-version">v1.15.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2014,6 +2051,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <div class="prx-abas" id="ce-tiles" role="group" aria-label="Filtrar por etapa">
             <button type="button" class="prx-aba" data-f="todos">Todos</button>
             <button type="button" class="prx-aba" data-f="alerta">⚠ Com alerta <b id="ce-n-alerta"></b></button>
+            <button type="button" class="prx-aba" data-f="parados">⏱ Parados 3+ dias</button>
             <button type="button" class="prx-aba" data-f="cp">No CP · guardados <b id="ce-t-cp">—</b></button>
             <button type="button" class="prx-aba" data-f="sua">Sua assinatura <b id="ce-t-sua">—</b></button>
             <button type="button" class="prx-aba" data-f="saude">Secretária <b id="ce-t-saude">—</b></button>
@@ -4057,6 +4095,7 @@ function ceNormal(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/
 function cePassaFiltro(it) {
   var f = ceFiltro, e = it.etapas;
   if (f === 'alerta' && !it.alerta) return false;
+  if (f === 'parados' && !(it.proxima && it.proxima !== 'enviado' && (it.diasParado || 0) >= 3)) return false;
   if (f === 'andamento' && !it.proxima) return false;
   if (f === 'concluidos' && it.proxima) return false;
   if (f === 'cp' && it.proxima !== 'enviado') return false;
