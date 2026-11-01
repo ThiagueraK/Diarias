@@ -1490,6 +1490,74 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   #panel-tabela #tabelaWrap tbody td:nth-child(2){position:sticky; left:0; z-index:2; background:var(--surface) !important;}
   #panel-tabela #tabelaWrap thead th:nth-child(2){position:sticky; left:0; z-index:11;}
   #panel-tabela #tabelaWrap td:last-child > *{display:inline-block; margin-right:4px;}
+  /* Modelo Recibo */
+  #panel-tabela{padding:16px 22px 22px;}
+  #panel-tabela .tb-cab{margin-bottom:10px;}
+  #panel-tabela .tabela-header,#panel-tabela .backup-wrap,#panel-tabela .busca-wrap{margin-bottom:8px;}
+  #panel-tabela .backup-wrap{padding:6px 10px;}
+  #panel-tabela .busca-hint{display:none;}
+  #panel-tabela .tb-flt{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; align-items:center; margin-bottom:8px;}
+  #panel-tabela .tb-flt .tb-srv{margin:0 !important;}
+  #panel-tabela .tb-flt .dias-dropdown-wrap{margin:0; flex-wrap:nowrap; min-width:0;}
+  #panel-tabela .tb-flt .dias-dropdown{flex:1; min-width:0; width:100%;}
+  #panel-tabela .tb-flt .dias-dropdown-label{white-space:nowrap;}
+  #panel-tabela .dia-info{padding:7px 14px; margin-bottom:8px;}
+  #panel-tabela .tb-linha{display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  #panel-tabela .tb-linha .filtro-pc-wrap{margin:0;}
+  #panel-tabela .tb-linha .tb-visao{margin:0;}
+  @media (max-width:800px){ #panel-tabela .tb-flt{grid-template-columns:minmax(0,1fr);} }
+  #panel-tabela .tb-visao{display:flex; gap:4px; margin:0 0 10px;}
+  #panel-tabela .tb-visao button{border:0; background:var(--surface2); color:var(--text); padding:6px 12px; font:500 13px var(--sans); cursor:pointer;}
+  #panel-tabela .tb-visao button[aria-pressed="true"]{background:#ffc857; color:#2a2100; font-weight:600;}
+  #panel-tabela .tb-re{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); background:var(--surface);}
+  #panel-tabela .tb-esq{min-width:0; display:flex; flex-direction:column; border-right:1px solid var(--border);}
+  #panel-tabela .tb-lista{overflow:auto; max-height:680px; min-height:420px; flex:1;}
+  #panel-tabela .tb-it{all:unset; box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 12px; width:100%; padding:9px 12px; border-bottom:1px solid var(--border); cursor:pointer; font-family:var(--sans); font-size:13.5px;}
+  #panel-tabela .tb-it:hover{background:#2e3343;}
+  #panel-tabela .tb-it:focus-visible{outline:2px solid #ffc857; outline-offset:-2px;}
+  #panel-tabela .tb-it.sel{background:var(--surface2); box-shadow:inset 3px 0 0 #ffc857;}
+  #panel-tabela .tb-it b{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #panel-tabela .tb-it small{min-width:0; color:var(--text-muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #panel-tabela .tb-val{font:600 13px var(--mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap;}
+  #panel-tabela .tb-se{font-size:12px; font-weight:600; text-align:right; white-space:nowrap;}
+  #panel-tabela .tb-se.ok{color:var(--success);} #panel-tabela .tb-se.at{color:var(--warning);}
+  #panel-tabela .tb-mais{padding:12px; text-align:center; color:var(--text-muted); font-size:13px;}
+  #panel-tabela .tb-mais button{background:var(--surface2); border:0; color:var(--text); padding:5px 11px; cursor:pointer; margin-left:6px;}
+  #panel-tabela .tb-tot{display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 14px; padding:9px 12px; border-top:1px solid var(--border-strong); font-size:12.5px; color:var(--text-muted);}
+  #panel-tabela .tb-tot b{color:var(--success); font-family:var(--mono);}
+  #panel-tabela .tb-ip{background:#10121a; min-width:0; padding:0 clamp(10px,3vw,40px) 24px; max-height:720px; overflow:hidden auto;}
+  #panel-tabela .tb-ranh{height:12px; background:#000; box-shadow:0 3px 5px rgba(0,0,0,.6); margin:0 -40px; position:sticky; top:0; z-index:3;}
+  #panel-tabela .tb-rc{--p:#f7f2e7; --t:#1d2a24; --m:#6f6550; position:relative; background:var(--p); color:var(--t); padding:16px; margin-bottom:12px; display:grid; gap:13px; font:13.5px/1.45 var(--sans);}
+  #panel-tabela .tb-rc::after{content:''; position:absolute; left:0; right:0; bottom:-7px; height:8px; background:radial-gradient(circle at 7px 0,transparent 6px,var(--p) 6.5px); background-size:14px 8px;}
+  #panel-tabela .tb-rc.imp{animation:tbImp .46s cubic-bezier(.25,.8,.3,1);}
+  @keyframes tbImp{from{transform:translateY(-101%);}}
+  #panel-tabela .tb-rc h3{margin:0; font:600 19px/1.2 var(--sans); padding-right:125px; overflow-wrap:anywhere; color:var(--t);}
+  #panel-tabela .tb-car{position:absolute; right:12px; top:14px; border:3px solid currentColor; padding:1px 8px; font:700 18px 'Pixelify Sans','IBM Plex Mono',monospace; transform:rotate(-9deg);}
+  #panel-tabela .tb-car.ok{color:#177a48;} #panel-tabela .tb-car.at{color:#a55d00;}
+  #panel-tabela .tb-car.cai{animation:tbCar .28s .32s cubic-bezier(.3,1.6,.5,1) backwards;}
+  @keyframes tbCar{from{opacity:0; transform:rotate(-9deg) scale(2.1);}}
+  #panel-tabela .tb-gr{display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:10px;}
+  #panel-tabela .tb-gr small{display:block; color:var(--m); font-size:12px;}
+  #panel-tabela .tb-gr span{font-family:var(--mono); font-size:12.5px; overflow-wrap:anywhere;}
+  #panel-tabela .tb-gr .td-empty{color:var(--m);}
+  #panel-tabela .tb-gr .v span{font-size:16px; font-weight:600;}
+  #panel-tabela .tb-tl{list-style:none; margin:0; padding:0; display:grid;}
+  #panel-tabela .tb-tl li{display:grid; grid-template-columns:20px minmax(0,1fr) auto; gap:8px; padding-bottom:11px; position:relative; align-items:center;}
+  #panel-tabela .tb-tl li:last-child{padding-bottom:0;}
+  #panel-tabela .tb-tl li::before{content:''; width:12px; height:12px; background:#c9bc9f; justify-self:center; z-index:1;}
+  #panel-tabela .tb-tl li.f::before{background:#177a48;}
+  #panel-tabela .tb-tl li:not(:last-child)::after{content:''; position:absolute; left:9px; top:12px; bottom:0; width:2px; background:#c9bc9f;}
+  #panel-tabela .tb-tl li.f:not(:last-child)::after{background:#177a48;}
+  #panel-tabela .tb-tl small{color:var(--m); font:12px var(--mono);}
+  #panel-tabela .tb-acs{display:flex; flex-wrap:wrap; gap:6px;}
+  #panel-tabela .tb-acs .btn-pc,#panel-tabela .tb-acs .btn-edit-row,#panel-tabela .tb-acs .btn-del-row{all:unset; box-sizing:border-box; background:#e9e1cf; color:var(--t); padding:7px 11px; font:500 13px var(--sans); cursor:pointer; text-decoration:none; white-space:nowrap;}
+  #panel-tabela .tb-acs .btn-pc{background:#245f47; color:#fff; font-weight:600;}
+  #panel-tabela .tb-acs .btn-del-row{color:#b42318;}
+  #panel-tabela .tb-acs > *:hover{outline:2px solid #c9bc9f;}
+  #panel-tabela .tb-acs > *:focus-visible{outline:2px solid #245f47; outline-offset:2px;}
+  body.anim-eco #panel-tabela .tb-rc.imp,body.anim-eco #panel-tabela .tb-car.cai{animation:none;}
+  @media (prefers-reduced-motion: reduce){ #panel-tabela .tb-rc.imp,#panel-tabela .tb-car.cai{animation:none;} }
+  @media (max-width:800px){ #panel-tabela .tb-re{grid-template-columns:minmax(0,1fr);} #panel-tabela .tb-esq{border-right:0; border-bottom:1px solid var(--border);} #panel-tabela .tb-lista{min-height:0; max-height:300px;} #panel-tabela{padding:14px;} }
   body:has(#panel-tabela.active) #scrollFlutuante{--card:#262a38; --border:#464d63; --bg:#191b25; --accent:#ffc857;}
   /* 01/11/2026: resto da aba Equipe no visual do escritório aprovado. Só #equipe: a aba Processos usa a mesma base .eqx */
   #equipe.eqx{
@@ -1745,7 +1813,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.17.0</span>
+    <span class="header-version">v1.18.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2004,18 +2072,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <button class="btn-busca-ia" id="btnBuscaIA">✨ Buscar com IA</button>
     </div>
     <div class="busca-hint">💡 Digite normalmente para busca rápida, ou clique em <strong>✨ Buscar com IA</strong> para pesquisa em linguagem natural: <em>"João que foi para Santa Maria dia 16/03 com placa TQU"</em></div>
-    <div style="margin:8px 0;display:flex;gap:8px;align-items:center;">
+    <div class="tb-flt"><div class="tb-srv" style="margin:8px 0;display:flex;gap:8px;align-items:center;">
       <select id="filtroServidor" style="font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer;flex:1;">
         <option value="">👤 Todos os servidores</option>
       </select>
       <button id="btnConsultaMulta" title="Descobrir quem dirigia na data da multa" style="font-size:13px;padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);cursor:pointer;white-space:nowrap;">🚨 Multa</button>
     </div>
+    <div class="dias-dropdown-wrap" id="diasDisponiveis"></div></div>
     <div class="busca-loading" id="buscaLoading"><div class="spinner"></div> Interpretando sua consulta com IA...</div>
     <div class="busca-ia-resultado" id="buscaIAResultado"></div>
     <div class="busca-info" id="buscaInfo" style="display:none;"></div>
-
-    <!-- Dropdown de dias com processos (substitui as antigas bolhas) -->
-    <div class="dias-dropdown-wrap" id="diasDisponiveis"></div>
 
     <!-- Info do dia -->
     <div class="dia-info" id="diaInfo" style="display:none;">
@@ -2025,10 +2091,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     </div>
 
     <!-- Filtro por status PC -->
+    <div class="tb-linha">
     <div class="filtro-pc-wrap" id="filtroPCWrap">
       <button class="filtro-pc-btn ativo" data-pc="todos">📋 Todos</button>
       <button class="filtro-pc-btn pendente" data-pc="pendente">⏳ Pendentes</button>
       <button class="filtro-pc-btn ok" data-pc="ok">✅ Concluídos</button>
+    </div>
+    <div class="tb-visao" role="group" aria-label="Forma de mostrar"><button type="button" data-tbvisao="recibo">Recibo</button><button type="button" data-tbvisao="tabela">Tabela completa</button></div>
     </div>
 
     <div id="tabelaWrap"></div>
@@ -7532,7 +7601,8 @@ function preencherCampos(found) {
       switchTab('panel-tabela', 'tabTabela');
       renderTabela();
       setTimeout(function() {
-        var row = document.querySelector('#panel-tabela tr[data-id="'+existenteSemHash.id+'"]');
+        var row = document.querySelector('#panel-tabela tr[data-id="'+existenteSemHash.id+'"], #panel-tabela .tb-it[data-id="'+existenteSemHash.id+'"]');
+        if (row && row.classList.contains('tb-it')) tbEscolher(Number(row.dataset.id));
         if (row) {
           row.scrollIntoView({behavior:'smooth', block:'center'});
           row.style.outline = '2px solid #ef4444';
@@ -7947,6 +8017,59 @@ function renderPills(dias) {
     + '<select class="dias-dropdown" id="diasDropdown">'+opcoes+'</select>';
 }
 
+// 01/11/2026: modelo Recibo aprovado na demonstração. Lista à esquerda e a ficha "impressa" à direita.
+// Mesmos botões e ids da tabela (.btn-pc, .btn-edit-row, .btn-del-row, #btnTabelaMais); só a apresentação muda.
+var tbVisao = 'recibo'; try { tbVisao = localStorage.getItem('sgd-tabela-visao') || 'recibo'; } catch (e) {}
+var tbSel = null, tbImpresso = null;
+function tbMarcarVisao() {
+  document.querySelectorAll('[data-tbvisao]').forEach(function(b) { b.setAttribute('aria-pressed', String(b.dataset.tbvisao === tbVisao)); });
+}
+function tbTx(v) { return v ? escaparHtmlProc(String(v)) : '—'; }
+function tbRecibo(p) {
+  var emp = dataEmpenhoBR(p), enc = dataEncaminhadoBR(p), pag = !!(p.pagamentoNotificadoEm || p.pagamentoAvisoGerenciadoCp);
+  var ultPag = p.pagamentoNotificadoEm ? String(p.pagamentoNotificadoEm).split(';').filter(Boolean).pop() : '';
+  var et = [['Empenhado', emp !== '—', emp], ['Encaminhado no 1Doc', enc !== '—', enc], ['Pagamento avisado', pag, ultPag || (pag ? 'pelo CP' : 'aguardando')], ['Prestação de contas', !!p.pcOk, p.pcOk ? 'concluída' : 'pendente']];
+  var novo = tbImpresso !== p.id; tbImpresso = p.id;
+  return '<div class="tb-rc' + (novo ? ' imp' : '') + '"><span class="tb-car ' + (p.pcOk ? 'ok' : 'at') + (novo ? ' cai' : '') + '">' + (p.pcOk ? 'CONCLUÍDA' : 'PENDENTE') + '</span>'
+    + '<h3>' + tbTx(p.servidor) + '</h3><div class="tb-gr">'
+    + [['Valor', p.valor ? 'R$ ' + tbTx(p.valor) : '—'], ['Nº do processo', tbTx(p.numProcesso)], ['Nº do empenho', tbTx(p.empenho)], ['Cidade de destino', tbTx(p.cidade)], ['Data de ida', tbTx(p.dataSaida)], ['Data de volta', tbTx(p.dataChegada)], ['Horário', horarioResumo(p)], ['Placa', tbTx(p.placa)], ['Distância', p.km ? tbTx(p.km) + ' km' : '—']].map(function(c, i) { return '<div' + (i === 0 ? ' class="v"' : '') + '><small>' + c[0] + '</small><span>' + c[1] + '</span></div>'; }).join('')
+    + '</div><ol class="tb-tl">' + et.map(function(e, i) { return '<li class="' + (e[1] ? 'f' : '') + '" style="--i:' + i + '"><span>' + e[0] + '</span><small>' + escaparHtmlProc(e[2]) + '</small></li>'; }).join('') + '</ol>'
+    + '<div class="tb-acs"><button type="button" class="btn-pc" data-id="' + p.id + '">Prestação de Contas</button>'
+    + (p.hash1doc ? '<a class="btn-edit-row" href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash1doc + '&itd=7" target="_blank" rel="noopener">Abrir no 1Doc</a>' : '')
+    + '<button type="button" class="btn-edit-row" data-id="' + p.id + '">Editar</button><button type="button" class="btn-del-row" data-id="' + p.id + '">Remover</button></div></div>';
+}
+function tbDesenharRecibo(wrap, vis, todos, hl, totalStr, totalPendente, comData) {
+  var lista = wrap.querySelector('.tb-lista'), rolagem = lista ? lista.scrollTop : 0, foco = document.activeElement && document.activeElement.classList.contains('tb-it') ? document.activeElement.dataset.id : null;
+  if (!vis.some(function(p) { return p.id === tbSel; })) tbSel = vis[0].id;
+  var sel = vis.filter(function(p) { return p.id === tbSel; })[0];
+  wrap.innerHTML = '<div class="tb-re"><div class="tb-esq"><div class="tb-lista">' + vis.map(function(p) {
+    var s = p.id === tbSel;
+    return '<button type="button" class="tb-it' + (s ? ' sel' : '') + '" data-id="' + p.id + '" aria-pressed="' + s + '"><b>' + hl(p.servidor, 'servidor') + '</b><span class="tb-val">' + (p.valor ? hl('R$ ' + p.valor, 'valor') : '—') + '</span><small>' + hl(p.numProcesso, 'numProcesso') + ' · ' + hl(p.cidade, 'cidade') + (comData ? ' · ' + hl(p.dataSaida, 'dataSaida') : '') + '</small>' + (p.pcOk ? '<span class="tb-se ok">✓ Concluída</span>' : '<span class="tb-se at">◆ Pendente</span>') + '</button>';
+  }).join('') + (todos.length > vis.length ? '<div class="tb-mais">Mostrando ' + vis.length + ' de ' + todos.length + ' <button type="button" id="btnTabelaMais">mostrar mais 300</button></div>' : '') + '</div>'
+    + (totalStr ? '<div class="tb-tot"><span>Total: <b>' + totalStr + '</b></span><span>Pendente: R$ ' + totalPendente.toFixed(2).replace('.', ',') + '</span></div>' : '')
+    + '</div><div class="tb-ip"><div class="tb-ranh"></div><div id="tbFicha">' + tbRecibo(sel) + '</div></div></div>';
+  var nova = wrap.querySelector('.tb-lista'); nova.scrollTop = rolagem;
+  if (foco) { var f = nova.querySelector('.tb-it[data-id="' + foco + '"]'); if (f) f.focus({ preventScroll: true }); }
+}
+function tbEscolher(id) {
+  var p = processos.find(function(x) { return x.id === id; }); if (!p) return;
+  tbSel = id;
+  document.querySelectorAll('#tabelaWrap .tb-it').forEach(function(i) { var s = Number(i.dataset.id) === id; i.classList.toggle('sel', s); i.setAttribute('aria-pressed', String(s)); });
+  var f = document.getElementById('tbFicha'); if (f) f.innerHTML = tbRecibo(p);
+  var ip = document.querySelector('#tabelaWrap .tb-ip'); if (ip) ip.scrollTop = 0;
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest) return;
+  var v = e.target.closest('[data-tbvisao]');
+  if (v) { tbVisao = v.dataset.tbvisao; try { localStorage.setItem('sgd-tabela-visao', tbVisao); } catch (er) {} renderTabela(); return; }
+  var it = e.target.closest('#tabelaWrap .tb-it');
+  if (it) tbEscolher(Number(it.dataset.id));
+});
+document.addEventListener('keydown', function(e) {
+  if ((e.key !== 'ArrowDown' && e.key !== 'ArrowUp') || !e.target.classList || !e.target.classList.contains('tb-it')) return;
+  var n = e.key === 'ArrowDown' ? e.target.nextElementSibling : e.target.previousElementSibling;
+  if (n && n.classList.contains('tb-it')) { e.preventDefault(); n.focus(); tbEscolher(Number(n.dataset.id)); }
+});
 var _tabelaLimite = 300, _tabelaChaveFiltro = null;
 document.addEventListener('click', function(e) {
   if (e.target && e.target.id === 'btnTabelaMais') { _tabelaLimite += 300; renderTabela(); }
@@ -8140,6 +8263,11 @@ function renderTabela() {
     return acc + (isNaN(v) ? 0 : v);
   }, 0);
 
+  tbMarcarVisao();
+  if (tbVisao === 'recibo') {
+    tbDesenharRecibo(wrap, visiveisTabela, filtrados, hl, totalStr, totalPendente, modoGlobal || modoStatusGlobal || modoIA);
+    return;
+  }
   wrap.innerHTML =
     '<div class="table-wrap"><table>'+
     '<thead><tr>'+
@@ -9640,7 +9768,8 @@ function abrirProcessoNaTabela(id) {
   switchTab('panel-tabela', 'tabTabela');
   renderTabela();
   setTimeout(function() {
-    var row = document.querySelector('#panel-tabela tr[data-id="'+id+'"]');
+    var row = document.querySelector('#panel-tabela tr[data-id="'+id+'"], #panel-tabela .tb-it[data-id="'+id+'"]');
+    if (row && row.classList.contains('tb-it')) tbEscolher(Number(row.dataset.id));
     if (row) {
       row.scrollIntoView({behavior:'smooth', block:'center'});
       row.style.outline = '2px solid #ef4444';
