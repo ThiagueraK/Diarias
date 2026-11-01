@@ -1404,6 +1404,20 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .tkt-fatos{display:grid;gap:6px;font-size:13px;} .tkt-fatos div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed #ddd3bf;padding-bottom:5px;} .tkt-fatos b{font:600 12.5px var(--mono);text-align:right;}
   .tkt-cobrar{background:#fbf2e3;border:1px solid rgba(199,125,24,.3);color:#8a4b00;border-radius:10px;padding:8px 10px;font-size:12.5px;}
   .tkt-cobrar.al{background:#fbeaea;border-color:rgba(214,69,69,.3);color:#a12a2a;}
+  /* ===== 01/11/2026 (fase 3): indicadores em painel de embarque (letras que viram) + modo econômico ===== */
+  .prx .flap-v{display:flex;flex-wrap:wrap;gap:3px;align-items:center;}
+  .prx #proc-contador-num.flap-v{display:inline-flex;}
+  .prx .flap{position:relative;display:inline-block;width:19px;height:30px;border-radius:4px;background:#0b0f13;color:#f4c95d;font:700 19px/30px var(--mono);text-align:center;box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);overflow:hidden;perspective:200px;}
+  .prx .flap::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.75);}
+  .prx .flap.esp{width:7px;background:none;box-shadow:none;} .prx .flap.esp::after{display:none;}
+  .prx .flap span{display:block;}
+  .prx .flap.vira span{animation:flapVira 90ms linear;}
+  @keyframes flapVira{from{transform:rotateX(-90deg);filter:brightness(.55);}}
+  .anim-tgl{font:600 12px var(--f-x-body,'IBM Plex Sans');border:1px solid rgba(148,163,184,.25);background:rgba(255,255,255,.04);color:#dee2f6;border-radius:999px;padding:6px 12px;cursor:pointer;}
+  .anim-tgl:hover{border-color:rgba(148,163,184,.45);}
+  body.anim-eco .proc-card.tkt.beam .tkt-corpo::before,body.anim-eco .kb-ce .kb::before,body.anim-eco .kb-ce .km.atr::before,body.anim-eco .tkt-parada.atual .pino{animation:none !important;}
+  body.anim-eco .proc-card.tkt,body.anim-eco .proc-card.tkt .tkt-rota .seta::after,body.anim-eco .kb-ce .km{transition:none !important;}
+  body.anim-eco .proc-card.tkt{filter:none;box-shadow:0 2px 6px rgba(0,0,0,.25);}
   @media (max-width:900px){ .prx .prx-ops{grid-template-columns:1fr;} .prx .prx-acoes{justify-content:flex-start;} .prx .prx-acoes .x-atual{text-align:left;} }
   @media (max-width:620px){ .prx .prx-cards{grid-template-columns:1fr; padding:4px 10px 12px;} .prx .prx-busca{width:100%;} .prx .prx-dist{grid-template-columns:100px minmax(0,1fr);} .prx .prx-trilha li span{font-size:8.5px;} }
   @media (prefers-reduced-motion: reduce){ .prx .prx-trilha li.cur b{animation:none;} }
@@ -1569,7 +1583,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.13.0</span>
+    <span class="header-version">v1.14.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1976,6 +1990,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
           <div class="x-sub">Da caixa do 1Doc ao CP, às assinaturas, ao pagamento e à prestação de contas, num lugar só.</div>
         </div>
         <div class="prx-acoes">
+          <button type="button" class="anim-tgl" id="anim-tgl" aria-pressed="false" title="Econômicas: sem animações contínuas — use se o computador ficar lento">✨ Animações: completas</button>
           <button type="button" class="x-bt" id="proc-atualizar" title="Varre a sua caixa SGD no 1Doc agora">🔄 Varrer caixa agora</button>
           <button type="button" class="x-bt" id="btn-triagem-marcos" title="Escaneia a caixa do Marcos no 1Doc agora, em vez de esperar o próximo horário fixo (6h/12h/18h)">📥 Varrer caixa do Marcos</button>
           <button type="button" class="x-bt" id="btn-checkpoint-empenho" title="Os empenhos gerados no CP ficam guardados aqui. Ao clicar, todos são anexados, enviados pra assinatura da Secretária e do Secretário de Administração e encaminhados no 1Doc de uma vez (assim a Secretária assina em lote)">📎 Encaminhar empenhos guardados</button>
@@ -3246,7 +3261,45 @@ function tktDuracao(p) {
 }
 window._tktAbertos = window._tktAbertos || new Set();
 window._tktVistos = window._tktVistos || null;
-var _tktReduz = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var _tktMQ = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+// 01/11/2026 (fase 3): chave "Animações: completas / econômicas" (guardada neste navegador). Econômico = sem animação
+// contínua (bordas girando, pontos pulsando, fluxo da esteira), sem sombra recortada e sem as viagens animadas.
+var _tktEco = false; try { _tktEco = localStorage.getItem('sgd-anim') === 'eco'; } catch (e) {}
+var _tktReduz = _tktMQ || _tktEco;
+function tktAplicarEco() {
+  _tktReduz = _tktMQ || _tktEco;
+  if (document.body) document.body.classList.toggle('anim-eco', _tktEco);
+  var b = document.getElementById('anim-tgl'); if (b) { b.textContent = _tktEco ? '✨ Animações: econômicas' : '✨ Animações: completas'; b.setAttribute('aria-pressed', String(_tktEco)); }
+}
+document.addEventListener('click', function(e){ if (e.target && e.target.id === 'anim-tgl') { _tktEco = !_tktEco; try { localStorage.setItem('sgd-anim', _tktEco ? 'eco' : 'completo'); } catch (er) {} tktAplicarEco(); } });
+// painel de embarque: cada caractere do indicador vira uma plaquinha; dígito que mudou "gira" até o novo valor
+function flapRender(el, txt) {
+  var prev = el._flapTxt || '', n = txt.length;
+  el._flapTxt = txt; el.textContent = '';
+  for (var i = 0; i < n; i++) {
+    var ch = txt[i], f = document.createElement('span'); f.className = 'flap' + (ch === ' ' ? ' esp' : ''); var sp = document.createElement('span'); f.appendChild(sp); el.appendChild(f);
+    var antes = prev[prev.length - (n - i)];
+    if (_tktReduz || !/[0-9]/.test(ch) || antes === ch) { sp.textContent = ch; continue; }
+    (function(f, sp, alvo, voltas){ var k = 0, d = /[0-9]/.test(antes || '') ? +antes : 0;
+      (function gira(){ k++; d = (d + 1) % 10; sp.textContent = k >= voltas ? alvo : String(d); f.classList.remove('vira'); void f.offsetWidth; f.classList.add('vira'); if (k < voltas) setTimeout(gira, 70); })();
+    })(f, sp, ch, 3 + (i % 4) + Math.floor(Math.random() * 3));
+  }
+}
+function flapObservar(id, fmt) {
+  var el = document.getElementById(id); if (!el || el._flapObs) return;
+  el.classList.add('flap-v'); el.setAttribute('aria-live', 'polite');
+  var ler = function(){ return (fmt ? fmt(el) : el.textContent).trim() || '—'; };
+  // só o próprio elemento (o giro das plaquinhas não conta) e desligado enquanto escreve: o aviso do observador chega
+  // depois da escrita, e sem isso o redesenho disparava a si mesmo sem fim e travava a aba
+  var opts = { childList: true };
+  var mo = new MutationObserver(function(){ mo.disconnect(); flapRender(el, ler()); mo.takeRecords(); mo.observe(el, opts); });
+  el._flapObs = mo; flapRender(el, ler()); mo.observe(el, opts);
+}
+(function(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); })(function(){
+  tktAplicarEco();
+  ['prx-k-mes', 'prx-k-esteira', 'proc-contador-num'].forEach(function(id){ flapObservar(id); });
+  flapObservar('ce-t-ciclo', function(el){ return el.textContent.replace(/\s*dias?$/i, 'd'); });
+});
 function tktPosRender(lista) {
   var primeira = !window._tktVistos; if (primeira) window._tktVistos = new Set();
   var n = 0;
