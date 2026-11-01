@@ -20,7 +20,7 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU0dEIERpYXJpYXMiLCJzaG9ydF9uYW1lIjoiU0dEIiwiZGVzY3JpcHRpb24iOiJHZXJhZG9yIGRlIERlc2NyaWNvZXMgZGUgRGlhcmlhcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGYxMTE3IiwidGhlbWVfY29sb3IiOiIjMGYxMTE3Iiwib3JpZW50YXRpb24iOiJwb3J0cmFpdC1wcmltYXJ5In0=">
 <title>SGD — Gerador de Diárias</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=VT323&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Orbitron:wght@600;700;900&family=Chakra+Petch:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=VT323&display=swap');
   :root {
     /* ===== TEMA CLARO (Fase 1 do redesenho) ===== */
     --bg:#f6f7f9; --surface:#ffffff; --surface2:#f1f3f6; --border:#e3e7ed;
@@ -1451,6 +1451,54 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .eqe-gv dl div{display:flex; justify-content:space-between; gap:10px; font-size:12.5px;}
   .eqx .eqe-gv dt{color:var(--x-muted);}
   .eqx .eqe-gv dd{margin:0; font-weight:600; text-align:right;}
+  /* 01/11/2026: resto da aba Equipe no visual do escritório aprovado. Só #equipe: a aba Processos usa a mesma base .eqx */
+  #equipe.eqx{
+    --x-bg:#191b25; --x-low:#20232f; --x-card:#262a38; --x-card2:#333848; --x-hi:#333848;
+    --x-line:#3a4054; --x-line2:#464d63; --x-text:#eef1f8; --x-muted:#a9b1c6; --x-dim:#858da3;
+    --x-ok:#6fe09a; --x-warn:#ffb648; --x-danger:#ff6b6b; --x-violeta:#ffc857;
+    --f-x-disp:'IBM Plex Sans','Segoe UI',system-ui,sans-serif; --f-x-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+    --f-x-pix:'Pixelify Sans','IBM Plex Mono',monospace; --f-x-num:'IBM Plex Mono',ui-monospace,monospace;
+    background:var(--x-bg); border-radius:0;
+  }
+  #equipe h2.x-title{font-family:var(--f-x-pix); font-size:clamp(24px,3vw,32px); letter-spacing:0;}
+  #equipe .x-sec h3,#equipe .x-ph h4,#equipe .x-aguarda h3{font-family:var(--f-x-pix); font-weight:600; font-size:18px; letter-spacing:0; text-transform:none; color:var(--x-text);}
+  #equipe .x-tag{border-radius:0; background:var(--x-card2); color:var(--x-text); border-color:transparent;}
+  #equipe .x-tag.ok{background:var(--x-card2); color:var(--x-ok); border-color:transparent;}
+  #equipe .x-kpis{gap:8px; margin-bottom:12px;}
+  #equipe .x-kpi{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 10px; align-items:center; padding:8px 12px; border:0; border-radius:0; backdrop-filter:none; background:var(--x-card);}
+  #equipe .x-kpi .x-lbl{grid-column:1; grid-row:1; font-size:12px; font-weight:500; letter-spacing:0; text-transform:none;}
+  #equipe .x-kpi .v{grid-column:2; grid-row:1 / span 2; margin:0; font-family:var(--f-x-num); font-weight:600; font-size:24px;}
+  #equipe .x-kpi .d{grid-column:1; grid-row:2; margin:0; font-size:11.5px;}
+  #equipe .x-kpi .x-barra{grid-column:1; grid-row:2; margin:5px 0 3px;}
+  #equipe .x-kpi.alerta{border:0; box-shadow:inset 3px 0 0 var(--x-warn);}
+  #equipe .x-kpi.alerta .v{color:#ffc857;}
+  #equipe .x-barra,#equipe .x-barra i{border-radius:0;}
+  #equipe .x-painel,#equipe .x-aguarda,#equipe .x-t,#equipe .x-ag{border:0; border-radius:0; background:var(--x-card); backdrop-filter:none; box-shadow:none;}
+  #equipe .x-aguarda{box-shadow:inset 3px 0 0 var(--x-warn);}
+  #equipe .x-prop pre{background:#10121a; border-radius:0; color:var(--x-text);}
+  #equipe .x-msg{border-radius:0; border:0;}
+  #equipe .x-msg.bot{background:var(--x-card2);}
+  #equipe .x-msg.eu{background:#ffc857; color:#2a2100;}
+  #equipe .x-msg.eu small{color:#6a5416;}
+  #equipe .x-form{background:transparent;}
+  #equipe .x-prompt{background:#10121a; border-radius:0; border-color:var(--x-line2);}
+  #equipe .x-prompt b{color:#ffc857;}
+  #equipe .x-bt{border-radius:0; border:0; background:var(--x-card2); color:var(--x-text); font-size:13px; letter-spacing:0; text-transform:none;}
+  #equipe .x-bt:hover:not(:disabled){outline:2px solid var(--x-line2); color:var(--x-text);}
+  #equipe .x-bt.prim,#equipe .x-bt.ok{background:#ffc857; color:#2a2100;}
+  #equipe .x-bt.prim:hover:not(:disabled){box-shadow:none;}
+  #equipe .x-bt.no{background:var(--x-card2); color:var(--x-danger);}
+  #equipe .x-bt:focus-visible,#equipe .x-filtro:focus-visible{outline-color:#ffc857;}
+  #equipe .x-filtro{border-radius:0; font-size:12px; letter-spacing:0;}
+  #equipe .x-filtro[aria-pressed="true"]{background:#ffc857; border-color:transparent; color:#2a2100;}
+  #equipe .x-prompt:focus-within{border-color:#ffc857;}
+  #equipe .x-ph .x-lbl{letter-spacing:0; text-transform:none; font-size:12px; font-weight:500;}
+  #equipe .x-ev time{font-family:var(--f-x-num);}
+  #equipe .norad-view-toggle{background:transparent; border:0; border-radius:0; padding:0; gap:6px;}
+  #equipe .norad-toggle-btn{background:var(--x-card2); color:var(--x-text); border-radius:0; font-size:13px; padding:7px 12px; box-shadow:none;}
+  #equipe .norad-toggle-btn.active{background:#ffc857; color:#2a2100; box-shadow:none;}
+  .eqx .eqe-w{border-radius:0;}
+  #equipe a[href="equipe.html"]{color:#ffc857 !important; border-color:var(--x-line2) !important; border-radius:0 !important;}
   @media (max-width:1000px){ .eqx .x-pr{grid-template-columns:minmax(0,1fr);} .eqx .x-pr.sem-cena .x-la{grid-template-columns:1fr;} }
   body:has(#panel-processos.active){background-color:#efeae0;background-image:radial-gradient(rgba(36,95,71,.08) 1px,transparent 1px);background-size:18px 18px;}
   .eqx.prx{--x-bg:transparent;--x-low:#f7f2e7;--x-card:#fffdf8;--x-card2:#fffdf8;--x-hi:#f7f2e7;--x-line:#ddd3bf;--x-line2:#c9bc9f;--x-text:#1d2a24;--x-muted:#6f6550;--x-dim:#8a7b5c;--x-ok:#1f9d57;--x-warn:#c77d18;--x-danger:#d64545;--x-violeta:#245f47;
@@ -1657,7 +1705,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.16.0</span>
+    <span class="header-version">v1.16.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
