@@ -1452,6 +1452,11 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .prx .x-ev,.prx .x-ev p{color:#4b5a52;} .prx .x-ev time{color:#8a7b5c;} .prx .x-ev{border-color:#ddd3bf;}
   #proc-lista.tkt-grade{grid-auto-flow:dense;}
   /* quadro no papel */
+  .kb-ce .kb{min-width:0;}
+  .kb-ce .kl{grid-template-columns:repeat(auto-fill,minmax(172px,1fr));}
+  .kb-ce .kmais{grid-column:1/-1;}
+  .kb-ce .kc.vazia .kh{flex-direction:column;align-items:center;justify-self:stretch;border-radius:12px;padding:6px 4px;gap:4px;}
+  .kb-ce .kc.vazia .kn{white-space:normal;text-align:center;font-size:11px;line-height:1.15;color:#8a7b5c;}
   .kb-ce .kb::before{background-image:repeating-linear-gradient(90deg,#2f7d5d 0 10px,transparent 10px 22px);}
   .kb-ce .kh{background:#fffdf8;border-color:#ddd3bf;box-shadow:0 2px 6px rgba(60,50,30,.07);} .kb-ce .kh .kn{color:#1d2a24;font:700 12.5px var(--f-x-disp);} .kb-ce .kh .kq{background:#245f47;color:#fff;} .kb-ce .kc.vazia .kq{background:#c9bc9f;color:#fff;}
   .kb-ce .kt{color:#8a7b5c;} .kb-ce .kt b{color:#4b5a52;} .kb-ce .kt.lento b{color:#c77d18;} .kb-ce .kl{background:rgba(233,225,208,.45);border-color:#ddd3bf;} .kb-ce .km{background:#fff;} .kb-ce .kmais{color:#245f47;} .kb-ce .kmais:hover{background:#fffdf8;} .kb-ce .kv{color:#b3a585;}
@@ -1620,7 +1625,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.15.0</span>
+    <span class="header-version">v1.15.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4258,12 +4263,18 @@ function kbRender(cont, lista) {
   var concl = ceFiltro === 'concluidos', cols = concl ? [['__fim', 'Concluídos', '']] : CE_COLS;
   _kbPorEmp = {};
   cont.classList.add('kb-ce');
-  cont.innerHTML = '<div class="kb" style="--ncol:' + cols.length + '">' + cols.map(function(c) {
-    var its = lista.filter(function(it){ return concl ? !it.proxima : it.proxima === c[0]; }), lim = prxExpand[c[0]] ? 999 : 4;
-    var med = its.length ? its.reduce(function(s, x){ return s + (x.diasParado || 0); }, 0) / its.length : 0;
-    return '<div class="kc' + (its.length ? '' : ' vazia') + '" data-c="' + c[0] + '"><div class="kh"><span class="kn">' + c[1] + '</span><span class="kq">' + its.length + '</span></div>'
-      + '<div class="kt' + (med >= 3 ? ' lento' : '') + '">' + (its.length && !concl ? (med < .5 ? 'em dia' : 'espera média <b>' + med.toFixed(1).replace('.', ',') + ' d</b>') : (c[2] || '&nbsp;')) + '</div>'
-      + '<div class="kl">' + (its.length ? its.slice(0, lim).map(kbMini).join('') + (its.length > lim ? '<button type="button" class="kmais" data-c="' + c[0] + '">+' + (its.length - lim) + ' mais</button>' : '') : '<div class="kv">nada aqui</div>') + '</div></div>';
+  // coluna vazia vira faixa estreita; as com empenhos dividem o espaço e mostram os parados há mais tempo primeiro
+  var porCol = cols.map(function(c){ return lista.filter(function(it){ return concl ? !it.proxima : it.proxima === c[0]; }).sort(function(a, b){ return (b.diasParado || 0) - (a.diasParado || 0); }); });
+  var LIM = 12, tpl = porCol.map(function(its){ return its.length ? 'minmax(190px,' + Math.max(1, Math.ceil(Math.min(its.length, LIM) / 4)) + 'fr)' : '84px'; }).join(' ');
+  var minW = porCol.reduce(function(t, its){ return t + (its.length ? 200 : 94); }, 0);
+  cont.innerHTML = '<div class="kb" style="grid-template-columns:' + tpl + ';min-width:' + minW + 'px">' + cols.map(function(c, ci) {
+    var its = porCol[ci], aberta = !!prxExpand[c[0]], lim = aberta ? 9999 : LIM;
+    if (!its.length) return '<div class="kc vazia" data-c="' + c[0] + '"><div class="kh"><span class="kq">0</span><span class="kn">' + c[1] + '</span></div></div>';
+    var med = its.reduce(function(s, x){ return s + (x.diasParado || 0); }, 0) / its.length;
+    return '<div class="kc" data-c="' + c[0] + '"><div class="kh"><span class="kn">' + c[1] + '</span><span class="kq">' + its.length + '</span></div>'
+      + '<div class="kt' + (med >= 3 ? ' lento' : '') + '">' + (!concl ? (med < .5 ? 'em dia' : 'espera média <b>' + med.toFixed(1).replace('.', ',') + ' d</b>') : (c[2] || '&nbsp;')) + '</div>'
+      + '<div class="kl">' + its.slice(0, lim).map(kbMini).join('')
+      + (its.length > LIM ? '<button type="button" class="kmais" data-c="' + c[0] + '">' + (aberta ? '▲ Recolher' : '▼ Ver mais ' + (its.length - LIM)) + '</button>' : '') + '</div></div>';
   }).join('') + '</div>';
   cont.querySelectorAll('.kc').forEach(function(col){ var q = col.querySelector('.kq'), c = col.dataset.c;
     if (_kbUltCont[c] !== undefined && _kbUltCont[c] !== q.textContent && !_tktReduz && q.animate) q.animate([{ transform: 'scale(1.5)' }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.175,.885,.32,1.275)' });
@@ -4275,7 +4286,7 @@ function kbRender(cont, lista) {
     else if (!a && (primeira || antes.size)) n.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: primeira ? Math.min(i, 12) * 30 : 0, easing: 'cubic-bezier(.05,.7,.1,1)', fill: 'backwards' }); });
 }
 document.addEventListener('click', function(ev){
-  var m = ev.target.closest && ev.target.closest('.kb-ce .kmais'); if (m) { prxExpand[m.dataset.c] = true; ceRender(); return; }
+  var m = ev.target.closest && ev.target.closest('.kb-ce .kmais'); if (m) { var cc = m.dataset.c, recolhe = prxExpand[cc]; prxExpand[cc] = !recolhe; ceRender(); if (recolhe) { var cx = document.querySelector('.kb-ce .kc[data-c="' + cc + '"]'); if (cx && cx.getBoundingClientRect().top < 0) cx.scrollIntoView({ block: 'start' }); } return; }
   var k = ev.target.closest && ev.target.closest('.kb-ce .km'); if (k && _kbPorEmp[k.dataset.k]) tktExtratoEmpenho(_kbPorEmp[k.dataset.k]);
 });
 // --- estrada genérica do extrato do empenho ---
