@@ -1451,6 +1451,46 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .eqe-gv dl div{display:flex; justify-content:space-between; gap:10px; font-size:12.5px;}
   .eqx .eqe-gv dt{color:var(--x-muted);}
   .eqx .eqe-gv dd{margin:0; font-weight:600; text-align:right;}
+  /* 01/11/2026: Tabela de Controle no visual da aba Equipe. Redefine os tokens só dentro do painel; a lógica não muda */
+  .container:has(#panel-tabela.active){max-width:min(1760px,100%);}
+  #panel-tabela{
+    color-scheme:dark;
+    --bg:#191b25; --surface:#262a38; --surface2:#333848; --card:#262a38; --border:#3a4054; --border-strong:#464d63;
+    --text:#eef1f8; --text-muted:#a9b1c6; --text-dim:#858da3; --accent:#ffc857; --accent2:#9fd0ff; --accent-light:rgba(255,200,87,.16);
+    --success:#6fe09a; --ok-soft:rgba(111,224,154,.13); --warning:#ffb648; --warn-soft:rgba(255,182,72,.13); --danger:#ff6b6b;
+    background:var(--bg); color:var(--text); padding:22px; margin-bottom:16px;
+  }
+  #panel-tabela .tb-cab{margin-bottom:14px;}
+  #panel-tabela .tb-cab h2{margin:0; font:700 clamp(24px,3vw,32px)/1.15 'Pixelify Sans','IBM Plex Mono',monospace; color:var(--text);}
+  #panel-tabela .tb-cab p{margin:4px 0 0; font-size:13.5px; color:var(--text-muted);}
+  #panel-tabela input,#panel-tabela select,#panel-tabela .dias-dropdown,#panel-tabela .btn-exportar,#panel-tabela .btn-backup,#panel-tabela .btn-hoje,#panel-tabela .btn-busca-ia,#panel-tabela .filtro-pc-btn,#panel-tabela .backup-wrap,#panel-tabela .dia-info,#panel-tabela .busca-hint,#panel-tabela .busca-loading,#panel-tabela .busca-ia-resultado,#panel-tabela .table-wrap,#panel-tabela .btn-pc,#panel-tabela .btn-edit-row,#panel-tabela .btn-del-row,#panel-tabela #btnConsultaMulta,#panel-tabela .empty-state{border-radius:0 !important;}
+  #panel-tabela input,#panel-tabela select,#panel-tabela .dias-dropdown{background:#10121a !important; color:var(--text) !important; border-color:var(--border-strong) !important;}
+  #panel-tabela .btn-exportar,#panel-tabela .btn-exportar.md,#panel-tabela .btn-backup,#panel-tabela .btn-backup.export,#panel-tabela .btn-backup.import,#panel-tabela .btn-hoje,#panel-tabela .filtro-pc-btn,#panel-tabela #btnConsultaMulta{background:var(--surface2) !important; color:var(--text) !important; border:0 !important;}
+  #panel-tabela .btn-exportar:hover,#panel-tabela .btn-backup:hover,#panel-tabela .btn-hoje:hover,#panel-tabela .filtro-pc-btn:hover,#panel-tabela #btnConsultaMulta:hover{outline:2px solid var(--border-strong);}
+  #panel-tabela .btn-exportar.danger{color:var(--danger) !important;}
+  #panel-tabela .btn-busca-ia{background:#ffc857; color:#2a2100;}
+  #panel-tabela .filtro-pc-btn.ativo,#panel-tabela .filtro-pc-btn.ativo.pendente,#panel-tabela .filtro-pc-btn.ativo.ok{background:#ffc857 !important; color:#2a2100 !important;}
+  #panel-tabela .backup-wrap,#panel-tabela .dia-info,#panel-tabela .busca-hint{background:var(--surface); border:0;}
+  #panel-tabela .dia-info{box-shadow:inset 3px 0 0 #ffc857;}
+  #panel-tabela .busca-hint strong{color:#ffc857;}
+  #panel-tabela .table-wrap{border:0; background:var(--surface);}
+  #panel-tabela table thead,#panel-tabela .table-wrap table thead th{background:var(--surface2);}
+  #panel-tabela th{color:var(--text-muted); letter-spacing:0; text-transform:none; font:600 12px var(--sans);}
+  #panel-tabela tr:hover td{background:rgba(255,200,87,.07) !important;}
+  #panel-tabela tr.pc-ok td{background:transparent !important;}
+  #panel-tabela tr.pc-pendente td{background:transparent !important;}
+  #panel-tabela .badge-pc-ok,#panel-tabela .badge-pc-pendente{border-radius:0;}
+  #panel-tabela .btn-pc{background:var(--surface2); border:0; color:var(--text);}
+  #panel-tabela .btn-pc:hover{background:#ffc857; color:#2a2100;}
+  #panel-tabela .btn-edit-row{background:transparent;}
+  #panel-tabela #tabelaWrap td,#panel-tabela #tabelaWrap th{white-space:nowrap; word-break:normal; overflow-wrap:normal; max-width:none; padding:9px 9px;}
+  #panel-tabela #tabelaWrap td:nth-child(2){white-space:normal; min-width:170px;}
+  #panel-tabela #tabelaWrap td:last-child{display:table-cell !important;}
+  #panel-tabela #tabelaWrap tfoot td{white-space:normal;}
+  #panel-tabela #tabelaWrap tbody td:nth-child(2){position:sticky; left:0; z-index:2; background:var(--surface) !important;}
+  #panel-tabela #tabelaWrap thead th:nth-child(2){position:sticky; left:0; z-index:11;}
+  #panel-tabela #tabelaWrap td:last-child > *{display:inline-block; margin-right:4px;}
+  body:has(#panel-tabela.active) #scrollFlutuante{--card:#262a38; --border:#464d63; --bg:#191b25; --accent:#ffc857;}
   /* 01/11/2026: resto da aba Equipe no visual do escritório aprovado. Só #equipe: a aba Processos usa a mesma base .eqx */
   #equipe.eqx{
     --x-bg:#191b25; --x-low:#20232f; --x-card:#262a38; --x-card2:#333848; --x-hi:#333848;
@@ -1705,7 +1745,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.16.1</span>
+    <span class="header-version">v1.17.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1910,6 +1950,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <!-- ABA TABELA                             -->
   <!-- ══════════════════════════════════════ -->
   <div class="tab-panel" id="panel-tabela">
+
+    <div class="tb-cab"><h2>Tabela de controle</h2><p>Todos os processos registrados, por dia ou por busca.</p></div>
 
     <div class="tabela-header">
       <div class="tabela-header-left">
