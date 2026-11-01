@@ -1451,6 +1451,57 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .eqx .eqe-gv dl div{display:flex; justify-content:space-between; gap:10px; font-size:12.5px;}
   .eqx .eqe-gv dt{color:var(--x-muted);}
   .eqx .eqe-gv dd{margin:0; font-weight:600; text-align:right;}
+  /* 01/11/2026: aba Relatórios no visual do escritório, com as Torres 3D */
+  .container:has(#panel-relatorio.active){max-width:min(1760px,100%);}
+  #panel-relatorio{
+    color-scheme:dark;
+    --bg:#10121a; --surface:#262a38; --surface2:#333848; --card:#262a38; --border:#3a4054; --border-strong:#464d63;
+    --text:#eef1f8; --text-muted:#a9b1c6; --text-dim:#a9b1c6; --accent:#ffc857; --accent2:#9fd0ff; --accent-light:rgba(255,200,87,.16);
+    --success:#6fe09a; --ok-soft:rgba(111,224,154,.13); --warning:#ffb648; --warn-soft:rgba(255,182,72,.13); --danger:#ff6b6b;
+    background:#191b25; color:var(--text); padding:16px 22px 22px; margin-bottom:16px;
+  }
+  #panel-relatorio .tb-cab{margin-bottom:10px;}
+  #panel-relatorio .tb-cab h2{margin:0; font:700 clamp(24px,3vw,32px)/1.15 'Pixelify Sans','IBM Plex Mono',monospace; color:var(--text);}
+  #panel-relatorio .tb-cab p{margin:4px 0 0; font-size:13.5px; color:var(--text-muted);}
+  #panel-relatorio .card{border:0; border-radius:0; box-shadow:none; padding:12px; margin-bottom:10px !important; background:var(--surface) !important;}
+  #panel-relatorio .card-title{color:var(--text); font:600 18px 'Pixelify Sans','IBM Plex Mono',monospace; letter-spacing:0; text-transform:none; margin-bottom:8px;}
+  #panel-relatorio .rel-filtros{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px;}
+  #panel-relatorio .rel-filtros .card-title{display:none;}
+  #panel-relatorio .rel-filtros .field-row{display:contents !important;}
+  #panel-relatorio .rel-filtros .field{margin:0;}
+  #panel-relatorio .rel-filtros .field label{color:var(--text-muted); font:500 12px var(--sans); letter-spacing:0; text-transform:none;}
+  #panel-relatorio .rel-filtros > div:last-child{grid-column:1 / -1; flex-wrap:wrap; margin-top:2px !important;}
+  #panel-relatorio input,#panel-relatorio select{background:#10121a !important; color:var(--text) !important; border:1px solid var(--border-strong) !important; border-radius:0 !important;}
+  #panel-relatorio button[id^="rel-btn"]{border:0 !important; border-radius:0 !important; background:var(--surface2) !important; color:var(--text) !important; padding:7px 12px !important; font-weight:500 !important;}
+  #panel-relatorio #rel-btn-aplicar{background:#ffc857 !important; color:#2a2100 !important; font-weight:600 !important;}
+  #panel-relatorio button[id^="rel-btn"]:hover{outline:2px solid var(--border-strong);}
+  #panel-relatorio #rel-cards{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important; gap:6px !important; margin-bottom:10px !important;}
+  #panel-relatorio .rel-card{border:0; border-radius:0; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  #panel-relatorio .rel-card::before{display:none;}
+  #panel-relatorio .rel-card-label{font:500 12px var(--sans); letter-spacing:0; text-transform:none; color:var(--text-muted);}
+  #panel-relatorio .rel-card-valor{font:600 18px var(--mono) !important; letter-spacing:0; margin:0; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right;}
+  #panel-relatorio .rel-tor-cab{display:flex; flex-wrap:wrap; gap:4px 12px; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  #panel-relatorio .rel-tor-cab h3{margin:0; font:600 18px 'Pixelify Sans','IBM Plex Mono',monospace; color:var(--text);}
+  #panel-relatorio .rel-tor-cab span{font-size:12px; color:var(--text-muted);}
+  #panel-relatorio .rel-tor-palco{position:relative; background:#0b0d14; overflow:hidden; aspect-ratio:1200/520; touch-action:pan-y;}
+  #rel-tor-cv{display:block; width:100%; height:100%; cursor:grab;}
+  #rel-tor-rot{position:absolute; inset:0; pointer-events:none;}
+  #panel-relatorio .rel-r3{position:absolute; left:0; top:0; display:grid; justify-items:center; white-space:nowrap; background:rgba(10,12,18,.8); padding:2px 8px; font-size:12px; will-change:transform;}
+  #panel-relatorio .rel-r3 b{font-weight:600;}
+  #panel-relatorio .rel-r3 small{color:var(--text-muted); font:11px var(--mono);}
+  #panel-relatorio .rel-tor-msg{position:absolute; inset:0; display:grid; place-items:center; color:var(--text-muted); padding:16px; text-align:center;}
+  #panel-relatorio .rel-tor-msg[hidden]{display:none;}
+  #panel-relatorio .rel-tor-bts{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:8px;}
+  #panel-relatorio .rel-tor-bt{border:0; background:var(--surface2); color:var(--text); padding:7px 10px; text-align:left; cursor:pointer; display:grid; gap:1px; font:12.5px var(--sans); min-width:0;}
+  #panel-relatorio .rel-tor-bt b{font:600 12.5px var(--mono); font-variant-numeric:tabular-nums;}
+  #panel-relatorio .rel-tor-bt.at b{color:var(--warning);} #panel-relatorio .rel-tor-bt.ok b{color:var(--success);}
+  #panel-relatorio .rel-tor-bt:hover{outline:2px solid var(--border-strong); outline-offset:-2px;}
+  #panel-relatorio .rel-tor-bt:focus-visible{outline:2px solid #ffc857; outline-offset:2px;}
+  #panel-relatorio .rel-tor-bt[aria-pressed="true"]{background:var(--text); color:#191b25;} #panel-relatorio .rel-tor-bt[aria-pressed="true"] b{color:#191b25;}
+  #panel-relatorio .rel-bar,#panel-relatorio .rel-bar-fill{border-radius:0;}
+  #panel-relatorio .rel-bar{background:#10121a;}
+  #panel-relatorio .rel-table th{letter-spacing:0; text-transform:none; font-size:12px;}
+  @media (max-width:800px){ #panel-relatorio{padding:14px;} #panel-relatorio .rel-tor-bts{grid-template-columns:repeat(2,minmax(0,1fr));} #panel-relatorio .rel-r3 small{display:none;} #panel-relatorio .rel-tor-palco{aspect-ratio:1/1;} }
   /* 01/11/2026: Tabela de Controle no visual da aba Equipe. Redefine os tokens só dentro do painel; a lógica não muda */
   .container:has(#panel-tabela.active){max-width:min(1760px,100%);}
   #panel-tabela{
@@ -1813,7 +1864,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.18.0</span>
+    <span class="header-version">v1.19.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2109,8 +2160,10 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <!-- ══════════════════════════════════════ -->
   <div class="tab-panel" id="panel-relatorio">
 
+    <div class="tb-cab"><h2>Relatórios</h2><p>Quanto foi gasto, para onde foi e onde o dinheiro está parado.</p></div>
+
     <!-- Filtros do relatório -->
-    <div class="card" style="margin-bottom:16px;">
+    <div class="card rel-filtros" style="margin-bottom:16px;">
       <div class="card-title">🔍 Filtros</div>
       <div class="field-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
         <div class="field">
@@ -2195,6 +2248,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
     <!-- Cards de resumo -->
     <div id="rel-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+
+    <!-- 01/11/2026: Torres 3D aprovadas na demonstração -->
+    <section class="card rel-tor" aria-labelledby="rel-tor-t">
+      <div class="rel-tor-cab"><h3 id="rel-tor-t">Caminho do dinheiro</h3><span id="rel-tor-nota">uma moeda é um processo · arraste para girar · clique em uma etapa para listar</span></div>
+      <div class="rel-tor-palco" id="rel-tor-palco"><canvas id="rel-tor-cv" role="img" aria-label="Torres de moedas em 3D com os processos em cada etapa"></canvas><div id="rel-tor-rot"></div><div class="rel-tor-msg" id="rel-tor-msg" hidden></div></div>
+      <div class="rel-tor-bts" id="rel-tor-bts"></div>
+    </section>
 
     <!-- Ranking servidores -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
@@ -9591,6 +9651,124 @@ function getProcessosFiltradosRelatorio() {
     return true;
   });
 }
+// 01/11/2026: Torres 3D da aba Relatórios. O three.js só é baixado ao abrir a aba.
+// A etapa vem do ponto mais avançado com registro: quem tem prestação concluída conta como concluído,
+// mesmo sem data de autorização (autorizadoEm só existe desde 02/10/2026).
+var relPar = null, relTor = null, relTorSig = null, relThree = false;
+var REL_PAR = { au: 'Aguardando autorização', pg: 'Aguardando pagamento', pc: 'Aguardando prestação', ok: 'Concluídos' };
+function relOnde(p) { return p.pcOk ? 'ok' : p.pago ? 'pc' : p.autorizadoEm ? 'pg' : 'au'; }
+function relMoeda(v) { return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function relResumo(l) {
+  var r = {}; ['au', 'pg', 'pc', 'ok'].forEach(function(k) { r[k] = { c: 0, v: 0 }; });
+  l.forEach(function(p) { var a = r[relOnde(p)]; a.c++; a.v += sgdValorNum(p.valor); });
+  var soma = function(ks) { return ks.reduce(function(x, k) { return { c: x.c + r[k].c, v: x.v + r[k].v }; }, { c: 0, v: 0 }); };
+  r.etapas = [['Registrado', soma(['au', 'pg', 'pc', 'ok'])], ['Autorizado', soma(['pg', 'pc', 'ok'])], ['Pago', soma(['pc', 'ok'])], ['Prestação concluída', r.ok]];
+  return r;
+}
+function relEstatico() { return _tktEco || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+function relTorParar() {
+  if (!relTor) return;
+  relTor.vivo = false;
+  try { relTor.rn.dispose(); relTor.rn.forceContextLoss(); } catch (e) {}
+  relTor = null;
+  var velho = document.getElementById('rel-tor-cv'), novo = velho.cloneNode(false);
+  velho.parentNode.replaceChild(novo, velho);
+}
+function relTorMsg(t) { var m = document.getElementById('rel-tor-msg'); m.hidden = !t; m.textContent = t || ''; }
+function relTorres(l) {
+  var r = relResumo(l), bts = document.getElementById('rel-tor-bts');
+  bts.innerHTML = ['au', 'pg', 'pc', 'ok'].map(function(k) {
+    return '<button type="button" class="rel-tor-bt ' + (k === 'ok' || !r[k].c ? 'ok' : 'at') + '" data-relpar="' + k + '" aria-pressed="' + (relPar === k) + '"><span>' + REL_PAR[k] + '</span><b>' + (k === 'ok' || !r[k].c ? '✓ ' : '◆ ') + r[k].c + ' · ' + relMoeda(r[k].v) + '</b></button>';
+  }).join('');
+  if (!document.getElementById('panel-relatorio').classList.contains('active')) return;
+  var sig = JSON.stringify([r.au, r.pg, r.pc, r.ok]);
+  if (sig === relTorSig && relTor) return;
+  relTorSig = sig; relTorParar();
+  document.getElementById('rel-tor-rot').innerHTML = '';
+  if (!l.length) { relTorMsg('Nenhum processo com esses filtros.'); return; }
+  if (window.THREE) { relTorMontar(r); return; }
+  relTorMsg('Carregando as torres…');
+  if (relThree) return;
+  relThree = true;
+  var sc = document.createElement('script');
+  sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  sc.onload = function() { relTorSig = null; renderRelatorio(); };
+  sc.onerror = function() { relThree = false; relTorMsg('Não consegui carregar o 3D. Os números estão nos botões abaixo.'); };
+  document.head.appendChild(sc);
+}
+function relTorMontar(r) {
+  var T = window.THREE, box = document.getElementById('rel-tor-palco'), cv = document.getElementById('rel-tor-cv'), rn;
+  try { rn = new T.WebGLRenderer({ canvas: cv, antialias: true }); } catch (e) { relTorMsg('Este computador não abriu o 3D. Os números estão nos botões abaixo.'); return; }
+  relTorMsg('');
+  var W = box.clientWidth, H = W * 520 / 1200;
+  rn.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75)); rn.setSize(W, H, false);
+  rn.setClearColor(0x0b0d14); rn.outputEncoding = T.sRGBEncoding; rn.shadowMap.enabled = true;
+  var sc = new T.Scene(); sc.fog = new T.Fog(0x0b0d14, 22, 46);
+  var cam = new T.PerspectiveCamera(34, W / H, .1, 100);
+  sc.add(new T.HemisphereLight(0xcfd8ff, 0x20140a, .75));
+  var dl = new T.DirectionalLight(0xfff0d0, 1.25); dl.position.set(6, 14, 9); dl.castShadow = true; dl.shadow.mapSize.set(1024, 1024);
+  dl.shadow.camera.left = -14; dl.shadow.camera.right = 14; dl.shadow.camera.top = 14; dl.shadow.camera.bottom = -14; sc.add(dl);
+  var pt = new T.PointLight(0xffc857, .9, 26); pt.position.set(-6, 6, 6); sc.add(pt);
+  var ch = new T.Mesh(new T.CircleGeometry(24, 64), new T.MeshStandardMaterial({ color: 0x010102, roughness: 1, metalness: 0 }));
+  ch.rotation.x = -Math.PI / 2; ch.receiveShadow = true; sc.add(ch);
+  var geo = new T.CylinderGeometry(.46, .46, .13, 28);
+  var ouro = new T.MeshStandardMaterial({ color: new T.Color(0xffc857).convertSRGBToLinear(), metalness: .75, roughness: .26 });
+  var ambar = new T.MeshStandardMaterial({ color: new T.Color(0xff9d3c).convertSRGBToLinear(), metalness: .45, roughness: .38, emissive: 0x552200, emissiveIntensity: .5 });
+  var mx = [-7.5, -2.5, 2.5, 7.5], cm = [-5, 0, 5], ko = ['au', 'pg', 'pc'], tot = Math.max(r.etapas[0][1].c, 1), esc = Math.max(1, Math.ceil(tot / 80));
+  var pilhas = [], rots = [], dum = new T.Object3D(), caixa = document.getElementById('rel-tor-rot'), html = '';
+  function pilha(n, x, z, mat, txt, sub, atraso) {
+    var q = Math.ceil(n / esc); if (!q) return;
+    var im = new T.InstancedMesh(geo, mat, q); im.castShadow = true; im.receiveShadow = true; im.frustumCulled = false; sc.add(im);
+    var li = [];
+    for (var i = 0; i < q; i++) { var col = i % 4, cam2 = Math.floor(i / 4), a = col * Math.PI / 2 + cam2 * .37, ra = q > 8 ? .5 : 0; li.push({ x: x + Math.cos(a) * ra, z: z + Math.sin(a) * ra, y: .08 + cam2 * .14, d: atraso + i * 1.6, r: Math.random() * .25 }); }
+    pilhas.push({ im: im, li: li });
+    rots.push({ x: x, z: z, y: .1 + Math.ceil(q / 4) * .14 + .7 });
+    html += '<span class="rel-r3"><b>' + txt + '</b><small>' + sub + '</small></span>';
+  }
+  r.etapas.forEach(function(e, i) { pilha(e[1].c, mx[i], 0, ouro, e[0], e[1].c + ' · ' + relMoeda(e[1].v), i * 30); });
+  ko.forEach(function(k, i) { if (r[k].c) pilha(r[k].c, cm[i], 3.6, ambar, '◆ ' + r[k].c + ' parados', relMoeda(r[k].v), i * 30 + 15); });
+  caixa.innerHTML = html;
+  var nota = document.getElementById('rel-tor-nota');
+  nota.textContent = (esc > 1 ? '1 moeda = ' + esc + ' processos' : 'uma moeda é um processo') + ' · arraste para girar · clique em uma etapa para listar';
+  var est = { vivo: true, rn: rn, vis: true }, rs = caixa.querySelectorAll('.rel-r3'), tt = 0, ang = 0, arr = false, lx = 0, v = new T.Vector3(), ult = performance.now(), pintouFinal = false;
+  relTor = est;
+  cv.addEventListener('pointerdown', function(e) { arr = true; lx = e.clientX; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; pintouFinal = false; });
+  cv.addEventListener('pointermove', function(e) { if (arr) { ang += (e.clientX - lx) * .008; lx = e.clientX; pintouFinal = false; } });
+  cv.addEventListener('pointerup', function() { arr = false; cv.style.cursor = 'grab'; });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function(e) { est.vis = e[0].isIntersecting; }).observe(cv);
+  function quadro(fim) {
+    var w = box.clientWidth;
+    if (w && w !== W) { W = w; H = W * 520 / 1200; rn.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); pintouFinal = false; }
+    var a = -.2 + ang + (fim ? 0 : Math.sin(tt * .003) * .2);
+    cam.position.set(Math.sin(a) * 21, 10.5, Math.cos(a) * 21); cam.lookAt(0, 1.6, 1);
+    pilhas.forEach(function(p) {
+      p.li.forEach(function(c, i) {
+        var u = fim ? 1 : Math.min(1, Math.max(0, (tt - c.d) / 26)), q = u >= 1 ? 1 : 1 - Math.pow(1 - u, 3);
+        dum.position.set(c.x, c.y + (1 - q) * (9 + c.r * 8), c.z); dum.rotation.set(0, i * .6 + (1 - q) * 4, (1 - q) * 1.2); dum.updateMatrix(); p.im.setMatrixAt(i, dum.matrix);
+      });
+      p.im.instanceMatrix.needsUpdate = true;
+    });
+    rn.render(sc, cam);
+    var cw = cv.clientWidth, chh = cv.clientHeight;
+    rots.forEach(function(o, i) { v.set(o.x, o.y, o.z).project(cam); rs[i].style.transform = 'translate(-50%,-100%) translate(' + ((v.x + 1) / 2 * cw).toFixed(1) + 'px,' + ((1 - v.y) / 2 * chh).toFixed(1) + 'px)'; });
+  }
+  (function laco(t) {
+    if (!est.vivo) return;
+    requestAnimationFrame(laco);
+    t = t || performance.now();
+    var k = Math.min(4, Math.max(.2, (t - ult) / 16.67)); ult = t;
+    if (document.hidden || !est.vis || !document.getElementById('panel-relatorio').classList.contains('active')) return;
+    if (relEstatico()) { if (!pintouFinal) { quadro(true); pintouFinal = true; } return; }
+    pintouFinal = false; tt += k; quadro(false);
+  })();
+}
+document.addEventListener('click', function(e) {
+  var b = e.target.closest && e.target.closest('[data-relpar]');
+  if (!b) return;
+  relPar = relPar === b.dataset.relpar ? null : b.dataset.relpar;
+  renderRelatorio();
+  var t = document.getElementById('rel-count'); if (t && relPar) t.scrollIntoView({ block: 'nearest' });
+});
 function renderRelatorio() {
   var servs = {}, cids = {};
   processos.forEach(function(p){
@@ -9649,7 +9827,9 @@ function renderRelatorio() {
         +'<div class="rel-bar-label"><span>'+c+'</span><span>'+d.viagens+kmStr+'</span></div>'
         +'<div class="rel-bar"><div class="rel-bar-fill" style="width:'+(d.viagens/maxC*100)+'%"></div></div></div>';
     }).join('') || '<p style="color:var(--text-muted)">Nenhum dado.</p>';
-  document.getElementById('rel-count').textContent = filtrados.length+' processo'+(filtrados.length!==1?'s':'')+' encontrado'+(filtrados.length!==1?'s':'');
+  relTorres(filtrados);
+  var relLista = relPar ? filtrados.filter(function(p){ return relOnde(p) === relPar; }) : filtrados;
+  document.getElementById('rel-count').textContent = (relPar ? relLista.length+' em '+REL_PAR[relPar].toLowerCase()+' · ' : '')+filtrados.length+' processo'+(filtrados.length!==1?'s':'')+' encontrado'+(filtrados.length!==1?'s':'');
   if (!filtrados.length) {
     document.getElementById('rel-tabela').innerHTML = '<div class="empty-state"><div class="icon">&#128269;</div><p>Nenhum processo encontrado.</p></div>';
     return;
@@ -9681,7 +9861,7 @@ function renderRelatorio() {
       '<div class="rel-card"><div class="rel-card-label">🛡️ Último backup</div>'
       +'<div class="rel-card-valor" style="font-size:15px;line-height:1.3;color:#16a34a;">'+dataB+'<br><span style="font-size:13px;color:var(--text-muted);">'+horaB+'</span></div></div>';
   }
-  var rows = filtrados.map(function(p,i){
+  var rows = relLista.map(function(p,i){
     var pc = p.pcOk ? '&#9989;' : '&#9203;';
     var statusPago, dataPag;
     if (p.pago) {
