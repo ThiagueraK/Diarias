@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap">
 <style>
+[hidden], .veu[hidden], .login-overlay[hidden], .hud-toast[hidden] { display: none !important; }
+
 /* ══════════════════════════════════════════════════════════════════════════
    DESIGN SYSTEM LUXO / CYBER TACTICAL (PRESTIGE UI + ACETERNITY + 21ST.DEV)
    ══════════════════════════════════════════════════════════════════════════ */
@@ -2338,6 +2340,8 @@ body {
   color: #34d399;
 }
 .login-overlay {
+  z-index: 99999 !important;
+
   position: fixed;
   inset: 0;
   background: rgba(3, 7, 5, 0.94);
@@ -3085,6 +3089,8 @@ body {
     </div>
   </nav>
 
+</div>
+
   <!-- MODAL DE CONFERÊNCIA DE PROCESSO -->
   <div class="veu" id="veuProc" hidden>
     <div class="folha" role="dialog" aria-label="Conferir processo">
@@ -3112,26 +3118,28 @@ body {
 
   <!-- MODAL LOGIN -->
   <div class="login-overlay" id="login" hidden>
-    <form class="login-card" id="formLogin">
+    <form class="login-card" id="formLogin" onsubmit="return fazerLogin(event)">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10b981,#047857);display:grid;place-items:center;font:800 13px var(--font-hud);color:#fff;">SGD</div>
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#10b981,#047857);display:grid;place-items:center;font:800 14px var(--font-hud);color:#fff;box-shadow:0 0 15px rgba(16,185,129,0.3);">SGD</div>
         <div>
-          <h2 style="font:800 18px var(--font-hud);margin:0;color:#fff;">Equipe SGD</h2>
-          <span style="font:500 11px var(--font-mono);color:#94a3b8;">Entre com o usuário e senha do SGD.</span>
+          <h2 style="font:800 18px var(--font-hud);margin:0;color:#fff;">Conectar ao SGD</h2>
+          <span style="font:500 11.5px var(--font-mono);color:#94a3b8;">Entre com seu usuário e senha do SGD</span>
         </div>
       </div>
-      <label for="lgU" style="position:absolute;left:-9999px">Usuário</label>
-      <input id="lgU" autocomplete="username" placeholder="Usuário">
-      <label for="lgS" style="position:absolute;left:-9999px">Senha</label>
-      <input id="lgS" type="password" autocomplete="current-password" placeholder="Senha">
-      <div class="err" id="lgErr"></div>
-      <button type="submit" id="lgBt">Entrar</button>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <label for="lgU" style="font:700 11px var(--font-hud);color:#94a3b8;">USUÁRIO</label>
+        <input id="lgU" autocomplete="username" placeholder="Digite seu usuário..." style="background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:12px;padding:12px 14px;font:14px var(--font-body);outline:none;">
+        <label for="lgS" style="font:700 11px var(--font-hud);color:#94a3b8;">SENHA</label>
+        <input id="lgS" type="password" autocomplete="current-password" placeholder="Digite sua senha..." style="background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:12px;padding:12px 14px;font:14px var(--font-body);outline:none;">
+      </div>
+      <div class="err" id="lgErr" style="color:#f87171;font:600 12px var(--font-mono);min-height:18px;"></div>
+      <button type="button" id="lgBt" onclick="fazerLogin(event)" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:12px;padding:14px;font:700 14px var(--font-hud);cursor:pointer;letter-spacing:0.05em;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span>Conectar Agora</span>
+      </button>
     </form>
   </div>
 
   <div class="hud-toast" id="toast" hidden></div>
-
-</div>
 
 <script>
 (function(){
@@ -3179,14 +3187,61 @@ function api(acao,opts){
   return fetch(W+'?action='+acao,{method:opts.body?'POST':'GET',headers:h,body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store'})
     .then(function(r){if(r.status===401){mostrarLogin('Sessão expirada. Entre de novo.');throw new Error('não autenticado');}return r.json();});
 }
-function mostrarLogin(msg){$('#login').hidden=false;$('#lgErr').textContent=msg||'';}
-$('#formLogin').addEventListener('submit',function(e){
-  e.preventDefault(); var u=$('#lgU').value.trim(), s=$('#lgS').value; if(!u||!s){$('#lgErr').textContent='Preencha usuário e senha.';return;}
-  $('#lgBt').disabled=true; $('#lgBt').textContent='Entrando…';
-  fetch(W+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:u,senha:s})}).then(function(r){return r.json();})
-   .then(function(d){if(d.ok&&d.token){try{localStorage.setItem(TK,d.token);}catch(e){}$('#login').hidden=true;tudo();}else $('#lgErr').textContent=d.error||'Usuário ou senha inválidos.';})
-   .catch(function(){$('#lgErr').textContent='Sem conexão. Tente de novo.';})
-   .finally(function(){$('#lgBt').disabled=false;$('#lgBt').textContent='Entrar';});
+function mostrarLogin(msg){
+  var el=$('#login');
+  if(!el)return;
+  el.hidden=false;
+  el.style.display='grid';
+  var err=$('#lgErr'); if(err)err.textContent=msg||'';
+  setTimeout(function(){var u=$('#lgU');if(u)u.focus();},120);
+}
+function esconderLogin(){
+  var el=$('#login');
+  if(!el)return;
+  el.hidden=true;
+  el.style.display='none';
+  var err=$('#lgErr'); if(err)err.textContent='';
+}
+function fazerLogin(e){
+  if(e&&e.preventDefault)e.preventDefault();
+  var u=($('#lgU')&&$('#lgU').value||'').trim(), s=$('#lgS')&&$('#lgS').value||'';
+  if(!u||!s){
+    var err=$('#lgErr'); if(err)err.textContent='Preencha o usuário e a senha.';
+    return false;
+  }
+  var btn=$('#lgBt');
+  if(btn){btn.disabled=true;btn.textContent='Conectando ao SGD…';}
+  var err=$('#lgErr'); if(err)err.textContent='';
+  fetch(W+'?action=login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({usuario:u,senha:s})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d&&d.ok&&d.token){
+      try{localStorage.setItem(TK,d.token);}catch(e){}
+      esconderLogin();
+      toast('✓ Conectado ao SGD!');
+      tudo();
+    } else {
+      var err=$('#lgErr'); if(err)err.textContent=(d&&d.error)||'Usuário ou senha inválidos.';
+    }
+  })
+  .catch(function(){
+    var err=$('#lgErr'); if(err)err.textContent='Sem conexão. Verifique sua internet.';
+  })
+  .finally(function(){
+    if(btn){btn.disabled=false;btn.textContent='Conectar Agora';}
+  });
+  return false;
+}
+window.fazerLogin = fazerLogin;
+var fLogin=$('#formLogin'); if(fLogin)fLogin.addEventListener('submit',fazerLogin);
+var bLogin=$('#lgBt'); if(bLogin)bLogin.addEventListener('click',fazerLogin);
+['#lgU','#lgS'].forEach(function(sel){
+  var el=$(sel);
+  if(el){el.addEventListener('keydown',function(ev){if(ev.key==='Enter')fazerLogin(ev);});}
 });
 
 function carregarCp(){return api('cp-acompanhamento').then(function(j){if(j&&j.ok){S.cp=j;S.em.cp=Date.now();amostraRitmo();desenharCp();}}).catch(function(){});}
