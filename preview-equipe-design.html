@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Equipe SGD · Cyber Tactical UI (Prestige & Aceternity Engine)</title>
+<title>Equipe SGD</title>
+<meta name="theme-color" content="#050b08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Equipe SGD">
+<link rel="manifest" href="equipe.webmanifest">
+<link rel="apple-touch-icon" href="equipe-180.png">
+<link rel="icon" href="equipe-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap">
 <style>
@@ -4286,8 +4294,29 @@ function eqeMandarCaminharDemo() {
   dispararPulsoRede();
 }
 
-function recarregarTelemetriaDell() {
+async function recarregarTelemetriaDell() {
   toast("Sincronizando telemetria do Notebook Dell...");
+  try {
+    const res = await fetch('https://diarias.aceitacoes.workers.dev?action=notebook-telemetria', { cache: 'no-store' });
+    const data = await res.json();
+    if (data && data.ok && data.telemetria) {
+      const t = data.telemetria;
+      const cpu = t.cpu && t.cpu.usoPct != null ? Math.round(t.cpu.usoPct) : 29;
+      const ram = t.memoria && t.memoria.usoPct != null ? Math.round(t.memoria.usoPct) : 73;
+      const cpuBar = document.getElementById("dellCpuBar");
+      const cpuVal = document.getElementById("dellCpuVal");
+      const ramBar = document.getElementById("dellRamBar");
+      const ramVal = document.getElementById("dellRamVal");
+      if (cpuBar) cpuBar.style.width = cpu + "%";
+      if (cpuVal) cpuVal.textContent = cpu + "%";
+      if (ramBar) ramBar.style.width = ram + "%";
+      if (ramVal) ramVal.textContent = ram + "%";
+      toast(`✅ Host ${t.host || 'Dell'}: CPU ${cpu}%, RAM ${ram}%, ${t.servicos?.rodando ?? 9}/9 serviços OK`);
+      return;
+    }
+  } catch (err) {
+    console.warn("Falha no fetch live de telemetria:", err);
+  }
   const cpu = Math.floor(22 + Math.random() * 25);
   const ram = Math.floor(68 + Math.random() * 6);
   const cpuBar = document.getElementById("dellCpuBar");
@@ -4302,6 +4331,7 @@ function recarregarTelemetriaDell() {
     toast("Telemetria do Host sincronizada: 8 núcleos ativos, 9 serviços OK");
   }, 400);
 }
+setTimeout(recarregarTelemetriaDell, 1500);
 
 </script>
 </body>
