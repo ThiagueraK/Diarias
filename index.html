@@ -1864,7 +1864,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.19.0</span>
+    <span class="header-version">v1.20.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2455,6 +2455,22 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         </div>
         <ol class="cpa-trilha" id="cpa-trilha"></ol>
         <div class="cpa-barra"><i id="cpa-barra"></i></div>
+      </div>
+
+      <!-- GUNDAM STAGE RUNNER: ESQUADRÃO RX-78-2 PELAS 4 ETAPAS DO CP -->
+      <div class="ce-panel ce-cut cpa-palco-painel" style="margin-bottom:12px;">
+        <div class="ce-panel-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div class="ce-panel-title" style="display:flex;align-items:center;gap:8px;">
+            <span>🤖 Esquadrão Gundam RX-78-2 · Validação das 4 Etapas do CP</span>
+          </div>
+          <div style="font-size:12px;color:var(--ce-muted);display:flex;gap:12px;align-items:center;">
+            <span>1. Empenho → 2. Liquidação → 3. Doc. Viagens → 4. 1Doc</span>
+            <button type="button" class="ce-chip" id="cpa-gundam-boost" style="background:rgba(255,200,87,0.15);color:#ffc857;border-color:rgba(255,200,87,0.4);cursor:pointer;" title="Ativar propulsores hiper-sônicos do esquadrão">🚀 Boost Esquadrão</button>
+          </div>
+        </div>
+        <div class="cpa-canvas-wrap" style="position:relative;background:#080a12;border:1px solid rgba(255,255,255,0.08);aspect-ratio:1200/540;overflow:hidden;width:100%;">
+          <canvas id="cpa-cv2d" style="display:block;width:100%;height:100%;"></canvas>
+        </div>
       </div>
 
       <div class="cpa-grid">
@@ -6427,6 +6443,237 @@ function cpaMarcos(r, d) {
     if (atual.loteEtapa !== a.loteEtapa && atual.loteEtapa === 'fim-erro') cpaAvisar('Lote do CP parou. Veja o próximo passo no SGD.');
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GUNDAM STAGE RUNNER: ESQUADRÃO RX-78-2 (VALIDAÇÃO DAS 4 ETAPAS DO CP)
+// ═══════════════════════════════════════════════════════════════════════════════
+var cpaGundamLaco = null;
+var cpaGundamSel = 0;
+var cpaGundamBoost = 0;
+var cpaGundamTT = 0;
+var imgRx78Squad = new Image();
+imgRx78Squad.src = 'assets/gundam/rx78_squad_mini.png';
+
+var CPA_DEFAULT_SQUAD = [
+  {proc:'5410/2026',srv:'CARLOS EDUARDO',valFmt:'R$ 581,52',est:'feito',q:3},
+  {proc:'5412/2026',srv:'ROBERTO ALMEIDA',valFmt:'R$ 180,55',est:'feito',q:3},
+  {proc:'5415/2026',srv:'JOÃO PAULO',valFmt:'R$ 230,27',est:'feito',q:3},
+  {proc:'5419/2026',srv:'MARCOS VINÍCIUS',valFmt:'R$ 180,55',est:'feito',q:3},
+  {proc:'5421/2026',srv:'WANDERLEI COSTA',valFmt:'R$ 491,25',est:'feito',q:3},
+  {proc:'5424/2026',srv:'LUCIANO MENDES',valFmt:'R$ 581,52',est:'ativo',q:2},
+  {proc:'5428/2026',srv:'PAULO CÉSAR',valFmt:'R$ 180,55',est:'ativo',q:1},
+  {proc:'5430/2026',srv:'FERNANDO LIMA',valFmt:'R$ 230,27',est:'pend',q:0}
+];
+
+function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
+  g.fillStyle = '#080a12';
+  g.fillRect(0, 0, W, H);
+
+  var GX = [220, 490, 760, 1030];
+  var NOMES = ['1. EMPENHO', '2. LIQUIDAÇÃO', '3. DOC. VIAGENS', '4. ANEXO 1DOC'];
+
+  // 4 Gate columns
+  GX.forEach(function(gx, gi) {
+    var ehFim = (gi === 3);
+    g.fillStyle = ehFim ? 'rgba(111,224,154,0.06)' : 'rgba(255,200,87,0.04)';
+    g.fillRect(gx - 70, 42, 140, 490);
+    g.strokeStyle = ehFim ? 'rgba(111,224,154,0.45)' : 'rgba(70,77,99,0.7)';
+    g.lineWidth = 1.5;
+    g.strokeRect(gx - 70, 42, 140, 490);
+
+    g.fillStyle = ehFim ? '#6fe09a' : '#ffc857';
+    g.font = '700 12.5px "Chakra Petch", monospace';
+    g.textAlign = 'center';
+    g.fillText(NOMES[gi], gx, 64);
+    g.fillStyle = '#a9b1c6';
+    g.font = '600 11px monospace';
+    g.fillText((contadores[gi] || 0) + ' / ' + procs.length + ' processos', gx, 80);
+  });
+
+  // Process Lanes with Gundam RX-78 Mobile Suits
+  procs.forEach(function(p, i) {
+    var y = 118 + i * 52;
+    var sel = (i === selIdx);
+    var ehFeito = (p.est === 'feito');
+    var giProc = ehFeito ? 3 : Math.min(3, p.q);
+
+    // Left card
+    g.fillStyle = sel ? '#28324a' : '#141826';
+    g.fillRect(20, y - 18, 140, 36);
+    g.strokeStyle = sel ? '#ffc857' : '#323c54';
+    g.strokeRect(20, y - 18, 140, 36);
+
+    g.fillStyle = '#ffffff';
+    g.font = '700 11px monospace';
+    g.textAlign = 'left';
+    g.fillText(p.proc, 28, y - 2);
+    g.fillStyle = '#a9b1c6';
+    g.font = '10px monospace';
+    g.fillText((p.srv || '—').slice(0, 10), 28, y + 11);
+
+    // Catapult track line
+    g.strokeStyle = '#22283a';
+    g.lineWidth = 3;
+    g.beginPath(); g.moveTo(165, y); g.lineTo(1090, y); g.stroke();
+
+    var gxTarget = GX[giProc];
+    var rx = 180 + (gxTarget - 180) * 0.95;
+    var bobX = (p.est === 'ativo' ? Math.sin(tt * 0.18 + i * 0.8) * 6 : 0);
+    var bobY = Math.sin(tt * 0.25 + i * 1.2) * 1.5;
+
+    if (cpaGundamBoost > 0) {
+      bobX += Math.sin(tt * 0.6) * 10;
+    }
+
+    // Glowing beam line
+    g.strokeStyle = p.est === 'feito' ? '#6fe09a' : p.est === 'comVoce' ? '#ff6b6b' : '#ffc857';
+    g.lineWidth = 3;
+    g.beginPath(); g.moveTo(165, y); g.lineTo(rx + bobX, y); g.stroke();
+
+    // Pulse traveling on line
+    var dist = Math.max(30, (rx + bobX) - 165);
+    var px = 165 + ((tt * 4.5 + i * 40) % dist);
+    g.fillStyle = '#ffffff';
+    g.fillRect(px - 10, y - 2, 20, 4);
+
+    var posX = rx + bobX;
+    var posY = y + bobY;
+
+    // Thruster exhaust flame (cyan core + orange glow)
+    if (p.est !== 'comVoce') {
+      g.fillStyle = '#ff9f43';
+      g.beginPath();
+      g.moveTo(posX - 18, posY - 4);
+      g.lineTo(posX - 30 - Math.sin(tt * 0.4 + i) * 6, posY);
+      g.lineTo(posX - 18, posY + 4);
+      g.closePath();
+      g.fill();
+
+      g.fillStyle = '#00d2d3';
+      g.beginPath();
+      g.moveTo(posX - 18, posY - 2);
+      g.lineTo(posX - 25 - Math.sin(tt * 0.5 + i) * 4, posY);
+      g.lineTo(posX - 18, posY + 2);
+      g.closePath();
+      g.fill();
+    } else {
+      g.fillStyle = 'rgba(255, 107, 107, 0.25)';
+      g.beginPath();
+      g.arc(posX, posY, 22, 0, 6.28);
+      g.fill();
+    }
+
+    // DRAW THE REAL RX-78-2 GUNDAM SPRITE!
+    if (imgRx78Squad.complete && imgRx78Squad.naturalWidth > 0) {
+      g.drawImage(imgRx78Squad, posX - 20, posY - 24, 46, 46);
+    } else {
+      // Clean fallback if image is still loading
+      g.fillStyle = sel ? '#ffffff' : '#ffc857';
+      g.fillRect(posX - 10, posY - 12, 20, 24);
+    }
+
+    // Selection Lock-On Reticle Corners
+    if (sel) {
+      g.strokeStyle = '#ffc857';
+      g.lineWidth = 1.5;
+      var sz = 24;
+      g.strokeRect(posX - sz/2, posY - sz/2, sz, sz);
+    }
+
+    // Status label at right
+    g.fillStyle = p.est === 'feito' ? '#6fe09a' : p.est === 'comVoce' ? '#ff6b6b' : '#ffc857';
+    g.font = '700 10px monospace';
+    g.textAlign = 'left';
+    g.fillText(p.est === 'feito' ? '1DOC CLEAR ✓' : p.est === 'comVoce' ? 'HOLD !' : 'ETAPA ' + (giProc + 1), 1105, y + 4);
+  });
+}
+
+function cpaRenderGundam(r, d) {
+  var cv = document.getElementById('cpa-cv2d');
+  if (!cv || !cpaAtiva()) return;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 1200, H = 540;
+  if (cv.width !== W * dpr || cv.height !== H * dpr) {
+    cv.width = W * dpr; cv.height = H * dpr;
+  }
+  var g = cv.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Extract squad processes from live data
+  var l = r.lote;
+  var itens = l ? (l.itens || []) : [];
+  var procs = [];
+
+  if (itens.length > 0) {
+    procs = itens.slice(0, 8).map(function(it) {
+      var ps = cpaPills(it, l);
+      var q = 0;
+      if (it.concluido) q = 3;
+      else if (ps[2][0] === 'ok') q = 3;
+      else if (ps[1][0] === 'ok') q = 2;
+      else if (ps[0][0] === 'ok') q = 1;
+
+      var est = it.concluido ? 'feito' :
+                (it.erro && /viagem/i.test(it.janelas + ' ' + it.erro)) ? 'comVoce' :
+                (it.erro) ? 'comVoce' :
+                (l.ativo && l.processo === it.processo) ? 'ativo' :
+                it.empenho ? 'feito' : 'pend';
+
+      return {
+        proc: it.processo || '—',
+        srv: it.servidor || '—',
+        valFmt: it.empenho ? 'Emp. ' + it.empenho : 'Na fila',
+        est: est,
+        q: q
+      };
+    });
+  } else {
+    procs = CPA_DEFAULT_SQUAD;
+  }
+
+  // Count gate completions
+  var contadores = [0, 0, 0, 0];
+  procs.forEach(function(p) {
+    if (p.q >= 0 && (p.est === 'feito' || p.q > 0)) contadores[0]++;
+    if (p.q >= 1 && (p.est === 'feito' || p.q > 1)) contadores[1]++;
+    if (p.q >= 2 && (p.est === 'feito' || p.q > 2)) contadores[2]++;
+    if (p.q >= 3 && p.est === 'feito') contadores[3]++;
+  });
+
+  // Start animation loop if not running
+  if (!cpaGundamLaco) {
+    var boostBt = document.getElementById('cpa-gundam-boost');
+    if (boostBt && !boostBt.dataset.wired) {
+      boostBt.dataset.wired = '1';
+      boostBt.addEventListener('click', function() {
+        cpaGundamBoost = 45;
+        if (typeof toastAlerta === 'function') toastAlerta('🚀 Boost acionado no Esquadrão Gundam!');
+      });
+    }
+
+    cv.onclick = function() {
+      cpaGundamBoost = 45;
+      if (typeof toastAlerta === 'function') toastAlerta('🚀 Boost acionado no Esquadrão Gundam!');
+    };
+
+    var ultT = performance.now();
+    function loopGundam(t) {
+      if (!cpaAtiva()) {
+        cpaGundamLaco = null;
+        return;
+      }
+      cpaGundamLaco = requestAnimationFrame(loopGundam);
+      var k = Math.min(4, Math.max(0.2, (t - ultT) / 16.67));
+      ultT = t;
+      cpaGundamTT += k;
+      if (cpaGundamBoost > 0) cpaGundamBoost -= k;
+
+      drawGundamSquadLive(g, procs, contadores, cpaGundamTT, cpaGundamSel, W, H);
+    }
+    cpaGundamLaco = requestAnimationFrame(loopGundam);
+  }
+}
+
 function cpaRender() {
   if (!cpaDados) return;
   var d = cpaDados, r = cpaRodada(d), passos = cpaPassos(r, d);
@@ -6434,6 +6681,7 @@ function cpaRender() {
   cpaRenderControle(r, d);
   cpaRenderTiles(r, d);
   cpaRenderTrilha(r, d, passos);
+  cpaRenderGundam(r, d);
   cpaRenderProcs(r);
   cpaRenderFoto(r);
   cpaRenderOcorr(r, d);
