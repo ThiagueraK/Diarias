@@ -1864,7 +1864,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.20.0</span>
+    <span class="header-version">v1.20.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -1923,7 +1923,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="x-pr" id="eq-palco">
         <div class="x-cena">
           <div class="eqe-w"><div class="eqe-cn" id="eq-cn"><canvas id="eq-cv" role="img" aria-label="Escritório animado com os nove agentes"></canvas></div></div>
-          <p class="eqe-nota">Recado novo aparece com borda laranja. Sem novidade, eles repetem recados reais das últimas 24 h. Clique em um agente para ver os detalhes. Arte: <a href="https://github.com/W17ant/Claude-Office" target="_blank" rel="noopener">Claude Office</a> (MIT).</p>
+          <p class="eqe-nota">Recado novo aparece com borda laranja. Ao abrir a aba, os recados das últimas 24 h passam uma vez, com o horário. Depois, só caminham com recado novo. Clique em um agente para ver os detalhes. Arte: <a href="https://github.com/W17ant/Claude-Office" target="_blank" rel="noopener">Claude Office</a> (MIT).</p>
         </div>
         <div class="x-la">
           <section class="x-painel" id="eq-gaveta" hidden aria-label="Detalhes do agente"></section>
@@ -4744,12 +4744,12 @@ window.eqDispararOrdem = function(texto) {
 var eqModoVisao = localStorage.getItem('eq_visao_escritorio') || 'escritorio';
 
 // 01/11/2026: escritório animado da aba Equipe. Cada recado real do fluxo vira uma caminhada até a mesa do colega.
-// Sem novidade, repete recados reais recentes; nenhum texto é inventado. Só desenha com a aba aberta e visível.
+// Ao abrir, cada recado das últimas 24 h passa uma só vez, com a hora no balão (repetir parecia loop dos bots); nenhum texto é inventado. Só desenha com a aba aberta e visível.
 var EQE_POS = { coordenador: [.12, .24], pesquisador: [.12, .52], programador: [.12, .8], vigia: [.42, .24], conferente: [.42, .52], auditor: [.42, .8], relatorios_cp: [.72, .24], operador_cp: [.72, .52], cacador: [.72, .8] };
 var EQE_SPRITE = { coordenador: 'Me-1', relatorios_cp: 'employee-3', operador_cp: 'Frontend-dev-1', vigia: 'employee-1', conferente: 'employee-2', auditor: 'security-audit-1', pesquisador: 'explore-1', programador: 'dev-1', cacador: 'dev-2' };
 var EQE_VA = [.1, .4, .68, .93], EQE_UA = [.27, .57, .87], EQE_RESP = ['Certo!', 'Pode deixar', 'Recebido', 'Vou ver', 'Obrigado'];
 var EQE_MAX_CONVERSAS = 3;
-var eqe = { img: {}, ag: {}, t: 0, ult: 0, pronto: false, carregando: false, fila: [], recentes: [], vistos: null, ativas: 0, espera: 0, vis: true, loop: false, porBot: {}, agora: 0, gaveta: null };
+var eqe = { img: {}, ag: {}, t: 0, ult: 0, pronto: false, carregando: false, fila: [], recentes: [], vistos: null, ativas: 0, espera: 0, vis: true, loop: false, porBot: {}, agora: 0, gaveta: null, passaram: {} };
 function eqeIso(u, v) { return [37 + u * 523 + v * 663, 616 - u * 289 + v * 309]; }
 function eqeUv(p) { var dx = p[0] - 37, dy = p[1] - 616, d = 353214; return [(309 * dx - 663 * dy) / d, (289 * dx + 523 * dy) / d]; }
 function eqePerto(l, x) { return l.reduce(function(m, v) { return Math.abs(v - x) < Math.abs(m - x) ? v : m; }); }
@@ -4821,8 +4821,12 @@ function eqeProxima() {
   var i, e = null;
   for (i = 0; i < eqe.fila.length; i++) if (eqeLivre(eqe.fila[i].de) && eqeLivre(eqe.fila[i].para)) { e = eqe.fila.splice(i, 1)[0]; break; }
   if (!e && !eqe.fila.length && eqe.recentes.length) {
-    var c = eqe.recentes[Math.floor(Math.random() * eqe.recentes.length)];
-    if (eqeLivre(c.de) && eqeLivre(c.para)) { e = c; eqe.espera = 12 + Math.random() * 30; }
+    var c = eqe.recentes[0];
+    if (eqeLivre(c.de) && eqeLivre(c.para)) {
+      eqe.passaram[c.chave] = 1; eqe.recentes.shift();
+      e = { de: c.de, para: c.para, txt: ceTempoRelativo(c.q) + ': ' + c.txt };
+      eqe.espera = 12 + Math.random() * 30;
+    }
   }
   if (e) eqeConversar(e);
 }
@@ -4839,7 +4843,7 @@ function eqeConversar(e) {
     a.fala = e.txt;
     setTimeout(function() {
       a.fala = null;
-      b.fala = /^(Resolvida|Conclu)/.test(e.txt) ? 'Obrigado' : EQE_RESP[Math.floor(Math.random() * EQE_RESP.length)];
+      b.fala = /(Resolvida|Conclu)/.test(e.txt) ? 'Obrigado' : EQE_RESP[Math.floor(Math.random() * EQE_RESP.length)];
       setTimeout(function() {
         b.fala = null; b.pose = 'trab'; b.visita = null; a.conv = null; eqe.ativas--;
         eqeAndar(e.de, eqeLugar(e.de), function() { a.pose = 'trab'; });
@@ -4925,10 +4929,10 @@ function eqeAtualizar(porBot, evs, agora) {
   validos.forEach(function(e) {
     var c = e.q + '|' + e.de + '|' + e.para;
     chaves[c] = 1;
-    if (eqe.vistos && !eqe.vistos[c] && agora - (e.q || 0) < 600000 && eqeAtivo() && !eqeEco() && eqe.fila.length < 12) eqe.fila.push({ de: e.de, para: e.para, txt: e.txt, vivo: true });
+    if (eqe.vistos && !eqe.vistos[c] && agora - (e.q || 0) < 600000 && eqeAtivo() && !eqeEco() && eqe.fila.length < 12) { eqe.passaram[c] = 1; eqe.fila.push({ de: e.de, para: e.para, txt: e.txt, vivo: true }); }
   });
   eqe.vistos = chaves;
-  eqe.recentes = validos.filter(function(e) { return agora - (e.q || 0) < 86400000; }).slice(0, 40);
+  eqe.recentes = validos.filter(function(e) { return agora - (e.q || 0) < 86400000 && !eqe.passaram[e.q + '|' + e.de + '|' + e.para]; }).slice(0, 40).reverse().map(function(e) { return { de: e.de, para: e.para, txt: e.txt, q: e.q, chave: e.q + '|' + e.de + '|' + e.para }; });
   if (eqe.pronto) eqeRotulos();
   if (eqe.gaveta) eqeAbrirGaveta(eqe.gaveta, true);
 }
