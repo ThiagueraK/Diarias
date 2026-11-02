@@ -2272,8 +2272,288 @@ body {
   color: #34d399;
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ESTILOS COMPLEMENTARES CYBER TACTICAL (MODAIS, ANEXOS, STATUS)
+   ══════════════════════════════════════════════════════════════════════════ */
+.funil {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+.etapa-f {
+  display: grid;
+  grid-template-columns: 120px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+}
+.etapa-f .bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.etapa-f .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--c, #10b981);
+}
+.etapa-f b {
+  font: 700 13px var(--font-hud);
+  color: #fff;
+  text-align: right;
+}
+.cyber-attention-item {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all var(--dur-fast);
+}
+.cyber-attention-item.r-medio { border-left: 3px solid #f59e0b; }
+.cyber-attention-item.r-alto { border-left: 3px solid #ef4444; }
+.cyber-attention-item.r-baixo { border-left: 3px solid #38bdf8; }
+.btn-att {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font: 700 11px var(--font-hud);
+  cursor: pointer;
+}
+.btn-att.sim {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  color: #34d399;
+}
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 5, 0.94);
+  backdrop-filter: blur(20px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(10, 22, 17, 0.95);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(16, 185, 129, 0.15);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.login-card input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: 14px var(--font-body);
+  outline: none;
+}
+.login-card input:focus { border-color: #34d399; }
+.login-card button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font: 700 13px var(--font-hud);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.login-card .err {
+  color: #f87171;
+  font: 600 12px var(--font-mono);
+  min-height: 18px;
+}
+.veu {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+.folha {
+  background: rgba(10, 24, 18, 0.98);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-bottom: none;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 28px 28px 0 0;
+  padding: 14px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 -20px 50px rgba(0,0,0,0.85);
+}
+.folha h3 {
+  font: 800 18px var(--font-hud);
+  color: #fff;
+  margin: 0;
+}
+.campos-p {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font: 13px var(--font-mono);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.campos-p span { color: #94a3b8; }
+.campos-p b { color: #f8fafc; font-weight: 600; }
+.folha textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px;
+  font: 13px/1.4 var(--font-mono);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  resize: vertical;
+}
+.folha textarea:focus { border-color: #34d399; outline: none; }
+.cp-txt {
+  font: 12px/1.45 var(--font-mono);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #38bdf8;
+  word-break: break-word;
+}
+.abrir1doc, .abrirAx {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  font: 700 12px var(--font-hud);
+  cursor: pointer;
+  text-decoration: none;
+}
+.abrir1doc:hover, .abrirAx:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #34d399;
+  color: #34d399;
+}
+.botoes {
+  display: flex;
+  gap: 10px;
+}
+.botoes button {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: 700 12px var(--font-hud);
+  cursor: pointer;
+}
+.botoes button.sim {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #34d399;
+  color: #fff;
+}
+.botoes button.perigo {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border-color: #f87171;
+  color: #fff;
+}
+.botoes button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.hud-toast {
+  position: fixed;
+  bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 24, 18, 0.95);
+  border: 1px solid #34d399;
+  color: #eafaf2;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font: 600 12px var(--font-hud);
+  z-index: 999;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 20px rgba(52,211,153,0.3);
+  white-space: nowrap;
+}
+/* Visualizador de Anexos VX */
+.vx { position: fixed; inset: 0; z-index: 9999; background: #05080d; color: #fff; display: flex; flex-direction: column; touch-action: none; }
+.vx-top { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top, 0px) + 8px) 10px 8px; background: rgba(5,8,13,0.9); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.vx-top b { flex: 1; font: 700 14px var(--font-hud); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vx-top small { opacity: 0.7; font: 12px var(--font-mono); }
+.vx-b { min-width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; font: 700 14px var(--font-hud); cursor: pointer; }
+.vx-palco { flex: 1; position: relative; overflow: hidden; }
+.vx-palco img { position: absolute; left: 0; top: 0; max-width: none; user-select: none; }
+.vx-sk { position: absolute; inset: 18% 12%; border-radius: 16px; background: linear-gradient(90deg,#141b26 0%,#243041 45%,#141b26 90%); background-size: 200% 100%; animation: vxShim 1.1s linear infinite; }
+.vx-msg { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; padding: 24px; text-align: center; font-size: 14px; color: #c9d2de; }
+.vx-pdf { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 26px; border-radius: 18px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #fff; text-decoration: none; font-weight: 600; }
+.vx-baixo { padding: 8px 12px calc(env(safe-area-inset-bottom, 0px) + 10px); background: rgba(5,8,13,0.9); display: grid; gap: 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+.vx-dots { display: flex; justify-content: center; gap: 6px; }
+.vx-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: width .25s, background .25s; }
+.vx-dots i.on { width: 20px; border-radius: 5px; background: #34d399; }
+.vx-nome { font: 12px var(--font-mono); opacity: 0.85; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vx-mot { font: 12.5px var(--font-mono); color: #fbbf24; background: rgba(245,158,11,0.12); border-radius: 10px; padding: 8px 10px; }
+.vx-ok { min-height: 44px; border-radius: 12px; border: 0; background: linear-gradient(135deg,#10b981,#059669); color: #fff; font: 700 14px var(--font-hud); cursor: pointer; }
+/* Passo Pedir */
+.passo2 { display: flex; flex-direction: column; gap: 12px; }
+.aviso-cp { font: 12px/1.4 var(--font-mono); color: #94a3b8; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); }
+.opcoes { display: grid; gap: 8px; }
+.opcao { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #fff; text-align: left; cursor: pointer; }
+.opcao:disabled { opacity: 0.4; cursor: not-allowed; }
+.opcao .em { font-size: 22px; }
+.opcao b { display: block; font: 700 13px var(--font-hud); }
+.opcao span span { display: block; font: 11px var(--font-mono); color: #94a3b8; margin-top: 2px; }
+.confirma { font: 13px var(--font-body); color: #fff; background: rgba(239,68,68,0.15); border: 1px solid #ef4444; border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+.feito { color: #34d399; font: 700 13px var(--font-hud); padding: 8px 12px; border-radius: 8px; background: rgba(16,185,129,0.15); border: 1px solid #10b981; }
+.erro-box { color: #f87171; font: 600 12px var(--font-mono); padding: 10px 12px; border-radius: 8px; background: rgba(239,68,68,0.15); border: 1px solid #ef4444; }
+.proc { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; }
+.proc .t1 { display: flex; justify-content: space-between; align-items: center; font: 700 12px var(--font-hud); }
+.proc .mot { font: 11px var(--font-mono); color: #fbbf24; }
+.proc .mot.az { color: #38bdf8; }
+.proc .mot.vm { color: #f87171; }
+.st-p { font: 700 9.5px var(--font-mono); padding: 2px 6px; border-radius: 4px; }
+.st-p.pronto { background: rgba(16,185,129,0.2); color: #34d399; }
+.st-p.fora { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.st-p.conferindo { background: rgba(56,189,248,0.2); color: #38bdf8; }
+.bot-filter-chip { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; border-radius: 999px; padding: 4px 10px; font: 600 11px var(--font-mono); cursor: pointer; }
+.bot-filter-chip.active { background: rgba(52,211,153,0.2); border-color: #34d399; color: #34d399; }
+.av { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font: 800 11px var(--font-hud); color: #fff; flex-shrink: 0; }
 </style>
 </head>
+
 <body>
 
 <!-- CANVAS DE FUNDO: METEOROS & STARDUST VIVOS -->
@@ -2291,16 +2571,14 @@ body {
         </div>
         <div class="brand-title">
           EQUIPE SGD
-          <small>SALA DE CONTROLE AUTÔNOMA</small>
+          <small id="fresco">CARREGANDO DADOS…</small>
         </div>
       </div>
       <div class="header-radar-chip">
-        <div class="radar-pulse"></div>
-        <span>VIGIA 100%</span>
+        <div class="radar-pulse" id="dotFresco"></div>
+        <span id="estadoGeral">● CONECTANDO</span>
       </div>
     </div>
-
-    
   </header>
 
   <!-- CONTEÚDO PRINCIPAL INTERATIVO -->
@@ -2318,14 +2596,13 @@ body {
           <div class="cockpit-user-meta">
             <div class="cockpit-avatar" title="Coordenação Geral">TK</div>
             <div class="cockpit-greeting">
-              <div class="cockpit-greeting-title">
+              <div class="cockpit-greeting-title" id="ola">
                 Olá, Thiago
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               </div>
-              <div class="cockpit-greeting-sub">SALA DE SITUAÇÃO · SISTEMA SGD</div>
+              <div class="cockpit-greeting-sub" id="hojeTxt">SALA DE SITUAÇÃO · SISTEMA SGD</div>
             </div>
           </div>
-          <div class="cockpit-status-badge">
+          <div class="cockpit-status-badge" id="cockpitStatusBadge">
             <div class="cockpit-badge-nominal">
               <span class="cockpit-badge-dot"></span>
               FROTA NOMINAL
@@ -2336,34 +2613,34 @@ body {
 
         <!-- Mini Funnel Operacional: O Fluxo das Diárias em Tempo Real -->
         <div class="pipeline-flow-deck">
-          <div class="flow-stage-box" onclick="toast('17 diárias na caixa de entrada 1Doc aguardando conferência')" title="Processos recebidos no 1Doc">
+          <div class="flow-stage-box" onclick="abrirAbaLoteDemo()" title="Processos na caixa 1Doc">
             <span class="flow-stage-tag">1Doc SGD</span>
-            <span class="flow-stage-val" id="funnel1DocVal">17</span>
-            <span class="flow-stage-sub">Triagem</span>
+            <span class="flow-stage-val" id="funnel1DocVal">0</span>
+            <span class="flow-stage-sub">Na caixa</span>
           </div>
 
           <div class="flow-chevron-sep">➔</div>
 
-          <div class="flow-stage-box active-stage" onclick="abrirAbaLoteDemo()" title="8 diárias prontas para envio ao CP - Clique para ver">
+          <div class="flow-stage-box active-stage" onclick="abrirAbaLoteDemo()" title="Diárias prontas para envio ao CP - Clique para ver">
             <span class="flow-stage-tag">Lote Ativo</span>
-            <span class="flow-stage-val" id="funnelLoteVal">8</span>
-            <span class="flow-stage-sub">R$ 7.240</span>
+            <span class="flow-stage-val" id="funnelLoteVal">0</span>
+            <span class="flow-stage-sub" id="funnelLoteSub">Prontos</span>
           </div>
 
           <div class="flow-chevron-sep">➔</div>
 
-          <div class="flow-stage-box" onclick="toast('18 empenhos emitidos com sucesso hoje pelo Operador CP')" title="Empenhos emitidos hoje">
+          <div class="flow-stage-box" onclick="toast('Empenhos emitidos hoje pelo Operador CP')" title="Empenhos emitidos hoje">
             <span class="flow-stage-tag">Empenhos</span>
-            <span class="flow-stage-val" id="funnelEmpenhosVal">18</span>
-            <span class="flow-stage-sub">R$ 14.850</span>
+            <span class="flow-stage-val" id="funnelEmpenhosVal">0</span>
+            <span class="flow-stage-sub" id="funnelEmpenhosSub">Hoje</span>
           </div>
 
           <div class="flow-chevron-sep">➔</div>
 
-          <div class="flow-stage-box" onclick="toast('26 diárias conciliadas e com ordem de pagamento concluída')" title="Diárias pagas e conciliadas">
+          <div class="flow-stage-box" onclick="toast('Diárias pagas e conciliadas no banco')" title="Diárias pagas e conciliadas">
             <span class="flow-stage-tag">Pagos</span>
-            <span class="flow-stage-val" id="funnelPagosVal">26</span>
-            <span class="flow-stage-sub">100% OK</span>
+            <span class="flow-stage-val" id="funnelPagosVal">0</span>
+            <span class="flow-stage-sub" id="funnelPagosSub">Hoje</span>
           </div>
         </div>
 
@@ -2371,7 +2648,7 @@ body {
         <div class="cockpit-quick-actions">
           <button class="quick-pill-btn pill-gold" onclick="abrirAbaLoteDemo()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Ver Lote (8 Diárias)
+            Ver Lote / Processos
           </button>
           <button class="quick-pill-btn pill-cyan" onclick="abrirAbaDellDemo()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -2399,19 +2676,18 @@ body {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
             CATAPULTA GUNDAM RX-78 · LOTE ATIVO
           </div>
-          <span style="font:600 11px var(--font-hud);color:#34d399;" id="gundamProcLabel">PROC 5410/2026</span>
+          <span style="font:600 11px var(--font-hud);color:#34d399;" id="gundamProcLabel">CATAPULTA EM STANDBY</span>
         </div>
 
         <div class="gundam-track-wrap">
           <div class="mag-rail"></div>
-          <div class="gates-grid">
-            <div class="gate-col done"><span>1. EMPENHO</span><span>✓ OK</span></div>
-            <div class="gate-col done"><span>2. LIQUIDAÇÃO</span><span>✓ OK</span></div>
-            <div class="gate-col done"><span>3. DOC VIAGEM</span><span>✓ OK</span></div>
-            <div class="gate-col"><span>4. 1DOC</span><span>⏳ RUN</span></div>
+          <div class="gates-grid" id="gundamGatesGrid">
+            <div class="gate-col" id="gate0"><span>1. EMPENHO</span><span>⏳ CP</span></div>
+            <div class="gate-col" id="gate1"><span>2. LIQUIDAÇÃO</span><span>⏳ CP</span></div>
+            <div class="gate-col" id="gate2"><span>3. DOC VIAGEM</span><span>⏳ 1DOC</span></div>
+            <div class="gate-col" id="gate3"><span>4. 1DOC</span><span>⏳ RUN</span></div>
           </div>
 
-          <!-- Unidade Gundam Avançando -->
           <div class="gundam-runner-unit" id="gundamUnit">
             <div class="plasma-thrust"></div>
             <img class="gundam-sprite" src="assets/gundam/rx78_squad_mini.png" alt="Gundam RX-78">
@@ -2419,368 +2695,72 @@ body {
         </div>
       </section>
 
-      <!-- 3. BENTO GRID DE LUXO (PRESTIGE UI STYLE) -->
+      <!-- 3. BENTO GRID DE LUXO -->
       <section class="bento-grid">
         <div class="bento-card wide">
           <div class="bento-k">Prestações de Contas no CP Hoje</div>
-          <div class="bento-v" id="numPrestacoes">42</div>
-          <div class="bento-sub">Fila do SGD: 3 zerando · 100% conciliadas com sucesso</div>
+          <div class="bento-v" id="numPrestacoes">0</div>
+          <div class="bento-sub" id="numPrestacoesSub">Fila do SGD</div>
         </div>
         <div class="bento-card">
           <div class="bento-k">Empenhos Emitidos</div>
-          <div class="bento-v" id="numEmpenhos">18</div>
-          <div class="bento-sub" id="numValEmpenhos">R$ 14.850,00</div>
+          <div class="bento-v" id="numEmpenhos">0</div>
+          <div class="bento-sub" id="numValEmpenhos">R$ 0,00</div>
         </div>
         <div class="bento-card">
           <div class="bento-k">Pagamentos CP</div>
-          <div class="bento-v" id="numPagamentos">26</div>
-          <div class="bento-sub">Relatório auditado</div>
+          <div class="bento-v" id="numPagamentos">0</div>
+          <div class="bento-sub" id="numPagamentosSub">Relatório auditado</div>
         </div>
       </section>
 
-      <!-- 4. CARD CRÍTICO COM BORDA VIVA DE NEON -->
-      <section class="cyber-attention-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:32px;height:32px;border-radius:10px;background:#f59e0b;display:grid;place-items:center;font:800 12px var(--font-hud);color:#000;">CO</div>
-            <div>
-              <b style="display:block;font-size:14px;letter-spacing:-0.01em;">2 diárias aguardando aprovação</b>
-              <span style="font-size:12px;color:#94a3b8;">Conferente detectou valor acima da média</span>
-            </div>
-          </div>
-          <span style="font:700 10px var(--font-mono);background:rgba(245,158,11,0.2);color:#f59e0b;padding:3px 8px;border-radius:6px;">DECISÃO</span>
-        </div>
+      <!-- 4. BOTÃO PEDIR AO CP -->
+      <button class="btn-shimmer-cyber" id="btPedir" style="margin-bottom:12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>PEDIR AO CP (RELATÓRIOS / PRESTAR CONTAS / EMPENHAR)</span>
+      </button>
 
-        <button class="btn-shimmer-cyber" onclick="avancarGundam()">
-          <span>APROVAR E LANÇAR NO LOTE DO CP</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </section>
-
+      <!-- 5. SEÇÃO PRECISA DE VOCÊ -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;">
+        <span style="font:700 11.5px var(--font-hud);color:#34d399;letter-spacing:0.06em;">PRECISA DE VOCÊ</span>
+        <span id="contPrecisa" style="font:700 11px var(--font-mono);color:#fbbf24;"></span>
+      </div>
+      <div id="precisa" style="display:grid;gap:10px;">
+        <div style="padding:14px;text-align:center;color:#34d399;font:600 12.5px var(--font-mono);">Conectando e verificando pendências…</div>
+      </div>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════
          VIEW 1: ABA LOTE / PROCESSOS (CYBER TACTICAL & PRESTIGE UI)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-lote" hidden>
-
       <!-- FUNIL DE VALIDAÇÃO DO LOTE COM BARRAS DE ENERGIA -->
-      <section class="lote-funil-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font:700 12px var(--font-hud);color:#34d399;letter-spacing:0.06em;">
-            FLUXO DO LOTE · CAIXA DO SGD
-          </span>
-          <span style="font:600 11px var(--font-mono);color:#94a3b8;" id="loteTotalBadge">14 PROCESSOS</span>
-        </div>
-        <div class="funil-bars">
-          <div class="funil-segment prontos" id="barProntos" style="width:58%;"></div>
-          <div class="funil-segment robo" id="barRobo" style="width:22%;"></div>
-          <div class="funil-segment pendentes" id="barPendentes" style="width:20%;"></div>
-        </div>
-        <div class="funil-legend">
-          <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span> 8 Prontos</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> 3 No Robô CP</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span> 3 Pendentes 1Doc</div>
-        </div>
-      </section>
+      <section class="funil" id="funil" style="margin-bottom:12px;"></section>
 
-      <!-- BOTÃO DE DISPARO RÁPIDO DO LOTE COMPLETO -->
-      <button class="btn-shimmer-cyber" onclick="dispararLoteCompleto()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>DISPARAR LOTE PRONTO (8 PROCESSOS) PRO CP</span>
-      </button>
+      <!-- PROBLEMAS A RESOLVER -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
+        <span style="font:700 11px var(--font-hud);color:#fbbf24;letter-spacing:0.06em;">PROBLEMAS A RESOLVER</span>
+        <span id="contProb" style="font:700 11px var(--font-mono);color:#fbbf24;"></span>
+      </div>
+      <div id="problemas" style="display:grid;gap:8px;margin-bottom:12px;"></div>
 
       <!-- FILTROS TÁTICOS -->
-      <div class="lote-filters">
-        <button class="lote-filter-btn active" onclick="filtrarProcessos('todos', this)">Todos <span>14</span></button>
-        <button class="lote-filter-btn" onclick="filtrarProcessos('prontos', this)">✓ Prontos <span>8</span></button>
-        <button class="lote-filter-btn" onclick="filtrarProcessos('robo', this)">⚡ No Robô <span>3</span></button>
-        <button class="lote-filter-btn" onclick="filtrarProcessos('atencao', this)">! Pendentes <span>3</span></button>
-      </div>
+      <div class="lote-filters" id="filtrosProc" style="margin-bottom:10px;"></div>
 
       <!-- BUSCA RÁPIDA -->
-      <div class="lote-search-box">
+      <div class="lote-search-box" style="margin-bottom:12px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="lote-search-input" id="buscaProc" placeholder="Buscar processo, servidor ou trajeto…" oninput="buscarProcessos(this.value)">
+        <input class="lote-search-input" id="busca" placeholder="Buscar por servidor, processo ou cidade…">
       </div>
 
-      <!-- LISTA DE PROCESSOS: CARDS MODERNOS COM SPOTLIGHT, BORDER BEAM E GUNDAM SQUAD MOTIF -->
-      <div class="proc-list-grid" id="listaProcGrid" style="display:flex;flex-direction:column;gap:12px;">
-        
-        <!-- CARD 1: EM EXECUÇÃO NO ROBÔ CP COM MAGIC UI BORDER BEAM -->
-        <article class="proc-modern-card ativo-robo" data-tipo="robo" onclick="abrirModalProc('5412/2026', 'ROBERTO ALMEIDA SANTOS', 'Santa Maria → Passo Fundo', 'R$ 180,55', 'robo')">
-          <div class="proc-squad-header">
-            <span class="proc-squad-tag">
-              <span class="squad-dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
-              UNIT-01 · SQUADRON ALPHA · ROBÔ ATIVO
-            </span>
-            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5412/2026', this)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-          </div>
-
-          <div class="proc-top-row">
-            <div class="proc-id-wrap">
-              <span class="proc-id-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                5412/2026
-              </span>
-              <span class="proc-val-pill">R$ 180,55</span>
-            </div>
-            <span class="proc-status-badge robo"><span class="status-pulse-dot"></span> ⚡ NO ROBÔ CP</span>
-          </div>
-
-          <div class="proc-mid-row">
-            <div class="proc-hex-avatar" style="background:linear-gradient(135deg,#0369a1,#0284c7);">RA</div>
-            <div class="proc-meta-info">
-              <h4 class="proc-srv-title">ROBERTO ALMEIDA SANTOS</h4>
-              <div class="proc-srv-route">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
-                <span>Santa Maria → Passo Fundo</span>
-              </div>
-              <div class="proc-bento-tags">
-                <span class="proc-bento-pill destaque">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                  VTR OFICIAL · IJC-8812
-                </span>
-                <span class="proc-bento-pill">⏱️ 1 diária</span>
-                <span class="proc-bento-pill">📎 2 notas fiscais</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- PIPELINE STEPPER CIRUIT (MAGIC UI) -->
-          <div class="proc-pipeline-circuit">
-            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:68%;"></div></div>
-            <div class="pipeline-node done">
-              <div class="node-disc">✓</div>
-              <span class="node-title">Empenho</span>
-            </div>
-            <div class="pipeline-node done">
-              <div class="node-disc">✓</div>
-              <span class="node-title">Liquidação</span>
-            </div>
-            <div class="pipeline-node active">
-              <div class="node-disc">3</div>
-              <span class="node-title">Doc. Viagem</span>
-            </div>
-            <div class="pipeline-node">
-              <div class="node-disc">4</div>
-              <span class="node-title">1Doc</span>
-            </div>
-          </div>
-
-          <!-- AÇÕES DO CARD -->
-          <div class="proc-card-actions">
-            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5412/2026', 'ROBERTO ALMEIDA SANTOS', 'Santa Maria → Passo Fundo', 'R$ 180,55', 'robo')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>Ver Comprovantes</span>
-            </button>
-            <button class="proc-btn-liberar" style="border-color:#38bdf8;color:#38bdf8;" onclick="event.stopPropagation();avancarGundam()">
-              <span>⚡ No Robô CP</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- CARD 2: PRONTO P/ CP COM SPOTLIGHT & ACETERNITY ACCENTS -->
-        <article class="proc-modern-card" data-tipo="prontos" onclick="abrirModalProc('5410/2026', 'CARLOS EDUARDO SILVA', 'Porto Alegre → Pelotas', 'R$ 581,52', 'pronto')">
-          <div class="proc-squad-header">
-            <span class="proc-squad-tag">
-              <span class="squad-dot"></span>
-              UNIT-02 · SQUADRON ALPHA · CATAPULT READY
-            </span>
-            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5410/2026', this)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-          </div>
-
-          <div class="proc-top-row">
-            <div class="proc-id-wrap">
-              <span class="proc-id-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                5410/2026
-              </span>
-              <span class="proc-val-pill">R$ 581,52</span>
-            </div>
-            <span class="proc-status-badge pronto"><span class="status-pulse-dot"></span> ✓ PRONTO P/ CP</span>
-          </div>
-
-          <div class="proc-mid-row">
-            <div class="proc-hex-avatar">CE</div>
-            <div class="proc-meta-info">
-              <h4 class="proc-srv-title">CARLOS EDUARDO SILVA</h4>
-              <div class="proc-srv-route">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
-                <span>Porto Alegre → Pelotas</span>
-              </div>
-              <div class="proc-bento-tags">
-                <span class="proc-bento-pill destaque">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                  VTR POLICIAL · JKH-4491
-                </span>
-                <span class="proc-bento-pill">⏱️ 2 diárias</span>
-                <span class="proc-bento-pill">📎 3 anexos conferidos</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- PIPELINE STEPPER COMPLETO -->
-          <div class="proc-pipeline-circuit">
-            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:100%;"></div></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Liquidação</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Doc. Viagem</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">1Doc</span></div>
-          </div>
-
-          <!-- AÇÕES DO CARD -->
-          <div class="proc-card-actions">
-            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5410/2026', 'CARLOS EDUARDO SILVA', 'Porto Alegre → Pelotas', 'R$ 581,52', 'pronto')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>Ver Comprovantes</span>
-            </button>
-            <button class="proc-btn-liberar" onclick="event.stopPropagation();dispararCatapultaCard(this.closest('.proc-modern-card'))">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span>✓ Liberar no CP</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- CARD 3: PENDÊNCIA COM PULSO ÂMBAR DE ATENÇÃO -->
-        <article class="proc-modern-card" data-tipo="atencao" onclick="abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
-          <div class="proc-squad-header">
-            <span class="proc-squad-tag" style="color:#fbbf24;">
-              <span class="squad-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></span>
-              UNIT-03 · SQUADRON BETA · PENDÊNCIA 1DOC
-            </span>
-            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5415/2026', this)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-          </div>
-
-          <div class="proc-top-row">
-            <div class="proc-id-wrap">
-              <span class="proc-id-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                5415/2026
-              </span>
-              <span class="proc-val-pill" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(245,158,11,0.12);">R$ 230,27</span>
-            </div>
-            <span class="proc-status-badge atencao"><span class="status-pulse-dot"></span> ! CONFERIR NOTA</span>
-          </div>
-
-          <div class="proc-mid-row">
-            <div class="proc-hex-avatar" style="background:linear-gradient(135deg,#b45309,#d97706);border-color:#f59e0b;">JP</div>
-            <div class="proc-meta-info">
-              <h4 class="proc-srv-title">JOÃO PAULO MORAES</h4>
-              <div class="proc-srv-route">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
-                <span>Caxias do Sul → Bento Gonçalves</span>
-              </div>
-              <div class="proc-bento-tags">
-                <span class="proc-bento-pill" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-                  ⚠️ Cupom fiscal sem CNPJ
-                </span>
-                <span class="proc-bento-pill">⏱️ 1 diária</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- PIPELINE STEPPER INCOMPLETO -->
-          <div class="proc-pipeline-circuit">
-            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:25%;"></div></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
-            <div class="pipeline-node"><div class="node-disc">2</div><span class="node-title">Liquidação</span></div>
-            <div class="pipeline-node"><div class="node-disc">3</div><span class="node-title">Doc. Viagem</span></div>
-            <div class="pipeline-node" style="color:#fbbf24;"><div class="node-disc" style="border-color:#fbbf24;color:#fbbf24;">!</div><span class="node-title" style="color:#fbbf24;">1Doc</span></div>
-          </div>
-
-          <!-- AÇÕES DO CARD -->
-          <div class="proc-card-actions">
-            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>Conferir Nota 1Doc</span>
-            </button>
-            <button class="proc-btn-liberar" style="border-color:#fbbf24;color:#fbbf24;" onclick="event.stopPropagation();abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
-              <span>! Resolver Pendência</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- CARD 4: PRONTO P/ CP -->
-        <article class="proc-modern-card" data-tipo="prontos" onclick="abrirModalProc('5419/2026', 'MARCOS VINÍCIUS LIMA', 'Alegrete → Uruguaiana', 'R$ 360,80', 'pronto')">
-          <div class="proc-squad-header">
-            <span class="proc-squad-tag">
-              <span class="squad-dot"></span>
-              UNIT-04 · SQUADRON BETA · CATAPULT READY
-            </span>
-            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5419/2026', this)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-          </div>
-
-          <div class="proc-top-row">
-            <div class="proc-id-wrap">
-              <span class="proc-id-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                5419/2026
-              </span>
-              <span class="proc-val-pill">R$ 360,80</span>
-            </div>
-            <span class="proc-status-badge pronto"><span class="status-pulse-dot"></span> ✓ PRONTO P/ CP</span>
-          </div>
-
-          <div class="proc-mid-row">
-            <div class="proc-hex-avatar">MV</div>
-            <div class="proc-meta-info">
-              <h4 class="proc-srv-title">MARCOS VINÍCIUS LIMA</h4>
-              <div class="proc-srv-route">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
-                <span>Alegrete → Uruguaiana</span>
-              </div>
-              <div class="proc-bento-tags">
-                <span class="proc-bento-pill destaque">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                  VTR POLICIAL · JKH-1029
-                </span>
-                <span class="proc-bento-pill">⏱️ 1.5 diárias</span>
-                <span class="proc-bento-pill">📎 4 fotos anexas</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="proc-pipeline-circuit">
-            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:100%;"></div></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Liquidação</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Doc. Viagem</span></div>
-            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">1Doc</span></div>
-          </div>
-
-          <div class="proc-card-actions">
-            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5419/2026', 'MARCOS VINÍCIUS LIMA', 'Alegrete → Uruguaiana', 'R$ 360,80', 'pronto')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>Ver Comprovantes</span>
-            </button>
-            <button class="proc-btn-liberar" onclick="event.stopPropagation();dispararCatapultaCard(this.closest('.proc-modern-card'))">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              <span>✓ Liberar no CP</span>
-            </button>
-          </div>
-        </article>
-
-      </div>
+      <!-- LISTA DE PROCESSOS -->
+      <div class="proc-list-grid" id="listaProc"></div>
     </div>
-
-    
-
 
     <!-- ══════════════════════════════════════════════════════════════════════
          VIEW 2: ABA TELEMETRIA DELL (UNIT-00 HOST HARDWARE COCKPIT)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-dell" hidden>
-
-      <!-- HARDWARE HOST DELL TELEMETRY CARD (UNIT-00) -->
       <section class="dell-telemetry-cockpit" id="dellCockpitCard">
         <div class="dell-cockpit-header">
           <div class="dell-title-wrap">
@@ -2791,10 +2771,10 @@ body {
               <div style="display:flex;align-items:center;gap:6px;">
                 <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
                 <span style="font:800 12px var(--font-hud);letter-spacing:0.06em;color:#f8fafc;">UNIT-00 · NOTEBOOK DELL HOST</span>
-                <span class="dell-online-pill">ONLINE</span>
+                <span class="dell-online-pill" id="dellOnlinePill">ONLINE</span>
               </div>
-              <div style="font:500 11px var(--font-mono);color:#94a3b8;margin-top:2px;">
-                DESKTOP-MIQJ3OB · Intel Core i7-7700HQ (8T) · Uptime: 18.0 dias
+              <div style="font:500 11px var(--font-mono);color:#94a3b8;margin-top:2px;" id="dellHostTitle">
+                DESKTOP-MIQJ3OB · Intel Core i7-7700HQ (8T) · Sincronizando…
               </div>
             </div>
           </div>
@@ -2809,13 +2789,13 @@ body {
           <div class="dell-gauge-card">
             <div class="dell-gauge-header">
               <span class="dell-gauge-name">Uso de CPU</span>
-              <span class="dell-gauge-val" id="dellCpuVal" style="color:#38bdf8;">30%</span>
+              <span class="dell-gauge-val" id="dellCpuVal" style="color:#38bdf8;">--%</span>
             </div>
             <div class="dell-progress-track">
-              <div class="dell-progress-bar" id="dellCpuBar" style="width:30%;background:linear-gradient(90deg,#06b6d4,#38bdf8);"></div>
+              <div class="dell-progress-bar" id="dellCpuBar" style="width:0%;background:linear-gradient(90deg,#06b6d4,#38bdf8);"></div>
             </div>
             <div class="dell-gauge-meta">
-              <span>8 Cores @ 2.80GHz</span>
+              <span id="dellCpuMeta">8 Cores @ 2.80GHz</span>
               <span>Temp Nominal</span>
             </div>
           </div>
@@ -2823,14 +2803,14 @@ body {
           <div class="dell-gauge-card">
             <div class="dell-gauge-header">
               <span class="dell-gauge-name">Memória RAM</span>
-              <span class="dell-gauge-val" id="dellRamVal" style="color:#fbbf24;">70%</span>
+              <span class="dell-gauge-val" id="dellRamVal" style="color:#fbbf24;">--%</span>
             </div>
             <div class="dell-progress-track">
-              <div class="dell-progress-bar" id="dellRamBar" style="width:70%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
+              <div class="dell-progress-bar" id="dellRamBar" style="width:0%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
             </div>
             <div class="dell-gauge-meta">
-              <span id="dellRamGb">11.4 / 16.0 GB</span>
-              <span>4.8 GB Livre</span>
+              <span id="dellRamGb">-- / -- GB</span>
+              <span id="dellRamSub">RAM do Sistema</span>
             </div>
           </div>
         </div>
@@ -2838,10 +2818,10 @@ body {
         <!-- 9 SERVIÇOS VITAIS WINDOWS -->
         <div class="dell-services-section">
           <div class="dell-section-label">
-            <span>SERVIÇOS VITAIS NO HOST (9/9 ATIVOS)</span>
-            <span style="color:#34d399;font-weight:700;">ALL SYSTEMS GO</span>
+            <span>SERVIÇOS VITAIS NO HOST WINDOWS</span>
+            <span style="color:#34d399;font-weight:700;">NSSM DEPLOY</span>
           </div>
-          <div class="dell-services-grid">
+          <div class="dell-services-grid" id="dellServicesGrid">
             <div class="dell-svc-chip"><span class="dell-svc-dot"></span>EquipeBots</div>
             <div class="dell-svc-chip"><span class="dell-svc-dot"></span>SaudeFrotaApi</div>
             <div class="dell-svc-chip"><span class="dell-svc-dot"></span>PostgreSQL</div>
@@ -2858,27 +2838,27 @@ body {
         <div class="dell-robo-status-row">
           <div class="dell-robo-box">
             <span class="dell-r-label">Chrome Automação:</span>
-            <span class="dell-r-tag" id="dellChromeTag">Aberto em Standby</span>
+            <span class="dell-r-tag" id="dellChromeTag">Verificando…</span>
           </div>
           <div class="dell-robo-box">
             <span class="dell-r-label">Trava de Concorrência:</span>
-            <span class="dell-r-tag lock" id="dellLockTag">robo.lock Ativo</span>
+            <span class="dell-r-tag lock" id="dellLockTag">robo.lock</span>
           </div>
           <div class="dell-robo-box">
-            <span class="dell-r-label">Último Disparo:</span>
-            <span class="dell-r-tag ok" id="dellDisparoTag">dmvvfflrq (100% OK)</span>
+            <span class="dell-r-label">Último Evento:</span>
+            <span class="dell-r-tag ok" id="dellDisparoTag">Standby</span>
           </div>
         </div>
       </section>
 
-      <!-- CARD EXPLICATIVO OBSERVABILIDADE D1 -->
+      <!-- CARD OBSERVABILIDADE D1 -->
       <section class="hud-card" style="padding:14px 16px;margin-top:12px;background:rgba(10,20,16,0.7);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span style="font:700 11px var(--font-hud);color:#34d399;letter-spacing:0.06em;">SINCRO CLOUDFLARE D1 (0 KV COST)</span>
           <span style="font:600 10px var(--font-mono);color:#38bdf8;">LATÊNCIA &lt; 5ms</span>
         </div>
         <p style="margin:0;font:500 11px var(--font-mono);color:#94a3b8;line-height:1.4;">
-          Dados de CPU, RAM, processos e serviços são gravados pelo daemon local no banco SQLite D1 Edge e sincronizados a cada batimento cardíaco da frota.
+          Telemetria gravada pelo host Dell e sincronizada diretamente na tabela <code>equipe_observabilidade</code> do Cloudflare D1. Consulta em tempo real sem expor portas residenciais.
         </p>
       </section>
     </div>
@@ -2887,8 +2867,6 @@ body {
          VIEW 3: ABA ATIVIDADE / RADAR (CYBER TACTICAL TIMELINE & RADAR DE EVENTOS)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-atividade" hidden>
-
-      <!-- RADAR DE TELEMETRIA AO VIVO (HUD TÁTICO) -->
       <section class="radar-telemetria-card">
         <div class="radar-sweep-screen">
           <div class="radar-ring"></div>
@@ -2903,277 +2881,36 @@ body {
               <span style="font:800 11px var(--font-hud);color:#34d399;letter-spacing:0.08em;">RADAR DA FROTA · SCAN ATIVO</span>
             </div>
             <p style="margin:2px 0 0;font:500 11.5px var(--font-mono);color:#94a3b8;line-height:1.3;">
-              Telemetria contínua dos 6 robôs autônomos e eventos do SGD.
+              Telemetria contínua dos robôs autônomos e eventos do SGD.
             </p>
           </div>
         </div>
 
         <div class="radar-stats-grid">
           <div class="radar-stat-box">
-            <span class="radar-stat-label">Frota Conectada</span>
-            <span class="radar-stat-val" style="color:#34d399;">
-              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;"></span>
-              6 / 6 BOTS
-            </span>
+            <span class="radar-stat-label">Frota</span>
+            <span class="radar-stat-val" style="color:#34d399;">9 AGENTES</span>
           </div>
           <div class="radar-stat-box">
             <span class="radar-stat-label">Varredura</span>
-            <span class="radar-stat-val" style="color:#38bdf8;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              A CADA 30s
-            </span>
+            <span class="radar-stat-val" style="color:#38bdf8;">A CADA 30s</span>
           </div>
           <div class="radar-stat-box">
-            <span class="radar-stat-label">Eventos Hoje</span>
-            <span class="radar-stat-val" style="color:#fbbf24;" id="statTotalEventos">
-              48 AÇÕES
-            </span>
+            <span class="radar-stat-label">Eventos</span>
+            <span class="radar-stat-val" style="color:#fbbf24;" id="statTotalEventos">-- AÇÕES</span>
           </div>
         </div>
       </section>
 
+      <!-- FILTROS POR BOT -->
+      <div class="bot-filter-chips" id="filtrosAt" style="margin:10px 0;"></div>
 
-      <!-- BOTÃO DE DISPARO DE TELEMETRIA AO VIVO (DEMO INTERATIVA) -->
-      <button class="btn-shimmer-cyber" onclick="simularNovoEventoTelemetria()" style="background:linear-gradient(135deg,rgba(6,182,212,0.25),rgba(3,105,161,0.3));border-color:rgba(56,189,248,0.4);color:#38bdf8;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>RECEBER NOVO EVENTO AO VIVO NA TIMELINE</span>
-      </button>
-
-      <!-- FILTROS TÁTICOS POR AGENTE/BOT -->
-      <div class="bot-filter-chips">
-        <button class="bot-chip active" onclick="filtrarAtividade('todos', this)">
-          <span>Todos</span> <span class="bot-chip-count" id="chipCountTodos">48</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('robo', this)">
-          <span style="color:#38bdf8;">●</span> Robô CP <span class="bot-chip-count">12</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('conferente', this)">
-          <span style="color:#10b981;">●</span> Conferente <span class="bot-chip-count">14</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('cacador', this)">
-          <span style="color:#06b6d4;">●</span> Caçador <span class="bot-chip-count">10</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('vigia', this)">
-          <span style="color:#f59e0b;">●</span> Vigia <span class="bot-chip-count">6</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('coordenador', this)">
-          <span style="color:#a855f7;">●</span> Coordenador <span class="bot-chip-count">4</span>
-        </button>
-        <button class="bot-chip" onclick="filtrarAtividade('thiago', this)">
-          <span style="color:#ec4899;">●</span> Thiago <span class="bot-chip-count">2</span>
-        </button>
-      </div>
-
-      <!-- TIMELINE DE TELEMETRIA AO VIVO COM MAGIC UI LASER BEAM -->
-      <div class="timeline-feed-wrap" id="feedAtividadeTimeline">
-        <div class="timeline-laser-wire"></div>
-
-        <!-- DIVISOR HORÁRIO 1: 18H -->
-        <div class="timeline-time-divider">
-          <span class="timeline-time-pill">HOJE · 18H</span>
-          <div class="timeline-time-line"></div>
-        </div>
-
-        <!-- EVENTO 1: ROBÔ CP EMPENHOU LOTE -->
-        <article class="ev-modern-card" data-bot="robo">
-          <div class="ev-card-header">
-            <div class="ev-bot-id">
-              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-color:#38bdf8;">
-                CP
-              </div>
-              <div class="ev-bot-name-group">
-                <span class="ev-bot-title">ROBÔ CP // SISTEMA FINANCEIRO</span>
-                <span class="ev-bot-role" style="color:#38bdf8;">OPERAÇÃO AUTOMÁTICA CP</span>
-              </div>
-            </div>
-            <time class="ev-time-stamp">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              18:02:14
-            </time>
-          </div>
-
-          <h4 class="ev-headline">
-            Empenho concluído com sucesso para o Lote #419 (8 processos)
-          </h4>
-
-          <div class="ev-log-terminal">
-<code>[EXEC] CP.empenharLote(id=419) -> 8 processos confirmados
-[DADOS] R$ 2.450,88 · Autenticação token: validada · 0 erros</code>
-          </div>
-
-          <div class="ev-card-footer">
-            <span class="ev-status-chip ok">
-              <span>✓</span> CONCLUÍDO
-            </span>
-            <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
-              <span>Ver no Lote</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </article>
-
-        <!-- EVENTO 2: CONFERENTE VALIDOU ANEXOS 1DOC -->
-        <article class="ev-modern-card" data-bot="conferente">
-          <div class="ev-card-header">
-            <div class="ev-bot-id">
-              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#059669,#10b981);border-color:#34d399;">
-                CF
-              </div>
-              <div class="ev-bot-name-group">
-                <span class="ev-bot-title">CONFERENTE // IA VALIDADORA</span>
-                <span class="ev-bot-role" style="color:#34d399;">AUDITORIA DE CUPONS</span>
-              </div>
-            </div>
-            <time class="ev-time-stamp">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              17:51:08
-            </time>
-          </div>
-
-          <h4 class="ev-headline">
-            Conferência de Notas Fiscais e Trajetos: 13 aprovados, 1 pendência
-          </h4>
-
-          <div class="ev-log-terminal">
-<code>[OCR] Processo 5415/2026: Cupom fiscal sem CNPJ legível.
-[AÇÃO] Sinalizado com badge de atenção para conferência manual.</code>
-          </div>
-
-          <div class="ev-card-footer">
-            <span class="ev-status-chip alerta">
-              <span>!</span> PENDÊNCIA 1DOC
-            </span>
-            <button class="ev-btn-action" onclick="abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
-              <span>Resolver Nota</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </article>
-
-        <!-- DIVISOR HORÁRIO 2: 17H -->
-        <div class="timeline-time-divider">
-          <span class="timeline-time-pill">HOJE · 17H</span>
-          <div class="timeline-time-line"></div>
-        </div>
-
-        <!-- EVENTO 3: CAÇADOR VARREU 1DOC -->
-        <article class="ev-modern-card" data-bot="cacador">
-          <div class="ev-card-header">
-            <div class="ev-bot-id">
-              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4);border-color:#22d3ee;">
-                CA
-              </div>
-              <div class="ev-bot-name-group">
-                <span class="ev-bot-title">CAÇADOR // RECON UNIT</span>
-                <span class="ev-bot-role" style="color:#06b6d4;">VARREDURA DE ENTRADA 1DOC</span>
-              </div>
-            </div>
-            <time class="ev-time-stamp">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              17:34:00
-            </time>
-          </div>
-
-          <h4 class="ev-headline">
-            Varredura horária: 14 novos processos capturados na caixa de entrada
-          </h4>
-
-          <div class="ev-log-terminal">
-<code>[SCAN] 105 processos inspecionados · 14 diárias pendentes de lote.
-[MEMÓRIA] Otimização ativada: 0 excedimentos de heap KV.</code>
-          </div>
-
-          <div class="ev-card-footer">
-            <span class="ev-status-chip ok">
-              <span>✓</span> 14 CAPTURADOS
-            </span>
-            <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
-              <span>Inspecionar</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- EVENTO 4: VIGIA DE CONFORMIDADE -->
-        <article class="ev-modern-card" data-bot="vigia">
-          <div class="ev-card-header">
-            <div class="ev-bot-id">
-              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#b45309,#f59e0b);border-color:#fbbf24;">
-                VI
-              </div>
-              <div class="ev-bot-name-group">
-                <span class="ev-bot-title">VIGIA // PROTOCOLO DE CONFORMIDADE</span>
-                <span class="ev-bot-role" style="color:#f59e0b;">SEGURANÇA JURÍDICA</span>
-              </div>
-            </div>
-            <time class="ev-time-stamp">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              17:20:19
-            </time>
-          </div>
-
-          <h4 class="ev-headline">
-            Conflito de diárias no mesmo servidor auditado: sem sobreposição
-          </h4>
-
-          <div class="ev-log-terminal">
-<code>[VIGIA] Servidor Carlos Eduardo Silva: viagem anterior encerrada às 12h.
-[STATUS] Conformidade com a Portaria nº 48/2026: APROVADO.</code>
-          </div>
-
-          <div class="ev-card-footer">
-            <span class="ev-status-chip ok">
-              <span>✓</span> APROVADO
-            </span>
-            <button class="ev-btn-action" onclick="toast('Regra de conformidade validada pelo Vigia')">
-              <span>Auditoria OK</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- EVENTO 5: THIAGO CORRIGIU CARD (COM BOTÃO DESFAZER) -->
-        <article class="ev-modern-card" data-bot="thiago" id="cardEvThiago">
-          <div class="ev-card-header">
-            <div class="ev-bot-id">
-              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899);border-color:#f472b6;">
-                TK
-              </div>
-              <div class="ev-bot-name-group">
-                <span class="ev-bot-title">THIAGO // OPERADOR HUMANO</span>
-                <span class="ev-bot-role" style="color:#ec4899;">INTERVENÇÃO DE SUPERVISÃO</span>
-              </div>
-            </div>
-            <time class="ev-time-stamp">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              17:05:40
-            </time>
-          </div>
-
-          <h4 class="ev-headline">
-            Correção manual aplicada no card 5412/2026
-          </h4>
-
-          <div class="ev-log-terminal">
-<code>Destino atualizado: Passo Fundo · Viatura: IJC-8812
-Motivo: retificação do itinerário informada pelo motorista</code>
-          </div>
-
-          <div class="ev-card-footer">
-            <span class="ev-status-chip ok" id="chipEvThiago">
-              <span>✓</span> APLICADO
-            </span>
-            <button class="ev-btn-action" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);" onclick="desfazerCorrecaoDemo(this)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-              <span>Desfazer</span>
-            </button>
-          </div>
-        </article>
-
-      </div>
-
+      <!-- TIMELINE DE TELEMETRIA -->
+      <div class="timeline-feed-wrap" id="feed"></div>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         VIEW 3: ABA EQUIPE (ESCRITÓRIO ISOMÉTRICO DOS 9 AGENTES DO SGD)
+         VIEW 4: ABA EQUIPE (ESCRITÓRIO 3D ISOMÉTRICO)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-equipe" hidden>
 
@@ -3255,104 +2992,49 @@ Motivo: retificação do itinerário informada pelo motorista</code>
     <!-- ══════════════════════════════════════════════════════════════════════
          VIEW 4: ABA CONVERSA (CANAL DIRETO COM O COORDENADOR)
          ══════════════════════════════════════════════════════════════════════ -->
+    
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 5: ABA CONVERSA (CHAT TÁTICO COM O COORDENADOR)
+         ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-conversa" hidden>
-      <div class="chat-cockpit-wrap">
-
-        <!-- CABEÇALHO DO CHAT -->
-        <header class="chat-cockpit-header">
-          <div class="chat-ai-profile">
-            <div class="chat-ai-avatar">CO</div>
+      <div class="hud-card" style="padding:14px;display:flex;flex-direction:column;min-height:560px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--glass-border);margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4c1d95);display:grid;place-items:center;font:800 12px var(--font-hud);color:#fff;">CO</div>
             <div>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <h4 style="margin:0;font:800 14.5px var(--font-hud);color:#fff;">COORDENADOR</h4>
-                <span class="status-pulse-dot" style="background:#8b5cf6;box-shadow:0 0 6px #8b5cf6;"></span>
-              </div>
-              <span style="font:600 11px var(--font-mono);color:#94a3b8;">DEEPSEEK ORCHESTRATOR · ONLINE</span>
+              <b style="font:700 13.5px var(--font-hud);color:#fff;display:block;">COORDENADOR GERAL</b>
+              <span style="font:500 10.5px var(--font-mono);color:#34d399;">● DeepSeek Flash · Ao Vivo</span>
             </div>
           </div>
-          <span style="font:700 10px var(--font-mono);color:#34d399;background:rgba(16,185,129,0.12);padding:3px 8px;border-radius:6px;border:1px solid rgba(52,211,153,0.3);">
-            SESSÃO CRIPTOGRAFADA
-          </span>
-        </header>
-
-        <!-- HISTÓRICO DE MENSAGENS DO CHAT -->
-        <div class="chat-messages-scroll" id="chatHistorico">
-          
-          <!-- MENSAGEM 1 (BOT) -->
-          <div class="chat-bubble bot">
-            <div class="chat-bubble-meta">
-              <span>COORDENADOR</span>
-              <span class="chat-bubble-time">17:40</span>
-            </div>
-            <div>
-              Bom final de tarde, Thiago! A varredura das 17h detectou 14 novos processos na caixa do 1Doc. 8 deles já foram conferidos pelo robô e estão 100% prontos para empenhar no CP.
-            </div>
-          </div>
-
-          <!-- MENSAGEM 2 (EU) -->
-          <div class="chat-bubble eu">
-            <div class="chat-bubble-meta">
-              <span>VOCÊ</span>
-              <span class="chat-bubble-time">17:42</span>
-            </div>
-            <div>
-              O processo 5415/2026 de Caxias do Sul tem algum problema na nota?
-            </div>
-          </div>
-
-          <!-- MENSAGEM 3 (BOT) -->
-          <div class="chat-bubble bot">
-            <div class="chat-bubble-meta">
-              <span>COORDENADOR</span>
-              <span class="chat-bubble-time">17:43</span>
-            </div>
-            <div>
-              Sim, o <b>Conferente</b> auditou o PDF via OCR e identificou que o cupom fiscal está sem CNPJ legível. O card foi marcado com alerta âmbar para que você possa conferir manualmente no 1Doc antes do lote ser liberado.
-            </div>
-          </div>
-
+          <span style="font:600 10px var(--font-mono);color:#64748b;">CANAL DIRETO</span>
         </div>
 
-        <!-- INDICADOR DE DIGITANDO (OCULTO POR PADRÃO) -->
-        <div class="chat-typing-indicator" id="chatDigitando" style="display:none;">
-          <div class="chat-typing-dots"><i></i><i></i><i></i></div>
-          <span>Coordenador formulando resposta…</span>
+        <!-- ATALHOS RÁPIDOS -->
+        <div class="atalhos" id="atalhos" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px;">
+          <button type="button" class="quick-pill-btn">qual o status do CP?</button>
+          <button type="button" class="quick-pill-btn">como está a fila de prestação?</button>
+          <button type="button" class="quick-pill-btn">tira o relatório de prestações pendentes</button>
+          <button type="button" class="quick-pill-btn">me dá o resumo do dia</button>
         </div>
 
-        <!-- ATALHOS RÁPIDOS DE MENSAGEM -->
-        <div class="chat-quick-prompts">
-          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('qual o status do CP?')">
-            ⚡ Status do CP
-          </button>
-          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('como está a fila de prestação de contas?')">
-            🧾 Fila de Prestações
-          </button>
-          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('tira o relatório de prestações pendentes')">
-            📋 Relatório Pendentes
-          </button>
-          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('me dá o resumo do dia das diárias')">
-            📊 Resumo do Dia
-          </button>
-          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('pode empenhar o lote pronto agora')">
-            🚀 Disparar Lote
-          </button>
-        </div>
+        <!-- HISTÓRICO DE MENSAGENS -->
+        <div class="chat-history-scroll" id="chatHistorico" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px;"></div>
 
-        <!-- BARRA DE ENTRADA -->
-        <form class="chat-input-bar" id="chatForm" onsubmit="event.preventDefault();enviarMensagemChat();">
-          <input class="chat-input-field" id="chatInput" placeholder="Mensagem para o Coordenador…" autocomplete="off">
-          <button class="chat-send-btn" type="submit" title="Enviar Mensagem">
+        <!-- FORMULÁRIO DE ENVIO -->
+        <form class="chat-input-bar" id="form" style="margin-top:10px;display:flex;gap:8px;">
+          <textarea id="txt" placeholder="Fale com o Coordenador..." rows="1" style="flex:1;min-height:40px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 12px;color:#fff;font:13px var(--font-body);resize:none;outline:none;"></textarea>
+          <button type="submit" class="chat-send-btn" title="Enviar Mensagem">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </form>
-
       </div>
     </div>
 
   </main>
 
   <!-- ══════════════════════════════════════════════════════════════════════
-       NOVA ABA INFERIOR: FLOATING DOCK HOLOGRÁFICA (DYNAMIC ISLAND LUXO)
+       FLOATING BOTTOM DOCK HOLOGRÁFICA (6 ABAS NATIVAS)
        ══════════════════════════════════════════════════════════════════════ -->
   <nav class="floating-bottom-dock">
     <div class="dock-nav-grid">
@@ -3365,11 +3047,11 @@ Motivo: retificação do itinerário informada pelo motorista</code>
         <div class="dock-glow-dot"></div>
       </button>
 
-      <!-- ABA 1: LOTE / PROCESSOS (COM BADGE PULSANTE EM NEON) -->
+      <!-- ABA 1: LOTE / PROCESSOS -->
       <button class="dock-item" onclick="trocarDock(1, this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Lote</span>
-        <span class="dock-badge-pulse" id="dockBadgeLote">8</span>
+        <span class="dock-badge-pulse" id="dockBadgeLote" hidden>0</span>
         <div class="dock-glow-dot"></div>
       </button>
 
@@ -3403,604 +3085,803 @@ Motivo: retificação do itinerário informada pelo motorista</code>
     </div>
   </nav>
 
-  <!-- MODAL DE PROCESSO & COMPROVANTES (BOTTOM SHEET HOLOGRÁFICA COM LASER SCANNER) -->
-  <div class="laser-scanner-sheet" id="modalProc" onclick="fecharModalProcOverlay(event)">
-    <div class="scanner-modal-body">
+  <!-- MODAL DE CONFERÊNCIA DE PROCESSO -->
+  <div class="veu" id="veuProc" hidden>
+    <div class="folha" role="dialog" aria-label="Conferir processo">
       <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);align-self:center;"></div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <h3 style="font:800 18px var(--font-hud);margin:0;color:#fff;" id="mProcNum">PROC 5410/2026</h3>
-          <span style="font:600 13px var(--font-body);color:#34d399;" id="mProcSrv">CARLOS EDUARDO SILVA</span>
-        </div>
-        <span class="proc-status-badge pronto" id="mProcBadge">CONFERIDO</span>
-      </div>
-
-      <div class="ocr-receipt-preview">
-        <div class="laser-beam-line"></div>
-        <div style="text-align:center;z-index:2;">
-          <div style="font-size:24px;margin-bottom:2px;">📄</div>
-          <b id="mProcVal" style="font-size:18px;color:#fff;display:block;">R$ 581,52</b>
-          <div style="font-size:11px;color:#94a3b8;" id="mProcRota">Porto Alegre → Pelotas</div>
-        </div>
-      </div>
-
-      <div style="display:grid;gap:8px;font:12px var(--font-mono);color:#94a3b8;background:rgba(0,0,0,0.3);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
-        <div><span style="color:#34d399;">✓</span> Nota Fiscal vinculada no 1Doc</div>
-        <div><span style="color:#34d399;">✓</span> CNH e dados cadastrais válidos</div>
-        <div><span style="color:#34d399;">✓</span> Roteiro verificado pelo Vigia</div>
-      </div>
-
-      <div style="display:flex;gap:8px;">
-        <button class="btn-shimmer-cyber" style="flex:1;" onclick="aprovarProcessoModal()">
-          <span>✓ CONFIRMAR E LIBERAR</span>
-        </button>
-        <button class="dock-btn" style="padding:0 18px;" onclick="fecharModalProc()">
-          <span>Fechar</span>
-        </button>
-      </div>
+      <div id="folhaProc" style="display:grid;gap:12px"></div>
     </div>
-
-    
   </div>
+
+  <!-- MODAL PEDIR AO CP -->
+  <div class="veu" id="veuPedir" hidden>
+    <div class="folha" role="dialog" aria-label="Pedir ao CP">
+      <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);align-self:center;"></div>
+      <div id="folhaPedir" style="display:grid;gap:12px"></div>
+    </div>
+  </div>
+
+  <!-- MODAL ACOMPANHAMENTO DO CP -->
+  <div class="veu" id="veuCp" hidden>
+    <div class="folha" role="dialog" aria-label="Pedido ao CP">
+      <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);align-self:center;"></div>
+      <div id="folhaCp" style="display:grid;gap:12px"></div>
+      <div class="botoes"><button type="button" data-fecha="veuCp">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN -->
+  <div class="login-overlay" id="login" hidden>
+    <form class="login-card" id="formLogin">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10b981,#047857);display:grid;place-items:center;font:800 13px var(--font-hud);color:#fff;">SGD</div>
+        <div>
+          <h2 style="font:800 18px var(--font-hud);margin:0;color:#fff;">Equipe SGD</h2>
+          <span style="font:500 11px var(--font-mono);color:#94a3b8;">Entre com o usuário e senha do SGD.</span>
+        </div>
+      </div>
+      <label for="lgU" style="position:absolute;left:-9999px">Usuário</label>
+      <input id="lgU" autocomplete="username" placeholder="Usuário">
+      <label for="lgS" style="position:absolute;left:-9999px">Senha</label>
+      <input id="lgS" type="password" autocomplete="current-password" placeholder="Senha">
+      <div class="err" id="lgErr"></div>
+      <button type="submit" id="lgBt">Entrar</button>
+    </form>
+  </div>
+
+  <div class="hud-toast" id="toast" hidden></div>
 
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════
-// 1. MOTOR DE METEOROS E POEIRA CIBERNÉTICA (ACETERNITY METEORS EFFECT)
-// ══════════════════════════════════════════════════════════════════════════
-const cv = document.getElementById('cyberCanvas');
-const ctx = cv.getContext('2d');
-let W = cv.width = window.innerWidth;
-let H = cv.height = window.innerHeight;
+(function(){
+'use strict';
+var W='https://diarias.aceitacoes.workers.dev', TK='sgd_token';
+var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
 
-window.addEventListener('resize', () => {
-  W = cv.width = window.innerWidth;
-  H = cv.height = window.innerHeight;
+var AG={
+  coordenador:['Coordenador','CO','#7c4ddb'],
+  relatorios_cp:['Relatórios CP','RE','#0f766e'],
+  operador_cp:['Operador CP','OP','#2f6fd8'],
+  vigia:['Vigia','VI','#ea6a12'],
+  conferente:['Conferente','CF','#c78a08'],
+  auditor:['Auditor','Au','#e11d48'],
+  pesquisador:['Pesquisador','PE','#0891b2'],
+  programador:['Programador','PR','#4d8b12'],
+  cacador:['Caçador local','CA','#059669'],
+  thiago:['Você','TH','#1f6b4f']
+};
+var ORDEM=['coordenador','operador_cp','relatorios_cp','vigia','conferente','auditor','pesquisador','programador','cacador'];
+var NOME_PED={
+  empenho:'Lote de empenho',
+  prestacao:'Prestação de contas',
+  relatorio_empenhos:'Relatório de empenhos',
+  relatorio_pagamentos:'Relatório de pagamentos',
+  relatorio_pc_pendentes:'Relatório de prestações pendentes'
+};
+var ATIVOS=['pendente','pegou','abrindo_tela','rodando'];
+var S={painel:null,equipe:null,cp:null,em:{},aba:'inicio',filtroP:'todos',filtroAt:'todos',enviando:null,desfeitos:{},ritmo:[],procAberto:null};
+
+function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function md(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');}
+function real(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function hm(ms){if(!ms)return '';var d=new Date(ms);return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+function ha(ms){var s=Math.max(0,Math.round((Date.now()-ms)/1000));return s<60?s+' s':s<3600?Math.round(s/60)+' min':Math.round(s/3600)+' h';}
+function av(bot,cls){var a=AG[bot]||[bot,'?','#6b7c74'];return '<div class="av'+(cls?' '+cls:'')+'" style="background:'+a[2]+'">'+a[1]+'</div>';}
+function nomeBot(b){return (AG[b]||[b])[0];}
+function toast(t){var e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true;},4200);}
+window.toast = toast;
+
+// ---------- REDE E AUTENTICAÇÃO ----------
+function token(){try{return localStorage.getItem(TK)||'';}catch(e){return '';}}
+function api(acao,opts){
+  opts=opts||{}; var h=Object.assign({'Authorization':'Bearer '+token()},opts.body?{'Content-Type':'application/json'}:{});
+  return fetch(W+'?action='+acao,{method:opts.body?'POST':'GET',headers:h,body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store'})
+    .then(function(r){if(r.status===401){mostrarLogin('Sessão expirada. Entre de novo.');throw new Error('não autenticado');}return r.json();});
+}
+function mostrarLogin(msg){$('#login').hidden=false;$('#lgErr').textContent=msg||'';}
+$('#formLogin').addEventListener('submit',function(e){
+  e.preventDefault(); var u=$('#lgU').value.trim(), s=$('#lgS').value; if(!u||!s){$('#lgErr').textContent='Preencha usuário e senha.';return;}
+  $('#lgBt').disabled=true; $('#lgBt').textContent='Entrando…';
+  fetch(W+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:u,senha:s})}).then(function(r){return r.json();})
+   .then(function(d){if(d.ok&&d.token){try{localStorage.setItem(TK,d.token);}catch(e){}$('#login').hidden=true;tudo();}else $('#lgErr').textContent=d.error||'Usuário ou senha inválidos.';})
+   .catch(function(){$('#lgErr').textContent='Sem conexão. Tente de novo.';})
+   .finally(function(){$('#lgBt').disabled=false;$('#lgBt').textContent='Entrar';});
 });
 
-let meteors = [];
-function criarMeteoro(extra = false) {
-  return {
-    x: Math.random() * W,
-    y: Math.random() * -200,
-    len: Math.random() * 80 + 40,
-    speed: (Math.random() * 8 + 4) * (extra ? 2.5 : 1),
-    size: Math.random() * 1.5 + 0.5,
-    alpha: Math.random() * 0.7 + 0.3
-  };
-}
-for (let i = 0; i < 24; i++) meteors.push(criarMeteoro());
-
-function animarFundo() {
-  ctx.clearRect(0, 0, W, H);
-
-  // Grade sutil
-  ctx.strokeStyle = 'rgba(52, 211, 153, 0.035)';
-  ctx.lineWidth = 1;
-  const step = 48;
-  for (let x = 0; x < W; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += step) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-
-  // Meteoros
-  meteors.forEach(m => {
-    m.x += m.speed * 0.8;
-    m.y += m.speed * 1.2;
-    if (m.y > H + 100 || m.x > W + 100) {
-      Object.assign(m, criarMeteoro());
+function carregarCp(){return api('cp-acompanhamento').then(function(j){if(j&&j.ok){S.cp=j;S.em.cp=Date.now();amostraRitmo();desenharCp();}}).catch(function(){});}
+function carregarEquipe(){return api('equipe-painel').then(function(j){if(j&&j.ok){S.equipe=j;S.em.eq=Date.now();desenharTudo();}}).catch(function(){});}
+function carregarPainel(){return api('celular-painel').then(function(j){if(j&&j.ok){S.painel=j;S.em.pa=Date.now();desenharTudo();}else if(j)S.erroPainel=j.error;}).catch(function(){});}
+function recarregarTelemetriaDell(){
+  toast('Sincronizando telemetria do Notebook Dell via D1…');
+  api('notebook-telemetria').then(function(j){
+    if(j&&j.ok&&j.telemetria){
+      if(!S.equipe)S.equipe={};
+      S.equipe.telemetriaNotebook=j.telemetria;
+      desenharNotebook();
+      toast('✓ Telemetria Dell atualizada (<5ms)');
+    } else {
+      carregarEquipe().then(function(){toast('✓ Sincronizado');});
     }
-    const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.len * 0.8, m.y - m.len * 1.2);
-    grad.addColorStop(0, `rgba(52, 211, 153, ${m.alpha})`);
-    grad.addColorStop(0.3, `rgba(6, 182, 212, ${m.alpha * 0.6})`);
-    grad.addColorStop(1, 'transparent');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = m.size;
-    ctx.beginPath();
-    ctx.moveTo(m.x, m.y);
-    ctx.lineTo(m.x - m.len * 0.8, m.y - m.len * 1.2);
-    ctx.stroke();
+  }).catch(function(){carregarEquipe();});
+}
+window.recarregarTelemetriaDell = recarregarTelemetriaDell;
+
+function tudo(){if(!token()){mostrarLogin();return;}carregarCp();carregarEquipe();carregarPainel();}
+
+// ---------- CP AO VIVO E RITMO ----------
+function pedidoAtual(){
+  var c=S.cp; if(!c)return null; var t=c.tarefa, l=c.lote, r=c.robo;
+  var ativo=!!(t&&ATIVOS.indexOf(t.status)>=0)||!!(l&&l.ativo);
+  var recente=t&&!ativo&&t.fimEm&&Date.now()-t.fimEm<20*60000;
+  return {t:t,l:l,r:r,ativo:ativo,recente:recente};
+}
+function amostraRitmo(){var l=S.cp&&S.cp.lote;if(!l||!l.ativo){S.ritmo=[];return;}S.ritmo.push([Date.now(),l.feitos||0]);if(S.ritmo.length>12)S.ritmo.shift();}
+
+function desenharCp(){
+  var p=pedidoAtual(); if(!p)return;
+  var t=p.t, l=p.l;
+  var lbl=$('#gundamProcLabel'), unit=$('#gundamUnit');
+  if(p.ativo&&l&&l.ativo){
+    var tot=l.total||1, f=l.feitos||0, pct=Math.min(95,Math.max(5,Math.round((f/tot)*100)));
+    if(lbl)lbl.textContent='ROBÔ CP · LOTE '+f+'/'+tot+' ('+pct+'%)';
+    if(unit)unit.style.left=pct+'%';
+    var g0=$('#gate0'), g1=$('#gate1'), g2=$('#gate2'), g3=$('#gate3');
+    if(g0)g0.className='gate-col '+(f>=1?'done':'');
+    if(g1)g1.className='gate-col '+(pct>=50?'done':'');
+    if(g2)g2.className='gate-col '+(pct>=75?'done':'');
+    if(g3)g3.className='gate-col '+(pct>=95?'done':'');
+  } else {
+    var pr=S.painel&&S.painel.processos;
+    if(lbl)lbl.textContent=pr&&pr.prontos?(pr.prontos+' PRONTOS PARA DISPARO'):'CATAPULTA EM STANDBY';
+    if(unit)unit.style.left='12%';
+  }
+}
+
+// ---------- RENDERIZADORES GERAIS ----------
+function desenharTudo(){
+  desenharInicio();
+  desenharProcessos();
+  desenharNotebook();
+  desenharAtividade();
+  desenharConversa();
+  desenharEquipe();
+  desenharCp();
+}
+
+function desenharInicio(){
+  var P=S.painel, E=S.equipe, d=new Date(), h=d.getHours();
+  $('#ola').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', Thiago';
+  $('#hojeTxt').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})+' · '+hm(Date.now());
+  
+  if(!P){
+    if(S.erroPainel)$('#precisa').innerHTML='<div class="erro-box">Não consegui ler o painel: '+esc(S.erroPainel)+'</div>';
+    return;
+  }
+  var pr=P.processos, D=P.dia, pc=P.prestacao;
+
+  // Mini Funnel
+  $('#funnel1DocVal').textContent=pr.total||0;
+  $('#funnelLoteVal').textContent=pr.prontos||0;
+  $('#funnelEmpenhosVal').textContent=D.empenhos?D.empenhos.n:0;
+  $('#funnelPagosVal').textContent=D.pagamentos?D.pagamentos.n:0;
+
+  // Bento Grid
+  $('#numPrestacoes').textContent=D.prestadas||0;
+  $('#numPrestacoesSub').textContent='Fila do SGD: '+(pc.fila||0)+' · vencidas: '+(pc.vencidas||0)+(pc.vencemLogo?' · vencem em 2 dias: '+pc.vencemLogo:'');
+  $('#numEmpenhos').textContent=D.empenhos?D.empenhos.n:0;
+  $('#numValEmpenhos').textContent=D.empenhos?real(D.empenhos.valor):'R$ 0,00';
+  $('#numPagamentos').textContent=(D.pagamentos?D.pagamentos.n:'—');
+  $('#numPagamentosSub').textContent=D.pagamentos?real(D.pagamentos.valor)+(D.pagamentos.divergentes?' · '+D.pagamentos.divergentes+' diverg.':''):'Relatório ainda não saiu';
+
+  // Badge do Lote na Barra Inferior
+  var badgeLote=$('#dockBadgeLote');
+  if(badgeLote){
+    badgeLote.textContent=pr.prontos||0;
+    badgeLote.hidden=!(pr.prontos>0);
+  }
+
+  // Cards de Decisão: Precisa de Você
+  var cards=[];
+  var ag=(E&&E.tarefas||[]).filter(function(t){return t.status==='aguardando';});
+  ag.forEach(function(t){
+    cards.push('<article class="cyber-attention-item r-medio" data-tarefa="'+t.id+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +av(t.para||'programador')
+          +'<div><b style="font:700 13px var(--font-hud);color:#fff;">'+esc(t.titulo)+'</b>'
+          +'<span style="font:500 11px var(--font-mono);color:#94a3b8;display:block;">'+esc(nomeBot(t.para))+' · proposta #'+t.id+'</span></div>'
+        +'</div>'
+        +'<span style="font:700 9px var(--font-mono);background:rgba(245,158,11,0.2);color:#f59e0b;padding:2px 6px;border-radius:4px;">DECISÃO</span>'
+      +'</div>'
+      +'<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;">'+esc(String(t.resultado||t.corpo||'').replace(/\*\*/g,'').slice(0,260))+'</p>'
+      +'<div class="botoes"><button type="button" class="sim" data-tacao="aprovar">Aprovar e publicar</button><button type="button" data-tacao="recusar">Recusar</button></div>'
+    +'</article>');
   });
 
-  requestAnimationFrame(animarFundo);
-}
-animarFundo();
-
-function rajadaMeteoros() {
-  for (let i = 0; i < 20; i++) {
-    meteors.push(criarMeteoro(true));
+  var sug=P.sugestoes||[];
+  if(sug.length){
+    cards.push('<article class="cyber-attention-item r-medio" id="cardSug">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +av('coordenador')
+          +'<div><b style="font:700 13px var(--font-hud);color:#fff;">'+sug.length+' correç'+(sug.length>1?'ões prontas':'ão pronta')+'</b>'
+          +'<span style="font:500 11px var(--font-mono);color:#94a3b8;display:block;">Coordenador · cards fora do lote</span></div>'
+        +'</div>'
+        +'<span style="font:700 9px var(--font-mono);background:rgba(245,158,11,0.2);color:#f59e0b;padding:2px 6px;border-radius:4px;">AJUSTE</span>'
+      +'</div>'
+      +'<div style="display:grid;gap:6px;margin:6px 0;">'+sug.map(function(s){return '<label style="display:flex;align-items:flex-start;gap:8px;font:12px var(--font-mono);color:#cbd5e1;"><input type="checkbox" value="'+esc(s.id)+'"'+(s.precisaOlhar?'':' checked')+'><span><code>'+esc(s.id)+'</code> '+esc(s.texto)+(s.precisaOlhar?' <b style="color:#f59e0b;">(confira antes)</b>':'')+'</span></label>';}).join('')+'</div>'
+      +'<div class="botoes"><button type="button" class="sim" data-sug="pode">Aplicar selecionadas</button><button type="button" data-sug="descarta">Descartar</button></div>'
+    +'</article>');
   }
-  setTimeout(() => { meteors = meteors.slice(0, 24); }, 2500);
-}
 
-// ══════════════════════════════════════════════════════════════════════════
-// 2. PULSO OPERACIONAL DO COCKPIT TÁTICO
-// ══════════════════════════════════════════════════════════════════════════
-function atualizarCoordenadasBots() {}
+  (P.problemas.depois||[]).filter(function(x){return x.tipo==='Anular';}).forEach(function(x){
+    cards.push('<article class="cyber-attention-item r-alto">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +av('relatorios_cp')
+          +'<div><b style="font:700 13px var(--font-hud);color:#fff;">Anular '+esc(x.titulo)+'</b>'
+          +'<span style="font:500 11px var(--font-mono);color:#94a3b8;display:block;">Relatórios CP · pendentes de prestação</span></div>'
+        +'</div>'
+        +'<span style="font:700 9px var(--font-mono);background:rgba(239,68,68,0.2);color:#ef4444;padding:2px 6px;border-radius:4px;">FINANCEIRO</span>'
+      +'</div>'
+      +'<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;">'+esc(x.texto)+'. A fila de prestação já ignora estes.</p>'
+    +'</article>');
+  });
 
-function dispararPulsoRede() {
-  const card = document.getElementById('cardOrbital');
-  if (card) {
-    card.classList.remove('pulse-active');
-    void card.offsetWidth; // trigger reflow
-    card.classList.add('pulse-active');
-    setTimeout(() => card.classList.remove('pulse-active'), 850);
+  var outros=(P.problemas.depois||[]).filter(function(x){return x.tipo!=='Anular';}).length+(P.problemas.antes||[]).length;
+  if(outros){
+    cards.push('<div class="cyber-attention-item r-baixo" onclick="abrirAbaLoteDemo()" style="cursor:pointer;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +av('conferente')
+          +'<div><b style="font:700 13px var(--font-hud);color:#fff;">'+outros+' processo'+(outros>1?'s':'')+' com apontamento</b>'
+          +'<span style="font:500 11px var(--font-mono);color:#94a3b8;display:block;">Antes e depois do empenho · Ver na aba Lote ›</span></div>'
+        +'</div>'
+        +'<span style="font:700 9px var(--font-mono);background:rgba(56,189,248,0.2);color:#38bdf8;padding:2px 6px;border-radius:4px;">CONFERIR</span>'
+      +'</div>'
+    +'</div>');
   }
+
+  var nPrec=ag.length+(sug.length?1:0)+(P.problemas.depois||[]).filter(function(x){return x.tipo==='Anular';}).length+(outros?1:0);
+  $('#precisa').innerHTML=cards.join('')||'<div style="text-align:center;padding:16px;font:600 13px var(--font-hud);color:#34d399;">Nada esperando você agora ✓</div>';
+  $('#contPrecisa').textContent=nPrec?nPrec+' PENDÊNCIA'+(nPrec>1?'S':''):'';
+
+  var eg=$('#estadoGeral');
+  eg.textContent=nPrec?'● '+nPrec+' PEDE'+(nPrec>1?'M':'')+' VOCÊ':'● TUDO NOMINAL';
+  eg.style.color=nPrec?'#fbbf24':'#34d399';
+
+  ligarAcoesInicio();
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// 3. AVANÇO DO GUNDAM PELOS 4 PORTÕES DO CP
-// ══════════════════════════════════════════════════════════════════════════
-let gundamEtapa = 2; // 0, 1, 2, 3
-const posicoes = [15, 38, 62, 86];
-const rotulos = ['PROC 5410/2026 · EMPENHO', 'PROC 5410/2026 · LIQUIDAÇÃO', 'PROC 5410/2026 · DOC VIAGEM', 'PROC 5410/2026 · 1DOC CONCLUÍDO!'];
+function ligarAcoesInicio(){
+  $$('[data-tacao]').forEach(function(b){b.onclick=function(){
+    var card=b.closest('[data-tarefa]'), id=Number(card.dataset.tarefa);
+    b.disabled=true; api('equipe-tarefa-acao',{body:{id:id,acao:b.dataset.tacao}}).then(function(j){
+      card.querySelector('.botoes').outerHTML='<div class="feito">'+(j.ok?'✓ '+(b.dataset.tacao==='aprovar'?'Aprovada · publicando e observando':'Recusada'):'Não deu: '+esc(j.error||'erro'))+'</div>';
+      carregarEquipe();
+    });
+  };});
+  $$('[data-sug]').forEach(function(b){b.onclick=function(){
+    var ids=$$('#cardSug input:checked').map(function(i){return i.value;}); if(!ids.length){toast('Marque ao menos uma sugestão.');return;}
+    var txt=(b.dataset.sug==='pode'?'pode ':'descarta ')+ids.join(' e ');
+    api('equipe-enviar',{body:{texto:txt}}).then(function(){
+      var c=$('#cardSug'); if(c)c.querySelector('.botoes').outerHTML='<div class="feito">✓ Pedido ao Coordenador: “'+esc(txt)+'”</div>';
+      carregarEquipe();
+    });
+  };});
+}
 
-function avancarGundam() {
-  gundamEtapa = (gundamEtapa + 1) % 4;
-  const unit = document.getElementById('gundamUnit');
-  if (unit) {
-    unit.style.left = posicoes[gundamEtapa] + '%';
-    document.getElementById('gundamProcLabel').textContent = rotulos[gundamEtapa];
+// ---------- PROCESSOS & LOTE ----------
+function conferida(p){try{return localStorage.getItem('conf_'+p.hash)==='1';}catch(e){return false;}}
+function marcarConf(p,val){try{localStorage.setItem('conf_'+p.hash,val?'1':'0');}catch(e){}}
+function curto(nome){return String(nome||'').split(' ').slice(0,2).join(' ');}
 
-    document.querySelectorAll('.gate-col').forEach((col, idx) => {
-      if (idx <= gundamEtapa) {
-        col.classList.add('done');
-        col.children[1].textContent = '✓ OK';
+function desenharProcessos(){
+  var P=S.painel; if(!P)return;
+  var pr=P.processos, D=P.dia, pc=P.prestacao;
+
+  // Funil
+  if(pr.erro){$('#funil').innerHTML='<div class="erro-box">Caixa indisponível: '+esc(pr.erro)+'</div>';}
+  else{
+    var base=Math.max(1,pr.total), linha=function(n,v,c){return '<div class="etapa-f"><span>'+n+'</span><div class="bar"><i style="width:'+Math.min(100,100*v/base)+'%;--c:'+c+'"></i></div><b>'+v+'</b></div>';};
+    $('#funil').innerHTML=linha('Na caixa',pr.total,'#94a3b8')+linha('Conferidos',pr.aEmpenhar-pr.conferindo,'#38bdf8')+linha('Prontos p/ lote',pr.prontos,'#34d399')+linha('Empenhados hoje',D.empenhos?D.empenhos.n:0,'#10b981')+linha('Pagos hoje',D.pagamentos?D.pagamentos.n:0,'#f59e0b')+linha('Prestação na fila',pc.fila||0,'#ef4444');
+  }
+
+  // Problemas
+  var A=P.problemas.antes||[], Dp=P.problemas.depois||[];
+  $('#contProb').textContent=A.length+Dp.length||'';
+  var cor={CP:'az','1Doc':'',Pagamento:'',Prestação:'',Anular:'vm'};
+  $('#problemas').innerHTML=(A.length?'<div style="font:700 11px var(--font-hud);color:#94a3b8;margin-bottom:4px;">Antes do empenho · Fora do lote</div>'+A.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.processo)+' · '+esc(curto(x.servidor))+'</b><span class="st-p '+x.estado+'">'+(x.estado==='conferindo'?'conferindo':'fora do lote')+'</span></div><div class="mot'+(x.estado==='conferindo'?' az':'')+'">'+esc(x.motivo)+'</div></div>';}).join(''):'')
+    +(Dp.length?'<div style="font:700 11px var(--font-hud);color:#94a3b8;margin-top:6px;margin-bottom:4px;">Depois do empenho</div>'+Dp.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.titulo)+'</b><span class="st-p fora">'+esc(x.tipo)+'</span></div><div class="mot '+(cor[x.tipo]||'')+'">'+esc(x.texto)+'</div></div>';}).join(''):'')
+    ||'<div style="text-align:center;padding:12px;font:600 12px var(--font-hud);color:#34d399;">Nenhum problema a resolver ✓</div>';
+
+  // Filtros
+  var aConf=(pr.itens||[]).filter(function(p){return p.descricao&&!conferida(p);}).length;
+  var f=[['todos','A empenhar',pr.aEmpenhar],['pronto','Prontos',pr.prontos],['fora','Fora do lote',pr.fora],['conferindo','Conferindo',pr.conferindo],['aconferir','Descrição a conferir',aConf]];
+  $('#filtrosProc').innerHTML=f.map(function(x){return '<button type="button" class="lote-filter-btn '+(S.filtroP===x[0]?'active':'')+'" data-pf="'+x[0]+'">'+x[1]+' <span>'+x[2]+'</span></button>';}).join('');
+  $$('[data-pf]').forEach(function(b){b.onclick=function(){S.filtroP=b.dataset.pf;desenharProcessos();};});
+
+  listaProc();
+}
+
+function listaProc(){
+  var pr=S.painel&&S.painel.processos; if(!pr)return;
+  var q=($('#busca').value||'').trim().toLowerCase();
+  var itens=(pr.itens||[]).filter(function(p){
+    if(S.filtroP==='pronto'&&p.estado!=='pronto')return false;
+    if(S.filtroP==='fora'&&p.estado!=='fora')return false;
+    if(S.filtroP==='conferindo'&&p.estado!=='conferindo')return false;
+    if(S.filtroP==='aconferir'&&(!p.descricao||conferida(p)))return false;
+    if(!q)return true;
+    return (p.servidor||'').toLowerCase().indexOf(q)>=0||(p.processo||'').indexOf(q)>=0||(p.cidade||'').toLowerCase().indexOf(q)>=0;
+  });
+
+  $('#listaProc').innerHTML=itens.map(function(p){
+    var st=p.estado, conf=conferida(p);
+    var cls=st==='pronto'?'pronto':st==='fora'?'fora':'robo';
+    var badgeTxt=st==='pronto'?'PRONTO':st==='fora'?'FORA DO LOTE':'CONFERINDO';
+    return '<article class="proc-modern-card '+(st==='pronto'?'':'ativo-robo')+'" style="cursor:pointer;" onclick="abrirProc(\''+esc(p.hash)+'\')">'
+      +'<div class="proc-squad-header">'
+        +'<span class="proc-squad-tag"><span class="squad-dot" style="background:'+(st==='pronto'?'#34d399':st==='fora'?'#f59e0b':'#38bdf8')+';"></span>UNIT · '+esc(p.processo)+'</span>'
+        +'<span class="proc-status-badge '+cls+'">'+badgeTxt+'</span>'
+      +'</div>'
+      +'<div class="proc-main-title">'+esc(p.servidor)+'</div>'
+      +'<div class="proc-route-sub">'+esc(p.cidade||'Destino não informado')+(p.uf&&p.uf!=='RS'?'/'+p.uf:'')+' · Saída: '+esc(p.saida||'--')+'</div>'
+      +(p.motivo?'<div class="proc-motivo-box" style="margin-top:6px;font:11px var(--font-mono);color:#fbbf24;background:rgba(245,158,11,0.12);padding:4px 8px;border-radius:6px;">'+esc(p.motivo)+'</div>':'')
+      +'<div class="proc-footer-metrics" style="margin-top:8px;">'
+        +'<div><span class="proc-metric-label">VALOR</span><span class="proc-metric-val" style="color:#34d399;">'+(p.valor?real(p.valor):'--')+'</span></div>'
+        +'<div style="text-align:right;"><span class="proc-metric-label">DESCRIÇÃO</span><span class="proc-metric-val" style="color:'+(conf?'#34d399':'#94a3b8')+';">'+(conf?'✓ Conferida':'Pendente')+'</span></div>'
+      +'</div>'
+    +'</article>';
+  }).join('')||'<div style="text-align:center;padding:24px;font:600 13px var(--font-hud);color:#94a3b8;">Nenhum processo encontrado com este filtro.</div>';
+}
+$('#busca').addEventListener('input',listaProc);
+window.abrirProc = abrirProc;
+
+// ---------- MODAL FOLHA PROCESSO ----------
+function abrirProc(hash){
+  var p=(S.painel&&S.painel.processos.itens||[]).filter(function(x){return x.hash===hash;})[0];
+  if(!p)return;
+  S.procAberto=hash;
+  desenharFolhaProc(p);
+  $('#veuProc').hidden=false;
+}
+
+function desenharFolhaProc(p){
+  var el=$('#folhaProc'), lin=function(r,v){return v?'<span>'+r+'</span><b>'+esc(v)+'</b>':'';};
+  el.innerHTML='<h3>'+esc(p.servidor)+'</h3>'
+    +'<div class="campos-p">'+lin('Processo',p.processo)+lin('Destino',(p.cidade||'?')+(p.uf&&p.uf!=='RS'?'/'+p.uf:''))+lin('Saída',(p.saida||'')+(p.horaSaida?' '+p.horaSaida:''))+lin('Chegada',(p.chegada||'')+(p.horaChegada?' '+p.horaChegada:''))+lin('Placa',p.placa)+lin('Valor',p.valor?real(p.valor):'')+lin('Situação',({pronto:'pronto p/ lote',fora:'fora do lote',conferindo:'conferindo'})[p.estado])+'</div>'
+    +(p.motivo?'<div class="proc-motivo-box" style="font:12px var(--font-mono);color:#fbbf24;background:rgba(245,158,11,0.15);padding:8px 10px;border-radius:8px;">'+esc(p.motivo)+'</div>':'')
+    +'<div style="font:700 11px var(--font-hud);color:#94a3b8;">Descrição do processo'+(p.descricaoCorrigida?' · corrigida':'')+'</div>'
+    +'<textarea id="descP" maxlength="600">'+esc(p.descricao||'')+'</textarea>'
+    +'<div style="font:700 11px var(--font-hud);color:#94a3b8;">Vai para o CP assim</div><div class="cp-txt" id="cpP">'+esc(p.descricaoCp||'(sem descrição - o lote não monta o texto)')+'</div>'
+    +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Conferida</button>')+'</div>'
+    +'<button type="button" class="abrirAx" id="verAxP">📎 Ver anexos (notas, roteiro)</button>'
+    +'<a class="abrir1doc" href="https://tupancireta.1doc.com.br/?pg=doc/ver&amp;hash='+encodeURIComponent(p.hash)+'&amp;itd=7" target="_blank" rel="noopener">Abrir no 1Doc ↗</a>'
+    +(p.confirmavel?'<div class="botoes"><button type="button" class="sim" id="notaOkP">✓ Nota conferida no 1Doc</button></div><div id="notaOkMsg" style="font:11px var(--font-mono);color:#ef4444;"></div>':'')
+    +'<div class="botoes">'+(p.descricaoCorrigida?'<button type="button" id="voltarP">Voltar ao lido</button>':'')+'<button type="button" id="fecharP">Fechar</button></div>';
+
+  var vx=$('#verAxP'); if(vx)vx.onclick=function(){vxAbrir(p);};
+  var ta=$('#descP'), sv=$('#salvarP');
+  ta.oninput=function(){sv.disabled=ta.value.trim()===String(p.descricao||'').trim()||ta.value.trim().length<10;};
+  sv.onclick=function(){
+    var v=ta.value.trim().replace(/\s+/g,' ').toUpperCase();sv.disabled=true;sv.textContent='Salvando…';
+    api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{descricaoSugerida:v},mesclar:true,autor:'thiago-celular',motivo:'descrição corrigida no celular'}}).then(function(j){
+      if(j.ok){
+        carregarPainel().then(function(){
+          var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];
+          if(n){marcarConf(n,true);if(!$('#veuProc').hidden&&S.procAberto===p.hash)desenharFolhaProc(n);}
+          listaProc();
+        });
       } else {
-        col.classList.remove('done');
-        col.children[1].textContent = '⏳ RUN';
+        toast('Não salvou: '+(j.error||'erro'));sv.disabled=false;sv.textContent='Salvar descrição';
+      }
+    }).catch(function(){toast('Sem conexão');sv.disabled=false;});
+  };
+
+  $('#confP').onclick=function(){
+    var marcar=!conferida(p);marcarConf(p,marcar);desenharFolhaProc(p);desenharProcessos();
+  };
+
+  var vt=$('#voltarP'); if(vt)vt.onclick=function(){
+    vt.disabled=true;api('processo-caixa-corrigir',{body:{hash:p.hash,numeroProcesso:p.processo,campos:{},limpar:['descricaoSugerida'],mesclar:true,autor:'thiago-celular',motivo:'descrição voltou ao lido pelo celular'}}).then(function(j){
+      if(j.ok){
+        toast('Voltou à descrição lida do processo');
+        carregarPainel().then(function(){
+          var n=(S.painel.processos.itens||[]).filter(function(x){return x.hash===p.hash;})[0];
+          if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);
+          listaProc();
+        });
       }
     });
+  };
+
+  $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
+
+  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){
+    var envia=function(just){
+      nk.disabled=true;nk.textContent='Confirmando…';
+      api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo,justificativa:just||undefined}}).then(function(j){
+        if(!j.ok&&j.precisaJustificativa&&!just){
+          var t=window.prompt('⚠️ '+(j.error||'Justifique')+'\n\nJustificativa para liberar mesmo assim:');
+          if(t&&t.trim())envia(t.trim());else{nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';}
+          return;
+        }
+        if(j.ok){
+          toast('✓ Confirmado! Liberado no lote.');
+          $('#veuProc').hidden=true;
+          carregarPainel();
+        } else {
+          $('#notaOkMsg').textContent=j.error||'Erro ao confirmar';
+          nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';
+        }
+      });
+    };
+    envia();
+  };
+}
+
+// ---------- VISUALIZADOR DE ANEXOS VX ----------
+var VX={cache:{},st:null};
+function vxFechar(){var el=document.getElementById('vx');if(el)el.parentNode.removeChild(el);VX.st=null;}
+function vxFit(){var st=VX.st;if(!st||!st.img)return{fit:1,w:0,h:0};var pw=st.palco.clientWidth,ph=st.palco.clientHeight,nw=st.img.naturalWidth||pw,nh=st.img.naturalHeight||ph,rad=st.giro*Math.PI/180,cos=Math.abs(Math.cos(rad)),sin=Math.abs(Math.sin(rad)),bbw=nw*cos+nh*sin,bbh=nw*sin+nh*cos;return{fit:Math.min(pw/bbw,ph/bbh),w:nw,h:nh};}
+function vxPintar(anim){var st=VX.st;if(!st||!st.img)return;st.img.className=anim?'anim':'';st.img.style.transform='translate3d('+st.x+'px,'+st.y+'px,0) scale('+st.z+') rotate('+st.giro+'deg)';}
+function vxZoomEm(alvo,cx,cy,anim){var st=VX.st;if(!st||!st.img)return;var px=(cx-st.x)/st.z,py=(cy-st.y)/st.z;st.z=Math.max(.2,Math.min(6,alvo));st.x=cx-px*st.z;st.y=cy-py*st.z;vxPintar(anim);}
+function vxBaixar(hash,i){var k=hash+':'+i;if(VX.cache[k])return Promise.resolve(VX.cache[k]);return api('processo-anexo-baixar',{body:{hash:hash,indice:i}}).then(function(j){if(!j.ok)throw new Error(j.error||'falha ao baixar');VX.cache[k]=j;return j;});}
+function vxIr(i){
+  var st=VX.st;if(!st||!st.anexos[i])return;st.atual=i;st.giro=0;vxBaixo();var pal=st.palco;pal.innerHTML='<div class="vx-sk"></div>';var a=st.anexos[i];
+  vxBaixar(st.hash,i).then(function(v){
+    if(!VX.st||VX.st.hash!==st.hash||VX.st.atual!==i)return;
+    if(v.tipo==='imagem'||/^image\//i.test(v.mime||'')){
+      var img=new Image();img.alt=a.nome;
+      img.onload=function(){
+        pal.innerHTML='';pal.appendChild(img);st.img=img;var F=vxFit();st.z=F.fit;st.x=(pal.clientWidth-F.w)/2;st.y=(pal.clientHeight-F.h)/2;vxPintar(false);
+      };
+      img.onerror=function(){pal.innerHTML='<div class="vx-msg">Não consegui exibir esta imagem.</div>';};
+      img.src=v.dataUrl;
+    }else if(v.tipo==='pdf'||/pdf/i.test(v.mime||'')){
+      pal.innerHTML='<div class="vx-msg"><a class="vx-pdf" href="'+v.url+'" target="_blank" rel="noopener"><span style="font-size:34px">📄</span>'+esc(v.nome)+'<span style="font-weight:400;font-size:12px;opacity:.8">Toque para abrir o PDF</span></a></div>';
+    }else pal.innerHTML='<div class="vx-msg">Sem visualização para este tipo. <a href="'+v.url+'" download="'+esc(v.nome)+'" style="color:#34d399">Baixar</a></div>';
+  }).catch(function(e){if(VX.st&&VX.st.atual===i)pal.innerHTML='<div class="vx-msg">Não consegui abrir: '+esc(e.message)+'</div>';});
+}
+function vxBaixo(){
+  var st=VX.st,el=document.getElementById('vxBaixo');if(!st||!el)return;var a=st.anexos[st.atual];
+  el.innerHTML='<div class="vx-dots">'+st.anexos.map(function(x,k){return'<i class="'+(k===st.atual?'on':'')+'"></i>';}).join('')+'</div>'
+    +'<div class="vx-nome">'+(a?esc(a.nome)+' · '+(st.atual+1)+' de '+st.anexos.length:(st.lendo?'Lendo a lista no 1Doc…':'Sem anexos'))+'</div>'
+    +(st.p.motivo?'<div class="vx-mot">🤖 '+esc(st.p.motivo)+'</div>':'')
+    +($('#notaOkP')?'<button type="button" class="vx-ok" id="vxOk">✓ Nota conferida — liberar</button>':'');
+  var ok=document.getElementById('vxOk');if(ok)ok.onclick=function(){vxFechar();var b=$('#notaOkP');if(b)b.click();};
+}
+function vxAbrir(p){
+  vxFechar();
+  var d=document.createElement('div');d.className='vx';d.id='vx';
+  d.innerHTML='<div class="vx-top"><button type="button" class="vx-b" id="vxX">✕</button><b>'+esc(p.servidor||'')+'</b><small>'+esc(p.processo||'')+'</small><button type="button" class="vx-b" id="vxGiro">⟳</button></div>'
+    +'<div class="vx-palco" id="vxPalco"><div class="vx-sk"></div></div><div class="vx-baixo" id="vxBaixo"></div>';
+  document.body.appendChild(d);
+  var st=VX.st={hash:p.hash,p:p,anexos:[],atual:0,giro:0,z:1,x:0,y:0,img:null,palco:d.querySelector('#vxPalco'),lendo:true};
+  d.querySelector('#vxX').onclick=vxFechar;
+  d.querySelector('#vxGiro').onclick=function(){if(!st.img)return;st.giro=(st.giro+90)%360;var F=vxFit();st.z=F.fit;vxPintar(true);};
+  vxBaixo();
+
+  api('processo-anexos&hash='+encodeURIComponent(p.hash)).then(function(j){
+    if(!VX.st||VX.st.hash!==p.hash)return;st.lendo=false;
+    if(!j.ok){vxBaixo();st.palco.innerHTML='<div class="vx-msg">'+esc(j.error||'Não consegui ler os anexos.')+'</div>';return;}
+    st.anexos=j.anexos||[];if(!st.anexos.length){vxBaixo();st.palco.innerHTML='<div class="vx-msg">Este processo não tem anexos.</div>';return;}
+    vxIr(0);
+  }).catch(function(e){if(VX.st){st.lendo=false;vxBaixo();st.palco.innerHTML='<div class="vx-msg">Sem conexão: '+esc(e.message)+'</div>';}});
+}
+
+// ---------- NOTEBOOK DELL HOST TELEMETRIA ----------
+function desenharNotebook(){
+  var E=S.equipe, tel=E&&E.telemetriaNotebook;
+  if(!tel||!tel.sistema){
+    $('#dellOnlinePill').textContent='OFFLINE';
+    $('#dellOnlinePill').style.background='rgba(239,68,68,0.2)';
+    $('#dellOnlinePill').style.color='#ef4444';
+    $('#dellHostTitle').textContent='DESKTOP-MIQJ3OB · Aguardando telemetria…';
+    return;
   }
-  turboTicker();
+  var agora=Date.now(), coletado=tel.coletadoEm||0, idadeSec=Math.max(0,Math.round((agora-coletado)/1000));
+  var online=idadeSec<90;
+  var sis=tel.sistema||{}, ram=sis.ram||{}, robo=tel.roboCp||{}, svcs=tel.servicos||{};
+
+  var cpuP=Math.round(sis.cpuPercent||0);
+  var ramP=Math.round(ram.percentual||0);
+  var uptime=sis.uptimeHoras?(sis.uptimeHoras<24?Math.round(sis.uptimeHoras)+' horas':(sis.uptimeHoras/24).toFixed(1)+' dias'):'--';
+
+  $('#dellOnlinePill').textContent=online?'ONLINE':'OFFLINE';
+  $('#dellOnlinePill').style.background=online?'rgba(52,211,153,0.2)':'rgba(239,68,68,0.2)';
+  $('#dellOnlinePill').style.color=online?'#34d399':'#ef4444';
+  $('#dellHostTitle').textContent=esc(sis.hostname||'Notebook Dell')+' · '+(sis.nucleos||8)+' Cores · '+(online?'Uptime: '+uptime:'Sem sinal há '+idadeSec+'s');
+
+  $('#dellCpuVal').textContent=cpuP+'%';
+  $('#dellCpuBar').style.width=Math.min(100,cpuP)+'%';
+  $('#dellCpuMeta').textContent=(sis.nucleos||8)+' Cores @ 2.80GHz';
+
+  $('#dellRamVal').textContent=ramP+'%';
+  $('#dellRamBar').style.width=Math.min(100,ramP)+'%';
+  $('#dellRamGb').textContent=((ram.usadaMb||0)/1024).toFixed(1)+' / '+((ram.totalMb||0)/1024).toFixed(1)+' GB';
+
+  // Serviços Windows
+  var svcEntries=Object.keys(svcs).sort();
+  if(svcEntries.length){
+    $('#dellServicesGrid').innerHTML=svcEntries.map(function(k){
+      var ok=svcs[k]==='Running';
+      return '<div class="dell-svc-chip" style="color:'+(ok?'#f8fafc':'#94a3b8')+';">'
+        +'<span class="dell-svc-dot" style="background:'+(ok?'#34d399':'#ef4444')+';box-shadow:0 0 6px '+(ok?'#34d399':'#ef4444')+';"></span>'
+        +esc(k)
+      +'</div>';
+    }).join('');
+  }
+
+  // Tags do Robô CP
+  $('#dellChromeTag').textContent=robo.chromeAberto?'Aberto':'Fechado';
+  $('#dellChromeTag').className='dell-r-tag '+(robo.chromeAberto?'ok':'');
+  $('#dellLockTag').textContent=robo.lock?'Bloqueado':'Livre';
+  $('#dellLockTag').className='dell-r-tag '+(robo.lock?'lock':'ok');
+  var ultEv=(robo.historicoLog||[]).slice(-1)[0];
+  $('#dellDisparoTag').textContent=ultEv?esc(ultEv.slice(0,25)):'Standby';
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// 4. NUMBER TICKER COM CURVA CÚBICA E GLOW (DESIGN.MD §7.3)
-// ══════════════════════════════════════════════════════════════════════════
-function animarNumero(el, fim, ms = 800) {
-  if (!el) return;
-  const ini = performance.now();
-  (function passo(t) {
-    const p = Math.min(1, (t - ini) / ms);
-    const e = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(fim * e);
-    if (p < 1) requestAnimationFrame(passo);
-  })(ini);
+// ---------- ATIVIDADE / RADAR ----------
+function desenharAtividade(){
+  var E=S.equipe, P=S.painel; if(!E)return;
+  var evs=[];
+  (E.mensagens||[]).forEach(function(m){evs.push({t:m.criado,tipo:'msg',bot:m.de,texto:m.texto});});
+  (E.tarefas||[]).forEach(function(t){evs.push({t:t.atualizado||t.criado,tipo:'tarefa',bot:t.para||t.de,titulo:t.titulo,corpo:t.resultado||t.corpo,st:t.status,id:t.id});});
+  if(P&&(P.correcoes||[]).length){
+    P.correcoes.forEach(function(c){evs.push({t:c.em,tipo:'corrigiu',bot:'coordenador',proc:c.numeroProcesso,desc:c.descricao,ant:c.anterior,autor:c.autor});});
+  }
+  evs.sort(function(a,b){return b.t-a.t;});
+
+  var contagens={};
+  evs.forEach(function(e){contagens[e.bot]=(contagens[e.bot]||0)+1;});
+  var botsPresentes=Object.keys(contagens).sort();
+
+  $('#filtrosAt').innerHTML='<button type="button" class="bot-filter-chip '+(S.filtroAt==='todos'?'active':'')+'" data-atf="todos">Todos ('+evs.length+')</button>'
+    +botsPresentes.map(function(b){return '<button type="button" class="bot-filter-chip '+(S.filtroAt===b?'active':'')+'" data-atf="'+b+'">'+nomeBot(b)+' ('+contagens[b]+')</button>';}).join('');
+
+  $$('[data-atf]').forEach(function(b){b.onclick=function(){S.filtroAt=b.dataset.atf;desenharAtividade();};});
+
+  var filtrados=evs.filter(function(e){return S.filtroAt==='todos'||e.bot===S.filtroAt;});
+  $('#statTotalEventos').textContent=evs.length+' AÇÕES';
+
+  $('#feed').innerHTML=filtrados.slice(0,40).map(function(e){
+    var bot=AG[e.bot]||[e.bot,'?','#6b7c74'];
+    var corpo='';
+    if(e.tipo==='msg')corpo='<p style="margin:4px 0 0;font:12.5px var(--font-body);color:#cbd5e1;">'+md(e.texto)+'</p>';
+    else if(e.tipo==='tarefa')corpo='<b style="font:700 13px var(--font-hud);color:#fff;">'+esc(e.titulo)+'</b><p style="margin:4px 0 0;font:12px var(--font-body);color:#94a3b8;">'+esc(String(e.corpo||'').replace(/\*\*/g,'').slice(0,180))+'</p>';
+    else if(e.tipo==='corrigiu')corpo='<b style="font:700 13px var(--font-hud);color:#34d399;">Corrigiu descrição do '+esc(e.proc)+'</b><p style="margin:4px 0 0;font:11.5px var(--font-mono);color:#94a3b8;">'+esc(e.desc)+'</p>';
+
+    return '<div class="timeline-cyber-card" style="display:flex;gap:12px;padding:12px 14px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:14px;margin-bottom:8px;">'
+      +av(e.bot)
+      +'<div style="flex:1;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+          +'<span style="font:700 12.5px var(--font-hud);color:'+bot[2]+';">'+esc(bot[0])+'</span>'
+          +'<span style="font:500 10.5px var(--font-mono);color:#64748b;">'+ha(e.t)+' atrás</span>'
+        +'</div>'
+        +corpo
+      +'</div>'
+    +'</div>';
+  }).join('')||'<div style="text-align:center;padding:24px;font:600 13px var(--font-hud);color:#94a3b8;">Nenhum evento registrado ainda.</div>';
 }
 
-function turboTicker() {
-  animarNumero(document.getElementById('numPrestacoes'), 42, 850);
-  animarNumero(document.getElementById('numEmpenhos'), 18, 700);
-  animarNumero(document.getElementById('numPagamentos'), 26, 800);
+// ---------- CONVERSA / CHAT ----------
+function desenharConversa(){
+  var E=S.equipe; if(!E)return;
+  var msgs=E.mensagens||[];
+  var hist=$('#chatHistorico');
+  hist.innerHTML=msgs.map(function(m){
+    var eu=m.de==='thiago';
+    var a=AG[m.de]||[m.de,'?','#6b7c74'];
+    return '<div class="chat-bubble '+(eu?'eu':'bot')+'">'
+      +'<div class="chat-bubble-meta">'
+        +'<span>'+(eu?'VOCÊ':esc(a[0]).toUpperCase())+'</span>'
+        +'<span class="chat-bubble-time">'+hm(m.criado)+'</span>'
+      +'</div>'
+      +'<div style="font:13px/1.4 var(--font-body);">'+md(m.texto)+'</div>'
+    +'</div>';
+  }).join('')||'<div style="text-align:center;padding:24px;font:600 12px var(--font-mono);color:#94a3b8;">Nenhuma mensagem ainda. Envie uma instrução ao Coordenador.</div>';
+  hist.scrollTop=hist.scrollHeight;
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// 5. SLIDER DESLIZANTE DA FLOATING DOCK (PRESTIGE UI) & TROCA DE ABAS
-// ══════════════════════════════════════════════════════════════════════════
+$('#form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var inp=$('#txt'), v=inp.value.trim(); if(!v)return;
+  inp.value='';
+  api('equipe-enviar',{body:{texto:v}}).then(function(){
+    toast('Mensagem enviada');
+    carregarEquipe();
+  }).catch(function(){toast('Erro ao enviar mensagem');});
+});
+
+$$('#atalhos button').forEach(function(b){
+  b.addEventListener('click',function(){
+    $('#txt').value='coordenador, '+b.textContent;
+    $('#txt').focus();
+  });
+});
+
+// ---------- EQUIPE (STATUS + 3D) ----------
+function desenharEquipe(){
+  var E=S.equipe; if(!E)return;
+  if(typeof eqeCarregar==='function')eqeCarregar();
+}
+
+// ---------- PEDIR AO CP ----------
+var PED={rel:'relatorio_pc_pendentes',dia:'hoje',qPc:0};
+function abrirPedir(){PED.qPc=0;passoPedir('menu');$('#veuPedir').hidden=false;}
+$('#btPedir').addEventListener('click',abrirPedir);
+
+function passoPedir(qual){
+  var P=S.painel||{}, pc=P.prestacao||{}, pr=P.processos||{itens:[]}, pAtual=pedidoAtual(), oc=pAtual&&pAtual.ativo?(NOME_PED[pAtual.t&&pAtual.t.tipo]||'um pedido'):null, el=$('#folhaPedir'), h='';
+  var prontos=(pr.itens||[]).filter(function(i){return i.estado==='pronto';});
+
+  if(qual==='menu'){
+    h='<div class="passo2"><h3>Pedir ao CP</h3><div class="aviso-cp">'+(oc?'⏳ Agora está rodando: <b>'+esc(oc)+'</b>. Espere terminar para pedir outro.':'🔒 O robô abre o CP sozinho no Dell — deixe o CP fechado no computador.')+'</div><div class="opcoes">'
+     +'<button type="button" class="opcao" data-ir="rel"'+(oc?' disabled':'')+'><span class="em">📋</span><span><b>Tirar relatórios</b><span>empenhos · pagamentos · prestações pendentes</span></span></button>'
+     +'<button type="button" class="opcao" data-ir="pc"'+(oc||!pc.prontos?' disabled':'')+'><span class="em">🧾</span><span><b>Prestar contas</b><span>'+(pc.prontos||0)+' prontas para gravar no CP</span></span></button>'
+     +'<button type="button" class="opcao" data-ir="emp"'+(oc||!prontos.length?' disabled':'')+'><span class="em">💰</span><span><b>Empenhar lote</b><span>'+prontos.length+' prontos para empenho</span></span></button>'
+     +'</div><div class="botoes"><button type="button" data-fecha2="1">Fechar</button></div></div>';
+  } else if(qual==='rel'){
+    h='<div class="passo2"><h3>Tirar relatório do CP</h3><div class="opcoes">'
+     +[['relatorio_pc_pendentes','Prestações pendentes','para o painel e conciliação'],['relatorio_empenhos','Empenhos emitidos','conferir o que foi empenhado'],['relatorio_pagamentos','Pagamentos do dia','conferir o que o banco pagou']].map(function(x){
+       return '<button type="button" class="opcao" data-rel="'+x[0]+'"><span class="em">📄</span><span><b>'+x[1]+'</b><span>'+x[2]+'</span></span></button>';
+     }).join('')
+     +'</div><div class="botoes"><button type="button" id="okRel" class="sim">Tirar relatório hoje</button><button type="button" data-ir="menu">Voltar</button></div></div>';
+  } else if(qual==='pc'){
+    var tot=pc.prontos||0; if(!PED.qPc)PED.qPc=Math.min(tot,10);
+    h='<div class="passo2"><h3>Prestar contas no CP</h3><p style="font:12px var(--font-mono);color:#94a3b8;">Temos <b>'+tot+'</b> prestações prontas.</p>'
+     +'<div class="botoes"><button type="button" class="sim" id="okPc">Prestar '+PED.qPc+' agora</button><button type="button" data-ir="menu">Voltar</button></div></div>';
+  } else if(qual==='emp'){
+    h='<div class="passo2"><h3>Empenhar lote no CP</h3><p style="font:12px var(--font-mono);color:#94a3b8;">Confira os processos prontos:</p>'
+     +'<div id="listaEmp" style="display:grid;gap:6px;max-height:220px;overflow-y:auto;">'+prontos.map(function(p){
+       return '<label style="display:flex;align-items:center;gap:8px;font:12px var(--font-mono);color:#cbd5e1;"><input type="checkbox" checked value="'+esc(p.hash)+'" data-v="'+(p.valor||0)+'"><span><b>'+esc(p.processo)+'</b> · '+esc(curto(p.servidor))+' · '+real(p.valor)+'</span></label>';
+     }).join('')+'</div>'
+     +'<div id="confEmp"></div>'
+     +'<div class="botoes" id="preEmp"><button type="button" class="sim" id="btEmp">Empenhar selecionados</button><button type="button" data-ir="menu">Voltar</button></div></div>';
+  }
+
+  el.innerHTML=h;
+  el.querySelectorAll('[data-ir]').forEach(function(b){b.onclick=function(){passoPedir(b.dataset.ir);};});
+  var f2=el.querySelector('[data-fecha2]'); if(f2)f2.onclick=function(){$('#veuPedir').hidden=true;};
+
+  var okRel=$('#okRel'); if(okRel)okRel.onclick=function(){
+    var d=new Date();
+    var data=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
+    var rota={relatorio_empenhos:'cp-relatorio-empenhos-pedir',relatorio_pagamentos:'cp-relatorio-pagamentos-pedir',relatorio_pc_pendentes:'cp-relatorio-pc_pendentes-pedir'}[PED.rel];
+    okRel.disabled=true; api(rota,{body:{data:data}}).then(function(j){
+      fimPedir(j,'📋 Relatório pedido ('+data+')');
+    });
+  };
+
+  var okPc=$('#okPc'); if(okPc)okPc.onclick=function(){
+    okPc.disabled=true;api('cp-tarefa-solicitar',{body:{tipo:'prestacao',limite:PED.qPc}}).then(function(j){
+      fimPedir(j,'🧾 Prestação de contas de '+PED.qPc+' pedida');
+    });
+  };
+
+  var btEmp=$('#btEmp'); if(btEmp){
+    btEmp.onclick=function(){
+      var c=$$('#listaEmp input:checked'); if(!c.length){toast('Nenhum processo marcado.');return;}
+      $('#preEmp').hidden=true;
+      $('#confEmp').innerHTML='<div class="confirma">Confirmar gravação de <b>'+c.length+' empenhos</b> no CP?<div class="botoes"><button type="button" class="perigo" id="empSim">Confirmar e Gravar</button><button type="button" id="empNao">Revisar</button></div></div>';
+      $('#empNao').onclick=function(){$('#confEmp').innerHTML='';$('#preEmp').hidden=false;};
+      $('#empSim').onclick=function(){
+        this.disabled=true;api('celular-empenhar',{body:{hashes:c.map(function(i){return i.value;})}}).then(function(j){
+          fimPedir(j,'💰 Lote de '+c.length+' enviado com sucesso!');
+        });
+      };
+    };
+  }
+}
+
+function fimPedir(j,okTxt){
+  $('#folhaPedir').innerHTML='<div class="passo2"><div class="'+(j&&j.ok?'feito':'erro-box')+'" style="font-size:14px">'+(j&&j.ok?esc(okTxt):'Não foi: '+esc((j&&(j.error||j.mensagem))||'erro'))+'</div><div class="botoes"><button type="button" id="fechaPed">Fechar</button></div></div>';
+  $('#fechaPed').onclick=function(){$('#veuPedir').hidden=true;}; carregarCp();
+}
+
+// Fechamento de modais
+$$('[data-fecha]').forEach(function(b){b.addEventListener('click',function(){$('#'+b.dataset.fecha).hidden=true;});});
+$$('.veu').forEach(function(v){v.addEventListener('click',function(e){if(e.target===v)v.hidden=true;});});
+
+// ---------- NAVEGAÇÃO ENTRE ABAS ----------
+var abas=['view-inicio','view-lote','view-dell','view-atividade','view-equipe','view-conversa'];
+var nomesAba=['inicio','lote','dell','atividade','equipe','conversa'];
+
 function posicionarDockPill(btn) {
-  const pill = document.getElementById('dockPill');
-  if (!pill || !btn) return;
-  pill.style.width = btn.offsetWidth + 'px';
-  pill.style.transform = `translateX(${btn.offsetLeft}px)`;
+  var pill=$('#dockPill');
+  if(!pill||!btn)return;
+  pill.style.transform='none';
+  pill.style.left=btn.offsetLeft+'px';
+  pill.style.width=btn.offsetWidth+'px';
 }
 
 function trocarDock(idx, btn) {
-  const items = document.querySelectorAll('.dock-item');
-  if (!btn && items[idx]) btn = items[idx];
-  items.forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  posicionarDockPill(btn);
+  var items=$$('.dock-item');
+  items.forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  else if(items[idx])items[idx].classList.add('active');
 
-  const vInicio = document.getElementById('view-inicio');
-  const vLote = document.getElementById('view-lote');
-  const vDell = document.getElementById('view-dell');
-  const vAtividade = document.getElementById('view-atividade');
-  const vEquipe = document.getElementById('view-equipe');
-  const vConversa = document.getElementById('view-conversa');
+  posicionarDockPill(btn||items[idx]);
 
-  if (vInicio) vInicio.hidden = (idx !== 0);
-  if (vLote) vLote.hidden = (idx !== 1);
-  if (vDell) vDell.hidden = (idx !== 2);
-  if (vAtividade) vAtividade.hidden = (idx !== 3);
-  if (vEquipe) vEquipe.hidden = (idx !== 4);
-  if (vConversa) vConversa.hidden = (idx !== 5);
+  abas.forEach(function(id, i){
+    var el=$('#'+id);
+    if(el)el.hidden=(i!==idx);
+  });
 
-  if (idx === 2) {
-    recarregarTelemetriaDell();
-  } else if (idx === 4) {
-    if (!eqe.pronto) eqeCarregar();
-    eqe.vis = true;
-    setTimeout(() => { if (eqe.pronto) { eqeMover(true); eqeDesenhar(); } }, 60);
-  } else if (idx === 5) {
-    const sc = document.getElementById('chatHistorico');
-    if (sc) sc.scrollTop = sc.scrollHeight;
-    const inp = document.getElementById('chatInput');
-    if (inp) inp.focus();
+  S.aba=nomesAba[idx]||'inicio';
+  try{localStorage.setItem('eq_cel_aba',S.aba);}catch(e){}
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  if(S.aba==='equipe'&&typeof eqeIniciar==='function')eqeIniciar();
+}
+window.trocarDock = trocarDock;
+
+function abrirAbaLoteDemo(){trocarDock(1,$$('.dock-item')[1]);}
+function abrirAbaDellDemo(){trocarDock(2,$$('.dock-item')[2]);}
+function abrirAbaAtividadeDemo(){trocarDock(3,$$('.dock-item')[3]);}
+function abrirAbaEquipeDemo(){trocarDock(4,$$('.dock-item')[4]);}
+function abrirAbaConversaDemo(){trocarDock(5,$$('.dock-item')[5]);}
+window.abrirAbaLoteDemo = abrirAbaLoteDemo;
+window.abrirAbaDellDemo = abrirAbaDellDemo;
+window.abrirAbaAtividadeDemo = abrirAbaAtividadeDemo;
+window.abrirAbaEquipeDemo = abrirAbaEquipeDemo;
+window.abrirAbaConversaDemo = abrirAbaConversaDemo;
+
+// ---------- POLLING AUTOMÁTICO E FRESCO ----------
+function fresco(){
+  var t=Math.max(S.em.cp||0,S.em.eq||0,S.em.pa||0); if(!t)return; var s=(Date.now()-t)/1000;
+  $('#fresco').textContent=s<30?'AO VIVO · '+Math.round(s)+'s':'ATUALIZADO HÁ '+ha(Date.now()-s*1000);
+  var d=$('#dotFresco'); if(d)d.className='radar-pulse'+(s<30?'':' velho');
+}
+
+var ultEq=0,ultPa=0;
+setInterval(function(){
+  if(document.hidden||!token()||!$('#login').hidden)return;
+  var p=pedidoAtual(), rapido=p&&p.ativo;
+  carregarCp();
+  if(Date.now()-ultEq>(S.aba==='conversa'?4000:rapido?8000:15000)){ultEq=Date.now();carregarEquipe();}
+  if(Date.now()-ultPa>(rapido?20000:45000)){ultPa=Date.now();carregarPainel();}
+},5000);
+setInterval(fresco,1000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)tudo();});
+
+// Inicialização de aba salva
+var abaSalva='inicio'; try{abaSalva=localStorage.getItem('eq_cel_aba')||'inicio';}catch(e){}
+var idxSalvo=nomesAba.indexOf(abaSalva);
+if(idxSalvo<0)idxSalvo=0;
+trocarDock(idxSalvo,$$('.dock-item')[idxSalvo]);
+tudo(); ultEq=ultPa=Date.now();
+
+// ---------- MOTOR DE METEOROS DE FUNDO ----------
+var cv=$('#cyberCanvas');
+if(cv){
+  var ctx=cv.getContext('2d'), Ww=cv.width=window.innerWidth, Hh=cv.height=window.innerHeight;
+  window.addEventListener('resize',function(){Ww=cv.width=window.innerWidth;Hh=cv.height=window.innerHeight;});
+  var meteors=[];
+  function criarMeteoro(){return {x:Math.random()*Ww,y:Math.random()*-200,len:Math.random()*80+40,speed:Math.random()*8+4};}
+  for(var i=0;i<20;i++)meteors.push(criarMeteoro());
+  function animarFundo(){
+    ctx.clearRect(0,0,Ww,Hh);
+    ctx.strokeStyle='rgba(52,211,153,0.035)';ctx.lineWidth=1;
+    for(var x=0;x<Ww;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,Hh);ctx.stroke();}
+    for(var y=0;y<Hh;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(Ww,y);ctx.stroke();}
+    meteors.forEach(function(m){
+      m.x+=m.speed*0.8;m.y+=m.speed*1.2;
+      if(m.y>Hh+100||m.x>Ww+100)Object.assign(m,criarMeteoro());
+      var grad=ctx.createLinearGradient(m.x,m.y,m.x-m.len*0.8,m.y-m.len*1.2);
+      grad.addColorStop(0,'rgba(52,211,153,0.7)');grad.addColorStop(1,'transparent');
+      ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(m.x-m.len*0.8,m.y-m.len*1.2);ctx.stroke();
+    });
+    requestAnimationFrame(animarFundo);
   }
-}
-
-let dockIdxAuto = 0;
-function trocarDockAuto() {
-  dockIdxAuto = (dockIdxAuto + 1) % 6;
-  const items = document.querySelectorAll('.dock-item');
-  if (items[dockIdxAuto]) {
-    trocarDock(dockIdxAuto, items[dockIdxAuto]);
-  }
-}
-
-function abrirAbaLoteDemo() {
-  const items = document.querySelectorAll('.dock-item');
-  trocarDock(1, items[1]);
-}
-
-function abrirAbaDellDemo() {
-  const items = document.querySelectorAll('.dock-item');
-  trocarDock(2, items[2]);
-}
-
-function abrirAbaAtividadeDemo() {
-  const items = document.querySelectorAll('.dock-item');
-  trocarDock(3, items[3]);
-}
-
-function abrirAbaEquipeDemo() {
-  const items = document.querySelectorAll('.dock-item');
-  trocarDock(4, items[4]);
-}
-
-function abrirAbaConversaDemo() {
-  const items = document.querySelectorAll('.dock-item');
-  trocarDock(5, items[5]);
-}
-
-window.addEventListener('resize', () => {
-  const active = document.querySelector('.dock-item.active');
-  if (active) posicionarDockPill(active);
-});
-setTimeout(() => {
-  const active = document.querySelector('.dock-item.active');
-  if (active) posicionarDockPill(active);
-}, 80);
-
-// ══════════════════════════════════════════════════════════════════════════
-// 5.2 CHAT DIRETO COM O COORDENADOR (TACTICAL COMMS ENGINE)
-// ══════════════════════════════════════════════════════════════════════════
-function enviarMensagemChat() {
-  const inp = document.getElementById('chatInput');
-  const txt = (inp.value || '').trim();
-  if (!txt) return;
-  inp.value = '';
-  adicionarMensagemUsuario(txt);
-  processarRespostaCoordenador(txt);
-}
-
-function enviarMensagemRapida(txt) {
-  abrirAbaConversaDemo();
-  adicionarMensagemUsuario(txt);
-  processarRespostaCoordenador(txt);
-}
-
-function adicionarMensagemUsuario(txt) {
-  const hist = document.getElementById('chatHistorico');
-  const d = new Date();
-  const hora = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-  
-  const el = document.createElement('div');
-  el.className = 'chat-bubble eu';
-  el.innerHTML = `
-    <div class="chat-bubble-meta">
-      <span>VOCÊ</span>
-      <span class="chat-bubble-time">${hora}</span>
-    </div>
-    <div>${escaparHtmlTexto(txt)}</div>
-  `;
-  hist.appendChild(el);
-  hist.scrollTop = hist.scrollHeight;
-  dispararPulsoRede();
-}
-
-function processarRespostaCoordenador(pergunta) {
-  const ind = document.getElementById('chatDigitando');
-  const hist = document.getElementById('chatHistorico');
-  if (ind) ind.style.display = 'flex';
-  hist.scrollTop = hist.scrollHeight;
-
-  const q = pergunta.toLowerCase();
-  let resposta = 'Entendido! Já repassei as instruções aos robôs da equipe.';
-
-  if (q.includes('status') || q.includes('cp')) {
-    resposta = 'O <b>Robô CP (Hermes FullCP)</b> está 100% operacional no notebook. Sessão autenticada via certificado, vigia ativo a cada 2 min e 0 falhas registradas hoje.';
-  } else if (q.includes('prestação') || q.includes('fila')) {
-    resposta = 'Temos <b>42 prestações prontas</b> na fila automática do CP, com 0 vencidas no momento. A próxima vence apenas amanhã às 18h.';
-  } else if (q.includes('relatório')) {
-    resposta = 'O relatório de prestações pendentes consolidou <b>R$ 14.890,20</b>. Os dados de conciliação já foram sincronizados no painel e no canal do Telegram.';
-  } else if (q.includes('resumo') || q.includes('dia')) {
-    resposta = 'Resumo de hoje: <b>18 empenhos</b> emitidos no CP (R$ 5.420,00), <b>26 pagamentos confirmados</b> e 8 novos processos no lote prontos para disparo.';
-  } else if (q.includes('lote') || q.includes('empenhar')) {
-    resposta = 'O lote com <b>8 processos (R$ 2.450,88)</b> está pronto na catapulta. Clique em "Disparar Lote" na aba Lote para autorizar o envio ao CP.';
-  }
-
-  setTimeout(() => {
-    if (ind) ind.style.display = 'none';
-    const d = new Date();
-    const hora = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-    
-    const bEl = document.createElement('div');
-    bEl.className = 'chat-bubble bot';
-    bEl.innerHTML = `
-      <div class="chat-bubble-meta">
-        <span>COORDENADOR</span>
-        <span class="chat-bubble-time">${hora}</span>
-      </div>
-      <div>${resposta}</div>
-    `;
-    hist.appendChild(bEl);
-    hist.scrollTop = hist.scrollHeight;
-    dispararPulsoRede();
-    toast('💬 Mensagem do Coordenador recebida!');
-  }, 950);
-}
-
-function escaparHtmlTexto(t) {
-  const d = document.createElement('div');
-  d.textContent = t;
-  return d.innerHTML;
+  animarFundo();
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// 5.1 FILTRO TÁTICO DA ABA ATIVIDADE / RADAR & AÇÕES
-// ══════════════════════════════════════════════════════════════════════════
-function filtrarAtividade(bot, btn) {
-  document.querySelectorAll('.bot-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.ev-modern-card').forEach(card => {
-    if (bot === 'todos' || card.dataset.bot === bot) {
-      card.style.display = 'flex';
-      card.animate([
-        { opacity: 0, transform: 'translateX(-12px)' },
-        { opacity: 1, transform: 'none' }
-      ], { duration: 180, easing: 'cubic-bezier(0.05, 0.7, 0.1, 1)' });
-    } else {
-      card.style.display = 'none';
-    }
-  });
-}
-
-function desfazerCorrecaoDemo(btn) {
-  btn.disabled = true;
-  const chip = document.getElementById('chipEvThiago');
-  if (chip) {
-    chip.className = 'ev-status-chip';
-    chip.style.background = 'rgba(255,255,255,0.08)';
-    chip.style.color = '#94a3b8';
-    chip.innerHTML = '<span>↺</span> DESFEITO';
-  }
-  btn.style.opacity = '0.4';
-  btn.textContent = 'Desfeito com sucesso';
-  toast('✓ Correção desfeita · O card voltou aos dados anteriores');
-}
-
-let simCount = 1;
-function simularNovoEventoTelemetria() {
-  const wrap = document.getElementById('feedAtividadeTimeline');
-  if (!wrap) return;
-  const d = new Date();
-  const hora = d.toTimeString().split(' ')[0];
-  
-  const el = document.createElement('article');
-  el.className = 'ev-modern-card';
-  el.dataset.bot = 'cacador';
-  el.innerHTML = `
-    <div class="ev-card-header">
-      <div class="ev-bot-id">
-        <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4);border-color:#22d3ee;">
-          CA
-        </div>
-        <div class="ev-bot-name-group">
-          <span class="ev-bot-title">CAÇADOR // RECON UNIT</span>
-          <span class="ev-bot-role" style="color:#06b6d4;">TELEMETRIA AO VIVO #${simCount++}</span>
-        </div>
-      </div>
-      <time class="ev-time-stamp" style="color:#34d399;">
-        <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 6px #34d399;"></span>
-        ${hora}
-      </time>
-    </div>
-    <h4 class="ev-headline">Novo processo capturado no 1Doc e sincronizado com o SGD Diárias</h4>
-    <div class="ev-log-terminal">
-<code>[VARREDURA] Execução otimizada em 12ms · 0 estouro de memória KV.
-[HASH] d48a${Math.floor(Math.random()*900+100)} · Servidor apto para conferência pelo lote.</code>
-    </div>
-    <div class="ev-card-footer">
-      <span class="ev-status-chip ok"><span>✓</span> CAPTURADO AGORA</span>
-      <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
-        <span>Ver no Lote</span>
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  `;
-  
-  const wire = wrap.querySelector('.timeline-laser-wire');
-  if (wire && wire.nextElementSibling) {
-    wrap.insertBefore(el, wire.nextElementSibling.nextElementSibling);
-  } else {
-    wrap.prepend(el);
-  }
-  
-  el.animate([
-    { opacity: 0, transform: 'translateY(-16px) scale(0.96)' },
-    { opacity: 1, transform: 'none' }
-  ], { duration: 250, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
-  
-  dispararPulsoRede();
-  toast('📡 Novo evento recebido na telemetria da frota!');
-  
-  const total = document.getElementById('statTotalEventos');
-  if (total) total.textContent = (48 + simCount - 1) + ' AÇÕES';
-  const badge = document.getElementById('chipCountTodos');
-  if (badge) badge.textContent = (48 + simCount - 1);
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// 6. FILTRO TÁTICO & BUSCA NA ABA LOTE
-// ══════════════════════════════════════════════════════════════════════════
-function filtrarProcessos(tipo, btn) {
-  document.querySelectorAll('.lote-filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.proc-modern-card').forEach(card => {
-    if (tipo === 'todos' || card.dataset.tipo === tipo) {
-      card.style.display = 'flex';
-      card.animate([
-        { opacity: 0, transform: 'translateY(6px)' },
-        { opacity: 1, transform: 'none' }
-      ], { duration: 180, easing: 'cubic-bezier(0.05, 0.7, 0.1, 1)' });
-    } else {
-      card.style.display = 'none';
-    }
-  });
-}
-
-function buscarProcessos(txt) {
-  const q = txt.toLowerCase().trim();
-  document.querySelectorAll('.proc-modern-card').forEach(card => {
-    const conteudo = card.textContent.toLowerCase();
-    card.style.display = (!q || conteudo.includes(q)) ? 'flex' : 'none';
-  });
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// 7. MODAL DE PROCESSO COM LASER SCANNER
-// ══════════════════════════════════════════════════════════════════════════
-function abrirModalProc(num, srv, rota, val, badge) {
-  document.getElementById('mProcNum').textContent = 'PROC ' + num;
-  document.getElementById('mProcSrv').textContent = srv;
-  document.getElementById('mProcRota').textContent = rota;
-  document.getElementById('mProcVal').textContent = val;
-  const bEl = document.getElementById('mProcBadge');
-  bEl.className = 'proc-status-badge ' + (badge === 'pronto' ? 'pronto' : badge === 'robo' ? 'robo' : 'atencao');
-  bEl.textContent = badge === 'pronto' ? '✓ PRONTO P/ CP' : badge === 'robo' ? '⚡ NO ROBÔ CP' : '! CONFERIR 1DOC';
-  document.getElementById('modalProc').classList.add('open');
-}
-
-function fecharModalProc() {
-  document.getElementById('modalProc').classList.remove('open');
-}
-function fecharModalProcOverlay(e) {
-  if (e.target.id === 'modalProc') fecharModalProc();
-}
-
-function aprovarProcessoModal() {
-  fecharModalProc();
-  dispararPulsoRede();
-  avancarGundam();
-}
-
-function dispararLoteCompleto() {
-  avancarGundam();
-  dispararPulsoRede();
-  rajadaMeteoros();
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// 8. REMOÇÃO DE CARD COM DECOLAGEM CATAPULTA E COLAPSO SUAVE (WAAPI)
-// ══════════════════════════════════════════════════════════════════════════
-async function dispararCatapultaCard(el) {
-  if (!el || el.classList.contains('catapult-launch')) return;
-  el.classList.add('catapult-launch');
-  dispararPulsoRede();
-  avancarGundam();
-  setTimeout(async () => {
-    const h = el.offsetHeight;
-    await el.animate([
-      { height: h + 'px', marginBottom: '12px', padding: '16px 18px', opacity: 0 },
-      { height: '0px', marginBottom: '0px', padding: '0px 18px', border: 'none', opacity: 0 }
-    ], { duration: 180, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' }).finished;
-    el.remove();
-    const restantes = document.querySelectorAll('.proc-modern-card').length;
-    const badge = document.getElementById('dockBadgeLote');
-    if (badge) badge.textContent = restantes;
-    const badgeTotal = document.getElementById('loteTotalBadge');
-    if (badgeTotal) badgeTotal.textContent = restantes + ' PROCESSOS';
-  }, 420);
-}
-
-async function removerCardAnimado(el) {
-  await el.animate([
-    { opacity: 1, transform: 'none' },
-    { opacity: 0, transform: 'translateX(30px)' }
-  ], { duration: 180, easing: 'cubic-bezier(.3,0,1,1)', fill: 'forwards' }).finished;
-
-  const h = el.offsetHeight;
-  await el.animate([
-    { height: h + 'px', marginBottom: '12px', padding: '16px 18px' },
-    { height: '0px', marginBottom: '0px', padding: '0px 18px', border: 'none' }
-  ], { duration: 200, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' }).finished;
-
-  el.remove();
-  
-  // Atualiza badge de contagem
-  const restantes = document.querySelectorAll('.proc-modern-card').length;
-  const badge = document.getElementById('dockBadgeLote');
-  if (badge) badge.textContent = restantes;
-  const badgeTotal = document.getElementById('loteTotalBadge');
-  if (badgeTotal) badgeTotal.textContent = restantes + ' PROCESSOS';
-}
-
-function copiarProcesso(num, btn) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(num);
-  }
-  const oldSvg = btn.innerHTML;
-  btn.innerHTML = '<span style="color:#34d399;font-size:11px;font-weight:700;">✓</span>';
-  setTimeout(() => { btn.innerHTML = oldSvg; }, 1400);
-}
-
-// SPOTLIGHT DOCK & BENTO CARDS (21ST.DEV & ACETERNITY HOVER EFFECT)
-document.addEventListener('mousemove', e => {
-  const cards = document.querySelectorAll('.proc-modern-card, .ev-modern-card');
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    if (e.clientX >= rect.left - 80 && e.clientX <= rect.right + 80 &&
-        e.clientY >= rect.top - 80 && e.clientY <= rect.bottom + 80) {
-      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-    }
-  });
-});
-
-document.addEventListener('touchmove', e => {
-  if (!e.touches.length) return;
-  const t = e.touches[0];
-  const cards = document.querySelectorAll('.proc-modern-card, .ev-modern-card');
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mouse-x', `${t.clientX - rect.left}px`);
-    card.style.setProperty('--mouse-y', `${t.clientY - rect.top}px`);
-  });
-}, { passive: true });
-
-// ══════════════════════════════════════════════════════════════════════════
-// 9. 3D CARD TILT SUAVE (ACETERNITY 3D PIN)
-// ══════════════════════════════════════════════════════════════════════════
-const cardOrbital = document.getElementById('cardOrbital');
-if (cardOrbital) {
-  cardOrbital.addEventListener('mousemove', e => {
-    const rect = cardOrbital.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const rotX = ((y / rect.height) - 0.5) * -12;
-    const rotY = ((x / rect.width) - 0.5) * 12;
-    cardOrbital.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-2px)`;
-  });
-  cardOrbital.addEventListener('mouseleave', () => {
-    cardOrbital.style.transform = 'none';
-  });
-}
-
+// ESCRITÓRIO ISOMÉTRICO 3D (9 AGENTES REAIS)
 // ══════════════════════════════════════════════════════════════════════════
 // 10. MOTOR DO ESCRITÓRIO ISOMÉTRICO 3D DOS 9 AGENTES (CLAUDE OFFICE ENGINE)
 // ══════════════════════════════════════════════════════════════════════════
@@ -4308,6 +4189,9 @@ async function recarregarTelemetriaDell() {
 }
 setTimeout(recarregarTelemetriaDell, 1500);
 
+
+
+})();
 </script>
 </body>
 </html>
