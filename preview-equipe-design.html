@@ -1,0 +1,4308 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Equipe SGD · Cyber Tactical UI (Prestige & Aceternity Engine)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM LUXO / CYBER TACTICAL (PRESTIGE UI + ACETERNITY + 21ST.DEV)
+   ══════════════════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+
+  /* Cores Base Profundas */
+  --bg-deep: #050b08;
+  --bg-surface: #0a1410;
+  --bg-card: rgba(13, 26, 20, 0.78);
+  --bg-card-hover: rgba(18, 36, 28, 0.9);
+  --bg-cockpit: radial-gradient(130% 150% at 90% 10%, #103325 0%, #06150f 100%);
+
+  /* Acentos de Luz Neon & Luxo */
+  --emerald: #10b981;
+  --emerald-glow: #34d399;
+  --emerald-neon: 0 0 20px rgba(52, 211, 153, 0.45);
+  
+  --cyan: #06b6d4;
+  --cyan-glow: #38bdf8;
+  --cyan-neon: 0 0 20px rgba(56, 189, 248, 0.45);
+
+  --amber: #f59e0b;
+  --amber-glow: #fbbf24;
+  --rose: #f43f5e;
+  --purple: #a855f7;
+
+  /* Bordas de Vidro Translúcido */
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-light: rgba(52, 211, 153, 0.35);
+  --glass-specular: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 40%, rgba(52, 211, 153, 0.14));
+
+  /* Tipografia */
+  --font-hud: 'Orbitron', 'Chakra Petch', monospace;
+  --font-disp: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Movimento e Animações (DESIGN.md) */
+  --dur-fast: 160ms;
+  --dur-base: 250ms;
+  --dur-spring: 450ms;
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg-deep);
+  color: #eafbf3;
+  font-family: var(--font-body);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 12px;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* CANVAS DE FUNDO: METEOROS + GRADE CIBERNÉTICA */
+#cyberCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.75;
+}
+
+/* PAINEL DE CONTROLE LATERAL (SHOWCASE DOCK) */
+.showcase-dock {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  background: rgba(10, 20, 16, 0.94);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 18px;
+  padding: 16px 18px;
+  color: #eafaf2;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.75), var(--emerald-neon);
+  z-index: 1000;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+.showcase-dock h4 {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dock-actions { display: flex; flex-direction: column; gap: 8px; }
+.dock-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: 500 12px var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--dur-fast) var(--ease-smooth);
+}
+.dock-btn:hover {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+  transform: translateY(-1px);
+}
+.dock-btn:active { transform: scale(0.96); }
+
+/* MOLDURA MOBILE PREMIUM (PRESTIGE VIEWPORT) */
+.phone-viewport {
+  width: 100%;
+  max-width: 440px;
+  min-height: 900px;
+  background: rgba(8, 17, 13, 0.95);
+  backdrop-filter: blur(28px);
+  border-radius: 42px;
+  border: 2px solid rgba(52, 211, 153, 0.25);
+  box-shadow: 0 30px 90px -15px rgba(0,0,0,0.9), 0 0 45px rgba(16, 185, 129, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 50px;
+}
+
+/* HEADER TÁTICO HOLOGRÁFICO */
+.app-header {
+  background: rgba(10, 22, 17, 0.9);
+  backdrop-filter: blur(22px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.header-row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-hex {
+  width: 36px;
+  height: 36px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #059669, #022c22);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.55);
+}
+.brand-title {
+  font: 800 18px/1 var(--font-hud);
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+}
+.brand-title small {
+  display: block;
+  font: 600 10px var(--font-mono);
+  color: var(--emerald-glow);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.header-radar-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11px var(--font-mono);
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: #34d399;
+  letter-spacing: 0.05em;
+}
+.radar-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  position: relative;
+}
+.radar-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #34d399;
+  animation: radar-wave 2s infinite;
+}
+@keyframes radar-wave {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* SCROLLVIEW INTERIOR */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PAINÉIS DE ABA */
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: view-fade-in var(--dur-base) var(--ease-enter);
+}
+.view-panel[hidden] {
+  display: none !important;
+}
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ABA INÍCIO: CARDS TÁTICOS
+   ══════════════════════════════════════════════════════════════════════════ */
+.hud-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: transform var(--dur-fast) var(--ease-smooth), border-color var(--dur-fast);
+}
+.hud-card:hover {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+.agents-orbital-net {
+  position: relative;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0;
+}
+.orbital-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.central-coord-node {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7c3aed, #4c1d95);
+  border: 2px solid #a855f7;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.65);
+  display: grid;
+  place-items: center;
+  font: 800 13px var(--font-hud);
+  color: #fff;
+  z-index: 5;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.central-coord-node:active { transform: scale(0.92); }
+.satellite-bot-node {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(14, 28, 22, 0.9);
+  border: 1.5px solid var(--st-color, #10b981);
+  box-shadow: 0 0 16px var(--st-glow, rgba(16, 185, 129, 0.4));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font: 700 11px var(--font-hud);
+  color: #fff;
+  cursor: pointer;
+  z-index: 4;
+  transition: transform var(--dur-spring) var(--ease-spring);
+}
+.satellite-bot-node:hover {
+  transform: scale(1.15);
+  border-width: 2px;
+}
+.satellite-bot-node small {
+  font: 600 8px var(--font-mono);
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COCKPIT DE COMANDO OPERACIONAL (PRESTIGE HUD)
+   ══════════════════════════════════════════════════════════════════════════ */
+.cockpit-command-card {
+  padding: 16px 18px 14px;
+  background: linear-gradient(145deg, rgba(14, 28, 22, 0.95), rgba(7, 15, 12, 0.98));
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all var(--dur-fast) var(--ease-smooth);
+}
+.cockpit-command-card.pulse-active {
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.35), inset 0 0 20px rgba(52, 211, 153, 0.25);
+  border-color: rgba(52, 211, 153, 0.7);
+}
+.cockpit-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.cockpit-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cockpit-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981, #047857);
+  border: 1.5px solid rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+  display: grid;
+  place-items: center;
+  font: 800 13px var(--font-hud);
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.cockpit-greeting {
+  display: flex;
+  flex-direction: column;
+}
+.cockpit-greeting-title {
+  font: 800 15px var(--font-hud);
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+.cockpit-greeting-sub {
+  font: 600 10px var(--font-mono);
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cockpit-status-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.cockpit-badge-nominal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  padding: 4px 9px;
+  border-radius: 12px;
+  font: 700 9.5px var(--font-hud);
+  color: #34d399;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+}
+.cockpit-badge-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  animation: pulseBeacon 2s infinite ease-in-out;
+}
+.cockpit-host-sub {
+  font: 500 9px var(--font-mono);
+  color: #64748b;
+}
+
+/* MINI FUNNEL / PIPELINE FLOW DECK */
+.pipeline-flow-deck {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 8px 6px;
+  margin-bottom: 12px;
+}
+.flow-stage-box {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 7px 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-spring);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+.flow-stage-box:hover {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(52, 211, 153, 0.45);
+  transform: translateY(-2px);
+}
+.flow-stage-box.active-stage {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #34d399;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+}
+.flow-stage-tag {
+  font: 700 8.5px var(--font-hud);
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.flow-stage-box.active-stage .flow-stage-tag {
+  color: #34d399;
+}
+.flow-stage-val {
+  font: 800 16px var(--font-hud);
+  color: #ffffff;
+  line-height: 1.1;
+}
+.flow-stage-box.active-stage .flow-stage-val {
+  color: #34d399;
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+.flow-stage-sub {
+  font: 600 8px var(--font-mono);
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.flow-chevron-sep {
+  color: rgba(52, 211, 153, 0.4);
+  font: 700 11px var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* QUICK ACTION PILLS */
+.cockpit-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.cockpit-quick-actions::-webkit-scrollbar { display: none; }
+.quick-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font: 700 10px var(--font-hud);
+  color: #e2e8f0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease-spring);
+  text-decoration: none;
+}
+.quick-pill-btn:hover {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #34d399;
+  transform: translateY(-1px);
+}
+.quick-pill-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.3;
+  color: #34d399;
+}
+.quick-pill-btn.pill-gold {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+}
+.quick-pill-btn.pill-gold svg {
+  color: #fbbf24;
+}
+.quick-pill-btn.pill-cyan {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+}
+.quick-pill-btn.pill-cyan svg {
+  color: #38bdf8;
+}
+.quick-pill-btn.pill-purple {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.1);
+  color: #c084fc;
+}
+.quick-pill-btn.pill-purple svg {
+  color: #c084fc;
+}
+
+/* CATAPULTA GUNDAM */
+.gundam-catapult-deck {
+  background: linear-gradient(135deg, #071510, #040907);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.1);
+}
+.catapult-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.catapult-title {
+  font: 700 12px var(--font-hud);
+  color: #34d399;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gundam-track-wrap {
+  position: relative;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.mag-rail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #10b981, #06b6d4, #10b981);
+  box-shadow: 0 0 10px #10b981;
+}
+.gates-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  pointer-events: none;
+}
+.gate-col {
+  border-right: 1px dashed rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 6px;
+  font: 600 9px var(--font-mono);
+  color: rgba(255, 255, 255, 0.4);
+}
+.gate-col.done { color: #34d399; border-right-color: rgba(52, 211, 153, 0.3); }
+.gundam-runner-unit {
+  position: absolute;
+  left: 65%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: left var(--dur-spring) var(--ease-spring);
+  z-index: 10;
+}
+.gundam-sprite {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8));
+}
+.plasma-thrust {
+  position: absolute;
+  right: 100%;
+  top: 55%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 8px;
+  background: linear-gradient(90deg, transparent, #06b6d4 40%, #ffffff);
+  border-radius: 4px;
+  filter: blur(1px);
+  animation: thrust-burn 0.18s infinite alternate;
+}
+@keyframes thrust-burn {
+  from { width: 18px; opacity: 0.8; }
+  to { width: 28px; opacity: 1; }
+}
+
+/* BENTO GRID */
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.bento-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  transition: transform var(--dur-fast) var(--ease-smooth), border-color var(--dur-fast);
+}
+.bento-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+.bento-card.wide {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(16, 40, 30, 0.8), rgba(8, 20, 15, 0.9));
+  border-color: rgba(52, 211, 153, 0.3);
+}
+.bento-k {
+  font: 600 11px var(--font-mono);
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.bento-v {
+  font: 800 32px/1 var(--font-hud);
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
+}
+.bento-card.wide .bento-v {
+  font-size: 40px;
+  color: #34d399;
+}
+.bento-sub {
+  font: 500 11px var(--font-mono);
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* CARD DE DECISÃO */
+@property --neon-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.cyber-attention-card {
+  position: relative;
+  background: rgba(18, 30, 24, 0.88);
+  border-radius: 22px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.cyber-attention-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--neon-angle), transparent 70%, #f59e0b 85%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotate-neon 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes rotate-neon {
+  to { --neon-angle: 360deg; }
+}
+
+.btn-shimmer-cyber {
+  position: relative;
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font: 700 13px var(--font-hud);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45);
+  overflow: hidden;
+  transition: transform 60ms var(--ease-smooth), box-shadow var(--dur-fast);
+  width: 100%;
+}
+.btn-shimmer-cyber:active { transform: scale(0.96); }
+.btn-shimmer-cyber::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -80%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: rotate(25deg);
+  animation: shimmer-beam 3s infinite;
+  pointer-events: none;
+}
+@keyframes shimmer-beam {
+  0% { left: -80%; }
+  30% { left: 140%; }
+  100% { left: 140%; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ABA LOTE: CARDS DE PROCESSOS MODERNOS (PRESTIGE UI + MAGIC UI + ACETERNITY)
+   ══════════════════════════════════════════════════════════════════════════ */
+.lote-funil-card {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+.funil-bars {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  gap: 2px;
+}
+.funil-segment {
+  height: 100%;
+  transition: width var(--dur-spring) var(--ease-spring);
+}
+.funil-segment.prontos { background: var(--emerald-glow); box-shadow: 0 0 10px var(--emerald); }
+.funil-segment.robo { background: var(--cyan-glow); box-shadow: 0 0 10px var(--cyan); }
+.funil-segment.pendentes { background: var(--amber-glow); box-shadow: 0 0 10px var(--amber); }
+
+.funil-legend {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font: 600 11px var(--font-mono);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.lote-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 2px 4px;
+}
+.lote-filters::-webkit-scrollbar { display: none; }
+.lote-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: #94a3b8;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: 600 11.5px var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--dur-fast) var(--ease-smooth);
+}
+.lote-filter-btn:active { transform: scale(0.95); }
+.lote-filter-btn.active {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.25), rgba(6, 182, 212, 0.25));
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #34d399;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+}
+
+.lote-search-box {
+  position: relative;
+  width: 100%;
+}
+.lote-search-box svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+.lote-search-input {
+  width: 100%;
+  background: rgba(14, 28, 22, 0.75);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 12px 14px 12px 42px;
+  color: #fff;
+  font: 14px var(--font-body);
+  outline: none;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.lote-search-input:focus {
+  border-color: rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NOVO: CARDS DE PROCESSOS MODERNOS COM SPOTLIGHT (21ST.DEV), BORDER BEAM (MAGIC UI)
+   E ESTÉTICA TÁTICA GUNDAM SQUADRON (ACETERNITY + PRESTIGE UI)
+   ══════════════════════════════════════════════════════════════════════════ */
+.proc-modern-card {
+  position: relative;
+  background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(52, 211, 153, 0.09), rgba(13, 26, 20, 0.82) 75%);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: transform var(--dur-fast) var(--ease-smooth), border-color var(--dur-fast), box-shadow var(--dur-fast);
+  overflow: hidden;
+}
+.proc-modern-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(240px circle at var(--mouse-x, -200px) var(--mouse-y, -200px), rgba(52, 211, 153, 0.5), transparent 75%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.proc-modern-card:hover::after {
+  opacity: 1;
+}
+.proc-modern-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 25px rgba(52, 211, 153, 0.16);
+}
+.proc-modern-card:active { transform: scale(0.985); }
+
+/* ANIMAÇÃO DE DECOLAGEM CATAPULTA (DISPARO DO CARD) */
+.proc-modern-card.catapult-launch {
+  pointer-events: none;
+  box-shadow: 0 0 40px rgba(52, 211, 153, 0.8), 0 0 80px rgba(56, 189, 248, 0.6) !important;
+  border-color: #38bdf8 !important;
+  animation: catapult-launch-anim 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) forwards !important;
+}
+@keyframes catapult-launch-anim {
+  0% { transform: scale(1) translateX(0); opacity: 1; filter: brightness(1); }
+  35% { transform: scale(1.03) translateX(-8px); filter: brightness(1.6); }
+  100% { transform: scale(0.92) translateX(110%); opacity: 0; filter: blur(4px); }
+}
+
+/* BORDA VIVA DE NEON NO PROCESSO ATIVO NO ROBÔ CP (MAGIC UI BORDER BEAM) */
+.proc-modern-card.ativo-robo::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--beam-proc, 0deg), transparent 60%, #38bdf8 80%, #34d399 90%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotate-proc-beam 2.8s linear infinite;
+  pointer-events: none;
+}
+@property --beam-proc {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes rotate-proc-beam {
+  to { --beam-proc: 360deg; }
+}
+
+/* SQUADRON TACTICAL HEADER */
+.proc-squad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: -4px;
+}
+.proc-squad-tag {
+  font: 700 9.5px var(--font-hud);
+  color: #64748b;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+}
+.proc-squad-tag .squad-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px #34d399;
+}
+.proc-copy-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color var(--dur-fast), background var(--dur-fast);
+  display: flex;
+  align-items: center;
+}
+.proc-copy-btn:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* LINHA 1 DO CARD: PROCESSO + VALOR + STATUS */
+.proc-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.proc-id-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.proc-id-badge {
+  font: 800 15.5px var(--font-hud);
+  color: #fff;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.proc-val-pill {
+  font: 700 12.5px var(--font-hud);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+.proc-status-badge {
+  font: 700 10px var(--font-mono);
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.status-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.proc-status-badge.pronto {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+.proc-status-badge.robo {
+  background: rgba(6, 182, 212, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+.proc-status-badge.atencao {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+/* LINHA 2 DO CARD: SERVIDOR + AVATAR + ROTA + BENTO PILLS */
+.proc-mid-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.proc-hex-avatar {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(6, 182, 212, 0.3));
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: 13px;
+  font: 800 13px var(--font-hud);
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+}
+.proc-meta-info {
+  flex: 1;
+  min-width: 0;
+}
+.proc-srv-title {
+  font: 700 14.5px var(--font-body);
+  color: #f1f5f9;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.proc-srv-route {
+  font: 500 12px var(--font-mono);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+}
+.proc-bento-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.proc-bento-pill {
+  font: 600 10px var(--font-mono);
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.proc-bento-pill.destaque {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+}
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.proc-srv-route {
+  font: 500 11.5px var(--font-mono);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+/* LINHA 3 DO CARD: PIPELINE STEPPER NEON EM CIRCUITO (MAGIC UI) */
+.proc-pipeline-circuit {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.pipeline-wire {
+  position: absolute;
+  top: 19px;
+  left: 14%;
+  right: 14%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+.pipeline-wire-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  box-shadow: 0 0 8px #10b981;
+  transition: width var(--dur-spring) var(--ease-spring);
+}
+.pipeline-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+.node-disc {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0d1b15;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  font: 700 9px var(--font-hud);
+  color: #64748b;
+  transition: all var(--dur-fast);
+}
+.pipeline-node.done .node-disc {
+  background: #10b981;
+  border-color: #34d399;
+  color: #042f21;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+}
+.pipeline-node.active .node-disc {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  animation: node-pulse 1.2s infinite alternate;
+}
+@keyframes node-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.18); }
+}
+.node-title {
+  font: 600 8.5px var(--font-mono);
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pipeline-node.done .node-title { color: #34d399; }
+.pipeline-node.active .node-title { color: #38bdf8; font-weight: 700; }
+
+/* LINHA 4 DO CARD: AÇÕES RÁPIDAS TÁTEIS */
+.proc-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+.proc-btn-inspect {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: #cbd5e1;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font: 600 11.5px var(--font-hud);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--dur-fast) var(--ease-smooth);
+}
+.proc-btn-inspect:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.proc-btn-inspect:active { transform: scale(0.96); }
+
+.proc-btn-liberar {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(4, 120, 87, 0.3));
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #34d399;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font: 700 11.5px var(--font-hud);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+  transition: all var(--dur-fast) var(--ease-smooth);
+}
+.proc-btn-liberar:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+.proc-btn-liberar:active { transform: scale(0.96); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NOVA ABA INFERIOR: FLOATING DOCK HOLOGRÁFICA (DYNAMIC ISLAND LUXO)
+   ══════════════════════════════════════════════════════════════════════════ */
+.floating-bottom-dock {
+  position: absolute;
+  bottom: 14px;
+  left: 12px;
+  right: 12px;
+  background: rgba(10, 24, 18, 0.92);
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 28px;
+  padding: 6px 8px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 30px rgba(16, 185, 129, 0.2);
+  z-index: 50;
+}
+.dock-nav-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+.dock-slider-pill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(20% - 2px);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.28), rgba(6, 182, 212, 0.28));
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  border-radius: 22px;
+  transition: transform var(--dur-spring) var(--ease-spring);
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+}
+.dock-item {
+  background: none;
+  border: none;
+  color: #718096;
+  font: 700 10px var(--font-hud);
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: color var(--dur-fast), transform var(--dur-fast);
+}
+.dock-item:active { transform: scale(0.9); }
+.dock-item.active {
+  color: #34d399;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.7);
+}
+.dock-item svg {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--dur-spring) var(--ease-spring);
+}
+.dock-item.active svg {
+  transform: translateY(-1px);
+}
+.dock-glow-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+.dock-item.active .dock-glow-dot {
+  opacity: 1;
+}
+
+/* BADGE PULSANTE NA ABA LOTE */
+.dock-badge-pulse {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 19px);
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #10b981;
+  color: #042f21;
+  font: 800 9px var(--font-mono);
+  display: grid;
+  place-items: center;
+  padding: 0 3px;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.9);
+  animation: badge-spring-pulse 2s infinite;
+}
+@keyframes badge-spring-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); box-shadow: 0 0 16px rgba(52, 211, 153, 1); }
+  100% { transform: scale(1); }
+}
+
+/* MODAL DE PROCESSO COM LASER SCANNER */
+.laser-scanner-sheet {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-enter);
+}
+.laser-scanner-sheet.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.scanner-modal-body {
+  background: #0d1b15;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  width: 100%;
+  border-radius: 28px 28px 0 0;
+  padding: 16px 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 -15px 40px rgba(0,0,0,0.9), 0 0 30px rgba(16, 185, 129, 0.25);
+  transform: translateY(100%);
+  transition: transform var(--dur-modal) var(--ease-spring);
+}
+.laser-scanner-sheet.open .scanner-modal-body {
+  transform: translateY(0);
+}
+.ocr-receipt-preview {
+  position: relative;
+  height: 120px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 12px var(--font-mono);
+  color: #34d399;
+}
+.laser-beam-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #34d399;
+  box-shadow: 0 0 12px #34d399, 0 0 24px #10b981;
+  animation: laser-sweep 2s infinite ease-in-out;
+}
+@keyframes laser-sweep {
+  0% { top: 5%; }
+  50% { top: 90%; }
+  100% { top: 5%; }
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   VIEW 2: ABA ATIVIDADE / RADAR TÁTICO (MAGIC UI TIMELINE & TELEMETRIA FEED)
+   ══════════════════════════════════════════════════════════════════════════ */
+.radar-telemetria-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.radar-sweep-screen {
+  position: relative;
+  height: 92px;
+  background: radial-gradient(circle at 60px center, rgba(6, 182, 212, 0.16) 0%, rgba(5, 11, 8, 0.95) 75%);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+.radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 55px;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1px dashed rgba(6, 182, 212, 0.25);
+  pointer-events: none;
+}
+.radar-ring.inner {
+  width: 50px;
+  height: 50px;
+  border-style: solid;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+.radar-sweeper {
+  position: absolute;
+  top: 50%;
+  left: 55px;
+  width: 50px;
+  height: 50px;
+  transform-origin: top left;
+  background: conic-gradient(from 0deg, rgba(6, 182, 212, 0.5), transparent 60%);
+  border-radius: 100% 0 0 0;
+  animation: radar-spin 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.radar-blip {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  animation: blip-fade 1.8s infinite ease-out;
+}
+@keyframes blip-fade {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1); }
+}
+.radar-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.radar-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.radar-stat-label {
+  font: 700 9px var(--font-hud);
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.radar-stat-val {
+  font: 800 13.5px var(--font-hud);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* FILTROS TÁTICOS POR BOT */
+.bot-filter-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+.bot-filter-chips::-webkit-scrollbar { display: none; }
+.bot-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #94a3b8;
+  font: 700 11px var(--font-hud);
+  letter-spacing: 0.04em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--dur-fast);
+}
+.bot-chip.active {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: #34d399;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+}
+.bot-chip-count {
+  font: 700 10px var(--font-mono);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+/* TIMELINE CONTAINER & LASER BEAM (MAGIC UI) */
+.timeline-feed-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-left: 20px;
+  margin-top: 6px;
+}
+.timeline-laser-wire {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 7px;
+  width: 2px;
+  background: linear-gradient(180deg, #34d399 0%, #06b6d4 40%, rgba(56, 189, 248, 0.15) 100%);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+}
+
+/* DIVISOR DE TEMPO HOLOGRÁFICO */
+.timeline-time-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: -20px;
+  margin-top: 8px;
+}
+.timeline-time-pill {
+  font: 800 10px var(--font-mono);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
+}
+.timeline-time-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* CARDS DE EVENTO DE ATIVIDADE (21ST.DEV & SPOTLIGHT) */
+.ev-modern-card {
+  position: relative;
+  background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(52, 211, 153, 0.08), rgba(13, 26, 20, 0.85) 75%);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transition: transform var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast);
+  cursor: pointer;
+  overflow: hidden;
+}
+.ev-modern-card::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: -20px;
+  width: 14px;
+  height: 2px;
+  background: #34d399;
+  box-shadow: 0 0 6px #34d399;
+}
+.ev-modern-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(220px circle at var(--mouse-x, -200px) var(--mouse-y, -200px), rgba(52, 211, 153, 0.45), transparent 75%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ev-modern-card:hover::after { opacity: 1; }
+.ev-modern-card:hover {
+  transform: translateX(3px) translateY(-1px);
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(52, 211, 153, 0.12);
+}
+
+/* HEADER DO CARD DO EVENTO */
+.ev-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ev-bot-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ev-bot-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font: 800 11px var(--font-hud);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+.ev-bot-name-group {
+  display: flex;
+  flex-direction: column;
+}
+.ev-bot-title {
+  font: 800 12px var(--font-hud);
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+.ev-bot-role {
+  font: 500 10px var(--font-mono);
+  color: #64748b;
+  text-transform: uppercase;
+}
+.ev-time-stamp {
+  font: 600 11px var(--font-mono);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* CONTEÚDO DO EVENTO */
+.ev-headline {
+  font: 700 13.5px var(--font-body);
+  color: #e2e8f0;
+  line-height: 1.4;
+  margin: 0;
+}
+.ev-log-terminal {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: 500 11px var(--font-mono);
+  color: #94a3b8;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.ev-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+.ev-status-chip {
+  font: 700 9.5px var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ev-status-chip.ok {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+.ev-status-chip.alerta {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+.ev-status-chip.executando {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.ev-btn-action {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font: 600 10.5px var(--font-hud);
+  padding: 4px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ev-btn-action:hover {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: #34d399;
+  color: #fff;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIEW 3: ABA EQUIPE · ESCRITÓRIO ISOMÉTRICO 3D DOS 9 AGENTES
+   ══════════════════════════════════════════════════════════════════════════ */
+.eq-office-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.eq-office-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.eq-office-tag {
+  font: 800 12px var(--font-hud);
+  color: #34d399;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eqe-w {
+  overflow-x: auto;
+  background: #060b08;
+  border-radius: 20px;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0, 0, 0, 0.5);
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, 0.3) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.eqe-cn {
+  position: relative;
+  min-width: 680px;
+  width: 100%;
+}
+#eq-cv {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+.eqe-sa {
+  all: unset;
+  position: absolute;
+  cursor: pointer;
+}
+.eqe-sa:hover, .eqe-sa:focus-visible {
+  outline: 2px dashed #34d399;
+}
+.eqe-pl {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  background: rgba(5, 11, 8, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 6px;
+  padding: 1px 7px;
+  pointer-events: none;
+  white-space: nowrap;
+  color: #eef1f8;
+  font: 700 10.5px var(--font-hud);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+.eqe-pl i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px #34d399;
+}
+.eqe-pl.at i {
+  background: #fbbf24;
+  box-shadow: 0 0 6px #fbbf24;
+}
+.eqe-pl.al i {
+  background: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+  animation: eqePisca .8s steps(1) infinite;
+}
+@keyframes eqePisca { 50% { opacity: 0.2; } }
+
+/* GAVETA DO AGENTE TÁTICA */
+.eq-gaveta-card {
+  background: rgba(13, 26, 20, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: gaveta-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes gaveta-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.eq-gaveta-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.eq-gaveta-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eq-gaveta-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font: 800 14px var(--font-hud);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.eq-gaveta-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+.eq-gaveta-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.eq-gaveta-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.eq-gaveta-stat-item span {
+  font: 700 9px var(--font-hud);
+  color: #64748b;
+  text-transform: uppercase;
+}
+.eq-gaveta-stat-item b {
+  font: 800 13px var(--font-mono);
+  color: #34d399;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIEW 4: ABA CONVERSA · CHAT DIRETO COM O COORDENADOR (TACTICAL COMMS)
+   ══════════════════════════════════════════════════════════════════════════ */
+.chat-cockpit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: calc(100vh - 190px);
+  min-height: 480px;
+}
+.chat-cockpit-header {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.chat-ai-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-ai-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  display: grid;
+  place-items: center;
+  font: 800 13px var(--font-hud);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.4);
+}
+.chat-messages-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 6px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, 0.2) transparent;
+}
+.chat-bubble {
+  max-width: 86%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font: 500 13.5px var(--font-body);
+  line-height: 1.45;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.chat-bubble.bot {
+  align-self: flex-start;
+  background: rgba(18, 30, 24, 0.9);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble.eu {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35));
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+}
+.chat-bubble-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font: 700 10.5px var(--font-mono);
+  margin-bottom: 2px;
+}
+.chat-bubble.bot .chat-bubble-meta { color: #8b5cf6; }
+.chat-bubble.eu .chat-bubble-meta { color: #34d399; }
+.chat-bubble-time {
+  font-weight: 500;
+  color: #64748b;
+  font-size: 10px;
+}
+
+/* DIGITANDO / RADAR COORDENADOR */
+.chat-typing-indicator {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 30, 24, 0.85);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  padding: 8px 14px;
+  border-radius: 16px;
+  font: 600 11px var(--font-mono);
+  color: #94a3b8;
+}
+.chat-typing-dots {
+  display: flex;
+  gap: 4px;
+}
+.chat-typing-dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34d399;
+  animation: typing-jump 1.2s infinite ease-in-out;
+}
+.chat-typing-dots i:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-jump {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ATALHOS RÁPIDOS */
+.chat-quick-prompts {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px 0;
+}
+.chat-quick-prompts::-webkit-scrollbar { display: none; }
+.chat-prompt-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font: 600 11px var(--font-hud);
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.chat-prompt-pill:hover {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* BARRA DE ENTRADA DO CHAT */
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 6px 8px 6px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: border-color var(--dur-fast);
+}
+.chat-input-bar:focus-within {
+  border-color: rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+}
+.chat-input-field {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font: 500 14px var(--font-body);
+  outline: none;
+}
+.chat-input-field::placeholder { color: #64748b; }
+.chat-send-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  transition: transform var(--dur-fast), filter var(--dur-fast);
+}
+.chat-send-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+.chat-send-btn:active { transform: scale(0.92); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DELL HOST TELEMETRY COCKPIT (UNIT-00)
+   ══════════════════════════════════════════════════════════════════════════ */
+.dell-telemetry-cockpit {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(5, 11, 8, 0.95));
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+.dell-telemetry-cockpit::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #34d399, transparent);
+}
+.dell-cockpit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dell-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dell-unit-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+.dell-online-pill {
+  font: 800 9px var(--font-hud);
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+}
+.btn-dell-refresh {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font: 600 11px var(--font-mono);
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-dell-refresh:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+.dell-gauges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.dell-gauge-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dell-gauge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dell-gauge-name {
+  font: 700 11px var(--font-mono);
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dell-gauge-val {
+  font: 800 14px var(--font-hud);
+}
+.dell-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.dell-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.dell-gauge-meta {
+  display: flex;
+  justify-content: space-between;
+  font: 500 10.5px var(--font-mono);
+  color: #64748b;
+}
+.dell-services-section {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dell-section-label {
+  display: flex;
+  justify-content: space-between;
+  font: 700 10.5px var(--font-hud);
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+.dell-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.dell-svc-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font: 600 10px var(--font-mono);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dell-svc-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 5px #34d399;
+}
+.dell-robo-status-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.dell-robo-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dell-r-label {
+  font: 600 10px var(--font-mono);
+  color: #64748b;
+  text-transform: uppercase;
+}
+.dell-r-tag {
+  font: 700 11px var(--font-hud);
+  color: #94a3b8;
+}
+.dell-r-tag.lock {
+  color: #fbbf24;
+}
+.dell-r-tag.ok {
+  color: #34d399;
+}
+
+</style>
+</head>
+<body>
+
+<!-- CANVAS DE FUNDO: METEOROS & STARDUST VIVOS -->
+<canvas id="cyberCanvas"></canvas>
+
+<!-- SHOWCASE DOCK: CONTROLE DO LABORATÓRIO -->
+<aside class="showcase-dock">
+  <h4>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    PRESTIGE & ACETERNITY ENGINE
+  </h4>
+  <p style="margin:0;font-size:12px;color:#a3dac4;line-height:1.4;">
+    Sinta a diferença: visual caro, cinematográfico e com física fluida conforme o DESIGN.md.
+  </p>
+  <div class="dock-actions">
+    <button class="dock-btn" onclick="abrirAbaLoteDemo()" style="background:rgba(52,211,153,0.22);border-color:#34d399;font-weight:700;">
+      <span>👉 Alternar para ABA LOTE</span>
+      <code>LOTE</code>
+    </button>
+    <button class="dock-btn" onclick="abrirAbaAtividadeDemo()" style="background:rgba(6,182,212,0.22);border-color:#38bdf8;font-weight:700;">
+      <span>📡 Alternar para ABA ATIVIDADE</span>
+      <code>RADAR</code>
+    </button>
+    <button class="dock-btn" onclick="abrirAbaEquipeDemo()" style="background:rgba(139,92,246,0.25);border-color:#a855f7;font-weight:700;">
+      <span>🏢 Alternar para ABA EQUIPE</span>
+      <code>ESCRITÓRIO</code>
+    </button>
+    <button class="dock-btn" onclick="abrirAbaConversaDemo()" style="background:rgba(16,185,129,0.22);border-color:#34d399;font-weight:700;">
+      <span>💬 Alternar para ABA CONVERSA</span>
+      <code>CHAT</code>
+    </button>
+    <button class="dock-btn" onclick="dispararPulsoRede()">
+      <span>1. Pulso Tático no Cockpit</span>
+      <code>HUD</code>
+    </button>
+    <button class="dock-btn" onclick="avancarGundam()">
+      <span>2. Avançar Gundam no Catapult</span>
+      <code>Gate +1</code>
+    </button>
+    <button class="dock-btn" onclick="turboTicker()">
+      <span>3. Number Ticker com Glow</span>
+      <code>HUD 800ms</code>
+    </button>
+    <button class="dock-btn" onclick="trocarDockAuto()">
+      <span>4. Deslizar Barra Flutuante</span>
+      <code>Dock Spring</code>
+    </button>
+    <button class="dock-btn" onclick="rajadaMeteoros()">
+      <span>5. Rajada de Meteoros no Fundo</span>
+      <code>Meteors</code>
+    </button>
+  </div>
+</aside>
+
+<!-- MOLDURA MOBILE DE LUXO -->
+<div class="phone-viewport" id="viewportCard">
+
+  <!-- HEADER HOLOGRÁFICO -->
+  <header class="app-header">
+    <div class="header-row1">
+      <div class="brand-badge">
+        <div class="brand-hex">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="brand-title">
+          EQUIPE SGD
+          <small>SALA DE CONTROLE AUTÔNOMA</small>
+        </div>
+      </div>
+      <div class="header-radar-chip">
+        <div class="radar-pulse"></div>
+        <span>VIGIA 100%</span>
+      </div>
+    </div>
+
+    
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL INTERATIVO -->
+  <main class="app-content">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 0: INÍCIO (SALA DE CONTROLE TÁTICA)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-inicio">
+
+      <!-- 1. COCKPIT DE COMANDO OPERACIONAL (PRESTIGE HUD) -->
+      <section class="hud-card cockpit-command-card" id="cardOrbital">
+        <!-- Topo: Identificação e Status da Missão -->
+        <div class="cockpit-header-row">
+          <div class="cockpit-user-meta">
+            <div class="cockpit-avatar" title="Coordenação Geral">TK</div>
+            <div class="cockpit-greeting">
+              <div class="cockpit-greeting-title">
+                Olá, Thiago
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <div class="cockpit-greeting-sub">SALA DE SITUAÇÃO · SISTEMA SGD</div>
+            </div>
+          </div>
+          <div class="cockpit-status-badge">
+            <div class="cockpit-badge-nominal">
+              <span class="cockpit-badge-dot"></span>
+              FROTA NOMINAL
+            </div>
+            <span class="cockpit-host-sub">Tupanciretã · Ao vivo</span>
+          </div>
+        </div>
+
+        <!-- Mini Funnel Operacional: O Fluxo das Diárias em Tempo Real -->
+        <div class="pipeline-flow-deck">
+          <div class="flow-stage-box" onclick="toast('17 diárias na caixa de entrada 1Doc aguardando conferência')" title="Processos recebidos no 1Doc">
+            <span class="flow-stage-tag">1Doc SGD</span>
+            <span class="flow-stage-val" id="funnel1DocVal">17</span>
+            <span class="flow-stage-sub">Triagem</span>
+          </div>
+
+          <div class="flow-chevron-sep">➔</div>
+
+          <div class="flow-stage-box active-stage" onclick="abrirAbaLoteDemo()" title="8 diárias prontas para envio ao CP - Clique para ver">
+            <span class="flow-stage-tag">Lote Ativo</span>
+            <span class="flow-stage-val" id="funnelLoteVal">8</span>
+            <span class="flow-stage-sub">R$ 7.240</span>
+          </div>
+
+          <div class="flow-chevron-sep">➔</div>
+
+          <div class="flow-stage-box" onclick="toast('18 empenhos emitidos com sucesso hoje pelo Operador CP')" title="Empenhos emitidos hoje">
+            <span class="flow-stage-tag">Empenhos</span>
+            <span class="flow-stage-val" id="funnelEmpenhosVal">18</span>
+            <span class="flow-stage-sub">R$ 14.850</span>
+          </div>
+
+          <div class="flow-chevron-sep">➔</div>
+
+          <div class="flow-stage-box" onclick="toast('26 diárias conciliadas e com ordem de pagamento concluída')" title="Diárias pagas e conciliadas">
+            <span class="flow-stage-tag">Pagos</span>
+            <span class="flow-stage-val" id="funnelPagosVal">26</span>
+            <span class="flow-stage-sub">100% OK</span>
+          </div>
+        </div>
+
+        <!-- Ações Táticas de 1 Toque -->
+        <div class="cockpit-quick-actions">
+          <button class="quick-pill-btn pill-gold" onclick="abrirAbaLoteDemo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Ver Lote (8 Diárias)
+          </button>
+          <button class="quick-pill-btn pill-cyan" onclick="abrirAbaAtividadeDemo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Radar & Host Dell
+          </button>
+          <button class="quick-pill-btn" onclick="abrirAbaConversaDemo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Falar c/ Coord
+          </button>
+          <button class="quick-pill-btn pill-purple" onclick="abrirAbaEquipeDemo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Agentes 3D
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. CATAPULTA GUNDAM RX-78 DO CP AO VIVO -->
+      <section class="gundam-catapult-deck">
+        <div class="catapult-top">
+          <div class="catapult-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            CATAPULTA GUNDAM RX-78 · LOTE ATIVO
+          </div>
+          <span style="font:600 11px var(--font-hud);color:#34d399;" id="gundamProcLabel">PROC 5410/2026</span>
+        </div>
+
+        <div class="gundam-track-wrap">
+          <div class="mag-rail"></div>
+          <div class="gates-grid">
+            <div class="gate-col done"><span>1. EMPENHO</span><span>✓ OK</span></div>
+            <div class="gate-col done"><span>2. LIQUIDAÇÃO</span><span>✓ OK</span></div>
+            <div class="gate-col done"><span>3. DOC VIAGEM</span><span>✓ OK</span></div>
+            <div class="gate-col"><span>4. 1DOC</span><span>⏳ RUN</span></div>
+          </div>
+
+          <!-- Unidade Gundam Avançando -->
+          <div class="gundam-runner-unit" id="gundamUnit">
+            <div class="plasma-thrust"></div>
+            <img class="gundam-sprite" src="assets/gundam/rx78_squad_mini.png" alt="Gundam RX-78">
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. BENTO GRID DE LUXO (PRESTIGE UI STYLE) -->
+      <section class="bento-grid">
+        <div class="bento-card wide">
+          <div class="bento-k">Prestações de Contas no CP Hoje</div>
+          <div class="bento-v" id="numPrestacoes">42</div>
+          <div class="bento-sub">Fila do SGD: 3 zerando · 100% conciliadas com sucesso</div>
+        </div>
+        <div class="bento-card">
+          <div class="bento-k">Empenhos Emitidos</div>
+          <div class="bento-v" id="numEmpenhos">18</div>
+          <div class="bento-sub" id="numValEmpenhos">R$ 14.850,00</div>
+        </div>
+        <div class="bento-card">
+          <div class="bento-k">Pagamentos CP</div>
+          <div class="bento-v" id="numPagamentos">26</div>
+          <div class="bento-sub">Relatório auditado</div>
+        </div>
+      </section>
+
+      <!-- 4. CARD CRÍTICO COM BORDA VIVA DE NEON -->
+      <section class="cyber-attention-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:#f59e0b;display:grid;place-items:center;font:800 12px var(--font-hud);color:#000;">CO</div>
+            <div>
+              <b style="display:block;font-size:14px;letter-spacing:-0.01em;">2 diárias aguardando aprovação</b>
+              <span style="font-size:12px;color:#94a3b8;">Conferente detectou valor acima da média</span>
+            </div>
+          </div>
+          <span style="font:700 10px var(--font-mono);background:rgba(245,158,11,0.2);color:#f59e0b;padding:3px 8px;border-radius:6px;">DECISÃO</span>
+        </div>
+
+        <button class="btn-shimmer-cyber" onclick="avancarGundam()">
+          <span>APROVAR E LANÇAR NO LOTE DO CP</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </section>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 1: ABA LOTE / PROCESSOS (CYBER TACTICAL & PRESTIGE UI)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-lote" hidden>
+
+      <!-- FUNIL DE VALIDAÇÃO DO LOTE COM BARRAS DE ENERGIA -->
+      <section class="lote-funil-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font:700 12px var(--font-hud);color:#34d399;letter-spacing:0.06em;">
+            FLUXO DO LOTE · CAIXA DO SGD
+          </span>
+          <span style="font:600 11px var(--font-mono);color:#94a3b8;" id="loteTotalBadge">14 PROCESSOS</span>
+        </div>
+        <div class="funil-bars">
+          <div class="funil-segment prontos" id="barProntos" style="width:58%;"></div>
+          <div class="funil-segment robo" id="barRobo" style="width:22%;"></div>
+          <div class="funil-segment pendentes" id="barPendentes" style="width:20%;"></div>
+        </div>
+        <div class="funil-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#34d399;"></span> 8 Prontos</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span> 3 No Robô CP</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span> 3 Pendentes 1Doc</div>
+        </div>
+      </section>
+
+      <!-- BOTÃO DE DISPARO RÁPIDO DO LOTE COMPLETO -->
+      <button class="btn-shimmer-cyber" onclick="dispararLoteCompleto()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>DISPARAR LOTE PRONTO (8 PROCESSOS) PRO CP</span>
+      </button>
+
+      <!-- FILTROS TÁTICOS -->
+      <div class="lote-filters">
+        <button class="lote-filter-btn active" onclick="filtrarProcessos('todos', this)">Todos <span>14</span></button>
+        <button class="lote-filter-btn" onclick="filtrarProcessos('prontos', this)">✓ Prontos <span>8</span></button>
+        <button class="lote-filter-btn" onclick="filtrarProcessos('robo', this)">⚡ No Robô <span>3</span></button>
+        <button class="lote-filter-btn" onclick="filtrarProcessos('atencao', this)">! Pendentes <span>3</span></button>
+      </div>
+
+      <!-- BUSCA RÁPIDA -->
+      <div class="lote-search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="lote-search-input" id="buscaProc" placeholder="Buscar processo, servidor ou trajeto…" oninput="buscarProcessos(this.value)">
+      </div>
+
+      <!-- LISTA DE PROCESSOS: CARDS MODERNOS COM SPOTLIGHT, BORDER BEAM E GUNDAM SQUAD MOTIF -->
+      <div class="proc-list-grid" id="listaProcGrid" style="display:flex;flex-direction:column;gap:12px;">
+        
+        <!-- CARD 1: EM EXECUÇÃO NO ROBÔ CP COM MAGIC UI BORDER BEAM -->
+        <article class="proc-modern-card ativo-robo" data-tipo="robo" onclick="abrirModalProc('5412/2026', 'ROBERTO ALMEIDA SANTOS', 'Santa Maria → Passo Fundo', 'R$ 180,55', 'robo')">
+          <div class="proc-squad-header">
+            <span class="proc-squad-tag">
+              <span class="squad-dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
+              UNIT-01 · SQUADRON ALPHA · ROBÔ ATIVO
+            </span>
+            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5412/2026', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+
+          <div class="proc-top-row">
+            <div class="proc-id-wrap">
+              <span class="proc-id-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                5412/2026
+              </span>
+              <span class="proc-val-pill">R$ 180,55</span>
+            </div>
+            <span class="proc-status-badge robo"><span class="status-pulse-dot"></span> ⚡ NO ROBÔ CP</span>
+          </div>
+
+          <div class="proc-mid-row">
+            <div class="proc-hex-avatar" style="background:linear-gradient(135deg,#0369a1,#0284c7);">RA</div>
+            <div class="proc-meta-info">
+              <h4 class="proc-srv-title">ROBERTO ALMEIDA SANTOS</h4>
+              <div class="proc-srv-route">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
+                <span>Santa Maria → Passo Fundo</span>
+              </div>
+              <div class="proc-bento-tags">
+                <span class="proc-bento-pill destaque">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  VTR OFICIAL · IJC-8812
+                </span>
+                <span class="proc-bento-pill">⏱️ 1 diária</span>
+                <span class="proc-bento-pill">📎 2 notas fiscais</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIPELINE STEPPER CIRUIT (MAGIC UI) -->
+          <div class="proc-pipeline-circuit">
+            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:68%;"></div></div>
+            <div class="pipeline-node done">
+              <div class="node-disc">✓</div>
+              <span class="node-title">Empenho</span>
+            </div>
+            <div class="pipeline-node done">
+              <div class="node-disc">✓</div>
+              <span class="node-title">Liquidação</span>
+            </div>
+            <div class="pipeline-node active">
+              <div class="node-disc">3</div>
+              <span class="node-title">Doc. Viagem</span>
+            </div>
+            <div class="pipeline-node">
+              <div class="node-disc">4</div>
+              <span class="node-title">1Doc</span>
+            </div>
+          </div>
+
+          <!-- AÇÕES DO CARD -->
+          <div class="proc-card-actions">
+            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5412/2026', 'ROBERTO ALMEIDA SANTOS', 'Santa Maria → Passo Fundo', 'R$ 180,55', 'robo')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Ver Comprovantes</span>
+            </button>
+            <button class="proc-btn-liberar" style="border-color:#38bdf8;color:#38bdf8;" onclick="event.stopPropagation();avancarGundam()">
+              <span>⚡ No Robô CP</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- CARD 2: PRONTO P/ CP COM SPOTLIGHT & ACETERNITY ACCENTS -->
+        <article class="proc-modern-card" data-tipo="prontos" onclick="abrirModalProc('5410/2026', 'CARLOS EDUARDO SILVA', 'Porto Alegre → Pelotas', 'R$ 581,52', 'pronto')">
+          <div class="proc-squad-header">
+            <span class="proc-squad-tag">
+              <span class="squad-dot"></span>
+              UNIT-02 · SQUADRON ALPHA · CATAPULT READY
+            </span>
+            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5410/2026', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+
+          <div class="proc-top-row">
+            <div class="proc-id-wrap">
+              <span class="proc-id-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                5410/2026
+              </span>
+              <span class="proc-val-pill">R$ 581,52</span>
+            </div>
+            <span class="proc-status-badge pronto"><span class="status-pulse-dot"></span> ✓ PRONTO P/ CP</span>
+          </div>
+
+          <div class="proc-mid-row">
+            <div class="proc-hex-avatar">CE</div>
+            <div class="proc-meta-info">
+              <h4 class="proc-srv-title">CARLOS EDUARDO SILVA</h4>
+              <div class="proc-srv-route">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
+                <span>Porto Alegre → Pelotas</span>
+              </div>
+              <div class="proc-bento-tags">
+                <span class="proc-bento-pill destaque">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  VTR POLICIAL · JKH-4491
+                </span>
+                <span class="proc-bento-pill">⏱️ 2 diárias</span>
+                <span class="proc-bento-pill">📎 3 anexos conferidos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIPELINE STEPPER COMPLETO -->
+          <div class="proc-pipeline-circuit">
+            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:100%;"></div></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Liquidação</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Doc. Viagem</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">1Doc</span></div>
+          </div>
+
+          <!-- AÇÕES DO CARD -->
+          <div class="proc-card-actions">
+            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5410/2026', 'CARLOS EDUARDO SILVA', 'Porto Alegre → Pelotas', 'R$ 581,52', 'pronto')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Ver Comprovantes</span>
+            </button>
+            <button class="proc-btn-liberar" onclick="event.stopPropagation();dispararCatapultaCard(this.closest('.proc-modern-card'))">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>✓ Liberar no CP</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- CARD 3: PENDÊNCIA COM PULSO ÂMBAR DE ATENÇÃO -->
+        <article class="proc-modern-card" data-tipo="atencao" onclick="abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
+          <div class="proc-squad-header">
+            <span class="proc-squad-tag" style="color:#fbbf24;">
+              <span class="squad-dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></span>
+              UNIT-03 · SQUADRON BETA · PENDÊNCIA 1DOC
+            </span>
+            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5415/2026', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+
+          <div class="proc-top-row">
+            <div class="proc-id-wrap">
+              <span class="proc-id-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                5415/2026
+              </span>
+              <span class="proc-val-pill" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(245,158,11,0.12);">R$ 230,27</span>
+            </div>
+            <span class="proc-status-badge atencao"><span class="status-pulse-dot"></span> ! CONFERIR NOTA</span>
+          </div>
+
+          <div class="proc-mid-row">
+            <div class="proc-hex-avatar" style="background:linear-gradient(135deg,#b45309,#d97706);border-color:#f59e0b;">JP</div>
+            <div class="proc-meta-info">
+              <h4 class="proc-srv-title">JOÃO PAULO MORAES</h4>
+              <div class="proc-srv-route">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
+                <span>Caxias do Sul → Bento Gonçalves</span>
+              </div>
+              <div class="proc-bento-tags">
+                <span class="proc-bento-pill" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
+                  ⚠️ Cupom fiscal sem CNPJ
+                </span>
+                <span class="proc-bento-pill">⏱️ 1 diária</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIPELINE STEPPER INCOMPLETO -->
+          <div class="proc-pipeline-circuit">
+            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:25%;"></div></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
+            <div class="pipeline-node"><div class="node-disc">2</div><span class="node-title">Liquidação</span></div>
+            <div class="pipeline-node"><div class="node-disc">3</div><span class="node-title">Doc. Viagem</span></div>
+            <div class="pipeline-node" style="color:#fbbf24;"><div class="node-disc" style="border-color:#fbbf24;color:#fbbf24;">!</div><span class="node-title" style="color:#fbbf24;">1Doc</span></div>
+          </div>
+
+          <!-- AÇÕES DO CARD -->
+          <div class="proc-card-actions">
+            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Conferir Nota 1Doc</span>
+            </button>
+            <button class="proc-btn-liberar" style="border-color:#fbbf24;color:#fbbf24;" onclick="event.stopPropagation();abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
+              <span>! Resolver Pendência</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- CARD 4: PRONTO P/ CP -->
+        <article class="proc-modern-card" data-tipo="prontos" onclick="abrirModalProc('5419/2026', 'MARCOS VINÍCIUS LIMA', 'Alegrete → Uruguaiana', 'R$ 360,80', 'pronto')">
+          <div class="proc-squad-header">
+            <span class="proc-squad-tag">
+              <span class="squad-dot"></span>
+              UNIT-04 · SQUADRON BETA · CATAPULT READY
+            </span>
+            <button class="proc-copy-btn" title="Copiar processo" onclick="event.stopPropagation();copiarProcesso('5419/2026', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+
+          <div class="proc-top-row">
+            <div class="proc-id-wrap">
+              <span class="proc-id-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                5419/2026
+              </span>
+              <span class="proc-val-pill">R$ 360,80</span>
+            </div>
+            <span class="proc-status-badge pronto"><span class="status-pulse-dot"></span> ✓ PRONTO P/ CP</span>
+          </div>
+
+          <div class="proc-mid-row">
+            <div class="proc-hex-avatar">MV</div>
+            <div class="proc-meta-info">
+              <h4 class="proc-srv-title">MARCOS VINÍCIUS LIMA</h4>
+              <div class="proc-srv-route">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 8 16 12 12 16 12 8"/></svg>
+                <span>Alegrete → Uruguaiana</span>
+              </div>
+              <div class="proc-bento-tags">
+                <span class="proc-bento-pill destaque">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  VTR POLICIAL · JKH-1029
+                </span>
+                <span class="proc-bento-pill">⏱️ 1.5 diárias</span>
+                <span class="proc-bento-pill">📎 4 fotos anexas</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="proc-pipeline-circuit">
+            <div class="pipeline-wire"><div class="pipeline-wire-fill" style="width:100%;"></div></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Empenho</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Liquidação</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">Doc. Viagem</span></div>
+            <div class="pipeline-node done"><div class="node-disc">✓</div><span class="node-title">1Doc</span></div>
+          </div>
+
+          <div class="proc-card-actions">
+            <button class="proc-btn-inspect" onclick="event.stopPropagation();abrirModalProc('5419/2026', 'MARCOS VINÍCIUS LIMA', 'Alegrete → Uruguaiana', 'R$ 360,80', 'pronto')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Ver Comprovantes</span>
+            </button>
+            <button class="proc-btn-liberar" onclick="event.stopPropagation();dispararCatapultaCard(this.closest('.proc-modern-card'))">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>✓ Liberar no CP</span>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    
+
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 2: ABA ATIVIDADE / RADAR (CYBER TACTICAL TIMELINE & TELEMETRIA FEED)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-atividade" hidden>
+
+      <!-- RADAR DE TELEMETRIA AO VIVO (HUD TÁTICO) -->
+      <section class="radar-telemetria-card">
+        <div class="radar-sweep-screen">
+          <div class="radar-ring"></div>
+          <div class="radar-ring inner"></div>
+          <div class="radar-sweeper"></div>
+          <div class="radar-blip" style="top:35%;left:45px;"></div>
+          <div class="radar-blip" style="top:65%;left:75px;animation-delay:0.8s;"></div>
+          
+          <div style="margin-left:95px;flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
+              <span style="font:800 11px var(--font-hud);color:#34d399;letter-spacing:0.08em;">RADAR DA FROTA · SCAN ATIVO</span>
+            </div>
+            <p style="margin:2px 0 0;font:500 11.5px var(--font-mono);color:#94a3b8;line-height:1.3;">
+              Telemetria contínua dos 6 robôs autônomos e eventos do SGD.
+            </p>
+          </div>
+        </div>
+
+        <div class="radar-stats-grid">
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Frota Conectada</span>
+            <span class="radar-stat-val" style="color:#34d399;">
+              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;"></span>
+              6 / 6 BOTS
+            </span>
+          </div>
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Varredura</span>
+            <span class="radar-stat-val" style="color:#38bdf8;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              A CADA 30s
+            </span>
+          </div>
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Eventos Hoje</span>
+            <span class="radar-stat-val" style="color:#fbbf24;" id="statTotalEventos">
+              48 AÇÕES
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- HARDWARE HOST DELL TELEMETRY CARD (UNIT-00) -->
+      <section class="dell-telemetry-cockpit" id="dellCockpitCard">
+        <div class="dell-cockpit-header">
+          <div class="dell-title-wrap">
+            <div class="dell-unit-avatar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="1"/></svg>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
+                <span style="font:800 12px var(--font-hud);letter-spacing:0.06em;color:#f8fafc;">UNIT-00 · NOTEBOOK DELL HOST</span>
+                <span class="dell-online-pill">ONLINE</span>
+              </div>
+              <div style="font:500 11px var(--font-mono);color:#94a3b8;margin-top:2px;">
+                DESKTOP-MIQJ3OB · Intel Core i7-7700HQ (8T) · Uptime: 18.0 dias
+              </div>
+            </div>
+          </div>
+          <button class="btn-dell-refresh" onclick="recarregarTelemetriaDell()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Live Sync</span>
+          </button>
+        </div>
+
+        <!-- GAUGES BENTO (CPU & RAM) -->
+        <div class="dell-gauges-grid">
+          <div class="dell-gauge-card">
+            <div class="dell-gauge-header">
+              <span class="dell-gauge-name">Uso de CPU</span>
+              <span class="dell-gauge-val" id="dellCpuVal" style="color:#38bdf8;">30%</span>
+            </div>
+            <div class="dell-progress-track">
+              <div class="dell-progress-bar" id="dellCpuBar" style="width:30%;background:linear-gradient(90deg,#06b6d4,#38bdf8);"></div>
+            </div>
+            <div class="dell-gauge-meta">
+              <span>8 Cores @ 2.80GHz</span>
+              <span>Temp Nominal</span>
+            </div>
+          </div>
+
+          <div class="dell-gauge-card">
+            <div class="dell-gauge-header">
+              <span class="dell-gauge-name">Memória RAM</span>
+              <span class="dell-gauge-val" id="dellRamVal" style="color:#fbbf24;">70%</span>
+            </div>
+            <div class="dell-progress-track">
+              <div class="dell-progress-bar" id="dellRamBar" style="width:70%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
+            </div>
+            <div class="dell-gauge-meta">
+              <span id="dellRamGb">11.4 / 16.0 GB</span>
+              <span>4.8 GB Livre</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9 SERVIÇOS VITAIS WINDOWS -->
+        <div class="dell-services-section">
+          <div class="dell-section-label">
+            <span>SERVIÇOS VITAIS NO HOST (9/9 ATIVOS)</span>
+            <span style="color:#34d399;font-weight:700;">ALL SYSTEMS GO</span>
+          </div>
+          <div class="dell-services-grid">
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>EquipeBots</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>SaudeFrotaApi</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>PostgreSQL</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>OnedocCloudrun</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>HermesGateway</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>AssessorApi</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>OcrSmall</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>OcrNanonets</div>
+            <div class="dell-svc-chip"><span class="dell-svc-dot"></span>MotoristaApi</div>
+          </div>
+        </div>
+
+        <!-- ROBÔ CP & TRAVAS -->
+        <div class="dell-robo-status-row">
+          <div class="dell-robo-box">
+            <span class="dell-r-label">Chrome Automação:</span>
+            <span class="dell-r-tag" id="dellChromeTag">Aberto em Standby</span>
+          </div>
+          <div class="dell-robo-box">
+            <span class="dell-r-label">Trava de Concorrência:</span>
+            <span class="dell-r-tag lock" id="dellLockTag">robo.lock Ativo</span>
+          </div>
+          <div class="dell-robo-box">
+            <span class="dell-r-label">Último Disparo:</span>
+            <span class="dell-r-tag ok" id="dellDisparoTag">dmvvfflrq (100% OK)</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- BOTÃO DE DISPARO DE TELEMETRIA AO VIVO (DEMO INTERATIVA) -->
+      <button class="btn-shimmer-cyber" onclick="simularNovoEventoTelemetria()" style="background:linear-gradient(135deg,rgba(6,182,212,0.25),rgba(3,105,161,0.3));border-color:rgba(56,189,248,0.4);color:#38bdf8;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>RECEBER NOVO EVENTO AO VIVO NA TIMELINE</span>
+      </button>
+
+      <!-- FILTROS TÁTICOS POR AGENTE/BOT -->
+      <div class="bot-filter-chips">
+        <button class="bot-chip active" onclick="filtrarAtividade('todos', this)">
+          <span>Todos</span> <span class="bot-chip-count" id="chipCountTodos">48</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('robo', this)">
+          <span style="color:#38bdf8;">●</span> Robô CP <span class="bot-chip-count">12</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('conferente', this)">
+          <span style="color:#10b981;">●</span> Conferente <span class="bot-chip-count">14</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('cacador', this)">
+          <span style="color:#06b6d4;">●</span> Caçador <span class="bot-chip-count">10</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('vigia', this)">
+          <span style="color:#f59e0b;">●</span> Vigia <span class="bot-chip-count">6</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('coordenador', this)">
+          <span style="color:#a855f7;">●</span> Coordenador <span class="bot-chip-count">4</span>
+        </button>
+        <button class="bot-chip" onclick="filtrarAtividade('thiago', this)">
+          <span style="color:#ec4899;">●</span> Thiago <span class="bot-chip-count">2</span>
+        </button>
+      </div>
+
+      <!-- TIMELINE DE TELEMETRIA AO VIVO COM MAGIC UI LASER BEAM -->
+      <div class="timeline-feed-wrap" id="feedAtividadeTimeline">
+        <div class="timeline-laser-wire"></div>
+
+        <!-- DIVISOR HORÁRIO 1: 18H -->
+        <div class="timeline-time-divider">
+          <span class="timeline-time-pill">HOJE · 18H</span>
+          <div class="timeline-time-line"></div>
+        </div>
+
+        <!-- EVENTO 1: ROBÔ CP EMPENHOU LOTE -->
+        <article class="ev-modern-card" data-bot="robo">
+          <div class="ev-card-header">
+            <div class="ev-bot-id">
+              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0284c7,#0369a1);border-color:#38bdf8;">
+                CP
+              </div>
+              <div class="ev-bot-name-group">
+                <span class="ev-bot-title">ROBÔ CP // SISTEMA FINANCEIRO</span>
+                <span class="ev-bot-role" style="color:#38bdf8;">OPERAÇÃO AUTOMÁTICA CP</span>
+              </div>
+            </div>
+            <time class="ev-time-stamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              18:02:14
+            </time>
+          </div>
+
+          <h4 class="ev-headline">
+            Empenho concluído com sucesso para o Lote #419 (8 processos)
+          </h4>
+
+          <div class="ev-log-terminal">
+<code>[EXEC] CP.empenharLote(id=419) -> 8 processos confirmados
+[DADOS] R$ 2.450,88 · Autenticação token: validada · 0 erros</code>
+          </div>
+
+          <div class="ev-card-footer">
+            <span class="ev-status-chip ok">
+              <span>✓</span> CONCLUÍDO
+            </span>
+            <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
+              <span>Ver no Lote</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- EVENTO 2: CONFERENTE VALIDOU ANEXOS 1DOC -->
+        <article class="ev-modern-card" data-bot="conferente">
+          <div class="ev-card-header">
+            <div class="ev-bot-id">
+              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#059669,#10b981);border-color:#34d399;">
+                CF
+              </div>
+              <div class="ev-bot-name-group">
+                <span class="ev-bot-title">CONFERENTE // IA VALIDADORA</span>
+                <span class="ev-bot-role" style="color:#34d399;">AUDITORIA DE CUPONS</span>
+              </div>
+            </div>
+            <time class="ev-time-stamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              17:51:08
+            </time>
+          </div>
+
+          <h4 class="ev-headline">
+            Conferência de Notas Fiscais e Trajetos: 13 aprovados, 1 pendência
+          </h4>
+
+          <div class="ev-log-terminal">
+<code>[OCR] Processo 5415/2026: Cupom fiscal sem CNPJ legível.
+[AÇÃO] Sinalizado com badge de atenção para conferência manual.</code>
+          </div>
+
+          <div class="ev-card-footer">
+            <span class="ev-status-chip alerta">
+              <span>!</span> PENDÊNCIA 1DOC
+            </span>
+            <button class="ev-btn-action" onclick="abrirModalProc('5415/2026', 'JOÃO PAULO MORAES', 'Caxias do Sul → Bento Gonçalves', 'R$ 230,27', 'atencao')">
+              <span>Resolver Nota</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- DIVISOR HORÁRIO 2: 17H -->
+        <div class="timeline-time-divider">
+          <span class="timeline-time-pill">HOJE · 17H</span>
+          <div class="timeline-time-line"></div>
+        </div>
+
+        <!-- EVENTO 3: CAÇADOR VARREU 1DOC -->
+        <article class="ev-modern-card" data-bot="cacador">
+          <div class="ev-card-header">
+            <div class="ev-bot-id">
+              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4);border-color:#22d3ee;">
+                CA
+              </div>
+              <div class="ev-bot-name-group">
+                <span class="ev-bot-title">CAÇADOR // RECON UNIT</span>
+                <span class="ev-bot-role" style="color:#06b6d4;">VARREDURA DE ENTRADA 1DOC</span>
+              </div>
+            </div>
+            <time class="ev-time-stamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              17:34:00
+            </time>
+          </div>
+
+          <h4 class="ev-headline">
+            Varredura horária: 14 novos processos capturados na caixa de entrada
+          </h4>
+
+          <div class="ev-log-terminal">
+<code>[SCAN] 105 processos inspecionados · 14 diárias pendentes de lote.
+[MEMÓRIA] Otimização ativada: 0 excedimentos de heap KV.</code>
+          </div>
+
+          <div class="ev-card-footer">
+            <span class="ev-status-chip ok">
+              <span>✓</span> 14 CAPTURADOS
+            </span>
+            <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
+              <span>Inspecionar</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- EVENTO 4: VIGIA DE CONFORMIDADE -->
+        <article class="ev-modern-card" data-bot="vigia">
+          <div class="ev-card-header">
+            <div class="ev-bot-id">
+              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#b45309,#f59e0b);border-color:#fbbf24;">
+                VI
+              </div>
+              <div class="ev-bot-name-group">
+                <span class="ev-bot-title">VIGIA // PROTOCOLO DE CONFORMIDADE</span>
+                <span class="ev-bot-role" style="color:#f59e0b;">SEGURANÇA JURÍDICA</span>
+              </div>
+            </div>
+            <time class="ev-time-stamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              17:20:19
+            </time>
+          </div>
+
+          <h4 class="ev-headline">
+            Conflito de diárias no mesmo servidor auditado: sem sobreposição
+          </h4>
+
+          <div class="ev-log-terminal">
+<code>[VIGIA] Servidor Carlos Eduardo Silva: viagem anterior encerrada às 12h.
+[STATUS] Conformidade com a Portaria nº 48/2026: APROVADO.</code>
+          </div>
+
+          <div class="ev-card-footer">
+            <span class="ev-status-chip ok">
+              <span>✓</span> APROVADO
+            </span>
+            <button class="ev-btn-action" onclick="toast('Regra de conformidade validada pelo Vigia')">
+              <span>Auditoria OK</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- EVENTO 5: THIAGO CORRIGIU CARD (COM BOTÃO DESFAZER) -->
+        <article class="ev-modern-card" data-bot="thiago" id="cardEvThiago">
+          <div class="ev-card-header">
+            <div class="ev-bot-id">
+              <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899);border-color:#f472b6;">
+                TK
+              </div>
+              <div class="ev-bot-name-group">
+                <span class="ev-bot-title">THIAGO // OPERADOR HUMANO</span>
+                <span class="ev-bot-role" style="color:#ec4899;">INTERVENÇÃO DE SUPERVISÃO</span>
+              </div>
+            </div>
+            <time class="ev-time-stamp">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              17:05:40
+            </time>
+          </div>
+
+          <h4 class="ev-headline">
+            Correção manual aplicada no card 5412/2026
+          </h4>
+
+          <div class="ev-log-terminal">
+<code>Destino atualizado: Passo Fundo · Viatura: IJC-8812
+Motivo: retificação do itinerário informada pelo motorista</code>
+          </div>
+
+          <div class="ev-card-footer">
+            <span class="ev-status-chip ok" id="chipEvThiago">
+              <span>✓</span> APLICADO
+            </span>
+            <button class="ev-btn-action" style="color:#fbbf24;border-color:rgba(251,191,36,0.3);" onclick="desfazerCorrecaoDemo(this)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              <span>Desfazer</span>
+            </button>
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 3: ABA EQUIPE (ESCRITÓRIO ISOMÉTRICO DOS 9 AGENTES DO SGD)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-equipe" hidden>
+
+      <!-- CARD DE CABEÇALHO DO ESCRITÓRIO TÁTICO -->
+      <section class="eq-office-card">
+        <div class="eq-office-header">
+          <div class="eq-office-tag">
+            <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
+            <span>QUARTEL GENERAL ISOMÉTRICO · 9 AGENTES</span>
+          </div>
+          <span style="font:700 11px var(--font-mono);color:#94a3b8;background:rgba(255,255,255,0.06);padding:3px 8px;border-radius:6px;">
+            CLAUDE OFFICE 3D
+          </span>
+        </div>
+        <p style="margin:0;font:500 12px var(--font-mono);color:#94a3b8;line-height:1.4;">
+          O mesmo escritório animado da versão web do SGD: clique em qualquer agente para ver tarefas e telemetria.
+        </p>
+
+        <!-- PALCO DO ESCRITÓRIO (CANVAS + CAMADA INTERATIVA DE BOTÕES) -->
+        <div class="eqe-w">
+          <div class="eqe-cn" id="eq-cn">
+            <canvas id="eq-cv" role="img" aria-label="Escritório animado com os nove agentes"></canvas>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:2px;">
+          <button class="btn-shimmer-cyber" style="flex:1;" onclick="eqeMandarCaminharDemo()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>DISPARAR RECADO ENTRE AGENTES (CAMINHADA ISOMÉTRICA)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- GAVETA TÁTICA DO AGENTE SELECIONADO -->
+      <div id="eq-gaveta" class="eq-gaveta-card" hidden>
+        <div class="eq-gaveta-top">
+          <div class="eq-gaveta-info">
+            <div class="eq-gaveta-avatar" id="eqGAv" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);">CO</div>
+            <div>
+              <h4 style="margin:0;font:800 15px var(--font-hud);color:#fff;" id="eqGNome">Coordenador</h4>
+              <span style="font:600 11px var(--font-mono);color:#34d399;" id="eqGModelo">DeepSeek Flash · Orquestrador</span>
+            </div>
+          </div>
+          <button class="eq-gaveta-close" onclick="fecharGavetaAgente()">&times;</button>
+        </div>
+
+        <p style="margin:0;font:500 12px var(--font-mono);color:#cbd5e1;line-height:1.4;" id="eqGPapel">
+          Conversa com você e distribui o trabalho entre a frota de robôs.
+        </p>
+
+        <div class="eq-gaveta-stats" id="eqGStats">
+          <div class="eq-gaveta-stat-item">
+            <span>Status</span>
+            <b id="eqGSt">Operacional</b>
+          </div>
+          <div class="eq-gaveta-stat-item">
+            <span>Último Sinal</span>
+            <b id="eqGTempo">Agora</b>
+          </div>
+          <div class="eq-gaveta-stat-item">
+            <span>Ações Hoje</span>
+            <b id="eqGAcoes">18</b>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="ev-btn-action" style="flex:1;justify-content:center;padding:8px;" onclick="falarComAgenteGaveta()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Enviar Ordem</span>
+          </button>
+          <button class="ev-btn-action" style="padding:8px 14px;" onclick="fecharGavetaAgente()">
+            <span>Fechar</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 4: ABA CONVERSA (CANAL DIRETO COM O COORDENADOR)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-conversa" hidden>
+      <div class="chat-cockpit-wrap">
+
+        <!-- CABEÇALHO DO CHAT -->
+        <header class="chat-cockpit-header">
+          <div class="chat-ai-profile">
+            <div class="chat-ai-avatar">CO</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <h4 style="margin:0;font:800 14.5px var(--font-hud);color:#fff;">COORDENADOR</h4>
+                <span class="status-pulse-dot" style="background:#8b5cf6;box-shadow:0 0 6px #8b5cf6;"></span>
+              </div>
+              <span style="font:600 11px var(--font-mono);color:#94a3b8;">DEEPSEEK ORCHESTRATOR · ONLINE</span>
+            </div>
+          </div>
+          <span style="font:700 10px var(--font-mono);color:#34d399;background:rgba(16,185,129,0.12);padding:3px 8px;border-radius:6px;border:1px solid rgba(52,211,153,0.3);">
+            SESSÃO CRIPTOGRAFADA
+          </span>
+        </header>
+
+        <!-- HISTÓRICO DE MENSAGENS DO CHAT -->
+        <div class="chat-messages-scroll" id="chatHistorico">
+          
+          <!-- MENSAGEM 1 (BOT) -->
+          <div class="chat-bubble bot">
+            <div class="chat-bubble-meta">
+              <span>COORDENADOR</span>
+              <span class="chat-bubble-time">17:40</span>
+            </div>
+            <div>
+              Bom final de tarde, Thiago! A varredura das 17h detectou 14 novos processos na caixa do 1Doc. 8 deles já foram conferidos pelo robô e estão 100% prontos para empenhar no CP.
+            </div>
+          </div>
+
+          <!-- MENSAGEM 2 (EU) -->
+          <div class="chat-bubble eu">
+            <div class="chat-bubble-meta">
+              <span>VOCÊ</span>
+              <span class="chat-bubble-time">17:42</span>
+            </div>
+            <div>
+              O processo 5415/2026 de Caxias do Sul tem algum problema na nota?
+            </div>
+          </div>
+
+          <!-- MENSAGEM 3 (BOT) -->
+          <div class="chat-bubble bot">
+            <div class="chat-bubble-meta">
+              <span>COORDENADOR</span>
+              <span class="chat-bubble-time">17:43</span>
+            </div>
+            <div>
+              Sim, o <b>Conferente</b> auditou o PDF via OCR e identificou que o cupom fiscal está sem CNPJ legível. O card foi marcado com alerta âmbar para que você possa conferir manualmente no 1Doc antes do lote ser liberado.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- INDICADOR DE DIGITANDO (OCULTO POR PADRÃO) -->
+        <div class="chat-typing-indicator" id="chatDigitando" style="display:none;">
+          <div class="chat-typing-dots"><i></i><i></i><i></i></div>
+          <span>Coordenador formulando resposta…</span>
+        </div>
+
+        <!-- ATALHOS RÁPIDOS DE MENSAGEM -->
+        <div class="chat-quick-prompts">
+          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('qual o status do CP?')">
+            ⚡ Status do CP
+          </button>
+          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('como está a fila de prestação de contas?')">
+            🧾 Fila de Prestações
+          </button>
+          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('tira o relatório de prestações pendentes')">
+            📋 Relatório Pendentes
+          </button>
+          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('me dá o resumo do dia das diárias')">
+            📊 Resumo do Dia
+          </button>
+          <button class="chat-prompt-pill" onclick="enviarMensagemRapida('pode empenhar o lote pronto agora')">
+            🚀 Disparar Lote
+          </button>
+        </div>
+
+        <!-- BARRA DE ENTRADA -->
+        <form class="chat-input-bar" id="chatForm" onsubmit="event.preventDefault();enviarMensagemChat();">
+          <input class="chat-input-field" id="chatInput" placeholder="Mensagem para o Coordenador…" autocomplete="off">
+          <button class="chat-send-btn" type="submit" title="Enviar Mensagem">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       NOVA ABA INFERIOR: FLOATING DOCK HOLOGRÁFICA (DYNAMIC ISLAND LUXO)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <nav class="floating-bottom-dock">
+    <div class="dock-nav-grid">
+      <div class="dock-slider-pill" id="dockPill"></div>
+      
+      <!-- ABA 0: INÍCIO -->
+      <button class="dock-item active" onclick="trocarDock(0, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Início</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+
+      <!-- ABA 1: LOTE / PROCESSOS (COM BADGE PULSANTE EM NEON) -->
+      <button class="dock-item" onclick="trocarDock(1, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Lote</span>
+        <span class="dock-badge-pulse" id="dockBadgeLote">8</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+
+      <!-- ABA 2: RADAR / ATIVIDADE -->
+      <button class="dock-item" onclick="trocarDock(2, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Radar</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+
+      <!-- ABA 3: EQUIPE (ESCRITÓRIO 3D) -->
+      <button class="dock-item" onclick="trocarDock(3, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Equipe</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+
+      <!-- ABA 4: CONVERSA / CHAT -->
+      <button class="dock-item" onclick="trocarDock(4, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Conversa</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL DE PROCESSO & COMPROVANTES (BOTTOM SHEET HOLOGRÁFICA COM LASER SCANNER) -->
+  <div class="laser-scanner-sheet" id="modalProc" onclick="fecharModalProcOverlay(event)">
+    <div class="scanner-modal-body">
+      <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);align-self:center;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h3 style="font:800 18px var(--font-hud);margin:0;color:#fff;" id="mProcNum">PROC 5410/2026</h3>
+          <span style="font:600 13px var(--font-body);color:#34d399;" id="mProcSrv">CARLOS EDUARDO SILVA</span>
+        </div>
+        <span class="proc-status-badge pronto" id="mProcBadge">CONFERIDO</span>
+      </div>
+
+      <div class="ocr-receipt-preview">
+        <div class="laser-beam-line"></div>
+        <div style="text-align:center;z-index:2;">
+          <div style="font-size:24px;margin-bottom:2px;">📄</div>
+          <b id="mProcVal" style="font-size:18px;color:#fff;display:block;">R$ 581,52</b>
+          <div style="font-size:11px;color:#94a3b8;" id="mProcRota">Porto Alegre → Pelotas</div>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:8px;font:12px var(--font-mono);color:#94a3b8;background:rgba(0,0,0,0.3);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+        <div><span style="color:#34d399;">✓</span> Nota Fiscal vinculada no 1Doc</div>
+        <div><span style="color:#34d399;">✓</span> CNH e dados cadastrais válidos</div>
+        <div><span style="color:#34d399;">✓</span> Roteiro verificado pelo Vigia</div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn-shimmer-cyber" style="flex:1;" onclick="aprovarProcessoModal()">
+          <span>✓ CONFIRMAR E LIBERAR</span>
+        </button>
+        <button class="dock-btn" style="padding:0 18px;" onclick="fecharModalProc()">
+          <span>Fechar</span>
+        </button>
+      </div>
+    </div>
+
+    
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// 1. MOTOR DE METEOROS E POEIRA CIBERNÉTICA (ACETERNITY METEORS EFFECT)
+// ══════════════════════════════════════════════════════════════════════════
+const cv = document.getElementById('cyberCanvas');
+const ctx = cv.getContext('2d');
+let W = cv.width = window.innerWidth;
+let H = cv.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  W = cv.width = window.innerWidth;
+  H = cv.height = window.innerHeight;
+});
+
+let meteors = [];
+function criarMeteoro(extra = false) {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * -200,
+    len: Math.random() * 80 + 40,
+    speed: (Math.random() * 8 + 4) * (extra ? 2.5 : 1),
+    size: Math.random() * 1.5 + 0.5,
+    alpha: Math.random() * 0.7 + 0.3
+  };
+}
+for (let i = 0; i < 24; i++) meteors.push(criarMeteoro());
+
+function animarFundo() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Grade sutil
+  ctx.strokeStyle = 'rgba(52, 211, 153, 0.035)';
+  ctx.lineWidth = 1;
+  const step = 48;
+  for (let x = 0; x < W; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Meteoros
+  meteors.forEach(m => {
+    m.x += m.speed * 0.8;
+    m.y += m.speed * 1.2;
+    if (m.y > H + 100 || m.x > W + 100) {
+      Object.assign(m, criarMeteoro());
+    }
+    const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.len * 0.8, m.y - m.len * 1.2);
+    grad.addColorStop(0, `rgba(52, 211, 153, ${m.alpha})`);
+    grad.addColorStop(0.3, `rgba(6, 182, 212, ${m.alpha * 0.6})`);
+    grad.addColorStop(1, 'transparent');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = m.size;
+    ctx.beginPath();
+    ctx.moveTo(m.x, m.y);
+    ctx.lineTo(m.x - m.len * 0.8, m.y - m.len * 1.2);
+    ctx.stroke();
+  });
+
+  requestAnimationFrame(animarFundo);
+}
+animarFundo();
+
+function rajadaMeteoros() {
+  for (let i = 0; i < 20; i++) {
+    meteors.push(criarMeteoro(true));
+  }
+  setTimeout(() => { meteors = meteors.slice(0, 24); }, 2500);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 2. PULSO OPERACIONAL DO COCKPIT TÁTICO
+// ══════════════════════════════════════════════════════════════════════════
+function atualizarCoordenadasBots() {}
+
+function dispararPulsoRede() {
+  const card = document.getElementById('cardOrbital');
+  if (card) {
+    card.classList.remove('pulse-active');
+    void card.offsetWidth; // trigger reflow
+    card.classList.add('pulse-active');
+    setTimeout(() => card.classList.remove('pulse-active'), 850);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 3. AVANÇO DO GUNDAM PELOS 4 PORTÕES DO CP
+// ══════════════════════════════════════════════════════════════════════════
+let gundamEtapa = 2; // 0, 1, 2, 3
+const posicoes = [15, 38, 62, 86];
+const rotulos = ['PROC 5410/2026 · EMPENHO', 'PROC 5410/2026 · LIQUIDAÇÃO', 'PROC 5410/2026 · DOC VIAGEM', 'PROC 5410/2026 · 1DOC CONCLUÍDO!'];
+
+function avancarGundam() {
+  gundamEtapa = (gundamEtapa + 1) % 4;
+  const unit = document.getElementById('gundamUnit');
+  if (unit) {
+    unit.style.left = posicoes[gundamEtapa] + '%';
+    document.getElementById('gundamProcLabel').textContent = rotulos[gundamEtapa];
+
+    document.querySelectorAll('.gate-col').forEach((col, idx) => {
+      if (idx <= gundamEtapa) {
+        col.classList.add('done');
+        col.children[1].textContent = '✓ OK';
+      } else {
+        col.classList.remove('done');
+        col.children[1].textContent = '⏳ RUN';
+      }
+    });
+  }
+  turboTicker();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 4. NUMBER TICKER COM CURVA CÚBICA E GLOW (DESIGN.MD §7.3)
+// ══════════════════════════════════════════════════════════════════════════
+function animarNumero(el, fim, ms = 800) {
+  if (!el) return;
+  const ini = performance.now();
+  (function passo(t) {
+    const p = Math.min(1, (t - ini) / ms);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(fim * e);
+    if (p < 1) requestAnimationFrame(passo);
+  })(ini);
+}
+
+function turboTicker() {
+  animarNumero(document.getElementById('numPrestacoes'), 42, 850);
+  animarNumero(document.getElementById('numEmpenhos'), 18, 700);
+  animarNumero(document.getElementById('numPagamentos'), 26, 800);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5. SLIDER DESLIZANTE DA FLOATING DOCK (PRESTIGE UI) & TROCA DE ABAS
+// ══════════════════════════════════════════════════════════════════════════
+function trocarDock(idx, btn) {
+  const items = document.querySelectorAll('.dock-item');
+  if (!btn && items[idx]) btn = items[idx];
+  items.forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const pill = document.getElementById('dockPill');
+  if (pill) pill.style.transform = `translateX(${idx * 100}%)`;
+
+  const vInicio = document.getElementById('view-inicio');
+  const vLote = document.getElementById('view-lote');
+  const vAtividade = document.getElementById('view-atividade');
+  const vEquipe = document.getElementById('view-equipe');
+  const vConversa = document.getElementById('view-conversa');
+
+  if (vInicio) vInicio.hidden = (idx !== 0);
+  if (vLote) vLote.hidden = (idx !== 1);
+  if (vAtividade) vAtividade.hidden = (idx !== 2);
+  if (vEquipe) vEquipe.hidden = (idx !== 3);
+  if (vConversa) vConversa.hidden = (idx !== 4);
+
+  if (idx === 0) {
+    atualizarCoordenadasBots();
+  } else if (idx === 3) {
+    if (!eqe.pronto) eqeCarregar();
+    eqe.vis = true;
+    setTimeout(() => { if (eqe.pronto) { eqeMover(true); eqeDesenhar(); } }, 60);
+  } else if (idx === 4) {
+    const sc = document.getElementById('chatHistorico');
+    if (sc) sc.scrollTop = sc.scrollHeight;
+    const inp = document.getElementById('chatInput');
+    if (inp) inp.focus();
+  }
+}
+
+let dockIdxAuto = 0;
+function trocarDockAuto() {
+  dockIdxAuto = (dockIdxAuto + 1) % 5;
+  const items = document.querySelectorAll('.dock-item');
+  if (items[dockIdxAuto]) {
+    trocarDock(dockIdxAuto, items[dockIdxAuto]);
+  }
+}
+
+function abrirAbaLoteDemo() {
+  const items = document.querySelectorAll('.dock-item');
+  trocarDock(1, items[1]);
+}
+
+function abrirAbaAtividadeDemo() {
+  const items = document.querySelectorAll('.dock-item');
+  trocarDock(2, items[2]);
+}
+
+function abrirAbaEquipeDemo() {
+  const items = document.querySelectorAll('.dock-item');
+  trocarDock(3, items[3]);
+}
+
+function abrirAbaConversaDemo() {
+  const items = document.querySelectorAll('.dock-item');
+  trocarDock(4, items[4]);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5.2 CHAT DIRETO COM O COORDENADOR (TACTICAL COMMS ENGINE)
+// ══════════════════════════════════════════════════════════════════════════
+function enviarMensagemChat() {
+  const inp = document.getElementById('chatInput');
+  const txt = (inp.value || '').trim();
+  if (!txt) return;
+  inp.value = '';
+  adicionarMensagemUsuario(txt);
+  processarRespostaCoordenador(txt);
+}
+
+function enviarMensagemRapida(txt) {
+  abrirAbaConversaDemo();
+  adicionarMensagemUsuario(txt);
+  processarRespostaCoordenador(txt);
+}
+
+function adicionarMensagemUsuario(txt) {
+  const hist = document.getElementById('chatHistorico');
+  const d = new Date();
+  const hora = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  
+  const el = document.createElement('div');
+  el.className = 'chat-bubble eu';
+  el.innerHTML = `
+    <div class="chat-bubble-meta">
+      <span>VOCÊ</span>
+      <span class="chat-bubble-time">${hora}</span>
+    </div>
+    <div>${escaparHtmlTexto(txt)}</div>
+  `;
+  hist.appendChild(el);
+  hist.scrollTop = hist.scrollHeight;
+  dispararPulsoRede();
+}
+
+function processarRespostaCoordenador(pergunta) {
+  const ind = document.getElementById('chatDigitando');
+  const hist = document.getElementById('chatHistorico');
+  if (ind) ind.style.display = 'flex';
+  hist.scrollTop = hist.scrollHeight;
+
+  const q = pergunta.toLowerCase();
+  let resposta = 'Entendido! Já repassei as instruções aos robôs da equipe.';
+
+  if (q.includes('status') || q.includes('cp')) {
+    resposta = 'O <b>Robô CP (Hermes FullCP)</b> está 100% operacional no notebook. Sessão autenticada via certificado, vigia ativo a cada 2 min e 0 falhas registradas hoje.';
+  } else if (q.includes('prestação') || q.includes('fila')) {
+    resposta = 'Temos <b>42 prestações prontas</b> na fila automática do CP, com 0 vencidas no momento. A próxima vence apenas amanhã às 18h.';
+  } else if (q.includes('relatório')) {
+    resposta = 'O relatório de prestações pendentes consolidou <b>R$ 14.890,20</b>. Os dados de conciliação já foram sincronizados no painel e no canal do Telegram.';
+  } else if (q.includes('resumo') || q.includes('dia')) {
+    resposta = 'Resumo de hoje: <b>18 empenhos</b> emitidos no CP (R$ 5.420,00), <b>26 pagamentos confirmados</b> e 8 novos processos no lote prontos para disparo.';
+  } else if (q.includes('lote') || q.includes('empenhar')) {
+    resposta = 'O lote com <b>8 processos (R$ 2.450,88)</b> está pronto na catapulta. Clique em "Disparar Lote" na aba Lote para autorizar o envio ao CP.';
+  }
+
+  setTimeout(() => {
+    if (ind) ind.style.display = 'none';
+    const d = new Date();
+    const hora = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    
+    const bEl = document.createElement('div');
+    bEl.className = 'chat-bubble bot';
+    bEl.innerHTML = `
+      <div class="chat-bubble-meta">
+        <span>COORDENADOR</span>
+        <span class="chat-bubble-time">${hora}</span>
+      </div>
+      <div>${resposta}</div>
+    `;
+    hist.appendChild(bEl);
+    hist.scrollTop = hist.scrollHeight;
+    dispararPulsoRede();
+    toast('💬 Mensagem do Coordenador recebida!');
+  }, 950);
+}
+
+function escaparHtmlTexto(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5.1 FILTRO TÁTICO DA ABA ATIVIDADE / RADAR & AÇÕES
+// ══════════════════════════════════════════════════════════════════════════
+function filtrarAtividade(bot, btn) {
+  document.querySelectorAll('.bot-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ev-modern-card').forEach(card => {
+    if (bot === 'todos' || card.dataset.bot === bot) {
+      card.style.display = 'flex';
+      card.animate([
+        { opacity: 0, transform: 'translateX(-12px)' },
+        { opacity: 1, transform: 'none' }
+      ], { duration: 180, easing: 'cubic-bezier(0.05, 0.7, 0.1, 1)' });
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function desfazerCorrecaoDemo(btn) {
+  btn.disabled = true;
+  const chip = document.getElementById('chipEvThiago');
+  if (chip) {
+    chip.className = 'ev-status-chip';
+    chip.style.background = 'rgba(255,255,255,0.08)';
+    chip.style.color = '#94a3b8';
+    chip.innerHTML = '<span>↺</span> DESFEITO';
+  }
+  btn.style.opacity = '0.4';
+  btn.textContent = 'Desfeito com sucesso';
+  toast('✓ Correção desfeita · O card voltou aos dados anteriores');
+}
+
+let simCount = 1;
+function simularNovoEventoTelemetria() {
+  const wrap = document.getElementById('feedAtividadeTimeline');
+  if (!wrap) return;
+  const d = new Date();
+  const hora = d.toTimeString().split(' ')[0];
+  
+  const el = document.createElement('article');
+  el.className = 'ev-modern-card';
+  el.dataset.bot = 'cacador';
+  el.innerHTML = `
+    <div class="ev-card-header">
+      <div class="ev-bot-id">
+        <div class="ev-bot-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4);border-color:#22d3ee;">
+          CA
+        </div>
+        <div class="ev-bot-name-group">
+          <span class="ev-bot-title">CAÇADOR // RECON UNIT</span>
+          <span class="ev-bot-role" style="color:#06b6d4;">TELEMETRIA AO VIVO #${simCount++}</span>
+        </div>
+      </div>
+      <time class="ev-time-stamp" style="color:#34d399;">
+        <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 6px #34d399;"></span>
+        ${hora}
+      </time>
+    </div>
+    <h4 class="ev-headline">Novo processo capturado no 1Doc e sincronizado com o SGD Diárias</h4>
+    <div class="ev-log-terminal">
+<code>[VARREDURA] Execução otimizada em 12ms · 0 estouro de memória KV.
+[HASH] d48a${Math.floor(Math.random()*900+100)} · Servidor apto para conferência pelo lote.</code>
+    </div>
+    <div class="ev-card-footer">
+      <span class="ev-status-chip ok"><span>✓</span> CAPTURADO AGORA</span>
+      <button class="ev-btn-action" onclick="abrirAbaLoteDemo()">
+        <span>Ver no Lote</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  `;
+  
+  const wire = wrap.querySelector('.timeline-laser-wire');
+  if (wire && wire.nextElementSibling) {
+    wrap.insertBefore(el, wire.nextElementSibling.nextElementSibling);
+  } else {
+    wrap.prepend(el);
+  }
+  
+  el.animate([
+    { opacity: 0, transform: 'translateY(-16px) scale(0.96)' },
+    { opacity: 1, transform: 'none' }
+  ], { duration: 250, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+  
+  dispararPulsoRede();
+  toast('📡 Novo evento recebido na telemetria da frota!');
+  
+  const total = document.getElementById('statTotalEventos');
+  if (total) total.textContent = (48 + simCount - 1) + ' AÇÕES';
+  const badge = document.getElementById('chipCountTodos');
+  if (badge) badge.textContent = (48 + simCount - 1);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 6. FILTRO TÁTICO & BUSCA NA ABA LOTE
+// ══════════════════════════════════════════════════════════════════════════
+function filtrarProcessos(tipo, btn) {
+  document.querySelectorAll('.lote-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.proc-modern-card').forEach(card => {
+    if (tipo === 'todos' || card.dataset.tipo === tipo) {
+      card.style.display = 'flex';
+      card.animate([
+        { opacity: 0, transform: 'translateY(6px)' },
+        { opacity: 1, transform: 'none' }
+      ], { duration: 180, easing: 'cubic-bezier(0.05, 0.7, 0.1, 1)' });
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function buscarProcessos(txt) {
+  const q = txt.toLowerCase().trim();
+  document.querySelectorAll('.proc-modern-card').forEach(card => {
+    const conteudo = card.textContent.toLowerCase();
+    card.style.display = (!q || conteudo.includes(q)) ? 'flex' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 7. MODAL DE PROCESSO COM LASER SCANNER
+// ══════════════════════════════════════════════════════════════════════════
+function abrirModalProc(num, srv, rota, val, badge) {
+  document.getElementById('mProcNum').textContent = 'PROC ' + num;
+  document.getElementById('mProcSrv').textContent = srv;
+  document.getElementById('mProcRota').textContent = rota;
+  document.getElementById('mProcVal').textContent = val;
+  const bEl = document.getElementById('mProcBadge');
+  bEl.className = 'proc-status-badge ' + (badge === 'pronto' ? 'pronto' : badge === 'robo' ? 'robo' : 'atencao');
+  bEl.textContent = badge === 'pronto' ? '✓ PRONTO P/ CP' : badge === 'robo' ? '⚡ NO ROBÔ CP' : '! CONFERIR 1DOC';
+  document.getElementById('modalProc').classList.add('open');
+}
+
+function fecharModalProc() {
+  document.getElementById('modalProc').classList.remove('open');
+}
+function fecharModalProcOverlay(e) {
+  if (e.target.id === 'modalProc') fecharModalProc();
+}
+
+function aprovarProcessoModal() {
+  fecharModalProc();
+  dispararPulsoRede();
+  avancarGundam();
+}
+
+function dispararLoteCompleto() {
+  avancarGundam();
+  dispararPulsoRede();
+  rajadaMeteoros();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 8. REMOÇÃO DE CARD COM DECOLAGEM CATAPULTA E COLAPSO SUAVE (WAAPI)
+// ══════════════════════════════════════════════════════════════════════════
+async function dispararCatapultaCard(el) {
+  if (!el || el.classList.contains('catapult-launch')) return;
+  el.classList.add('catapult-launch');
+  dispararPulsoRede();
+  avancarGundam();
+  setTimeout(async () => {
+    const h = el.offsetHeight;
+    await el.animate([
+      { height: h + 'px', marginBottom: '12px', padding: '16px 18px', opacity: 0 },
+      { height: '0px', marginBottom: '0px', padding: '0px 18px', border: 'none', opacity: 0 }
+    ], { duration: 180, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' }).finished;
+    el.remove();
+    const restantes = document.querySelectorAll('.proc-modern-card').length;
+    const badge = document.getElementById('dockBadgeLote');
+    if (badge) badge.textContent = restantes;
+    const badgeTotal = document.getElementById('loteTotalBadge');
+    if (badgeTotal) badgeTotal.textContent = restantes + ' PROCESSOS';
+  }, 420);
+}
+
+async function removerCardAnimado(el) {
+  await el.animate([
+    { opacity: 1, transform: 'none' },
+    { opacity: 0, transform: 'translateX(30px)' }
+  ], { duration: 180, easing: 'cubic-bezier(.3,0,1,1)', fill: 'forwards' }).finished;
+
+  const h = el.offsetHeight;
+  await el.animate([
+    { height: h + 'px', marginBottom: '12px', padding: '16px 18px' },
+    { height: '0px', marginBottom: '0px', padding: '0px 18px', border: 'none' }
+  ], { duration: 200, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' }).finished;
+
+  el.remove();
+  
+  // Atualiza badge de contagem
+  const restantes = document.querySelectorAll('.proc-modern-card').length;
+  const badge = document.getElementById('dockBadgeLote');
+  if (badge) badge.textContent = restantes;
+  const badgeTotal = document.getElementById('loteTotalBadge');
+  if (badgeTotal) badgeTotal.textContent = restantes + ' PROCESSOS';
+}
+
+function copiarProcesso(num, btn) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(num);
+  }
+  const oldSvg = btn.innerHTML;
+  btn.innerHTML = '<span style="color:#34d399;font-size:11px;font-weight:700;">✓</span>';
+  setTimeout(() => { btn.innerHTML = oldSvg; }, 1400);
+}
+
+// SPOTLIGHT DOCK & BENTO CARDS (21ST.DEV & ACETERNITY HOVER EFFECT)
+document.addEventListener('mousemove', e => {
+  const cards = document.querySelectorAll('.proc-modern-card, .ev-modern-card');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if (e.clientX >= rect.left - 80 && e.clientX <= rect.right + 80 &&
+        e.clientY >= rect.top - 80 && e.clientY <= rect.bottom + 80) {
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    }
+  });
+});
+
+document.addEventListener('touchmove', e => {
+  if (!e.touches.length) return;
+  const t = e.touches[0];
+  const cards = document.querySelectorAll('.proc-modern-card, .ev-modern-card');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mouse-x', `${t.clientX - rect.left}px`);
+    card.style.setProperty('--mouse-y', `${t.clientY - rect.top}px`);
+  });
+}, { passive: true });
+
+// ══════════════════════════════════════════════════════════════════════════
+// 9. 3D CARD TILT SUAVE (ACETERNITY 3D PIN)
+// ══════════════════════════════════════════════════════════════════════════
+const cardOrbital = document.getElementById('cardOrbital');
+if (cardOrbital) {
+  cardOrbital.addEventListener('mousemove', e => {
+    const rect = cardOrbital.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const rotX = ((y / rect.height) - 0.5) * -12;
+    const rotY = ((x / rect.width) - 0.5) * 12;
+    cardOrbital.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-2px)`;
+  });
+  cardOrbital.addEventListener('mouseleave', () => {
+    cardOrbital.style.transform = 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 10. MOTOR DO ESCRITÓRIO ISOMÉTRICO 3D DOS 9 AGENTES (CLAUDE OFFICE ENGINE)
+// ══════════════════════════════════════════════════════════════════════════
+const EQ_AG = {
+  coordenador: { nome: 'Coordenador', modelo: 'DeepSeek Flash · Orquestrador', papel: 'Conversa com você e distribui o trabalho entre a frota', cor: '#8b5cf6', sigla: 'CO', acoesHoje: 18 },
+  relatorios_cp: { nome: 'Relatórios CP', modelo: 'Hermes · Conciliação', papel: 'Relatórios oficiais, conferência de empenhos e avisos no Telegram', cor: '#0f766e', sigla: 'RC', acoesHoje: 12 },
+  operador_cp: { nome: 'Operador CP', modelo: 'Hermes FullCP · Autônomo', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR e reconciliação', cor: '#3b82f6', sigla: 'CP', acoesHoje: 24 },
+  vigia: { nome: 'Vigia', modelo: 'Infraestrutura · Ciclo 2 min', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', sigla: 'VI', acoesHoje: 6 },
+  conferente: { nome: 'Conferente', modelo: 'Regras + OCR (pdfplumber + Tesseract)', papel: 'Confere cada processo: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', sigla: 'CF', acoesHoje: 14 },
+  auditor: { nome: 'Auditor', modelo: 'Regras + histórico de notas', papel: 'Audita contra o histórico: mesma nota em duas diárias e viagens simultâneas', cor: '#e11d48', sigla: 'AU', acoesHoje: 8 },
+  pesquisador: { nome: 'Pesquisador', modelo: 'Busca 1Doc + Tabela de Controle', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', sigla: 'PQ', acoesHoje: 5 },
+  programador: { nome: 'Programador', modelo: 'DeepSeek (programador próprio)', papel: 'Corrige sozinho com revisor, linhas vermelhas e auto-reversão', cor: '#84cc16', sigla: 'PG', acoesHoje: 9 },
+  cacador: { nome: 'Caçador local', modelo: 'IA Local no Notebook (Llama)', papel: 'Classifica os erros novos dos logs a cada 5 min sem custo de API', cor: '#10b981', sigla: 'CA', acoesHoje: 16 }
+};
+
+const EQ_ORDEM = ['coordenador', 'relatorios_cp', 'operador_cp', 'vigia', 'conferente', 'auditor', 'pesquisador', 'programador', 'cacador'];
+const EQE_POS = {
+  coordenador: [.12, .24], pesquisador: [.12, .52], programador: [.12, .8],
+  vigia: [.42, .24], conferente: [.42, .52], auditor: [.42, .8],
+  relatorios_cp: [.72, .24], operador_cp: [.72, .52], cacador: [.72, .8]
+};
+const EQE_SPRITE = {
+  coordenador: 'Me-1', relatorios_cp: 'employee-3', operador_cp: 'Frontend-dev-1',
+  vigia: 'employee-1', conferente: 'employee-2', auditor: 'security-audit-1',
+  pesquisador: 'explore-1', programador: 'dev-1', cacador: 'dev-2'
+};
+const EQE_VA = [.1, .4, .68, .93];
+const EQE_UA = [.27, .57, .87];
+const EQE_RESP = ['Certo!', 'Pode deixar!', 'Recebido!', 'Conferindo agora', 'Validado!', 'Perfeito'];
+
+const eqe = {
+  img: {}, ag: {}, t: 0, ult: 0, pronto: false, carregando: false,
+  fila: [], ativas: 0, espera: 0, vis: true, loop: false, alt: 971
+};
+
+function eqeIso(u, v) { return [37 + u * 523 + v * 663, 616 - u * 289 + v * 309]; }
+function eqeUv(p) { var dx = p[0] - 37, dy = p[1] - 616, d = 353214; return [(309 * dx - 663 * dy) / d, (289 * dx + 523 * dy) / d]; }
+function eqePerto(l, x) { return l.reduce(function(m, v) { return Math.abs(v - x) < Math.abs(m - x) ? v : m; }); }
+function eqeMesa(k) { return eqeIso(EQE_POS[k][0], EQE_POS[k][1]); }
+function eqeLugar(k) { var m = eqeMesa(k); return [m[0] + 41, m[1] + 38]; }
+function eqeRota(a, b) {
+  var A = eqeUv([a.x, a.y]), B = eqeUv(b), va = eqePerto(EQE_VA, A[1]), vb = eqePerto(EQE_VA, B[1]), ub = eqePerto(EQE_UA, B[0]);
+  return [eqeIso(A[0], va), eqeIso(ub, va), eqeIso(ub, vb), eqeIso(B[0], vb), b];
+}
+function eqeLivre(k) { var a = eqe.ag[k]; return a && a.pose === 'trab' && !a.path.length && !a.visita && !a.conv; }
+
+function eqeCarregar() {
+  if (eqe.carregando || eqe.pronto) return;
+  eqe.carregando = true;
+  var nomes = ['room.jpg', 'standing-desk-left-front.png', 'typing.png', 'fire.png', 'thumb-up.png', 'sleeping.png', 'post-it.png', 'printer.png', 'monstera-plant.png', 'filling-closed.png'];
+  EQ_ORDEM.forEach(function(k) { ['front-left', 'front-right', 'rear-left'].forEach(function(d) { nomes.push(EQE_SPRITE[k] + '-' + d + '.png'); }); });
+  var falta = nomes.length;
+  nomes.forEach(function(n) {
+    var i = new Image();
+    i.onload = i.onerror = function() {
+      if (--falta === 0) eqeIniciar();
+    };
+    i.src = 'escritorio/' + n;
+    eqe.img[n.replace(/\.(png|jpg)$/, '')] = i;
+  });
+}
+
+function eqeIniciar() {
+  var cv = document.getElementById('eq-cv');
+  if (!cv) return;
+  cv.width = 1300;
+  cv.height = (eqe.img.room && eqe.img.room.naturalHeight) || 971;
+  eqe.alt = cv.height;
+  eqe.g = cv.getContext('2d');
+  
+  var n = document.getElementById('eq-cn');
+  if (!n) return;
+  n.querySelectorAll('.eqe-sa').forEach(el => el.remove());
+
+  EQ_ORDEM.forEach(function(k) {
+    var s = eqeLugar(k);
+    eqe.ag[k] = { k: k, x: s[0], y: s[1], path: [], pose: 'trab', flip: false, dir: 'up', fala: null, vivo: false, conv: null, visita: null, icone: null, iconeT: 0 };
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'eqe-sa'; b.dataset.k = k;
+    b.innerHTML = '<span class="eqe-pl"><i></i><b>' + EQ_AG[k].nome + '</b></span>';
+    b.addEventListener('click', function() { eqeAbrirGaveta(k); });
+    n.appendChild(b);
+  });
+  
+  eqe.pronto = true;
+  eqeMover(true);
+  eqeDesenhar();
+  if (!eqe.loop) {
+    eqe.loop = true;
+    requestAnimationFrame(eqeLaco);
+  }
+}
+
+function eqeLaco(t) {
+  requestAnimationFrame(eqeLaco);
+  const vEquipe = document.getElementById('view-equipe');
+  if (!eqe.pronto || !vEquipe || vEquipe.hidden) return;
+  if (t - eqe.ult < 60) return;
+  eqe.ult = t;
+  eqePasso();
+  eqeDesenhar();
+  eqeMover(false);
+}
+
+function eqePasso() {
+  eqe.t++;
+  EQ_ORDEM.forEach(function(k) {
+    var a = eqe.ag[k];
+    if (!a) return;
+    if (a.iconeT > 0 && --a.iconeT === 0) a.icone = null;
+    if (!a.path.length) return;
+    var p = a.path[0], dx = p[0] - a.x, dy = p[1] - a.y, d = Math.hypot(dx, dy);
+    a.flip = dx > 0; a.dir = dy < 0 ? 'up' : 'down';
+    if (d <= 5) {
+      a.x = p[0]; a.y = p[1]; a.path.shift();
+      if (!a.path.length) { a.dir = 'up'; a.flip = false; var f = a.fim; a.fim = null; if (f) f(); }
+    } else { a.x += dx / d * 5; a.y += dy / d * 5; }
+  });
+  if (eqe.espera > 0) eqe.espera--;
+  else if (eqe.t % 8 === 0 && eqe.fila.length) eqeProxima();
+}
+
+function eqeProxima() {
+  if (eqe.ativas >= 3) return;
+  for (var i = 0; i < eqe.fila.length; i++) {
+    if (eqeLivre(eqe.fila[i].de) && eqeLivre(eqe.fila[i].para)) {
+      var e = eqe.fila.splice(i, 1)[0];
+      eqeConversar(e);
+      break;
+    }
+  }
+}
+
+function eqeAndar(k, destino, cb) {
+  var a = eqe.ag[k];
+  if (!a) return;
+  a.path = eqeRota(a, destino); a.fim = cb; a.pose = 'anda';
+}
+
+function eqeConversar(e) {
+  var a = eqe.ag[e.de], b = eqe.ag[e.para], w = eqeLugar(e.para);
+  if (!a || !b) return;
+  var lado = EQ_ORDEM.indexOf(e.para) % 3 === 2 ? -1 : 1;
+  eqe.ativas++; a.conv = e.para; b.visita = e.de; a.vivo = true;
+  eqeAndar(e.de, [w[0] + lado * 56, w[1] + 10], function() {
+    a.pose = 'conversa'; a.flip = lado < 0; a.dir = 'down';
+    b.pose = 'conversa'; b.flip = lado > 0; b.dir = 'down';
+    a.fala = e.txt;
+    setTimeout(function() {
+      a.fala = null;
+      b.fala = EQE_RESP[Math.floor(Math.random() * EQE_RESP.length)];
+      setTimeout(function() {
+        b.fala = null; b.pose = 'trab'; b.visita = null; a.conv = null; eqe.ativas--;
+        eqeAndar(e.de, eqeLugar(e.de), function() { a.pose = 'trab'; });
+      }, 1100);
+    }, 1400);
+  });
+}
+
+function eqeMover(todos) {
+  EQ_ORDEM.forEach(function(k) {
+    var a = eqe.ag[k];
+    if (!a) return;
+    if (!todos && a._hx === a.x && a._hy === a.y) return;
+    a._hx = a.x; a._hy = a.y;
+    var b = document.querySelector('.eqe-sa[data-k="' + k + '"]');
+    if (!b) return;
+    b.style.left = (a.x - 45) / 13 + '%';
+    b.style.top = (a.y - 130) / eqe.alt * 100 + '%';
+    b.style.width = 90 / 13 + '%';
+    b.style.height = 142 / eqe.alt * 100 + '%';
+    b.style.zIndex = Math.round(a.y);
+  });
+}
+
+function eqeD(n, x, y, w, h) {
+  var i = eqe.img[n];
+  if (i && i.naturalWidth) eqe.g.drawImage(i, Math.round(x), Math.round(y), w || i.naturalWidth, h || i.naturalHeight);
+}
+
+function eqePessoa(k) {
+  var g = eqe.g, a = eqe.ag[k], pre = EQE_SPRITE[k];
+  if (!a) return;
+  var i = eqe.img[pre + '-' + (a.pose === 'trab' ? 'rear-left' : 'front-' + (a.flip ? 'right' : 'left'))], h = 108;
+  if (a.pose !== 'trab' && a.dir === 'up') i = eqe.img[pre + '-rear-left'];
+  if (!i || !i.naturalWidth) return;
+  var w = i.naturalWidth * h / i.naturalHeight, nw = i.naturalWidth, nh = i.naturalHeight, x0 = a.x - w / 2, y0 = a.y - h;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(a.x, a.y, 18, 6, 0, 0, 6.3); g.fill();
+  if (a.path.length) {
+    var ph = Math.sin(eqe.t * .95), bob = Math.abs(ph) * 4, c = .6, l = Math.max(0, ph) * 10, r = Math.max(0, -ph) * 10, sh = ph * 4;
+    g.drawImage(i, nw / 2, nh * c, nw / 2, nh * (1 - c), a.x + sh, y0 + h * c - r - bob * .3, w / 2, h * (1 - c));
+    g.drawImage(i, 0, nh * c, nw / 2, nh * (1 - c), x0 - sh, y0 + h * c - l - bob * .3, w / 2, h * (1 - c));
+    g.drawImage(i, 0, 0, nw, nh * c + 1, x0 + ph * 2, y0 - bob, w, h * c + 1);
+  } else {
+    g.drawImage(i, x0, y0 + (a.pose === 'trab' ? Math.sin(eqe.t / 5) * .8 : 0), w, h);
+  }
+  var ic = a.icone || (a.pose === 'trab' && Math.floor(eqe.t / 45 + EQ_ORDEM.indexOf(k)) % 3 === 0 ? 'typing' : null);
+  if (ic && eqe.img[ic]) g.drawImage(eqe.img[ic], a.x - 18, y0 - 38, 36, 36);
+}
+
+function eqeBalao(a) {
+  var g = eqe.g, t = a.fala.length > 44 ? a.fala.slice(0, 43) + '…' : a.fala;
+  g.font = '700 20px "IBM Plex Sans", system-ui, sans-serif';
+  var l = g.measureText(t).width + 28, h = 40, x = Math.max(8, Math.min(1292 - l, a.x - l / 2)), y = Math.max(6, a.y - 158);
+  g.fillStyle = '#050b08'; g.strokeStyle = '#34d399'; g.lineWidth = 2.5;
+  g.beginPath(); g.roundRect(x, y, l, h, 10); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(a.x - 9, y + h - 1); g.lineTo(a.x, y + h + 12); g.lineTo(a.x + 9, y + h - 1); g.fill();
+  g.fillStyle = '#eef1f8'; g.textBaseline = 'middle'; g.textAlign = 'left';
+  g.fillText(t, x + 14, y + h / 2 + 1);
+}
+
+function eqeDesenhar() {
+  var g = eqe.g, it = [];
+  eqeD('room', 0, 0, 1300, eqe.alt);
+  EQ_ORDEM.forEach(function(k) {
+    var m = eqeMesa(k);
+    it.push({ y: m[1] + 17, f: function() {
+      eqeD('standing-desk-left-front', m[0] - 59, m[1] - 93, 118, 148);
+    } });
+    it.push({ y: eqe.ag[k] ? eqe.ag[k].y : 0, f: function() { eqePessoa(k); } });
+  });
+  it.push({ y: 560, f: function() { eqeD('printer', 985, 398); } });
+  it.push({ y: 505, f: function() { var i = eqe.img['filling-closed']; if (i) eqeD('filling-closed', 335 - i.naturalWidth / 2, 505 - i.naturalHeight); } });
+  it.push({ y: 626, f: function() { var i = eqe.img['monstera-plant']; if (i) eqeD('monstera-plant', 86 - i.naturalWidth / 2, 632 - i.naturalHeight); } });
+  it.sort(function(a, b) { return a.y - b.y; }).forEach(function(i) { i.f(); });
+  EQ_ORDEM.forEach(function(k) { if (eqe.ag[k] && eqe.ag[k].fala) eqeBalao(eqe.ag[k]); });
+}
+
+function eqeAbrirGaveta(k) {
+  const ag = EQ_AG[k];
+  if (!ag) return;
+  const gaveta = document.getElementById('eq-gaveta');
+  if (!gaveta) return;
+  document.getElementById('eqGAv').textContent = ag.sigla;
+  document.getElementById('eqGAv').style.background = `linear-gradient(135deg, ${ag.cor}, #0f172a)`;
+  document.getElementById('eqGNome').textContent = ag.nome;
+  document.getElementById('eqGModelo').textContent = ag.modelo;
+  document.getElementById('eqGPapel').textContent = ag.papel;
+  document.getElementById('eqGAcoes').textContent = ag.acoesHoje;
+  gaveta.hidden = false;
+  toast(`Inspecionando: ${ag.nome}`);
+}
+
+function fecharGavetaAgente() {
+  const gaveta = document.getElementById('eq-gaveta');
+  if (gaveta) gaveta.hidden = true;
+}
+
+function falarComAgenteGaveta() {
+  toast('Comando despachado diretamente ao agente!');
+  fecharGavetaAgente();
+}
+
+function eqeMandarCaminharDemo() {
+  if (!eqe.pronto) eqeCarregar();
+  const pares = [
+    { de: 'cacador', para: 'conferente', txt: '14 processos lidos no 1Doc' },
+    { de: 'conferente', para: 'operador_cp', txt: 'Lote pronto com 8 processos!' },
+    { de: 'vigia', para: 'coordenador', txt: 'Regras validadas sem conflito' },
+    { de: 'coordenador', para: 'relatorios_cp', txt: 'Conciliar pagamentos do dia' },
+    { de: 'programador', para: 'cacador', txt: 'Varredura otimizada em 12ms' }
+  ];
+  const p = pares[Math.floor(Math.random() * pares.length)];
+  eqe.fila.push(p);
+  toast(`🚶 Agente ${EQ_AG[p.de].nome} caminhando até ${EQ_AG[p.para].nome}!`);
+  dispararPulsoRede();
+}
+
+function recarregarTelemetriaDell() {
+  toast("Sincronizando telemetria do Notebook Dell...");
+  const cpu = Math.floor(22 + Math.random() * 25);
+  const ram = Math.floor(68 + Math.random() * 6);
+  const cpuBar = document.getElementById("dellCpuBar");
+  const cpuVal = document.getElementById("dellCpuVal");
+  const ramBar = document.getElementById("dellRamBar");
+  const ramVal = document.getElementById("dellRamVal");
+  if (cpuBar) cpuBar.style.width = cpu + "%";
+  if (cpuVal) cpuVal.textContent = cpu + "%";
+  if (ramBar) ramBar.style.width = ram + "%";
+  if (ramVal) ramVal.textContent = ram + "%";
+  setTimeout(() => {
+    toast("Telemetria do Host sincronizada: 8 núcleos ativos, 9 serviços OK");
+  }, 400);
+}
+
+</script>
+</body>
+</html>
