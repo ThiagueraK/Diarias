@@ -2461,7 +2461,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div class="ce-panel ce-cut cpa-palco-painel" style="margin-bottom:12px;">
         <div class="ce-panel-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div class="ce-panel-title" style="display:flex;align-items:center;gap:8px;">
-            <span>🤖 Esquadrão Gundam RX-78-2 · Validação das 4 Etapas do CP</span>
+            <span id="cpa-gundam-titulo">🤖 Esquadrão Gundam RX-78-2 · Catapulta de Validação</span>
           </div>
           <div style="font-size:12px;color:var(--ce-muted);display:flex;gap:12px;align-items:center;">
             <span>1. Empenho → 2. Liquidação → 3. Doc. Viagens → 4. 1Doc</span>
@@ -6449,27 +6449,19 @@ function cpaMarcos(r, d) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// GUNDAM STAGE RUNNER: ESQUADRÃO RX-78-2 (VALIDAÇÃO DAS 4 ETAPAS DO CP)
+// GUNDAM STAGE RUNNER: ESQUADRÃO RX-78-2 (DADOS 100% REAIS DO LOTE DO CP)
 // ═══════════════════════════════════════════════════════════════════════════════
 var cpaGundamLaco = null;
 var cpaGundamSel = 0;
 var cpaGundamBoost = 0;
 var cpaGundamTT = 0;
+var cpaGundamProcs = [];
+var cpaGundamCont = [0, 0, 0, 0];
+var cpaGundamVigiaOn = false;
 var imgRx78Squad = new Image();
 imgRx78Squad.src = 'assets/gundam/rx78_squad_mini.png';
 
-var CPA_DEFAULT_SQUAD = [
-  {proc:'5410/2026',srv:'CARLOS EDUARDO',valFmt:'R$ 581,52',est:'feito',q:3},
-  {proc:'5412/2026',srv:'ROBERTO ALMEIDA',valFmt:'R$ 180,55',est:'feito',q:3},
-  {proc:'5415/2026',srv:'JOÃO PAULO',valFmt:'R$ 230,27',est:'feito',q:3},
-  {proc:'5419/2026',srv:'MARCOS VINÍCIUS',valFmt:'R$ 180,55',est:'feito',q:3},
-  {proc:'5421/2026',srv:'WANDERLEI COSTA',valFmt:'R$ 491,25',est:'feito',q:3},
-  {proc:'5424/2026',srv:'LUCIANO MENDES',valFmt:'R$ 581,52',est:'ativo',q:2},
-  {proc:'5428/2026',srv:'PAULO CÉSAR',valFmt:'R$ 180,55',est:'ativo',q:1},
-  {proc:'5430/2026',srv:'FERNANDO LIMA',valFmt:'R$ 230,27',est:'pend',q:0}
-];
-
-function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
+function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H, vigiaOn) {
   g.fillStyle = '#080a12';
   g.fillRect(0, 0, W, H);
 
@@ -6491,21 +6483,73 @@ function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
     g.fillText(NOMES[gi], gx, 64);
     g.fillStyle = '#a9b1c6';
     g.font = '600 11px monospace';
-    g.fillText((contadores[gi] || 0) + ' / ' + procs.length + ' processos', gx, 80);
+    var countTxt = procs.length > 0 ? ((contadores[gi] || 0) + ' / ' + procs.length + ' processos') : 'AGUARDANDO';
+    g.fillText(countTxt, gx, 80);
   });
 
-  // Process Lanes with Gundam RX-78 Mobile Suits
+  // SE NÃO HÁ PROCESSOS NO LOTE: MOSTRA CATAPULTA EM PRONTIDÃO (SEM NENHUM DADO FICTÍCIO!)
+  if (!procs || procs.length === 0) {
+    var midY = 280;
+    // Magnetic central guide rails
+    g.strokeStyle = '#22283a';
+    g.lineWidth = 4;
+    g.beginPath(); g.moveTo(40, midY - 60); g.lineTo(W - 40, midY - 60); g.stroke();
+    g.beginPath(); g.moveTo(40, midY + 60); g.lineTo(W - 40, midY + 60); g.stroke();
+
+    for (var cx0 = 60; cx0 < W - 60; cx0 += 40) {
+      g.fillStyle = 'rgba(159, 208, 255, 0.1)';
+      g.fillRect(cx0, midY - 56, 16, 112);
+    }
+
+    // Holographic Tactical Standby Box in Center
+    var boxW = 620, boxH = 150;
+    var boxX = (W - boxW) / 2, boxY = midY - boxH / 2;
+    g.fillStyle = 'rgba(15, 20, 34, 0.95)';
+    g.fillRect(boxX, boxY, boxW, boxH);
+    g.strokeStyle = '#ffc857';
+    g.lineWidth = 1.5;
+    g.strokeRect(boxX, boxY, boxW, boxH);
+
+    g.fillStyle = '#ffc857';
+    g.font = '700 13px monospace';
+    g.textAlign = 'center';
+    g.fillText('【 CATAPULTA GUNDAM EM PRONTIDÃO · AGUARDANDO LOTE DO CP 】', W / 2, boxY + 34);
+
+    g.fillStyle = vigiaOn ? '#6fe09a' : '#a9b1c6';
+    g.font = '600 12px monospace';
+    var vigiaTxt = vigiaOn ? '● Vigia na sessão do CP: LIGADO E PRONTO' : '○ Vigia na sessão do CP: Desligado (use ▶ Disparar robô)';
+    g.fillText(vigiaTxt, W / 2, boxY + 65);
+
+    g.fillStyle = '#eef1f8';
+    g.font = '12px sans-serif';
+    g.fillText('Nenhum processo em execução no momento.', W / 2, boxY + 98);
+    g.fillStyle = '#a9b1c6';
+    g.font = '11.5px sans-serif';
+    g.fillText('Os robôs RX-78 entrarão na pista automaticamente assim que o lote for iniciado.', W / 2, boxY + 122);
+
+    // Standby Mecha on the entrance platform
+    if (imgRx78Squad && imgRx78Squad.complete && imgRx78Squad.naturalWidth > 0) {
+      g.drawImage(imgRx78Squad, 90, midY - 35, 70, 70);
+    }
+    return;
+  }
+
+  // ESQUADRÃO DINÂMICO: DIMENSIONA AS PISTAS EXATAMENTE PARA O NÚMERO DE PROCESSOS REAIS DO LOTE!
+  var totalProcs = procs.length;
+  var laneH = Math.min(52, Math.max(36, 420 / totalProcs));
+  var startY = 110 + (420 - totalProcs * laneH) / 2;
+
   procs.forEach(function(p, i) {
-    var y = 118 + i * 52;
+    var y = startY + i * laneH + laneH / 2;
     var sel = (i === selIdx);
     var ehFeito = (p.est === 'feito');
     var giProc = ehFeito ? 3 : Math.min(3, p.q);
 
-    // Left card
+    // Left process badge (com número de processo e servidor 100% reais)
     g.fillStyle = sel ? '#28324a' : '#141826';
-    g.fillRect(20, y - 18, 140, 36);
+    g.fillRect(20, y - 16, 140, 32);
     g.strokeStyle = sel ? '#ffc857' : '#323c54';
-    g.strokeRect(20, y - 18, 140, 36);
+    g.strokeRect(20, y - 16, 140, 32);
 
     g.fillStyle = '#ffffff';
     g.font = '700 11px monospace';
@@ -6513,11 +6557,11 @@ function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
     g.fillText(p.proc, 28, y - 2);
     g.fillStyle = '#a9b1c6';
     g.font = '10px monospace';
-    g.fillText((p.srv || '—').slice(0, 10), 28, y + 11);
+    g.fillText((p.srv || '—').slice(0, 11), 28, y + 10);
 
     // Catapult track line
     g.strokeStyle = '#22283a';
-    g.lineWidth = 3;
+    g.lineWidth = 2.5;
     g.beginPath(); g.moveTo(165, y); g.lineTo(1090, y); g.stroke();
 
     var gxTarget = GX[giProc];
@@ -6534,16 +6578,10 @@ function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
     g.lineWidth = 3;
     g.beginPath(); g.moveTo(165, y); g.lineTo(rx + bobX, y); g.stroke();
 
-    // Pulse traveling on line
-    var dist = Math.max(30, (rx + bobX) - 165);
-    var px = 165 + ((tt * 4.5 + i * 40) % dist);
-    g.fillStyle = '#ffffff';
-    g.fillRect(px - 10, y - 2, 20, 4);
-
     var posX = rx + bobX;
     var posY = y + bobY;
 
-    // Thruster exhaust flame (cyan core + orange glow)
+    // Thruster exhaust flame
     if (p.est !== 'comVoce') {
       g.fillStyle = '#ff9f43';
       g.beginPath();
@@ -6567,11 +6605,10 @@ function drawGundamSquadLive(g, procs, contadores, tt, selIdx, W, H) {
       g.fill();
     }
 
-    // DRAW THE REAL RX-78-2 GUNDAM SPRITE!
-    if (imgRx78Squad.complete && imgRx78Squad.naturalWidth > 0) {
+    // DRAW THE REAL RX-78-2 GUNDAM SPRITE
+    if (imgRx78Squad && imgRx78Squad.complete && imgRx78Squad.naturalWidth > 0) {
       g.drawImage(imgRx78Squad, posX - 20, posY - 24, 46, 46);
     } else {
-      // Clean fallback if image is still loading
       g.fillStyle = sel ? '#ffffff' : '#ffc857';
       g.fillRect(posX - 10, posY - 12, 20, 24);
     }
@@ -6603,13 +6640,15 @@ function cpaRenderGundam(r, d) {
   var g = cv.getContext('2d');
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  // Extract squad processes from live data
+  cpaGundamVigiaOn = !!(d.vigiaVivoEm && r.agora - d.vigiaVivoEm < 3 * 60000);
+
+  // EXTRAÇÃO EXCLUSIVA DE DADOS REAIS DO LOTE (SEM NENHUM PROCESSO FICTÍCIO)
   var l = r.lote;
   var itens = l ? (l.itens || []) : [];
   var procs = [];
 
   if (itens.length > 0) {
-    procs = itens.slice(0, 8).map(function(it) {
+    procs = itens.map(function(it) {
       var ps = cpaPills(it, l);
       var q = 0;
       if (it.concluido) q = 3;
@@ -6631,11 +6670,34 @@ function cpaRenderGundam(r, d) {
         q: q
       };
     });
+  } else if (d.tarefa && d.tarefa.processos && d.tarefa.processos.length && ['pendente', 'pegou', 'abrindo_tela', 'rodando'].indexOf(d.tarefa.status) >= 0) {
+    // Pedido feito na aba Processos que está começando a entrar no CP
+    procs = d.tarefa.processos.map(function(procNum) {
+      return {
+        proc: procNum,
+        srv: 'Entrando no CP',
+        valFmt: 'Na fila',
+        est: 'ativo',
+        q: 0
+      };
+    });
   } else {
-    procs = CPA_DEFAULT_SQUAD;
+    procs = []; // Nenhum dado fictício!
   }
 
-  // Count gate completions
+  cpaGundamProcs = procs;
+
+  // Atualiza título do header com a contagem real
+  var titEl = document.getElementById('cpa-gundam-titulo');
+  if (titEl) {
+    if (procs.length > 0) {
+      titEl.textContent = '🤖 Esquadrão Gundam RX-78-2 · ' + procs.length + ' processo(s) do lote em validação';
+    } else {
+      titEl.textContent = '🤖 Esquadrão Gundam RX-78-2 · Catapulta de Prontidão (Aguardando lote)';
+    }
+  }
+
+  // Contagem real das etapas
   var contadores = [0, 0, 0, 0];
   procs.forEach(function(p) {
     if (p.q >= 0 && (p.est === 'feito' || p.q > 0)) contadores[0]++;
@@ -6643,8 +6705,9 @@ function cpaRenderGundam(r, d) {
     if (p.q >= 2 && (p.est === 'feito' || p.q > 2)) contadores[2]++;
     if (p.q >= 3 && p.est === 'feito') contadores[3]++;
   });
+  cpaGundamCont = contadores;
 
-  // Start animation loop if not running
+  // Inicia loop se não estiver rodando
   if (!cpaGundamLaco) {
     var boostBt = document.getElementById('cpa-gundam-boost');
     if (boostBt && !boostBt.dataset.wired) {
@@ -6672,7 +6735,7 @@ function cpaRenderGundam(r, d) {
       cpaGundamTT += k;
       if (cpaGundamBoost > 0) cpaGundamBoost -= k;
 
-      drawGundamSquadLive(g, procs, contadores, cpaGundamTT, cpaGundamSel, W, H);
+      drawGundamSquadLive(g, cpaGundamProcs, cpaGundamCont, cpaGundamTT, cpaGundamSel, W, H, cpaGundamVigiaOn);
     }
     cpaGundamLaco = requestAnimationFrame(loopGundam);
   }
