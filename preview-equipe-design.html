@@ -85,55 +85,29 @@ body {
   opacity: 0.75;
 }
 
-/* PAINEL DE CONTROLE LATERAL (SHOWCASE DOCK) */
-.showcase-dock {
-  position: fixed;
-  top: 18px;
-  left: 18px;
-  background: rgba(10, 20, 16, 0.94);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  border-radius: 18px;
-  padding: 16px 18px;
-  color: #eafaf2;
-  box-shadow: 0 20px 45px rgba(0,0,0,0.75), var(--emerald-neon);
-  z-index: 1000;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  font-size: 13px;
+/* RESPONSIVIDADE MOBILE NATIVA */
+@media (max-width: 600px) {
+  body {
+    padding: 0;
+  }
+  .phone-viewport {
+    border-radius: 0 !important;
+    border: none !important;
+    max-width: 100% !important;
+    min-height: 100vh !important;
+    box-shadow: none !important;
+    margin-bottom: 0 !important;
+  }
+  .floating-bottom-dock {
+    position: fixed !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: calc(100% - 16px) !important;
+    max-width: 440px !important;
+    margin: 0 auto;
+  }
 }
-.showcase-dock h4 {
-  margin: 0;
-  font-family: var(--font-hud);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  color: #34d399;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.dock-actions { display: flex; flex-direction: column; gap: 8px; }
-.dock-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-radius: 10px;
-  padding: 9px 12px;
-  font: 500 12px var(--font-body);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: all var(--dur-fast) var(--ease-smooth);
-}
-.dock-btn:hover {
-  background: rgba(52, 211, 153, 0.18);
-  border-color: rgba(52, 211, 153, 0.45);
-  transform: translateY(-1px);
-}
-.dock-btn:active { transform: scale(0.96); }
 
 /* MOLDURA MOBILE PREMIUM (PRESTIGE VIEWPORT) */
 .phone-viewport {
@@ -1261,32 +1235,32 @@ body {
 .floating-bottom-dock {
   position: absolute;
   bottom: 14px;
-  left: 12px;
-  right: 12px;
-  background: rgba(10, 24, 18, 0.92);
+  left: 10px;
+  right: 10px;
+  background: rgba(10, 24, 18, 0.94);
   backdrop-filter: blur(28px);
   border: 1px solid rgba(52, 211, 153, 0.35);
   border-radius: 28px;
-  padding: 6px 8px;
+  padding: 5px 6px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 30px rgba(16, 185, 129, 0.2);
   z-index: 50;
 }
 .dock-nav-grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
 }
 .dock-slider-pill {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  width: calc(20% - 2px);
+  width: 0;
   background: linear-gradient(135deg, rgba(52, 211, 153, 0.28), rgba(6, 182, 212, 0.28));
   border: 1px solid rgba(52, 211, 153, 0.5);
-  border-radius: 22px;
-  transition: transform var(--dur-spring) var(--ease-spring);
+  border-radius: 20px;
+  transition: transform var(--dur-spring) var(--ease-spring), width var(--dur-spring) var(--ease-spring);
   pointer-events: none;
   z-index: 1;
   box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
@@ -1295,14 +1269,14 @@ body {
   background: none;
   border: none;
   color: #718096;
-  font: 700 10px var(--font-hud);
-  letter-spacing: 0.05em;
+  font: 700 9px var(--font-hud);
+  letter-spacing: 0.03em;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 0;
-  border-radius: 20px;
+  gap: 3px;
+  padding: 6px 0;
+  border-radius: 18px;
   cursor: pointer;
   position: relative;
   z-index: 2;
@@ -2305,55 +2279,6 @@ body {
 <!-- CANVAS DE FUNDO: METEOROS & STARDUST VIVOS -->
 <canvas id="cyberCanvas"></canvas>
 
-<!-- SHOWCASE DOCK: CONTROLE DO LABORATÓRIO -->
-<aside class="showcase-dock">
-  <h4>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    PRESTIGE & ACETERNITY ENGINE
-  </h4>
-  <p style="margin:0;font-size:12px;color:#a3dac4;line-height:1.4;">
-    Sinta a diferença: visual caro, cinematográfico e com física fluida conforme o DESIGN.md.
-  </p>
-  <div class="dock-actions">
-    <button class="dock-btn" onclick="abrirAbaLoteDemo()" style="background:rgba(52,211,153,0.22);border-color:#34d399;font-weight:700;">
-      <span>👉 Alternar para ABA LOTE</span>
-      <code>LOTE</code>
-    </button>
-    <button class="dock-btn" onclick="abrirAbaAtividadeDemo()" style="background:rgba(6,182,212,0.22);border-color:#38bdf8;font-weight:700;">
-      <span>📡 Alternar para ABA ATIVIDADE</span>
-      <code>RADAR</code>
-    </button>
-    <button class="dock-btn" onclick="abrirAbaEquipeDemo()" style="background:rgba(139,92,246,0.25);border-color:#a855f7;font-weight:700;">
-      <span>🏢 Alternar para ABA EQUIPE</span>
-      <code>ESCRITÓRIO</code>
-    </button>
-    <button class="dock-btn" onclick="abrirAbaConversaDemo()" style="background:rgba(16,185,129,0.22);border-color:#34d399;font-weight:700;">
-      <span>💬 Alternar para ABA CONVERSA</span>
-      <code>CHAT</code>
-    </button>
-    <button class="dock-btn" onclick="dispararPulsoRede()">
-      <span>1. Pulso Tático no Cockpit</span>
-      <code>HUD</code>
-    </button>
-    <button class="dock-btn" onclick="avancarGundam()">
-      <span>2. Avançar Gundam no Catapult</span>
-      <code>Gate +1</code>
-    </button>
-    <button class="dock-btn" onclick="turboTicker()">
-      <span>3. Number Ticker com Glow</span>
-      <code>HUD 800ms</code>
-    </button>
-    <button class="dock-btn" onclick="trocarDockAuto()">
-      <span>4. Deslizar Barra Flutuante</span>
-      <code>Dock Spring</code>
-    </button>
-    <button class="dock-btn" onclick="rajadaMeteoros()">
-      <span>5. Rajada de Meteoros no Fundo</span>
-      <code>Meteors</code>
-    </button>
-  </div>
-</aside>
-
 <!-- MOLDURA MOBILE DE LUXO -->
 <div class="phone-viewport" id="viewportCard">
 
@@ -2448,9 +2373,13 @@ body {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Ver Lote (8 Diárias)
           </button>
-          <button class="quick-pill-btn pill-cyan" onclick="abrirAbaAtividadeDemo()">
+          <button class="quick-pill-btn pill-cyan" onclick="abrirAbaDellDemo()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Radar & Host Dell
+            Telemetria Dell
+          </button>
+          <button class="quick-pill-btn" onclick="abrirAbaAtividadeDemo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Radar Frota
           </button>
           <button class="quick-pill-btn" onclick="abrirAbaConversaDemo()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -2847,53 +2776,9 @@ body {
 
 
     <!-- ══════════════════════════════════════════════════════════════════════
-         VIEW 2: ABA ATIVIDADE / RADAR (CYBER TACTICAL TIMELINE & TELEMETRIA FEED)
+         VIEW 2: ABA TELEMETRIA DELL (UNIT-00 HOST HARDWARE COCKPIT)
          ══════════════════════════════════════════════════════════════════════ -->
-    <div class="view-panel" id="view-atividade" hidden>
-
-      <!-- RADAR DE TELEMETRIA AO VIVO (HUD TÁTICO) -->
-      <section class="radar-telemetria-card">
-        <div class="radar-sweep-screen">
-          <div class="radar-ring"></div>
-          <div class="radar-ring inner"></div>
-          <div class="radar-sweeper"></div>
-          <div class="radar-blip" style="top:35%;left:45px;"></div>
-          <div class="radar-blip" style="top:65%;left:75px;animation-delay:0.8s;"></div>
-          
-          <div style="margin-left:95px;flex:1;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
-              <span style="font:800 11px var(--font-hud);color:#34d399;letter-spacing:0.08em;">RADAR DA FROTA · SCAN ATIVO</span>
-            </div>
-            <p style="margin:2px 0 0;font:500 11.5px var(--font-mono);color:#94a3b8;line-height:1.3;">
-              Telemetria contínua dos 6 robôs autônomos e eventos do SGD.
-            </p>
-          </div>
-        </div>
-
-        <div class="radar-stats-grid">
-          <div class="radar-stat-box">
-            <span class="radar-stat-label">Frota Conectada</span>
-            <span class="radar-stat-val" style="color:#34d399;">
-              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;"></span>
-              6 / 6 BOTS
-            </span>
-          </div>
-          <div class="radar-stat-box">
-            <span class="radar-stat-label">Varredura</span>
-            <span class="radar-stat-val" style="color:#38bdf8;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              A CADA 30s
-            </span>
-          </div>
-          <div class="radar-stat-box">
-            <span class="radar-stat-label">Eventos Hoje</span>
-            <span class="radar-stat-val" style="color:#fbbf24;" id="statTotalEventos">
-              48 AÇÕES
-            </span>
-          </div>
-        </div>
-      </section>
+    <div class="view-panel" id="view-dell" hidden>
 
       <!-- HARDWARE HOST DELL TELEMETRY CARD (UNIT-00) -->
       <section class="dell-telemetry-cockpit" id="dellCockpitCard">
@@ -2982,6 +2867,67 @@ body {
           <div class="dell-robo-box">
             <span class="dell-r-label">Último Disparo:</span>
             <span class="dell-r-tag ok" id="dellDisparoTag">dmvvfflrq (100% OK)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD EXPLICATIVO OBSERVABILIDADE D1 -->
+      <section class="hud-card" style="padding:14px 16px;margin-top:12px;background:rgba(10,20,16,0.7);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font:700 11px var(--font-hud);color:#34d399;letter-spacing:0.06em;">SINCRO CLOUDFLARE D1 (0 KV COST)</span>
+          <span style="font:600 10px var(--font-mono);color:#38bdf8;">LATÊNCIA &lt; 5ms</span>
+        </div>
+        <p style="margin:0;font:500 11px var(--font-mono);color:#94a3b8;line-height:1.4;">
+          Dados de CPU, RAM, processos e serviços são gravados pelo daemon local no banco SQLite D1 Edge e sincronizados a cada batimento cardíaco da frota.
+        </p>
+      </section>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VIEW 3: ABA ATIVIDADE / RADAR (CYBER TACTICAL TIMELINE & RADAR DE EVENTOS)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <div class="view-panel" id="view-atividade" hidden>
+
+      <!-- RADAR DE TELEMETRIA AO VIVO (HUD TÁTICO) -->
+      <section class="radar-telemetria-card">
+        <div class="radar-sweep-screen">
+          <div class="radar-ring"></div>
+          <div class="radar-ring inner"></div>
+          <div class="radar-sweeper"></div>
+          <div class="radar-blip" style="top:35%;left:45px;"></div>
+          <div class="radar-blip" style="top:65%;left:75px;animation-delay:0.8s;"></div>
+          
+          <div style="margin-left:95px;flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="status-pulse-dot" style="background:#34d399;box-shadow:0 0 8px #34d399;"></span>
+              <span style="font:800 11px var(--font-hud);color:#34d399;letter-spacing:0.08em;">RADAR DA FROTA · SCAN ATIVO</span>
+            </div>
+            <p style="margin:2px 0 0;font:500 11.5px var(--font-mono);color:#94a3b8;line-height:1.3;">
+              Telemetria contínua dos 6 robôs autônomos e eventos do SGD.
+            </p>
+          </div>
+        </div>
+
+        <div class="radar-stats-grid">
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Frota Conectada</span>
+            <span class="radar-stat-val" style="color:#34d399;">
+              <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;"></span>
+              6 / 6 BOTS
+            </span>
+          </div>
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Varredura</span>
+            <span class="radar-stat-val" style="color:#38bdf8;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              A CADA 30s
+            </span>
+          </div>
+          <div class="radar-stat-box">
+            <span class="radar-stat-label">Eventos Hoje</span>
+            <span class="radar-stat-val" style="color:#fbbf24;" id="statTotalEventos">
+              48 AÇÕES
+            </span>
           </div>
         </div>
       </section>
@@ -3427,22 +3373,29 @@ Motivo: retificação do itinerário informada pelo motorista</code>
         <div class="dock-glow-dot"></div>
       </button>
 
-      <!-- ABA 2: RADAR / ATIVIDADE -->
+      <!-- ABA 2: DELL TELEMETRIA -->
       <button class="dock-item" onclick="trocarDock(2, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Dell</span>
+        <div class="dock-glow-dot"></div>
+      </button>
+
+      <!-- ABA 3: RADAR / ATIVIDADE -->
+      <button class="dock-item" onclick="trocarDock(3, this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <span>Radar</span>
         <div class="dock-glow-dot"></div>
       </button>
 
-      <!-- ABA 3: EQUIPE (ESCRITÓRIO 3D) -->
-      <button class="dock-item" onclick="trocarDock(3, this)">
+      <!-- ABA 4: EQUIPE (ESCRITÓRIO 3D) -->
+      <button class="dock-item" onclick="trocarDock(4, this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Equipe</span>
         <div class="dock-glow-dot"></div>
       </button>
 
-      <!-- ABA 4: CONVERSA / CHAT -->
-      <button class="dock-item" onclick="trocarDock(4, this)">
+      <!-- ABA 5: CONVERSA / CHAT -->
+      <button class="dock-item" onclick="trocarDock(5, this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span>Conversa</span>
         <div class="dock-glow-dot"></div>
@@ -3628,33 +3581,41 @@ function turboTicker() {
 // ══════════════════════════════════════════════════════════════════════════
 // 5. SLIDER DESLIZANTE DA FLOATING DOCK (PRESTIGE UI) & TROCA DE ABAS
 // ══════════════════════════════════════════════════════════════════════════
+function posicionarDockPill(btn) {
+  const pill = document.getElementById('dockPill');
+  if (!pill || !btn) return;
+  pill.style.width = btn.offsetWidth + 'px';
+  pill.style.transform = `translateX(${btn.offsetLeft}px)`;
+}
+
 function trocarDock(idx, btn) {
   const items = document.querySelectorAll('.dock-item');
   if (!btn && items[idx]) btn = items[idx];
   items.forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const pill = document.getElementById('dockPill');
-  if (pill) pill.style.transform = `translateX(${idx * 100}%)`;
+  posicionarDockPill(btn);
 
   const vInicio = document.getElementById('view-inicio');
   const vLote = document.getElementById('view-lote');
+  const vDell = document.getElementById('view-dell');
   const vAtividade = document.getElementById('view-atividade');
   const vEquipe = document.getElementById('view-equipe');
   const vConversa = document.getElementById('view-conversa');
 
   if (vInicio) vInicio.hidden = (idx !== 0);
   if (vLote) vLote.hidden = (idx !== 1);
-  if (vAtividade) vAtividade.hidden = (idx !== 2);
-  if (vEquipe) vEquipe.hidden = (idx !== 3);
-  if (vConversa) vConversa.hidden = (idx !== 4);
+  if (vDell) vDell.hidden = (idx !== 2);
+  if (vAtividade) vAtividade.hidden = (idx !== 3);
+  if (vEquipe) vEquipe.hidden = (idx !== 4);
+  if (vConversa) vConversa.hidden = (idx !== 5);
 
-  if (idx === 0) {
-    atualizarCoordenadasBots();
-  } else if (idx === 3) {
+  if (idx === 2) {
+    recarregarTelemetriaDell();
+  } else if (idx === 4) {
     if (!eqe.pronto) eqeCarregar();
     eqe.vis = true;
     setTimeout(() => { if (eqe.pronto) { eqeMover(true); eqeDesenhar(); } }, 60);
-  } else if (idx === 4) {
+  } else if (idx === 5) {
     const sc = document.getElementById('chatHistorico');
     if (sc) sc.scrollTop = sc.scrollHeight;
     const inp = document.getElementById('chatInput');
@@ -3664,7 +3625,7 @@ function trocarDock(idx, btn) {
 
 let dockIdxAuto = 0;
 function trocarDockAuto() {
-  dockIdxAuto = (dockIdxAuto + 1) % 5;
+  dockIdxAuto = (dockIdxAuto + 1) % 6;
   const items = document.querySelectorAll('.dock-item');
   if (items[dockIdxAuto]) {
     trocarDock(dockIdxAuto, items[dockIdxAuto]);
@@ -3676,20 +3637,34 @@ function abrirAbaLoteDemo() {
   trocarDock(1, items[1]);
 }
 
-function abrirAbaAtividadeDemo() {
+function abrirAbaDellDemo() {
   const items = document.querySelectorAll('.dock-item');
   trocarDock(2, items[2]);
 }
 
-function abrirAbaEquipeDemo() {
+function abrirAbaAtividadeDemo() {
   const items = document.querySelectorAll('.dock-item');
   trocarDock(3, items[3]);
 }
 
-function abrirAbaConversaDemo() {
+function abrirAbaEquipeDemo() {
   const items = document.querySelectorAll('.dock-item');
   trocarDock(4, items[4]);
 }
+
+function abrirAbaConversaDemo() {
+  const items = document.querySelectorAll('.dock-item');
+  trocarDock(5, items[5]);
+}
+
+window.addEventListener('resize', () => {
+  const active = document.querySelector('.dock-item.active');
+  if (active) posicionarDockPill(active);
+});
+setTimeout(() => {
+  const active = document.querySelector('.dock-item.active');
+  if (active) posicionarDockPill(active);
+}, 80);
 
 // ══════════════════════════════════════════════════════════════════════════
 // 5.2 CHAT DIRETO COM O COORDENADOR (TACTICAL COMMS ENGINE)
