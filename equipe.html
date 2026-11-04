@@ -2830,9 +2830,9 @@ body {
           <div class="cockpit-status-badge" id="cockpitStatusBadge">
             <div class="cockpit-badge-nominal">
               <span class="cockpit-badge-dot"></span>
-              FROTA NOMINAL
+              <span id="cockpitFrota">--</span>
             </div>
-            <span class="cockpit-host-sub">Tupanciretã · Ao vivo</span>
+            <span class="cockpit-host-sub">Tupanciretã</span>
           </div>
         </div>
 
@@ -2988,7 +2988,7 @@ body {
                 <span class="dell-online-pill" id="dellOnlinePill">ONLINE</span>
               </div>
               <div style="font:500 11px var(--font-mono);color:#94a3b8;margin-top:2px;" id="dellHostTitle">
-                DESKTOP-MIQJ3OB · Intel Core i7-7700HQ (8T) · Sincronizando…
+                Notebook Dell · Sincronizando…
               </div>
             </div>
           </div>
@@ -3009,7 +3009,7 @@ body {
               <div class="dell-progress-bar" id="dellCpuBar" style="width:0%;background:linear-gradient(90deg,#06b6d4,#38bdf8);"></div>
             </div>
             <div class="dell-gauge-meta">
-              <span id="dellCpuMeta">8 Cores @ 2.80GHz</span>
+              <span id="dellCpuMeta">--</span>
               <span>Temp Nominal</span>
             </div>
           </div>
@@ -3065,15 +3065,12 @@ body {
         </div>
       </section>
 
-      <!-- CARD OBSERVABILIDADE D1 -->
+      <!-- ORIGEM DA LEITURA -->
       <section class="hud-card" style="padding:14px 16px;margin-top:12px;background:rgba(10,20,16,0.7);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font:700 11px var(--font-hud);color:#34d399;letter-spacing:0.06em;">SINCRO CLOUDFLARE D1 (0 KV COST)</span>
-          <span style="font:600 10px var(--font-mono);color:#38bdf8;">LATÊNCIA &lt; 5ms</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <span style="font:700 11px var(--font-hud);color:#34d399;letter-spacing:0.06em;">ÚLTIMA LEITURA DO NOTEBOOK</span>
+          <span style="font:600 11px var(--font-mono);color:#38bdf8;" id="dellIdade">--</span>
         </div>
-        <p style="margin:0;font:500 11px var(--font-mono);color:#94a3b8;line-height:1.4;">
-          Telemetria gravada pelo host Dell e sincronizada diretamente na tabela <code>equipe_observabilidade</code> do Cloudflare D1. Consulta em tempo real sem expor portas residenciais.
-        </p>
       </section>
     </div>
 
@@ -3103,11 +3100,11 @@ body {
         <div class="radar-stats-grid">
           <div class="radar-stat-box">
             <span class="radar-stat-label">Frota</span>
-            <span class="radar-stat-val" style="color:#34d399;">9 AGENTES</span>
+            <span class="radar-stat-val" style="color:#34d399;" id="statFrota">--</span>
           </div>
           <div class="radar-stat-box">
-            <span class="radar-stat-label">Varredura</span>
-            <span class="radar-stat-val" style="color:#38bdf8;">A CADA 30s</span>
+            <span class="radar-stat-label">Atualizado</span>
+            <span class="radar-stat-val" style="color:#38bdf8;" id="statFresco">--</span>
           </div>
           <div class="radar-stat-box">
             <span class="radar-stat-label">Eventos</span>
@@ -3158,7 +3155,7 @@ body {
             <div class="eq-gaveta-avatar" id="eqGAv" style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);">CO</div>
             <div>
               <h4 style="margin:0;font:800 15px var(--font-hud);color:#fff;" id="eqGNome">Coordenador</h4>
-              <span style="font:600 11px var(--font-mono);color:#34d399;" id="eqGModelo">DeepSeek Flash · Orquestrador</span>
+              <span style="font:600 11px var(--font-mono);color:#34d399;" id="eqGModelo">--</span>
             </div>
           </div>
           <button class="eq-gaveta-close" onclick="fecharGavetaAgente()">&times;</button>
@@ -3212,7 +3209,7 @@ body {
             <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4c1d95);display:grid;place-items:center;font:800 12px var(--font-hud);color:#fff;">CO</div>
             <div>
               <b style="font:700 13.5px var(--font-hud);color:#fff;display:block;">COORDENADOR GERAL</b>
-              <span style="font:500 10.5px var(--font-mono);color:#34d399;">● DeepSeek Flash · Ao Vivo</span>
+              <span style="font:500 10.5px var(--font-mono);color:#34d399;">● DeepSeek</span>
             </div>
           </div>
           <span style="font:600 10px var(--font-mono);color:#64748b;">CANAL DIRETO</span>
@@ -3552,7 +3549,7 @@ function desenharInicio(){
       +'<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;">Motivo: '+esc(o.motivo)+'</p>'
       +o.itens.map(function(i){return '<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;"><b>'+esc(i.processo)+'</b> · '+esc(i.servidor)+' · R$ '+Number(i.valor).toFixed(2).replace('.',',')+(i.pendencias&&i.pendencias.length?'<br>⚠ '+i.pendencias.map(esc).join(' · '):'')+(i.semConferencia?'<br>sem conferência':'')+'</p>';}).join('')
       +((o.impedidos||[]).length?'<p style="margin:4px 0;font:12px var(--font-body);color:#94a3b8;">Ficam de fora: '+o.impedidos.map(function(i){return esc(i.processo||i.hash)+' ('+esc(i.motivo)+')';}).join('; ')+'</p>':'')
-      +'<div class="botoes"><button type="button" class="sim" data-oacao="confirmar">Confirmar e empenhar</button><button type="button" data-oacao="recusar">Recusar</button></div>'
+      +(S.ordemIncerta&&S.ordemIncerta[o.id]?'<div class="feito">'+esc(S.ordemIncerta[o.id])+'</div>':'<div class="botoes"><button type="button" class="sim" data-oacao="confirmar">Confirmar e empenhar</button><button type="button" data-oacao="recusar">Recusar</button></div>')
     +'</article>');
   });
   var ag=(E&&E.tarefas||[]).filter(function(t){return t.status==='aguardando';});
@@ -3619,6 +3616,10 @@ function desenharInicio(){
   $('#precisa').innerHTML=cards.join('')||'<div style="text-align:center;padding:16px;font:600 13px var(--font-hud);color:#34d399;">Nada esperando você agora ✓</div>';
   $('#contPrecisa').textContent=nPrec?nPrec+' PENDÊNCIA'+(nPrec>1?'S':''):'';
 
+  var bots=(E&&E.bots)||[], botsVivos=bots.filter(function(x){return x.visto&&Date.now()-x.visto<300000;}).length, fr=$('#cockpitFrota');
+  fr.textContent=bots.length?botsVivos+' DE '+bots.length+' BOTS COM SINAL':'--';
+  fr.style.color=bots.length&&botsVivos<bots.length?'#fbbf24':'';
+
   var eg=$('#estadoGeral');
   eg.textContent=nPrec?'● '+nPrec+' PEDE'+(nPrec>1?'M':'')+' VOCÊ':'● TUDO NOMINAL';
   eg.style.color=nPrec?'#fbbf24':'#34d399';
@@ -3633,6 +3634,11 @@ function ligarAcoesInicio(){
     api('equipe-ordem-decidir',{body:{id:id,acao:b.dataset.oacao}}).then(function(j){
       card.querySelector('.botoes').outerHTML='<div class="feito">'+(j.ok?'✓ '+(b.dataset.oacao==='confirmar'?'Confirmado · enviado ao CP':'Recusado'):'Não deu: '+esc(j.error||'erro'))+'</div>';
       carregarEquipe();
+    }).catch(function(){
+      // Guarda o aviso: o redesenho da tela não pode trazer o botão de volta e esconder a dúvida.
+      S.ordemIncerta=S.ordemIncerta||{}; S.ordemIncerta[id]='Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.';
+      var bx=card.querySelector('.botoes'); if(bx)bx.outerHTML='<div class="feito">'+esc(S.ordemIncerta[id])+'</div>';
+      carregarEquipe();
     });
   };});
   $$('[data-tacao]').forEach(function(b){b.onclick=function(){
@@ -3640,7 +3646,7 @@ function ligarAcoesInicio(){
     b.disabled=true; api('equipe-tarefa-acao',{body:{id:id,acao:b.dataset.tacao}}).then(function(j){
       card.querySelector('.botoes').outerHTML='<div class="feito">'+(j.ok?'✓ '+(b.dataset.tacao==='aprovar'?'Aprovada · publicando e observando':'Recusada'):'Não deu: '+esc(j.error||'erro'))+'</div>';
       carregarEquipe();
-    });
+    }).catch(function(){b.disabled=false;toast('Sem resposta do servidor. Tente de novo.');});
   };});
   $$('[data-sug]').forEach(function(b){b.onclick=function(){
     var ids=$$('#cardSug input:checked').map(function(i){return i.value;}); if(!ids.length){toast('Marque ao menos uma sugestão.');return;}
@@ -3648,7 +3654,7 @@ function ligarAcoesInicio(){
     api('equipe-enviar',{body:{texto:txt}}).then(function(){
       var c=$('#cardSug'); if(c)c.querySelector('.botoes').outerHTML='<div class="feito">✓ Pedido ao Coordenador: “'+esc(txt)+'”</div>';
       carregarEquipe();
-    });
+    }).catch(function(){toast('Mensagem não enviada. Tente de novo.');});
   };});
 }
 
@@ -3657,6 +3663,7 @@ function conferida(p){try{return localStorage.getItem('conf_'+p.hash)==='1';}cat
 function marcarConf(p,val){try{localStorage.setItem('conf_'+p.hash,val?'1':'0');}catch(e){}}
 function curto(nome){return String(nome||'').split(' ').slice(0,2).join(' ');}
 
+function plural(n,um,varios){return n+' '+(n===1?um:varios);}
 function motivoCurto(m){
   var t=String(m||'').replace(/^Conferente:\s*/i,'').replace(/\S+\.(pdf|jpe?g|png)\s*:\s*/ig,'').replace(/\s*-\s*aba Processos\s*>\s*Credores/i,' · cadastre no site').replace(/\/20\d\d\b/g,'').trim();
   return t.length>110?t.slice(0,107)+'…':t;
@@ -3671,7 +3678,7 @@ function desenharProcessos(){
   $('#loteTopo').innerHTML=pr.erro?'<div class="erro-box">Caixa indisponível: '+esc(pr.erro)+'</div>':
     '<div class="lt-res"><div><b>'+prontos.length+' pronto'+(prontos.length===1?'':'s')+'</b><span>'+real(tot)+'</span></div>'
     +'<button type="button" class="lt-emp" id="btEmpLote"'+(ocupado||!prontos.length?' disabled':'')+'>'+(ocupado?'CP ocupado':'Empenhar prontos')+'</button></div>'
-    +'<div class="lt-hoje">Hoje: '+(D.empenhos?D.empenhos.n:0)+' empenhados · '+(D.pagamentos?D.pagamentos.n:0)+' pagos · '+(pc.fila||0)+' prestações na fila</div>';
+    +'<div class="lt-hoje">Hoje: '+plural(D.empenhos?D.empenhos.n:0,'empenhado','empenhados')+' · '+plural(D.pagamentos?D.pagamentos.n:0,'pago','pagos')+' · '+plural(pc.fila||0,'prestação','prestações')+' na fila</div>';
   var be=$('#btEmpLote'); if(be)be.onclick=function(){PED.qPc=0;passoPedir('emp');$('#veuPedir').hidden=false;};
 
   var f=[['resolver','Resolver',nFora],['pronto','Prontos',prontos.length],['conferindo','Conferindo',nConf],['depois','Depois do empenho',Dp.length]];
@@ -3772,7 +3779,7 @@ function desenharFolhaProc(p){
       } else {
         toast('Não salvou: '+(j.error||'erro'));sv.disabled=false;sv.textContent='Salvar descrição';
       }
-    }).catch(function(){toast('Sem conexão');sv.disabled=false;});
+    }).catch(function(){toast('Sem conexão');sv.disabled=false;sv.textContent='Salvar descrição';});
   };
 
   $('#confP').onclick=function(){
@@ -3788,8 +3795,8 @@ function desenharFolhaProc(p){
           if(n&&!$('#veuProc').hidden)desenharFolhaProc(n);
           listaProc();
         });
-      }
-    });
+      } else {toast('Não voltou: '+(j.error||'erro'));vt.disabled=false;}
+    }).catch(function(){toast('Sem conexão');vt.disabled=false;});
   };
 
   $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
@@ -3804,7 +3811,20 @@ function vxFechar(){var el=document.getElementById('vx');if(el)el.parentNode.rem
 function vxFit(){var st=VX.st;if(!st||!st.img)return{fit:1,w:0,h:0};var pw=st.palco.clientWidth,ph=st.palco.clientHeight,nw=st.img.naturalWidth||pw,nh=st.img.naturalHeight||ph,rad=st.giro*Math.PI/180,cos=Math.abs(Math.cos(rad)),sin=Math.abs(Math.sin(rad)),bbw=nw*cos+nh*sin,bbh=nw*sin+nh*cos;return{fit:Math.min(pw/bbw,ph/bbh),w:nw,h:nh};}
 function vxPintar(anim){var st=VX.st;if(!st||!st.img)return;st.img.className=anim?'anim':'';st.img.style.transform='translate3d('+st.x+'px,'+st.y+'px,0) scale('+st.z+') rotate('+st.giro+'deg)';}
 function vxZoomEm(alvo,cx,cy,anim){var st=VX.st;if(!st||!st.img)return;var px=(cx-st.x)/st.z,py=(cy-st.y)/st.z;st.z=Math.max(.2,Math.min(6,alvo));st.x=cx-px*st.z;st.y=cy-py*st.z;vxPintar(anim);}
-function vxBaixar(hash,i){var k=hash+':'+i;if(VX.cache[k])return Promise.resolve(VX.cache[k]);return api('processo-anexo-baixar',{body:{hash:hash,indice:i}}).then(function(j){if(!j.ok)throw new Error(j.error||'falha ao baixar');VX.cache[k]=j;return j;});}
+function vxHeic(){if(window.heic2any)return Promise.resolve(window.heic2any);if(VX.heicP)return VX.heicP;VX.heicP=new Promise(function(ok,f){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';sc.onload=function(){ok(window.heic2any);};sc.onerror=function(){VX.heicP=null;f(new Error('não carregou o conversor de HEIC'));};document.head.appendChild(sc);});return VX.heicP;}
+function vxBaixar(hash,i){
+  var k=hash+':'+i;if(VX.cache[k])return Promise.resolve(VX.cache[k]);
+  return fetch(W+'?action=processo-anexo&hash='+encodeURIComponent(hash)+'&i='+i,{headers:{'Authorization':'Bearer '+token()},cache:'no-store'}).then(function(r){
+    if(r.status===401){mostrarLogin('Sessão expirada. Entre de novo.');throw new Error('não autenticado');}
+    if(!r.ok)return r.json().catch(function(){return{};}).then(function(j){throw new Error(j.error||('erro '+r.status));});
+    var nome=decodeURIComponent(r.headers.get('X-Anexo-Nome')||''),mime=(r.headers.get('Content-Type')||'').split(';')[0];
+    return r.blob().then(function(b){
+      var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+      if((/heic|heif/i.test(mime)||/\.(heic|heif)$/i.test(nome))&&!ios)return vxHeic().then(function(h){return h({blob:b,toType:'image/jpeg',quality:.85});}).then(function(x){return{blob:Array.isArray(x)?x[0]:x,mime:'image/jpeg',nome:nome};});
+      return{blob:b,mime:mime,nome:nome};
+    });
+  }).then(function(x){var u=URL.createObjectURL(x.blob),v={url:u,dataUrl:u,mime:x.mime,nome:x.nome};VX.cache[k]=v;return v;});
+}
 function vxIr(i){
   var st=VX.st;if(!st||!st.anexos[i])return;st.atual=i;st.giro=0;vxBaixo();var pal=st.palco;pal.innerHTML='<div class="vx-sk"></div>';var a=st.anexos[i];
   vxBaixar(st.hash,i).then(function(v){
@@ -3826,8 +3846,8 @@ function vxBaixo(){
   el.innerHTML='<div class="vx-dots">'+st.anexos.map(function(x,k){return'<i class="'+(k===st.atual?'on':'')+'"></i>';}).join('')+'</div>'
     +'<div class="vx-nome">'+(a?esc(a.nome)+' · '+(st.atual+1)+' de '+st.anexos.length:(st.lendo?'Lendo a lista no 1Doc…':'Sem anexos'))+'</div>'
     +(st.p.motivo?'<div class="vx-mot">🤖 '+esc(st.p.motivo)+'</div>':'')
-    +($('#notaOkP')?'<button type="button" class="vx-ok" id="vxOk">✓ Nota conferida — liberar</button>':'');
-  var ok=document.getElementById('vxOk');if(ok)ok.onclick=function(){vxFechar();var b=$('#notaOkP');if(b)b.click();};
+    +(st.p.confirmavel?'<button type="button" class="vx-ok" id="vxOk">✓ Nota conferida — liberar</button>':'');
+  var ok=document.getElementById('vxOk');if(ok)ok.onclick=function(){var pr=st.p;vxFechar();confirmarNota(pr,{},'',function(e){toast(e);});};
 }
 function vxAbrir(p){
   vxFechar();
@@ -3856,6 +3876,7 @@ function desenharNotebook(){
     $('#dellOnlinePill').style.background='rgba(239,68,68,0.2)';
     $('#dellOnlinePill').style.color='#ef4444';
     $('#dellHostTitle').textContent='Notebook Dell · sem leitura agora';
+    $('#dellIdade').textContent='sem leitura';
     $('#dellCpuVal').textContent='--%';$('#dellCpuBar').style.width='0%';
     $('#dellRamVal').textContent='--%';$('#dellRamBar').style.width='0%';
     return;
@@ -3871,11 +3892,12 @@ function desenharNotebook(){
   $('#dellOnlinePill').textContent=online?'ONLINE':'OFFLINE';
   $('#dellOnlinePill').style.background=online?'rgba(52,211,153,0.2)':'rgba(239,68,68,0.2)';
   $('#dellOnlinePill').style.color=online?'#34d399':'#ef4444';
-  $('#dellHostTitle').textContent=esc(sis.hostname||'Notebook Dell')+' · '+(sis.nucleos||8)+' Cores · '+(online?'Uptime: '+uptime:'Sem sinal há '+idadeSec+'s');
+  $('#dellIdade').textContent=coletado?'há '+ha(coletado):'--';
+  $('#dellHostTitle').textContent=(sis.hostname||'Notebook Dell')+(sis.nucleos?' · '+sis.nucleos+' núcleos':'')+' · '+(online?'Uptime: '+uptime:'Sem sinal há '+idadeSec+'s');
 
   $('#dellCpuVal').textContent=cpuP==null?'--%':cpuP+'%';
   $('#dellCpuBar').style.width=Math.min(100,cpuP||0)+'%';
-  $('#dellCpuMeta').textContent=(sis.nucleos||8)+' Cores @ 2.80GHz';
+  $('#dellCpuMeta').textContent=sis.nucleos?sis.nucleos+' núcleos':'--';
 
   $('#dellRamVal').textContent=ramP==null?'--%':ramP+'%';
   $('#dellRamBar').style.width=Math.min(100,ramP||0)+'%';
@@ -3899,13 +3921,14 @@ function desenharNotebook(){
   $('#dellLockTag').textContent=robo.lock?'Bloqueado':'Livre';
   $('#dellLockTag').className='dell-r-tag '+(robo.lock?'lock':'ok');
   var ultEv=(robo.historicoLog||[]).slice(-1)[0];
-  $('#dellDisparoTag').textContent=ultEv?esc(ultEv.slice(0,25)):'Standby';
+  $('#dellDisparoTag').textContent=ultEv?ultEv.slice(0,25):'Standby';
 }
 
 // ---------- ATIVIDADE / RADAR ----------
 function desenharAtividade(){
   var E=S.equipe, P=S.painel; if(!E)return;
   var evs=[];
+  $('#statFrota').textContent=(E.bots||[]).length?(E.bots||[]).length+' AGENTES':'--';
   (E.mensagens||[]).forEach(function(m){evs.push({t:m.criado,tipo:'msg',bot:m.de,texto:m.texto});});
   (E.tarefas||[]).forEach(function(t){evs.push({t:t.atualizado||t.criado,tipo:'tarefa',bot:t.para||t.de,titulo:t.titulo,corpo:t.resultado||t.corpo,st:t.status,id:t.id});});
   if(P&&(P.correcoes||[]).length){
@@ -4031,13 +4054,13 @@ function passoPedir(qual){
     var rota={relatorio_empenhos:'cp-relatorio-empenhos-pedir',relatorio_pagamentos:'cp-relatorio-pagamentos-pedir',relatorio_pc_pendentes:'cp-relatorio-pc_pendentes-pedir'}[PED.rel];
     okRel.disabled=true; api(rota,{body:{data:data}}).then(function(j){
       fimPedir(j,'📋 Relatório pedido ('+data+')');
-    });
+    }).catch(function(){fimPedir({ok:false,error:'Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.'},'');});
   };
 
   var okPc=$('#okPc'); if(okPc)okPc.onclick=function(){
     okPc.disabled=true;api('cp-tarefa-solicitar',{body:{tipo:'prestacao',limite:PED.qPc}}).then(function(j){
       fimPedir(j,'🧾 Prestação de contas de '+PED.qPc+' pedida');
-    });
+    }).catch(function(){fimPedir({ok:false,error:'Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.'},'');});
   };
 
   var btEmp=$('#btEmp'); if(btEmp){
@@ -4049,7 +4072,7 @@ function passoPedir(qual){
       $('#empSim').onclick=function(){
         this.disabled=true;api('celular-empenhar',{body:{hashes:c.map(function(i){return i.value;})}}).then(function(j){
           fimPedir(j,'💰 Lote de '+c.length+' enviado com sucesso!');
-        });
+        }).catch(function(){fimPedir({ok:false,error:'Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.'},'');});
       };
     };
   }
@@ -4120,6 +4143,7 @@ window.abrirAbaConversaDemo = abrirAbaConversaDemo;
 function fresco(){
   var t=Math.max(S.em.cp||0,S.em.eq||0,S.em.pa||0); if(!t)return; var s=(Date.now()-t)/1000;
   $('#fresco').textContent=s<30?'AO VIVO · '+Math.round(s)+'s':'ATUALIZADO HÁ '+ha(Date.now()-s*1000);
+  var sf=$('#statFresco'); if(sf)sf.textContent='HÁ '+ha(t).toUpperCase();
   var d=$('#dotFresco'); if(d)d.className='radar-pulse'+(s<30?'':' velho');
 }
 
