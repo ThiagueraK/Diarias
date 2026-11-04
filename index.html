@@ -1922,7 +1922,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.21.0</span>
+    <span class="header-version">v1.21.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3014,10 +3014,14 @@ document.getElementById('tabEmpenhos').addEventListener('click', function() { sw
 // ═══════════════════════════════════════════════════════
 var ES_SIT = {
   pronto_para_empenhar: { nome: 'Pronto p/ empenhar', cor: '#1f9d57', ord: 1 },
-  aguardando_secretaria: { nome: 'Aguardando Secretária', cor: '#7c3aed', ord: 2 },
-  aguardando_suplementacao: { nome: 'Aguardando suplementação', cor: '#d97706', ord: 3 },
-  aguardando_financeiro: { nome: 'Aguardando Financeiro', cor: '#2563eb', ord: 4 },
-  empenhado: { nome: 'Empenhado', cor: '#64748b', ord: 5 }
+  usa_empenho_existente: { nome: 'Usa empenho existente', cor: '#0d9488', ord: 2 },
+  aguardando_secretaria: { nome: 'Aguardando assinaturas', cor: '#7c3aed', ord: 3 },
+  aguardando_suplementacao: { nome: 'Aguardando suplementação', cor: '#d97706', ord: 4 },
+  aguardando_financeiro: { nome: 'Aguardando Financeiro', cor: '#2563eb', ord: 5 },
+  em_licitacao: { nome: 'Licitação / contratação', cor: '#a16207', ord: 6 },
+  em_andamento: { nome: 'Em andamento', cor: '#475569', ord: 7 },
+  empenhado: { nome: 'Empenhado', cor: '#64748b', ord: 8 },
+  outro_assunto: { nome: 'Outro assunto', cor: '#94a3b8', ord: 9 }
 };
 var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open';
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -3084,7 +3088,7 @@ function esDetalhe(p, animar) {
   var st = esSitDe(p), dt = p.dotacao || {}, valor = dt.valorTotal != null ? dt.valorTotal : p.somaItens;
   var link = p.hash ? 'https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash : null;
   var h = '<div class="es-casc">';
-  h += '<div><span class="es-tag" style="--es-cor:' + st.cor + '">' + esH(st.nome) + '</span></div>';
+  h += '<div><span class="es-tag" style="--es-cor:' + st.cor + '">' + esH(st.nome) + '</span>' + (p.etapa ? ' <span style="font-size:12px;opacity:.75">Etapa no 1Doc: ' + esH(p.etapa) + '</span>' : '') + '</div>';
   h += '<h3 style="margin-top:8px">' + esH(p.documento) + '</h3><div class="ass">' + esH(p.assunto || '') + (p.recebidoEm ? ' · recebido ' + esH(String(p.recebidoEm).slice(0, 10).split('-').reverse().join('/')) : '') + '</div>';
   if (p.erro) h += '<div class="es-erro">' + esH(p.erro) + '</div>';
   h += '<div class="es-valor" id="esValor">' + esBRL(animar ? 0 : valor) + '</div>';
