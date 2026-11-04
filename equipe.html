@@ -3735,7 +3735,7 @@ function confirmarNota(p,btn,rotulo,aoErro,just){
       if(t&&t.trim())confirmarNota(p,btn,rotulo,aoErro,t.trim());else volta();
       return;
     }
-    if(j.ok){toast('✓ Confirmado! Liberado no lote.');$('#veuProc').hidden=true;S.procAberto=null;carregarPainel();}
+    if(j.ok){toast(j.status==='pronto'?'✓ Confirmado! Liberado no lote.':'✓ Confirmado; ainda falta: '+String((j.restantes||[])[0]||j.status).slice(0,90));$('#veuProc').hidden=true;S.procAberto=null;carregarPainel();}
     else{aoErro(j.error||'Erro ao confirmar');volta();}
   }).catch(function(){aoErro('Sem conexão');volta();});
 }

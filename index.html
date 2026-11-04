@@ -3987,7 +3987,7 @@ function procConferenciaHtml(p) {
   return '<details class="proc-conf ' + cls + '" data-conf-hash="' + escaparHtmlProc(p.hash || '') + '"' + (c.status !== 'pronto' ? ' open' : '') + '><summary>' + tit + (c.em ? ' <small>' + ceTempoRelativo(c.em) + '</small>' : '') + '</summary><ul>' + linhas + '</ul>' + botao + '</details>';
 }
 // mesma lista do Conferente (equipe/conferencia_processos.mjs) e do Worker
-var CONF_REGRAS_JUSTIFICADAS = ['NOTA_DIA_ANTERIOR_MADRUGADA','EVIDENCIA_DATA_OUTRA_DIARIA','NOTA_REPETIDA','MADRUGADA_PARTIDA','AMBULANCIA_DOIS_LUGARES','EQUIPE_DIVERGENTE','NOTA_FORA_DA_ROTA'];   // 31/10/2026: + Auditor   // 23/10/2026: possível diária em dobro - só com justificativa
+var CONF_REGRAS_JUSTIFICADAS = ['NOTA_DIA_ANTERIOR_MADRUGADA','EVIDENCIA_DATA_OUTRA_DIARIA','NOTA_REPETIDA','MADRUGADA_PARTIDA','AMBULANCIA_DOIS_LUGARES','EQUIPE_DIVERGENTE','NOTA_FORA_DA_ROTA','ANEXOS_LEITURA_INCOMPLETA'];   // 31/10/2026: + Auditor   // 23/10/2026: possível diária em dobro - só com justificativa
 var CONF_REGRAS_MANUAIS = ['PEDIDO_DATA_FORA','ROTEIRO_AUSENTE','AUTORIZACAO_AUSENTE','DESCRICAO_REVISAR','JUSTIFICATIVA_DATA_NAO_CONFIRMADA','NOTA_DATA_ILEGIVEL','NOTA_DATA_AMBIGUA','NOTA_DATA_FORA','NOTA_NAO_IDENTIFICADA','ANEXOS_LEITURA_INDISPONIVEL','PLACA_NOVA','PLACA_FORMATO','PLACA_AUSENTE','VALOR_DIVERGENTE','VALOR_MULTIPLAS_NOITES','VALOR_CIDADE_DESCONHECIDA','VIAGEM_FUTURA_JUSTIFICATIVA_AUSENTE'];
 document.addEventListener('click', function(e){
   var b = e.target && e.target.closest && e.target.closest('.proc-btn-conferido');
