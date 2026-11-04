@@ -1923,7 +1923,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.21.2</span>
+    <span class="header-version">v1.22.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -5222,8 +5222,18 @@ function eqRender() {
   if (badge) { badge.style.display = (ag.length || abertasTot) ? '' : 'none'; badge.textContent = ag.length ? '!' + ag.length : abertasTot; }
   // propostas aguardando
   var boxAg = document.getElementById('eq-aguarda');
-  boxAg.hidden = !ag.length;
-  boxAg.innerHTML = ag.length ? '<h3>Aguardando você</h3>' + ag.map(function(t) {
+  var ordens = (eqDados && eqDados.ordensForcadas) || [];
+  boxAg.hidden = !ag.length && !ordens.length;
+  boxAg.innerHTML = (ag.length || ordens.length) ? '<h3>Aguardando você</h3>' + ordens.map(function(o) {
+    var linhas = o.itens.map(function(i) {
+      return '<li><b>' + escaparHtmlProc(i.processo) + '</b> · ' + escaparHtmlProc(i.servidor) + ' · R$ ' + Number(i.valor).toFixed(2).replace('.', ',') + (i.semConferencia ? ' · <i>sem conferência</i>' : '')
+        + (i.pendencias && i.pendencias.length ? '<br><small>⚠ ' + i.pendencias.map(escaparHtmlProc).join(' · ') + '</small>' : '') + '</li>';
+    }).join('');
+    var fora = (o.impedidos || []).map(function(i) { return '<li>' + escaparHtmlProc(i.processo || i.hash) + ': ' + escaparHtmlProc(i.motivo) + '</li>'; }).join('');
+    return '<div class="x-prop"><b>Empenho forçado · ' + o.itens.length + ' processo(s) · R$ ' + Number(o.total).toFixed(2).replace('.', ',') + '</b><div style="font-size:13px;margin:6px 0">Motivo: ' + escaparHtmlProc(o.motivo) + '</div><ul style="font-size:13px;margin:6px 0;padding-left:18px">' + linhas + '</ul>'
+      + (fora ? '<div style="font-size:13px;margin:6px 0"><b>Ficam de fora:</b><ul style="padding-left:18px;margin:4px 0">' + fora + '</ul></div>' : '')
+      + '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-ordem="confirmar" data-id="' + o.id + '">Confirmar e empenhar</button><button type="button" class="x-bt no" data-eq-ordem="recusar" data-id="' + o.id + '">Recusar</button></div></div>';
+  }).join('') + ag.map(function(t) {
     var texto = String(t.resultado || t.corpo || '');
     return '<div class="x-prop"><b>#' + t.id + ' · ' + escaparHtmlProc(t.titulo) + '</b><pre>' + escaparHtmlProc(texto.slice(0, 2500)) + '</pre>'
       + '<div class="x-t-acoes"><button type="button" class="x-bt ok" data-eq-acao="aprovar" data-id="' + t.id + '">Aprovar e publicar</button><button type="button" class="x-bt no" data-eq-acao="recusar" data-id="' + t.id + '">Recusar</button></div></div>';
@@ -5651,6 +5661,13 @@ document.addEventListener('click', function(ev) {
   if (f) { eqFiltro = f.dataset.f; eqRender(); return; }
   var fl = ev.target.closest && ev.target.closest('[data-fluxo]');
   if (fl) { eqFluxoAgente = fl.dataset.fluxo; eqRender(); return; }
+  var bo = ev.target.closest && ev.target.closest('[data-eq-ordem]');
+  if (bo) {
+    bo.disabled = true;
+    sgdFetch(SGD_WORKER_URL + '?action=equipe-ordem-decidir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(bo.dataset.id), acao: bo.dataset.eqOrdem }) })
+      .then(function(r) { return r.json(); }).then(function(res) { if (res && res.ok === false) alert(res.error || 'Não deu certo.'); carregarEquipe(); }).catch(function() { alert('Sem resposta do servidor. Consulte o CP antes de tentar de novo.'); carregarEquipe(); });
+    return;
+  }
   var a = ev.target.closest && ev.target.closest('[data-eq-acao]');
   if (!a) return;
   if (a.dataset.eqAcao === 'aprovar' && !confirm('Aprovar e publicar a proposta #' + a.dataset.id + '?\n\nO Programador publica, observa 5 min e desfaz sozinho se piorar.')) return;

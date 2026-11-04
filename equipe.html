@@ -3531,6 +3531,16 @@ function desenharInicio(){
 
   // Cards de Decisão: Precisa de Você
   var cards=[];
+  ((E&&E.ordensForcadas)||[]).forEach(function(o){
+    cards.push('<article class="cyber-attention-item r-medio" data-ordem="'+o.id+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;"><b style="font:700 13px var(--font-hud);color:#fff;">Empenho forçado · '+o.itens.length+' processo(s) · R$ '+Number(o.total).toFixed(2).replace('.',',')+'</b>'
+      +'<span style="font:700 9px var(--font-mono);background:rgba(245,158,11,0.2);color:#f59e0b;padding:2px 6px;border-radius:4px;">DECISÃO</span></div>'
+      +'<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;">Motivo: '+esc(o.motivo)+'</p>'
+      +o.itens.map(function(i){return '<p style="margin:4px 0;font:12px var(--font-body);color:#cbd5e1;"><b>'+esc(i.processo)+'</b> · '+esc(i.servidor)+' · R$ '+Number(i.valor).toFixed(2).replace('.',',')+(i.pendencias&&i.pendencias.length?'<br>⚠ '+i.pendencias.map(esc).join(' · '):'')+(i.semConferencia?'<br>sem conferência':'')+'</p>';}).join('')
+      +((o.impedidos||[]).length?'<p style="margin:4px 0;font:12px var(--font-body);color:#94a3b8;">Ficam de fora: '+o.impedidos.map(function(i){return esc(i.processo||i.hash)+' ('+esc(i.motivo)+')';}).join('; ')+'</p>':'')
+      +'<div class="botoes"><button type="button" class="sim" data-oacao="confirmar">Confirmar e empenhar</button><button type="button" data-oacao="recusar">Recusar</button></div>'
+    +'</article>');
+  });
   var ag=(E&&E.tarefas||[]).filter(function(t){return t.status==='aguardando';});
   ag.forEach(function(t){
     cards.push('<article class="cyber-attention-item r-medio" data-tarefa="'+t.id+'">'
@@ -3591,7 +3601,7 @@ function desenharInicio(){
     +'</div>');
   }
 
-  var nPrec=ag.length+(sug.length?1:0)+(P.problemas.depois||[]).filter(function(x){return x.tipo==='Anular';}).length+(outros?1:0);
+  var nPrec=((E&&E.ordensForcadas)||[]).length+ag.length+(sug.length?1:0)+(P.problemas.depois||[]).filter(function(x){return x.tipo==='Anular';}).length+(outros?1:0);
   $('#precisa').innerHTML=cards.join('')||'<div style="text-align:center;padding:16px;font:600 13px var(--font-hud);color:#34d399;">Nada esperando você agora ✓</div>';
   $('#contPrecisa').textContent=nPrec?nPrec+' PENDÊNCIA'+(nPrec>1?'S':''):'';
 
@@ -3603,6 +3613,14 @@ function desenharInicio(){
 }
 
 function ligarAcoesInicio(){
+  $$('[data-oacao]').forEach(function(b){b.onclick=function(){
+    var card=b.closest('[data-ordem]'), id=Number(card.dataset.ordem);
+    card.querySelectorAll('button').forEach(function(x){x.disabled=true;});
+    api('equipe-ordem-decidir',{body:{id:id,acao:b.dataset.oacao}}).then(function(j){
+      card.querySelector('.botoes').outerHTML='<div class="feito">'+(j.ok?'✓ '+(b.dataset.oacao==='confirmar'?'Confirmado · enviado ao CP':'Recusado'):'Não deu: '+esc(j.error||'erro'))+'</div>';
+      carregarEquipe();
+    });
+  };});
   $$('[data-tacao]').forEach(function(b){b.onclick=function(){
     var card=b.closest('[data-tarefa]'), id=Number(card.dataset.tarefa);
     b.disabled=true; api('equipe-tarefa-acao',{body:{id:id,acao:b.dataset.tacao}}).then(function(j){
