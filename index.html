@@ -1825,6 +1825,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .es-chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 11px;font:500 12.5px var(--sans);cursor:pointer;color:var(--text-muted);transition:all .18s}
   .es-chip b{font-family:var(--mono);margin-left:4px}
   .es-chip.on{background:var(--text);color:var(--surface);border-color:var(--text)}
+  .proc-card.proc-filtrado{display:none !important;}
   .es-grid{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:14px;align-items:start}
   @media(max-width:860px){.es-grid{grid-template-columns:1fr}}
   .es-lista{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 260px);overflow:auto;padding-right:4px}
@@ -2474,6 +2475,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <div id="proc-lista" class="prx-lista">
         <p style="color:var(--text-muted);">Carregando...</p>
       </div>
+      <p id="proc-filtro-vazio" hidden style="color:var(--text-muted);margin:12px 2px;">Nenhum processo neste seletor agora.</p>
     </div>
   </div>
 
@@ -4247,6 +4249,57 @@ document.addEventListener('click', function(e){
   }).catch(function(err){ b.disabled = false; b.textContent = '🔓 Liberar com justificativa'; alert('Erro: ' + err.message); });
 });
 var SIT_ROTULO = { 'ja-empenhado': 'Já empenhado (fora da Tabela)', 'a-empenhar': 'A empenhar', 'guardado': 'Empenhado · guardado', 'bloqueado': 'Bloqueado', 'fora-do-script': 'Fora do script', 'sem-leitura': 'Sem leitura' };
+// 04/11/2026: seletores dos cards. O grupo sai da mesma situação que o Worker manda para o card; "No lote" é prontoLote.
+var PROC_FILTROS = [['todos', 'Todos'], ['lote', 'No lote'], ['problema', 'Com problema'], ['conferindo', 'Conferindo'], ['fora', 'Fora do lote'], ['empenhados', 'Empenhados']];
+var _procFiltro = 'todos';
+try { var _pfSalvo = localStorage.getItem('sgd_proc_filtro'); if (PROC_FILTROS.some(function(f){ return f[0] === _pfSalvo; })) _procFiltro = _pfSalvo; } catch (e) {}
+function procGrupoDaSituacao(s) {
+  if (!s) return 'conferindo';
+  if (s.situacao === 'guardado' || s.situacao === 'ja-empenhado') return 'empenhados';
+  if (s.situacao === 'fora-do-script') return 'fora';
+  if (s.situacao === 'bloqueado') return 'problema';
+  if (s.situacao === 'a-empenhar') {
+    if (s.prontoLote) return 'lote';
+    if (/ainda não conferido/.test(s.motivoFila || '')) return 'conferindo';
+    if (/^empenho comum/.test(s.motivoFila || '')) return 'fora';
+    return 'problema';
+  }
+  return 'conferindo';
+}
+function procAplicarFiltro() {
+  var el = document.getElementById('proc-resumo-situacao'), mapa = window._situacaoCaixa || {};
+  if (!el || !Object.keys(mapa).length) return;
+  var grupos = { todos: [] };
+  PROC_FILTROS.forEach(function(f){ grupos[f[0]] = []; });
+  var grupoDo = {};
+  (processosCaixaAtual || []).forEach(function(p){
+    if (empenhoJaLancado(p.hash)) return;
+    var g = procGrupoDaSituacao(mapa[p.hash]);
+    grupoDo[p.hash] = g;
+    grupos.todos.push(p.numeroProcesso || '?');
+    grupos[g].push(p.numeroProcesso || '?');
+  });
+  el.innerHTML = PROC_FILTROS.map(function(f){
+    if (f[0] !== 'todos' && f[0] !== _procFiltro && !grupos[f[0]].length) return '';
+    return '<button type="button" class="es-chip' + (f[0] === _procFiltro ? ' on' : '') + '" data-filtro="' + f[0] + '" aria-pressed="' + (f[0] === _procFiltro) + '" title="' + escaparHtmlProc(grupos[f[0]].join(', ')) + '">' + f[1] + '<b>' + grupos[f[0]].length + '</b></button>';
+  }).join('');
+  el.hidden = false;
+  document.querySelectorAll('#proc-lista .proc-card[data-hash]').forEach(function(card){
+    // card aberto fica à vista até ser fechado: não some da tela logo depois de "✓ Conferido"
+    var some = _procFiltro !== 'todos' && grupoDo[card.dataset.hash] !== _procFiltro && !card.classList.contains('aberto');
+    card.classList.toggle('proc-filtrado', some);
+  });
+  var vazio = document.getElementById('proc-filtro-vazio');
+  if (vazio) vazio.hidden = !!document.querySelector('#proc-lista .proc-card[data-hash]:not(.proc-filtrado)') || !grupos.todos.length;
+}
+document.getElementById('proc-resumo-situacao').addEventListener('click', function(e){
+  var b = e.target && e.target.closest && e.target.closest('[data-filtro]');
+  if (!b) return;
+  _procFiltro = b.dataset.filtro;
+  try { localStorage.setItem('sgd_proc_filtro', _procFiltro); } catch (ex) {}
+  document.querySelectorAll('#proc-lista .proc-card.tkt.aberto').forEach(function(o){ if (typeof tktAlternar === 'function') tktAlternar(o); });
+  procAplicarFiltro();
+});
 function aplicarSituacaoNosCards() {
   var mapa = window._situacaoCaixa || {};
   document.querySelectorAll('.proc-sit[data-hash]').forEach(function(el) {
@@ -4267,6 +4320,7 @@ function aplicarSituacaoNosCards() {
     else if (s && (s.situacao === 'a-empenhar' || s.situacao === 'fora-do-script') && s.motivoFila) { el.textContent = '⏸ ' + (s.situacao === 'fora-do-script' ? '' : 'Fora do lote: ') + s.motivoFila; el.hidden = false; }
     else el.hidden = true;
   });
+  procAplicarFiltro();
 }
 // Casa uma hash de processo com uma linha já lançada na Tabela de Controle (adicionarProcesso
 // já grava hash1doc em cada linha nova — ver pendente.hash1doc na função gerar()).
@@ -5781,21 +5835,6 @@ function atualizarResumoSituacaoCaixa() {
     window._situacaoCaixa = {};
     res.itens.forEach(function(p){ if (p.hash) window._situacaoCaixa[p.hash] = { situacao: p.situacao, motivo: p.motivoBloqueio || '', motivoFila: p.motivoFila || '', prontoLote: p.prontoLote === true }; });
     aplicarSituacaoNosCards();
-    var grupos = [
-      ['a-empenhar', 'a empenhar', '#16a34a'],
-      ['guardado', 'empenhados, esperando encaminhar', '#2563eb'],
-      ['ja-empenhado', 'já empenhados (anexo no 1Doc, fora da Tabela)', '#dc2626'],
-      ['bloqueado', 'bloqueados (mesma data/reserva)', '#dc2626'],
-      ['fora-do-script', 'fora do script', '#f59e0b'],
-      ['sem-leitura', 'sem leitura', '#6b7280']
-    ];
-    el.innerHTML = grupos.map(function(g){
-      var doGrupo = visiveis.filter(function(p){ return p.situacao === g[0]; });
-      if (!doGrupo.length) return '';
-      var nums = doGrupo.map(function(p){ return p.numeroProcesso || '?'; }).join(', ');
-      return '<span title="' + escaparHtmlProc(nums) + '" style="font-weight:700;color:' + g[2] + ';border:1px solid ' + g[2] + ';border-radius:12px;padding:3px 10px;background:var(--surface2);">' + doGrupo.length + ' ' + g[1] + '</span>';
-    }).join('');
-    el.hidden = false;
   })
   .catch(function(){});
 }
