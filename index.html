@@ -4257,7 +4257,8 @@ function procGrupoDaSituacao(s) {
   if (!s) return 'conferindo';
   if (s.situacao === 'guardado' || s.situacao === 'ja-empenhado') return 'empenhados';
   if (s.situacao === 'fora-do-script') return 'fora';
-  if (s.situacao === 'bloqueado') return 'problema';
+  // reservado = empenho em andamento no CP agora; não é problema
+  if (s.situacao === 'bloqueado') return /^reservado/.test(s.motivo || '') ? 'empenhados' : 'problema';
   if (s.situacao === 'a-empenhar') {
     if (s.prontoLote) return 'lote';
     if (/ainda não conferido/.test(s.motivoFila || '')) return 'conferindo';
