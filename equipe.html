@@ -3468,11 +3468,11 @@ function recarregarTelemetriaDell(){
       if(!S.equipe)S.equipe={};
       S.equipe.telemetriaNotebook=j.telemetria;
       desenharNotebook();
-      toast('✓ Telemetria Dell atualizada (<5ms)');
+      toast('✓ Telemetria Dell atualizada');
     } else {
-      carregarEquipe().then(function(){toast('✓ Sincronizado');});
+      carregarEquipe().then(function(){toast(S.equipe&&S.equipe.telemetriaNotebook&&S.equipe.telemetriaNotebook.sistema?'✓ Telemetria Dell atualizada':'Sem leitura do notebook agora');});
     }
-  }).catch(function(){carregarEquipe();});
+  }).catch(function(){toast('Sem leitura do notebook agora');carregarEquipe();});
 }
 window.recarregarTelemetriaDell = recarregarTelemetriaDell;
 
@@ -3862,15 +3862,17 @@ function desenharNotebook(){
     $('#dellOnlinePill').textContent='OFFLINE';
     $('#dellOnlinePill').style.background='rgba(239,68,68,0.2)';
     $('#dellOnlinePill').style.color='#ef4444';
-    $('#dellHostTitle').textContent='DESKTOP-MIQJ3OB · Aguardando telemetria…';
+    $('#dellHostTitle').textContent='Notebook Dell · sem leitura agora';
+    $('#dellCpuVal').textContent='--%';$('#dellCpuBar').style.width='0%';
+    $('#dellRamVal').textContent='--%';$('#dellRamBar').style.width='0%';
     return;
   }
   var agora=Date.now(), coletado=tel.coletadoEm||0, idadeSec=Math.max(0,Math.round((agora-coletado)/1000));
   var online=idadeSec<90;
   var sis=tel.sistema||{}, ram=sis.ram||{}, robo=tel.roboCp||{}, svcs=tel.servicos||{};
 
-  var cpuP=Math.round(sis.cpuPercent||0);
-  var ramP=Math.round(ram.percentual||0);
+  var cpuP=sis.cpuPercent==null?null:Math.round(sis.cpuPercent);
+  var ramP=ram.percentual==null?null:Math.round(ram.percentual);
   var uptime=sis.uptimeHoras?(sis.uptimeHoras<24?Math.round(sis.uptimeHoras)+' horas':(sis.uptimeHoras/24).toFixed(1)+' dias'):'--';
 
   $('#dellOnlinePill').textContent=online?'ONLINE':'OFFLINE';
@@ -3878,12 +3880,12 @@ function desenharNotebook(){
   $('#dellOnlinePill').style.color=online?'#34d399':'#ef4444';
   $('#dellHostTitle').textContent=esc(sis.hostname||'Notebook Dell')+' · '+(sis.nucleos||8)+' Cores · '+(online?'Uptime: '+uptime:'Sem sinal há '+idadeSec+'s');
 
-  $('#dellCpuVal').textContent=cpuP+'%';
-  $('#dellCpuBar').style.width=Math.min(100,cpuP)+'%';
+  $('#dellCpuVal').textContent=cpuP==null?'--%':cpuP+'%';
+  $('#dellCpuBar').style.width=Math.min(100,cpuP||0)+'%';
   $('#dellCpuMeta').textContent=(sis.nucleos||8)+' Cores @ 2.80GHz';
 
-  $('#dellRamVal').textContent=ramP+'%';
-  $('#dellRamBar').style.width=Math.min(100,ramP)+'%';
+  $('#dellRamVal').textContent=ramP==null?'--%':ramP+'%';
+  $('#dellRamBar').style.width=Math.min(100,ramP||0)+'%';
   $('#dellRamGb').textContent=((ram.usadaMb||0)/1024).toFixed(1)+' / '+((ram.totalMb||0)/1024).toFixed(1)+' GB';
 
   // Serviços Windows
@@ -4441,41 +4443,7 @@ function eqeMandarCaminharDemo() {
   dispararPulsoRede();
 }
 
-async function recarregarTelemetriaDell() {
-  toast("Sincronizando telemetria do Notebook Dell...");
-  try {
-    const res = await fetch('https://diarias.aceitacoes.workers.dev?action=notebook-telemetria', { cache: 'no-store' });
-    const data = await res.json();
-    if (data && data.ok && data.telemetria) {
-      const t = data.telemetria;
-      const cpu = t.cpu && t.cpu.usoPct != null ? Math.round(t.cpu.usoPct) : 29;
-      const ram = t.memoria && t.memoria.usoPct != null ? Math.round(t.memoria.usoPct) : 73;
-      const cpuBar = document.getElementById("dellCpuBar");
-      const cpuVal = document.getElementById("dellCpuVal");
-      const ramBar = document.getElementById("dellRamBar");
-      const ramVal = document.getElementById("dellRamVal");
-      if (cpuBar) cpuBar.style.width = cpu + "%";
-      if (cpuVal) cpuVal.textContent = cpu + "%";
-      if (ramBar) ramBar.style.width = ram + "%";
-      if (ramVal) ramVal.textContent = ram + "%";
-      toast(`✅ Host ${t.host || 'Dell'}: CPU ${cpu}%, RAM ${ram}%, ${t.servicos?.rodando ?? 9}/9 serviços OK`);
-      return;
-    }
-  } catch (err) {
-    console.warn("Falha no fetch live de telemetria:", err);
-  }
-  const cpu = Math.floor(22 + Math.random() * 25);
-  const ram = Math.floor(68 + Math.random() * 6);
-  const cpuBar = document.getElementById("dellCpuBar");
-  const cpuVal = document.getElementById("dellCpuVal");
-  const ramBar = document.getElementById("dellRamBar");
-  const ramVal = document.getElementById("dellRamVal");
-  if (cpuBar) cpuBar.style.width = cpu + "%";
-  if (cpuVal) cpuVal.textContent = cpu + "%";
-  if (ramBar) ramBar.style.width = ram + "%";
-  if (ramVal) ramVal.textContent = ram + "%";
-}
-setTimeout(recarregarTelemetriaDell, 1500);
+
 
 
 
