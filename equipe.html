@@ -3149,13 +3149,6 @@ body {
             <canvas id="eq-cv" role="img" aria-label="Escritório animado com os nove agentes"></canvas>
           </div>
         </div>
-
-        <div style="display:flex;gap:8px;margin-top:2px;">
-          <button class="btn-shimmer-cyber" style="flex:1;" onclick="eqeMandarCaminharDemo()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span>DISPARAR RECADO ENTRE AGENTES (CAMINHADA ISOMÉTRICA)</span>
-          </button>
-        </div>
       </section>
 
       <!-- GAVETA TÁTICA DO AGENTE SELECIONADO -->
@@ -3178,22 +3171,22 @@ body {
         <div class="eq-gaveta-stats" id="eqGStats">
           <div class="eq-gaveta-stat-item">
             <span>Status</span>
-            <b id="eqGSt">Operacional</b>
+            <b id="eqGSt">--</b>
           </div>
           <div class="eq-gaveta-stat-item">
             <span>Último Sinal</span>
-            <b id="eqGTempo">Agora</b>
+            <b id="eqGTempo">--</b>
           </div>
           <div class="eq-gaveta-stat-item">
-            <span>Ações Hoje</span>
-            <b id="eqGAcoes">18</b>
+            <span>Tarefas abertas</span>
+            <b id="eqGAcoes">--</b>
           </div>
         </div>
 
         <div style="display:flex;gap:8px;">
           <button class="ev-btn-action" style="flex:1;justify-content:center;padding:8px;" onclick="falarComAgenteGaveta()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span>Enviar Ordem</span>
+            <span>Falar com o agente</span>
           </button>
           <button class="ev-btn-action" style="padding:8px 14px;" onclick="fecharGavetaAgente()">
             <span>Fechar</span>
@@ -4145,7 +4138,8 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)tudo
 var abaSalva='inicio'; try{abaSalva=localStorage.getItem('eq_cel_aba')||'inicio';}catch(e){}
 var idxSalvo=nomesAba.indexOf(abaSalva);
 if(idxSalvo<0)idxSalvo=0;
-trocarDock(idxSalvo,$$('.dock-item')[idxSalvo]);
+// Espera o script terminar: a aba Equipe usa variáveis declaradas mais abaixo, e o erro aqui parava todo o resto.
+setTimeout(function(){trocarDock(idxSalvo,$$('.dock-item')[idxSalvo]);},0);
 tudo(); ultEq=ultPa=Date.now();
 
 // ---------- MOTOR DE METEOROS DE FUNDO ----------
@@ -4179,15 +4173,15 @@ if(cv){
 // 10. MOTOR DO ESCRITÓRIO ISOMÉTRICO 3D DOS 9 AGENTES (CLAUDE OFFICE ENGINE)
 // ══════════════════════════════════════════════════════════════════════════
 const EQ_AG = {
-  coordenador: { nome: 'Coordenador', modelo: 'DeepSeek Flash · Orquestrador', papel: 'Conversa com você e distribui o trabalho entre a frota', cor: '#8b5cf6', sigla: 'CO', acoesHoje: 18 },
-  relatorios_cp: { nome: 'Relatórios CP', modelo: 'Hermes · Conciliação', papel: 'Relatórios oficiais, conferência de empenhos e avisos no Telegram', cor: '#0f766e', sigla: 'RC', acoesHoje: 12 },
-  operador_cp: { nome: 'Operador CP', modelo: 'Hermes FullCP · Autônomo', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR e reconciliação', cor: '#3b82f6', sigla: 'CP', acoesHoje: 24 },
-  vigia: { nome: 'Vigia', modelo: 'Infraestrutura · Ciclo 2 min', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', sigla: 'VI', acoesHoje: 6 },
-  conferente: { nome: 'Conferente', modelo: 'Regras + OCR (pdfplumber + Tesseract)', papel: 'Confere cada processo: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', sigla: 'CF', acoesHoje: 14 },
-  auditor: { nome: 'Auditor', modelo: 'Regras + histórico de notas', papel: 'Audita contra o histórico: mesma nota em duas diárias e viagens simultâneas', cor: '#e11d48', sigla: 'AU', acoesHoje: 8 },
-  pesquisador: { nome: 'Pesquisador', modelo: 'Busca 1Doc + Tabela de Controle', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', sigla: 'PQ', acoesHoje: 5 },
-  programador: { nome: 'Programador', modelo: 'DeepSeek (programador próprio)', papel: 'Corrige sozinho com revisor, linhas vermelhas e auto-reversão', cor: '#84cc16', sigla: 'PG', acoesHoje: 9 },
-  cacador: { nome: 'Caçador local', modelo: 'IA Local no Notebook (Llama)', papel: 'Classifica os erros novos dos logs a cada 5 min sem custo de API', cor: '#10b981', sigla: 'CA', acoesHoje: 16 }
+  coordenador: { nome: 'Coordenador', modelo: 'DeepSeek · Orquestrador', papel: 'Conversa com você e distribui o trabalho entre a frota', cor: '#8b5cf6', sigla: 'CO' },
+  relatorios_cp: { nome: 'Relatórios CP', modelo: 'Hermes · Conciliação', papel: 'Relatórios oficiais, conferência de empenhos e avisos no Telegram', cor: '#0f766e', sigla: 'RC' },
+  operador_cp: { nome: 'Operador CP', modelo: 'Hermes FullCP · Autônomo', papel: 'Hermes FullCP: ciclo do CP, pré-lote, vigia, OCR e reconciliação', cor: '#3b82f6', sigla: 'CP' },
+  vigia: { nome: 'Vigia', modelo: 'Infraestrutura · Ciclo 2 min', papel: 'Confere serviços, robô, tarefas e logs a cada 2 min; religa o que parou', cor: '#f97316', sigla: 'VI' },
+  conferente: { nome: 'Conferente', modelo: 'Regras + OCR (pdfplumber + Tesseract)', papel: 'Confere cada processo: valor, servidor, placa, duplicidade e nota (OCR)', cor: '#f59e0b', sigla: 'CF' },
+  auditor: { nome: 'Auditor', modelo: 'Regras + histórico de notas', papel: 'Audita contra o histórico: mesma nota em duas diárias e viagens simultâneas', cor: '#e11d48', sigla: 'AU' },
+  pesquisador: { nome: 'Pesquisador', modelo: 'Busca 1Doc + Tabela de Controle', papel: 'Pesquisa no 1Doc e na Tabela de Controle sob pedido', cor: '#06b6d4', sigla: 'PQ' },
+  programador: { nome: 'Programador', modelo: 'DeepSeek (programador próprio)', papel: 'Corrige sozinho com revisor, linhas vermelhas e auto-reversão', cor: '#84cc16', sigla: 'PG' },
+  cacador: { nome: 'Caçador local', modelo: 'IA Local no Notebook (Llama)', papel: 'Classifica os erros novos dos logs a cada 5 min sem custo de API', cor: '#10b981', sigla: 'CA' }
 };
 
 const EQ_ORDEM = ['coordenador', 'relatorios_cp', 'operador_cp', 'vigia', 'conferente', 'auditor', 'pesquisador', 'programador', 'cacador'];
@@ -4403,6 +4397,9 @@ function eqeDesenhar() {
   EQ_ORDEM.forEach(function(k) { if (eqe.ag[k] && eqe.ag[k].fala) eqeBalao(eqe.ag[k]); });
 }
 
+var eqGavetaAgente = null;
+window.fecharGavetaAgente = fecharGavetaAgente;
+window.falarComAgenteGaveta = falarComAgenteGaveta;
 function eqeAbrirGaveta(k) {
   const ag = EQ_AG[k];
   if (!ag) return;
@@ -4413,7 +4410,13 @@ function eqeAbrirGaveta(k) {
   document.getElementById('eqGNome').textContent = ag.nome;
   document.getElementById('eqGModelo').textContent = ag.modelo;
   document.getElementById('eqGPapel').textContent = ag.papel;
-  document.getElementById('eqGAcoes').textContent = ag.acoesHoje;
+  eqGavetaAgente = k;
+  const E = S.equipe || {};
+  const bot = (E.bots || []).filter(function(b) { return b.bot === k; })[0];
+  document.getElementById('eqGSt').textContent = bot ? (bot.status || 'sem status') : 'sem sinal';
+  const seg = bot && bot.visto ? Math.max(0, Math.round((Date.now() - bot.visto) / 1000)) : null;
+  document.getElementById('eqGTempo').textContent = seg == null ? 'sem sinal' : seg < 90 ? 'há ' + seg + ' s' : seg < 5400 ? 'há ' + Math.round(seg / 60) + ' min' : 'há ' + Math.round(seg / 3600) + ' h';
+  document.getElementById('eqGAcoes').textContent = (E.tarefas || []).filter(function(t) { return t.para === k && ['aberta', 'em_andamento', 'aguardando'].includes(t.status); }).length;
   gaveta.hidden = false;
   toast(`Inspecionando: ${ag.nome}`);
 }
@@ -4423,25 +4426,17 @@ function fecharGavetaAgente() {
   if (gaveta) gaveta.hidden = true;
 }
 
+// Abre a conversa real com o Coordenador, já citando o agente; nada é enviado sem você escrever e mandar.
 function falarComAgenteGaveta() {
-  toast('Comando despachado diretamente ao agente!');
+  const k = eqGavetaAgente;
   fecharGavetaAgente();
+  trocarDock(5, $$('.dock-item')[5]);
+  const inp = $('#txt');
+  inp.value = k && k !== 'coordenador' ? '@' + k + ' ' : '';
+  inp.focus();
+  inp.setSelectionRange(inp.value.length, inp.value.length);
 }
 
-function eqeMandarCaminharDemo() {
-  if (!eqe.pronto) eqeCarregar();
-  const pares = [
-    { de: 'cacador', para: 'conferente', txt: '14 processos lidos no 1Doc' },
-    { de: 'conferente', para: 'operador_cp', txt: 'Lote pronto com 8 processos!' },
-    { de: 'vigia', para: 'coordenador', txt: 'Regras validadas sem conflito' },
-    { de: 'coordenador', para: 'relatorios_cp', txt: 'Conciliar pagamentos do dia' },
-    { de: 'programador', para: 'cacador', txt: 'Varredura otimizada em 12ms' }
-  ];
-  const p = pares[Math.floor(Math.random() * pares.length)];
-  eqe.fila.push(p);
-  toast(`🚶 Agente ${EQ_AG[p.de].nome} caminhando até ${EQ_AG[p.para].nome}!`);
-  dispararPulsoRede();
-}
 
 
 
