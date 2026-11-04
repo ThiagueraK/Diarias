@@ -2744,6 +2744,38 @@ body {
   padding: 6px 8px !important;
 }
 
+.veu, .vx { z-index: 100000 !important; }
+.hud-toast { z-index: 100001 !important; }
+.lt-topo { background: rgba(10,24,18,.92); border: 1px solid rgba(52,211,153,.25); border-radius: 16px; padding: 12px 14px; }
+.lt-res { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lt-res b { display: block; font: 700 16px var(--font-hud); color: #f8fafc; }
+.lt-res span { font: 700 15px var(--font-mono); color: #34d399; }
+.lt-emp { flex: none; border: 0; border-radius: 12px; padding: 12px 14px; font: 700 13px var(--font-hud); color: #04130d; background: #34d399; cursor: pointer; }
+.lt-emp:disabled { background: rgba(148,163,184,.2); color: #94a3b8; cursor: default; }
+.lt-hoje { margin-top: 8px; font: 11.5px var(--font-mono); color: #94a3b8; }
+.lt-abas { position: sticky; top: 0; z-index: 20; display: flex; gap: 6px; overflow-x: auto; padding: 10px 0; margin-top: 2px; background: #04100b; scrollbar-width: none; }
+.lt-abas::-webkit-scrollbar { display: none; }
+.lt-aba { flex: none; border: 1px solid rgba(148,163,184,.25); background: transparent; color: #cbd5e1; border-radius: 999px; padding: 8px 12px; font: 600 12.5px var(--font-body); cursor: pointer; }
+.lt-aba span { margin-left: 6px; font: 700 12px var(--font-mono); color: #94a3b8; }
+.lt-aba.on { background: #34d399; border-color: #34d399; color: #04130d; }
+.lt-aba.on span { color: #04130d; }
+.lt-c { background: rgba(15,23,32,.75); border: 1px solid rgba(148,163,184,.16); border-left: 3px solid #38bdf8; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+.lt-c.pronto { border-left-color: #34d399; }
+.lt-c.fora { border-left-color: #f59e0b; }
+.lt-c.alerta { border-left-color: #ef4444; }
+.lt-c .l1 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.lt-c .l1 b { font: 700 13.5px var(--font-mono); color: #f8fafc; }
+.lt-c .l1 span { flex: none; font: 700 13.5px var(--font-mono); color: #34d399; }
+.lt-c .l1 em { flex: none; font: 700 11px var(--font-mono); color: #fbbf24; font-style: normal; }
+.lt-c .l2 { margin-top: 3px; font: 13px var(--font-body); color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lt-c .l3 { margin-top: 5px; font: 12px var(--font-body); line-height: 1.35; color: #fbbf24; }
+.lt-acoes { display: flex; gap: 8px; margin-top: 8px; }
+.lt-acoes button { flex: 1; min-height: 38px; border-radius: 9px; border: 1px solid rgba(148,163,184,.3); background: transparent; color: #e2e8f0; font: 600 12.5px var(--font-body); cursor: pointer; }
+.lt-acoes button.ok { background: rgba(52,211,153,.16); border-color: rgba(52,211,153,.55); color: #34d399; }
+.lt-vazio { text-align: center; padding: 28px 12px; font: 600 13px var(--font-body); color: #94a3b8; }
+.lt-det-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.lt-det-top h3 { margin: 0; }
+.lt-det-top button { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(148,163,184,.3); background: transparent; color: #e2e8f0; font-size: 15px; cursor: pointer; }
 </style>
 </head>
 
@@ -2927,21 +2959,10 @@ body {
          VIEW 1: ABA LOTE / PROCESSOS (CYBER TACTICAL & PRESTIGE UI)
          ══════════════════════════════════════════════════════════════════════ -->
     <div class="view-panel" id="view-lote" hidden>
-      <!-- FUNIL DE VALIDAÇÃO DO LOTE COM BARRAS DE ENERGIA -->
-      <section class="funil" id="funil" style="margin-bottom:12px;"></section>
-
-      <!-- PROBLEMAS A RESOLVER -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
-        <span style="font:700 11px var(--font-hud);color:#fbbf24;letter-spacing:0.06em;">PROBLEMAS A RESOLVER</span>
-        <span id="contProb" style="font:700 11px var(--font-mono);color:#fbbf24;"></span>
-      </div>
-      <div id="problemas" style="display:grid;gap:8px;margin-bottom:12px;"></div>
-
-      <!-- FILTROS TÁTICOS -->
-      <div class="lote-filters" id="filtrosProc" style="margin-bottom:10px;"></div>
-
-      <!-- BUSCA RÁPIDA -->
-      <div class="lote-search-box" style="margin-bottom:12px;">
+      <!-- 04/11/2026: topo enxuto com a ação principal; separadores no lugar de funil + problemas -->
+      <section class="lt-topo" id="loteTopo"></section>
+      <div class="lt-abas" id="filtrosProc"></div>
+      <div class="lote-search-box" style="margin:10px 0 12px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input class="lote-search-input" id="busca" placeholder="Buscar por servidor, processo ou cidade…">
       </div>
@@ -3361,7 +3382,7 @@ var NOME_PED={
   relatorio_pc_pendentes:'Relatório de prestações pendentes'
 };
 var ATIVOS=['pendente','pegou','abrindo_tela','rodando'];
-var S={painel:null,equipe:null,cp:null,em:{},aba:'inicio',filtroP:'todos',filtroAt:'todos',enviando:null,desfeitos:{},ritmo:[],procAberto:null};
+var S={painel:null,equipe:null,cp:null,em:{},aba:'inicio',filtroP:null,filtroAt:'todos',enviando:null,desfeitos:{},ritmo:[],procAberto:null};
 
 function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function md(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');}
@@ -3643,66 +3664,81 @@ function conferida(p){try{return localStorage.getItem('conf_'+p.hash)==='1';}cat
 function marcarConf(p,val){try{localStorage.setItem('conf_'+p.hash,val?'1':'0');}catch(e){}}
 function curto(nome){return String(nome||'').split(' ').slice(0,2).join(' ');}
 
+function motivoCurto(m){
+  var t=String(m||'').replace(/^Conferente:\s*/i,'').replace(/\S+\.(pdf|jpe?g|png)\s*:\s*/ig,'').replace(/\s*-\s*aba Processos\s*>\s*Credores/i,' · cadastre no site').replace(/\/20\d\d\b/g,'').trim();
+  return t.length>110?t.slice(0,107)+'…':t;
+}
 function desenharProcessos(){
   var P=S.painel; if(!P)return;
-  var pr=P.processos, D=P.dia, pc=P.prestacao;
+  var pr=P.processos, D=P.dia, pc=P.prestacao||{}, Dp=(P.problemas&&P.problemas.depois)||[];
+  var prontos=(pr.itens||[]).filter(function(i){return i.estado==='pronto';}), nFora=(pr.itens||[]).filter(function(i){return i.estado==='fora';}).length, nConf=(pr.itens||[]).filter(function(i){return i.estado==='conferindo';}).length;
+  var tot=prontos.reduce(function(s,i){return s+Number(i.valor||0);},0), pa=pedidoAtual(), ocupado=!!(pa&&pa.ativo);
+  if(!S.filtroP)S.filtroP=nFora?'resolver':prontos.length?'pronto':nConf?'conferindo':Dp.length?'depois':'resolver';
 
-  // Funil
-  if(pr.erro){$('#funil').innerHTML='<div class="erro-box">Caixa indisponível: '+esc(pr.erro)+'</div>';}
-  else{
-    var base=Math.max(1,pr.total), linha=function(n,v,c){return '<div class="etapa-f"><span>'+n+'</span><div class="bar"><i style="width:'+Math.min(100,100*v/base)+'%;--c:'+c+'"></i></div><b>'+v+'</b></div>';};
-    $('#funil').innerHTML=linha('Na caixa',pr.total,'#94a3b8')+linha('Conferidos',pr.aEmpenhar-pr.conferindo,'#38bdf8')+linha('Prontos p/ lote',pr.prontos,'#34d399')+linha('Empenhados hoje',D.empenhos?D.empenhos.n:0,'#10b981')+linha('Pagos hoje',D.pagamentos?D.pagamentos.n:0,'#f59e0b')+linha('Prestação na fila',pc.fila||0,'#ef4444');
-  }
+  $('#loteTopo').innerHTML=pr.erro?'<div class="erro-box">Caixa indisponível: '+esc(pr.erro)+'</div>':
+    '<div class="lt-res"><div><b>'+prontos.length+' pronto'+(prontos.length===1?'':'s')+'</b><span>'+real(tot)+'</span></div>'
+    +'<button type="button" class="lt-emp" id="btEmpLote"'+(ocupado||!prontos.length?' disabled':'')+'>'+(ocupado?'CP ocupado':'Empenhar prontos')+'</button></div>'
+    +'<div class="lt-hoje">Hoje: '+(D.empenhos?D.empenhos.n:0)+' empenhados · '+(D.pagamentos?D.pagamentos.n:0)+' pagos · '+(pc.fila||0)+' prestações na fila</div>';
+  var be=$('#btEmpLote'); if(be)be.onclick=function(){PED.qPc=0;passoPedir('emp');$('#veuPedir').hidden=false;};
 
-  // Problemas
-  var A=P.problemas.antes||[], Dp=P.problemas.depois||[];
-  $('#contProb').textContent=A.length+Dp.length||'';
-  var cor={CP:'az','1Doc':'',Pagamento:'',Prestação:'',Anular:'vm'};
-  $('#problemas').innerHTML=(A.length?'<div style="font:700 11px var(--font-hud);color:#94a3b8;margin-bottom:4px;">Antes do empenho · Fora do lote</div>'+A.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.processo)+' · '+esc(curto(x.servidor))+'</b><span class="st-p '+x.estado+'">'+(x.estado==='conferindo'?'conferindo':'fora do lote')+'</span></div><div class="mot'+(x.estado==='conferindo'?' az':'')+'">'+esc(x.motivo)+'</div></div>';}).join(''):'')
-    +(Dp.length?'<div style="font:700 11px var(--font-hud);color:#94a3b8;margin-top:6px;margin-bottom:4px;">Depois do empenho</div>'+Dp.map(function(x){return '<div class="proc"><div class="t1"><b>'+esc(x.titulo)+'</b><span class="st-p fora">'+esc(x.tipo)+'</span></div><div class="mot '+(cor[x.tipo]||'')+'">'+esc(x.texto)+'</div></div>';}).join(''):'')
-    ||'<div style="text-align:center;padding:12px;font:600 12px var(--font-hud);color:#34d399;">Nenhum problema a resolver ✓</div>';
-
-  // Filtros
-  var aConf=(pr.itens||[]).filter(function(p){return p.descricao&&!conferida(p);}).length;
-  var f=[['todos','A empenhar',pr.aEmpenhar],['pronto','Prontos',pr.prontos],['fora','Fora do lote',pr.fora],['conferindo','Conferindo',pr.conferindo],['aconferir','Descrição a conferir',aConf]];
-  $('#filtrosProc').innerHTML=f.map(function(x){return '<button type="button" class="lote-filter-btn '+(S.filtroP===x[0]?'active':'')+'" data-pf="'+x[0]+'">'+x[1]+' <span>'+x[2]+'</span></button>';}).join('');
+  var f=[['resolver','Resolver',nFora],['pronto','Prontos',prontos.length],['conferindo','Conferindo',nConf],['depois','Depois do empenho',Dp.length]];
+  $('#filtrosProc').innerHTML=f.map(function(x){return '<button type="button" class="lt-aba '+(S.filtroP===x[0]?'on':'')+'" data-pf="'+x[0]+'">'+x[1]+'<span>'+x[2]+'</span></button>';}).join('');
   $$('[data-pf]').forEach(function(b){b.onclick=function(){S.filtroP=b.dataset.pf;desenharProcessos();};});
 
   listaProc();
 }
 
 function listaProc(){
-  var pr=S.painel&&S.painel.processos; if(!pr)return;
+  var P=S.painel, pr=P&&P.processos; if(!pr)return;
   var q=($('#busca').value||'').trim().toLowerCase();
+  var vazio=function(t){return '<div class="lt-vazio">'+t+'</div>';};
+  if(S.filtroP==='depois'){
+    var Dp=((P.problemas&&P.problemas.depois)||[]).filter(function(x){return !q||(String(x.titulo)+' '+String(x.texto)).toLowerCase().indexOf(q)>=0;});
+    $('#listaProc').innerHTML=Dp.map(function(x){
+      return '<article class="lt-c '+(x.tipo==='Anular'?'alerta':'fora')+'"><div class="l1"><b>'+esc(x.titulo)+'</b><em>'+esc(x.tipo)+'</em></div>'+(x.texto?'<div class="l3">'+esc(x.texto)+'</div>':'')+'</article>';
+    }).join('')||vazio('Nada a resolver depois do empenho ✓');
+    return;
+  }
+  var est={resolver:'fora',pronto:'pronto',conferindo:'conferindo'}[S.filtroP];
   var itens=(pr.itens||[]).filter(function(p){
-    if(S.filtroP==='pronto'&&p.estado!=='pronto')return false;
-    if(S.filtroP==='fora'&&p.estado!=='fora')return false;
-    if(S.filtroP==='conferindo'&&p.estado!=='conferindo')return false;
-    if(S.filtroP==='aconferir'&&(!p.descricao||conferida(p)))return false;
+    if(p.estado!==est)return false;
     if(!q)return true;
     return (p.servidor||'').toLowerCase().indexOf(q)>=0||(p.processo||'').indexOf(q)>=0||(p.cidade||'').toLowerCase().indexOf(q)>=0;
-  });
-
+  }).sort(function(a,b){return (b.confirmavel?1:0)-(a.confirmavel?1:0);});
   $('#listaProc').innerHTML=itens.map(function(p){
-    var st=p.estado, conf=conferida(p);
-    var cls=st==='pronto'?'pronto':st==='fora'?'fora':'robo';
-    var badgeTxt=st==='pronto'?'PRONTO':st==='fora'?'FORA DO LOTE':'CONFERINDO';
-    return '<article class="proc-modern-card '+(st==='pronto'?'':'ativo-robo')+'" style="cursor:pointer;" onclick="abrirProc(\''+esc(p.hash)+'\')">'
-      +'<div class="proc-squad-header">'
-        +'<span class="proc-squad-tag"><span class="squad-dot" style="background:'+(st==='pronto'?'#34d399':st==='fora'?'#f59e0b':'#38bdf8')+';"></span>UNIT · '+esc(p.processo)+'</span>'
-        +'<span class="proc-status-badge '+cls+'">'+badgeTxt+'</span>'
-      +'</div>'
-      +'<div class="proc-main-title">'+esc(p.servidor)+'</div>'
-      +'<div class="proc-route-sub">'+esc(p.cidade||'Destino não informado')+(p.uf&&p.uf!=='RS'?'/'+p.uf:'')+' · Saída: '+esc(p.saida||'--')+'</div>'
-      +(p.motivo?'<div class="proc-motivo-box" style="margin-top:6px;font:11px var(--font-mono);color:#fbbf24;background:rgba(245,158,11,0.12);padding:4px 8px;border-radius:6px;">'+esc(p.motivo)+'</div>':'')
-      +'<div class="proc-footer-metrics" style="margin-top:8px;">'
-        +'<div><span class="proc-metric-label">VALOR</span><span class="proc-metric-val" style="color:#34d399;">'+(p.valor?real(p.valor):'--')+'</span></div>'
-        +'<div style="text-align:right;"><span class="proc-metric-label">DESCRIÇÃO</span><span class="proc-metric-val" style="color:'+(conf?'#34d399':'#94a3b8')+';">'+(conf?'✓ Conferida':'Pendente')+'</span></div>'
-      +'</div>'
+    var data=String(p.saida||'').replace(/\/20\d\d$/,'');
+    return '<article class="lt-c '+p.estado+'" data-h="'+esc(p.hash)+'">'
+      +'<div class="l1"><b>'+esc(p.processo)+'</b><span>'+(p.valor?real(p.valor):'sem valor')+'</span></div>'
+      +'<div class="l2">'+esc(curto(p.servidor))+' · '+esc(p.cidade||'destino não informado')+(p.uf&&p.uf!=='RS'?'/'+esc(p.uf):'')+(data?' · '+esc(data):'')+'</div>'
+      +(p.motivo?'<div class="l3">'+esc(motivoCurto(p.motivo))+'</div>':'')
+      +(p.estado==='fora'?'<div class="lt-acoes"><button type="button" data-a="nota">Ver nota</button>'+(p.confirmavel?'<button type="button" class="ok" data-a="liberar">Conferi, liberar</button>':'')+'</div>':'')
     +'</article>';
-  }).join('')||'<div style="text-align:center;padding:24px;font:600 13px var(--font-hud);color:#94a3b8;">Nenhum processo encontrado com este filtro.</div>';
+  }).join('')||vazio(q?'Nenhum processo encontrado.':est==='fora'?'Nada para resolver ✓':est==='pronto'?'Nenhum processo pronto agora.':'Nada em conferência.');
 }
 $('#busca').addEventListener('input',listaProc);
+$('#listaProc').addEventListener('click',function(ev){
+  var card=ev.target.closest('[data-h]'); if(!card)return;
+  var p=(S.painel.processos.itens||[]).filter(function(x){return x.hash===card.dataset.h;})[0]; if(!p)return;
+  var b=ev.target.closest('[data-a]');
+  if(!b){abrirProc(p.hash);return;}
+  if(b.dataset.a==='nota'){vxAbrir(p);return;}
+  if(!window.confirm('Liberar o processo '+p.processo+' para o lote?\n\nUse só depois de conferir a nota.'))return;
+  confirmarNota(p,b,'Conferi, liberar',function(e){toast(e);});
+});
+// O mesmo fluxo no cartão e no detalhe: regra que pede justificativa pergunta antes de liberar.
+function confirmarNota(p,btn,rotulo,aoErro,just){
+  var volta=function(){btn.disabled=false;btn.textContent=rotulo;};
+  btn.disabled=true;btn.textContent='Confirmando…';
+  api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo,justificativa:just||undefined}}).then(function(j){
+    if(!j.ok&&j.precisaJustificativa&&!just){
+      var t=window.prompt('⚠️ '+(j.error||'Justifique')+'\n\nJustificativa para liberar mesmo assim:');
+      if(t&&t.trim())confirmarNota(p,btn,rotulo,aoErro,t.trim());else volta();
+      return;
+    }
+    if(j.ok){toast('✓ Confirmado! Liberado no lote.');$('#veuProc').hidden=true;S.procAberto=null;carregarPainel();}
+    else{aoErro(j.error||'Erro ao confirmar');volta();}
+  }).catch(function(){aoErro('Sem conexão');volta();});
+}
 window.abrirProc = abrirProc;
 
 // ---------- MODAL FOLHA PROCESSO ----------
@@ -3716,16 +3752,16 @@ function abrirProc(hash){
 
 function desenharFolhaProc(p){
   var el=$('#folhaProc'), lin=function(r,v){return v?'<span>'+r+'</span><b>'+esc(v)+'</b>':'';};
-  el.innerHTML='<h3>'+esc(p.servidor)+'</h3>'
-    +'<div class="campos-p">'+lin('Processo',p.processo)+lin('Destino',(p.cidade||'?')+(p.uf&&p.uf!=='RS'?'/'+p.uf:''))+lin('Saída',(p.saida||'')+(p.horaSaida?' '+p.horaSaida:''))+lin('Chegada',(p.chegada||'')+(p.horaChegada?' '+p.horaChegada:''))+lin('Placa',p.placa)+lin('Valor',p.valor?real(p.valor):'')+lin('Situação',({pronto:'pronto p/ lote',fora:'fora do lote',conferindo:'conferindo'})[p.estado])+'</div>'
+  el.innerHTML='<div class="lt-det-top"><h3>'+esc(p.servidor)+'</h3><button type="button" id="xP" aria-label="Fechar">✕</button></div>'
     +(p.motivo?'<div class="proc-motivo-box" style="font:12px var(--font-mono);color:#fbbf24;background:rgba(245,158,11,0.15);padding:8px 10px;border-radius:8px;">'+esc(p.motivo)+'</div>':'')
+    +'<button type="button" class="abrirAx" id="verAxP">📎 Ver anexos (notas, roteiro)</button>'
+    +(p.confirmavel?'<div class="botoes"><button type="button" class="sim" id="notaOkP">✓ Nota conferida no 1Doc</button></div><div id="notaOkMsg" style="font:11px var(--font-mono);color:#ef4444;"></div>':'')
+    +'<div class="campos-p">'+lin('Processo',p.processo)+lin('Destino',(p.cidade||'?')+(p.uf&&p.uf!=='RS'?'/'+p.uf:''))+lin('Saída',(p.saida||'')+(p.horaSaida?' '+p.horaSaida:''))+lin('Chegada',(p.chegada||'')+(p.horaChegada?' '+p.horaChegada:''))+lin('Placa',p.placa)+lin('Valor',p.valor?real(p.valor):'')+lin('Situação',({pronto:'pronto p/ lote',fora:'fora do lote',conferindo:'conferindo'})[p.estado])+'</div>'
     +'<div style="font:700 11px var(--font-hud);color:#94a3b8;">Descrição do processo'+(p.descricaoCorrigida?' · corrigida':'')+'</div>'
     +'<textarea id="descP" maxlength="600">'+esc(p.descricao||'')+'</textarea>'
     +'<div style="font:700 11px var(--font-hud);color:#94a3b8;">Vai para o CP assim</div><div class="cp-txt" id="cpP">'+esc(p.descricaoCp||'(sem descrição - o lote não monta o texto)')+'</div>'
-    +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Conferida</button>')+'</div>'
-    +'<button type="button" class="abrirAx" id="verAxP">📎 Ver anexos (notas, roteiro)</button>'
+    +'<div class="botoes"><button type="button" class="sim" id="salvarP" disabled>Salvar descrição</button>'+(conferida(p)?'<button type="button" id="confP">Desmarcar conferida</button>':'<button type="button" id="confP">✓ Descrição conferida</button>')+'</div>'
     +'<a class="abrir1doc" href="https://tupancireta.1doc.com.br/?pg=doc/ver&amp;hash='+encodeURIComponent(p.hash)+'&amp;itd=7" target="_blank" rel="noopener">Abrir no 1Doc ↗</a>'
-    +(p.confirmavel?'<div class="botoes"><button type="button" class="sim" id="notaOkP">✓ Nota conferida no 1Doc</button></div><div id="notaOkMsg" style="font:11px var(--font-mono);color:#ef4444;"></div>':'')
     +'<div class="botoes">'+(p.descricaoCorrigida?'<button type="button" id="voltarP">Voltar ao lido</button>':'')+'<button type="button" id="fecharP">Fechar</button></div>';
 
   var vx=$('#verAxP'); if(vx)vx.onclick=function(){vxAbrir(p);};
@@ -3764,28 +3800,9 @@ function desenharFolhaProc(p){
   };
 
   $('#fecharP').onclick=function(){$('#veuProc').hidden=true;S.procAberto=null;};
+  $('#xP').onclick=$('#fecharP').onclick;
 
-  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){
-    var envia=function(just){
-      nk.disabled=true;nk.textContent='Confirmando…';
-      api('conferencia-confirmar',{body:{hash:p.hash,numeroProcesso:p.processo,justificativa:just||undefined}}).then(function(j){
-        if(!j.ok&&j.precisaJustificativa&&!just){
-          var t=window.prompt('⚠️ '+(j.error||'Justifique')+'\n\nJustificativa para liberar mesmo assim:');
-          if(t&&t.trim())envia(t.trim());else{nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';}
-          return;
-        }
-        if(j.ok){
-          toast('✓ Confirmado! Liberado no lote.');
-          $('#veuProc').hidden=true;
-          carregarPainel();
-        } else {
-          $('#notaOkMsg').textContent=j.error||'Erro ao confirmar';
-          nk.disabled=false;nk.textContent='✓ Nota conferida no 1Doc';
-        }
-      });
-    };
-    envia();
-  };
+  var nk=$('#notaOkP'); if(nk)nk.onclick=function(){confirmarNota(p,nk,'✓ Nota conferida no 1Doc',function(e){$('#notaOkMsg').textContent=e;});};
 }
 
 // ---------- VISUALIZADOR DE ANEXOS VX ----------
@@ -4457,9 +4474,6 @@ async function recarregarTelemetriaDell() {
   if (cpuVal) cpuVal.textContent = cpu + "%";
   if (ramBar) ramBar.style.width = ram + "%";
   if (ramVal) ramVal.textContent = ram + "%";
-  setTimeout(() => {
-    toast("Telemetria do Host sincronizada: 8 núcleos ativos, 9 serviços OK");
-  }, 400);
 }
 setTimeout(recarregarTelemetriaDell, 1500);
 
