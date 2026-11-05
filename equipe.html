@@ -4032,8 +4032,9 @@ function passoPedir(qual){
      }).join('')
      +'</div><div class="botoes"><button type="button" id="okRel" class="sim">Tirar relatório hoje</button><button type="button" data-ir="menu">Voltar</button></div></div>';
   } else if(qual==='pc'){
-    var tot=pc.prontos||0; if(!PED.qPc)PED.qPc=Math.min(tot,10);
+    var tot=pc.prontos||0, maxPc=Math.min(tot,200); if(!PED.qPc||PED.qPc>maxPc)PED.qPc=maxPc;
     h='<div class="passo2"><h3>Prestar contas no CP</h3><p style="font:12px var(--font-mono);color:#94a3b8;">Temos <b>'+tot+'</b> prestações prontas.</p>'
+     +'<label style="display:flex;align-items:center;gap:8px;font:12px var(--font-mono);color:#cbd5e1;">Quantas prestar agora <input id="qtdPc" type="number" inputmode="numeric" min="1" max="'+maxPc+'" step="1" value="'+PED.qPc+'" aria-label="Quantidade de prestações" style="width:76px;padding:6px 8px;font:13px var(--font-mono);color:#f1f5f9;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.4);border-radius:6px;"></label>'
      +'<div class="botoes"><button type="button" class="sim" id="okPc">Prestar '+PED.qPc+' agora</button><button type="button" data-ir="menu">Voltar</button></div></div>';
   } else if(qual==='emp'){
     h='<div class="passo2"><h3>Empenhar lote no CP</h3><p style="font:12px var(--font-mono);color:#94a3b8;">Confira os processos prontos:</p>'
@@ -4057,7 +4058,14 @@ function passoPedir(qual){
     }).catch(function(){fimPedir({ok:false,error:'Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.'},'');});
   };
 
-  var okPc=$('#okPc'); if(okPc)okPc.onclick=function(){
+  var okPc=$('#okPc'), qtdPc=$('#qtdPc');
+  if(okPc&&qtdPc)qtdPc.oninput=function(){
+    var n=Number(qtdPc.value), max=Number(qtdPc.max), vale=Number.isInteger(n)&&n>=1&&n<=max;
+    if(vale)PED.qPc=n;
+    okPc.disabled=!vale;
+    okPc.textContent=vale?'Prestar '+n+' agora':'Digite de 1 a '+max;
+  };
+  if(okPc)okPc.onclick=function(){
     okPc.disabled=true;api('cp-tarefa-solicitar',{body:{tipo:'prestacao',limite:PED.qPc}}).then(function(j){
       fimPedir(j,'🧾 Prestação de contas de '+PED.qPc+' pedida');
     }).catch(function(){fimPedir({ok:false,error:'Sem resposta do servidor. Consulte o CP antes de tentar de novo: o pedido pode ter chegado.'},'');});
