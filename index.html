@@ -7202,18 +7202,18 @@ function verSolicitacaoBot(chave) {
       html += '<div style="margin-top:12px;padding:10px 12px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.25);border-radius:10px;font-size:13px;line-height:1.6;">'
         + '<div style="font-weight:700;color:#0284c7;margin-bottom:4px;">🤖 Auditoria IA dos Comprovantes</div>';
       if (pacsLidos.length > 0) {
-        html += '<div><strong>Paciente(s) lido(s) no comprovante:</strong> ' + pacsLidos.join(', ') + '</div>';
+        html += '<div><strong>Paciente(s) lido(s) no comprovante:</strong> ' + pacsLidos.map(escaparHtmlProc).join(', ') + '</div>';
       }
       if (clinsLidas.length > 0) {
-        html += '<div><strong>Clínica / Hospital lido:</strong> ' + clinsLidas.join(', ') + '</div>';
+        html += '<div><strong>Clínica / Hospital lido:</strong> ' + clinsLidas.map(escaparHtmlProc).join(', ') + '</div>';
       }
       if (aud && Array.isArray(aud.comprovantes) && aud.comprovantes.length > 0) {
         html += '<div style="margin-top:6px;font-size:12px;color:var(--text-muted);">'
           + aud.comprovantes.map(function(c){
-              return '• <strong>' + (c.categoria || 'doc').toUpperCase() + ':</strong> ' + (c.estabelecimento || '—')
-                + (c.cnpj ? ' · CNPJ ' + c.cnpj : '')
-                + (c.data ? ' · Data ' + c.data : '')
-                + (c.valor && c.valor !== '0,00' ? ' · R$ ' + c.valor : '');
+              return '• <strong>' + escaparHtmlProc(String(c.categoria || 'doc').toUpperCase()) + ':</strong> ' + escaparHtmlProc(c.estabelecimento || '—')
+                + (c.cnpj ? ' · CNPJ ' + escaparHtmlProc(c.cnpj) : '')
+                + (c.data ? ' · Data ' + escaparHtmlProc(c.data) : '')
+                + (c.valor && c.valor !== '0,00' ? ' · R$ ' + escaparHtmlProc(c.valor) : '');
             }).join('<br>')
           + '</div>';
       }
