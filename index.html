@@ -1816,6 +1816,9 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   #panel-empenhos .es-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
   #panel-empenhos .es-top h2{font-size:18px;margin:0;flex:1;min-width:200px}
   #panel-empenhos .es-top small{color:var(--text-muted);font-weight:400;font-size:12.5px;display:block}
+  #panel-empenhos .es-busca{display:flex;gap:6px;flex:0 1 300px;min-width:0}
+  #panel-empenhos .es-busca input{flex:1;min-width:0;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:9px;padding:7px 10px;font:500 13px var(--sans)}
+  #panel-empenhos .es-busca-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--text-muted);margin:0 0 8px}
   .es-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:9px;padding:7px 12px;font:600 13px var(--sans);cursor:pointer;transition:all .18s}
   .es-btn:hover{border-color:var(--accent);color:var(--accent)}
   .es-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -2487,6 +2490,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <div class="tab-panel" id="panel-empenhos">
     <div class="es-top">
       <h2>🏥 Empenhos da Saúde <small id="esInfo">Caixa SMS-SE no 1Doc</small></h2>
+      <form class="es-busca" onsubmit="esBuscar();return false"><input id="esBuscaTxt" type="search" inputmode="numeric" placeholder="Nº do processo (abertos e arquivados)" aria-label="Pesquisar processo pelo número"><button class="es-btn" type="submit">🔍</button></form>
       <button class="es-btn" id="esCaixaBtn" onclick="esTrocarCaixa()">Ver arquivados</button>
       <button class="es-btn" onclick="esCarregar(true)">↻ Atualizar</button>
     </div>
@@ -3042,10 +3046,59 @@ var ES_REC = {
 var ES_TIPO_EMP = { global: 'global', estimativo: 'por estimativa', ordinario: 'ordinário', restos_a_pagar: 'restos a pagar' };
 var ES_FASE = { fase_preparatoria: 'fase preparatória', licitacao: 'licitação', contratacao_direta: 'contratação direta', empenho: 'empenho', execucao: 'execução', outro: 'outra' };
 var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
+// 06/11/2026 (Thiago): pesquisa por número - processos achados fora da lista atual ficam em esBuscados (abrem no card)
+var esBuscados = [], esBuscaAtiva = null;
+function esBuscar() {
+  var q = document.getElementById('esBuscaTxt').value.trim();
+  if (q.length < 2) { esLimparBusca(); return; }
+  esBuscaAtiva = q;
+  var lista = document.getElementById('esLista');
+  lista.innerHTML = '<div class="es-busca-cab">Pesquisando “' + esH(q) + '” no 1Doc…</div><div class="es-sk"></div><div class="es-sk" style="width:70%"></div>';
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-buscar&q=' + encodeURIComponent(q))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (esBuscaAtiva !== q) return;
+      if (!d.ok) throw new Error(d.error || d.erro || 'falha na pesquisa');
+      var itens = d.itens || [];
+      var h = '<div class="es-busca-cab"><span>Pesquisa “' + esH(q) + '”: ' + itens.length + ' processo' + (itens.length === 1 ? '' : 's') + '</span><button class="es-btn" onclick="esLimparBusca()">✕ Voltar à lista</button></div>';
+      h += itens.length ? itens.map(function(x, i) {
+        var naLista = esTodos().find(function(p) { return p.idEmissao === x.idEmissao; });
+        var tag = naLista ? (esCaixa === 'open' && !naLista.foraDaCaixa ? 'Na caixa' : esCaixa === 'open' ? 'Acompanhado' : 'Nos arquivados recentes') : 'Fora da lista (aberto em outro setor ou arquivado)';
+        return '<div class="es-item" style="--es-cor:' + (x.exato ? '#2563eb' : '#94a3b8') + ';animation-delay:' + (i * 30) + 'ms" onclick="esAbrirBusca(' + x.idEmissao + ',\'' + esH(x.hash || '') + '\')">' +
+          '<div class="n">' + esH(x.numero || x.documento) + '</div><div class="o">' + esH(x.assunto || '') + '</div>' +
+          '<div class="r"><span class="es-tag">' + esH(tag) + '</span><span class="v">' + (x.ultimaAtividade ? esH(new Date(String(x.ultimaAtividade).replace(' ', 'T')).toLocaleDateString('pt-BR')) : '') + '</span></div></div>';
+      }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nenhum processo do SMS-SE com esse número.</div>';
+      document.getElementById('esLista').innerHTML = h;
+      var exatos = itens.filter(function(x) { return x.exato; });
+      if (exatos.length === 1) esAbrirBusca(exatos[0].idEmissao, exatos[0].hash || '');
+    })
+    .catch(function(e) { if (esBuscaAtiva === q) document.getElementById('esLista').innerHTML = '<div class="es-erro">Não consegui pesquisar: ' + esH(e.message) + ' <button class="es-btn" onclick="esLimparBusca()">Voltar</button></div>'; });
+}
+function esLimparBusca() { esBuscaAtiva = null; var i = document.getElementById('esBuscaTxt'); if (i) i.value = ''; if (esDados) esRender(); }
+function esAbrirBusca(id, hash, tentativa) {
+  if (esTodos().find(function(p) { return p.idEmissao === id; }) && !tentativa) { esAbrir(id); return; }
+  if (!hash) return;
+  esSel = id;
+  var det = document.getElementById('esDet');
+  det.innerHTML = '<div class="es-busca-cab">Lendo o processo e os anexos no 1Doc…' + (tentativa ? ' (processo grande, continua lendo)' : '') + '</div><div class="es-sk" style="width:40%;height:20px"></div><div class="es-sk" style="width:70%"></div><div class="es-sk"></div>';
+  if (window.innerWidth < 860) det.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-processo&hash=' + encodeURIComponent(hash))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (esSel !== id) return;
+      if (d.ok && d.emLeitura) { if ((tentativa || 0) < 10) setTimeout(function() { esAbrirBusca(id, hash, (tentativa || 0) + 1); }, 4000); else det.innerHTML = '<div class="es-erro">O processo é grande e ainda está sendo lido. Tente abrir de novo em alguns minutos.</div>'; return; }
+      if (!d.ok || !d.processo) throw new Error(d.error || d.erro || 'falha na leitura');
+      var p = d.processo; p.foraDaLista = true;
+      esBuscados = esBuscados.filter(function(x) { return x.idEmissao !== p.idEmissao; }).concat([p]).slice(-20);
+      esDetalhe(p, true);
+    })
+    .catch(function(e) { if (esSel === id) det.innerHTML = '<div class="es-erro">Não consegui ler o processo: ' + esH(e.message) + '</div>'; });
+}
+window.esBuscar = esBuscar; window.esLimparBusca = esLimparBusca; window.esAbrirBusca = esAbrirBusca;
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function esBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 // 06/11/2026: processos arquivados que continuam acompanhados (vêm em d.acompanhados, só na caixa aberta)
-function esTodos() { return (esDados.processos || []).concat(esCaixa === 'open' ? (esDados.acompanhados || []) : []); }
+function esTodos() { var base = esDados ? (esDados.processos || []).concat(esCaixa === 'open' ? (esDados.acompanhados || []) : []) : []; return base.concat(esBuscados.filter(function(b) { return !base.some(function(x) { return x.idEmissao === b.idEmissao; }); })); }
 function esAcompanhado(p) { return !!(p && p.hash && (p.foraDaCaixa || (esDados.acompanhar || []).indexOf(String(p.hash).toUpperCase()) >= 0)); }
 function esAcompanhar(hash, documento, acao) {
   sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-acompanhar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, documento: documento, acao: acao }) })
@@ -3079,6 +3132,7 @@ function esCarregar(forcar, silencioso) {
       if (d.atualizando && esTentativas < 40 && painel && painel.offsetParent !== null) { esTentativas++; esRepetir = setTimeout(function() { esCarregar(false, true); }, 12000); }
       var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar' || p.situacao === 'nota_aguardando_empenho'; }).length;
       if (esCaixa === 'open') { var b = document.getElementById('badgeEmpenhos'); b.textContent = prontos; b.style.display = prontos ? '' : 'none'; }
+      if (esBuscaAtiva) return;   // pesquisa aberta: não troca a lista de resultados
       esRender();
       if (d.emLeitura && !d.processos.length) lista.innerHTML = '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Lendo o 1Doc por completo (todos os anexos e despachos)… a primeira leitura pode levar vários minutos. A lista aparece sozinha.</div>';
     })
