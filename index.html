@@ -3135,6 +3135,10 @@ function esDetalhe(p, animar) {
     esCampo(dt.despesas && dt.despesas.length > 1 ? 'Despesas (reduzido)' : 'Despesa (reduzido)', dt.despesa) + esCampo('Fonte', dt.fonte ? dt.fonte + (dt.fonteNome ? ' – ' + dt.fonteNome : '') : null) + esCampo('Detalhamento', dt.detalhamento ? dt.detalhamento + (dt.detalhamentoNome ? ' – ' + dt.detalhamentoNome : '') : null) +
     esCampo('Fornecedor' + (p.fornecedorDe ? ' (' + p.fornecedorDe + ')' : ''), p.fornecedor) + (p.credorCP ? esCampo('Credor no CP (último empenho)', p.credorCP.codigo + ' — ' + (p.credorCP.nome || '') + (p.credorCP.cnpj ? ' · CNPJ ' + p.credorCP.cnpj : '') + ' · empenho ' + p.credorCP.empenho + (p.credorCP.emissao ? ' de ' + p.credorCP.emissao : '')) : '') + esCampo('Pregão', p.pregao) + esCampo('Ata RP', p.ata) +
     esCampo('Processo LC', p.processoLC) + esCampo('Contrato', p.contrato) + esCampo('Competência', p.competencia) +
+    // 06/11/2026: centro de custo sugerido pelo objeto (um por despesa; "?" = conferir)
+    (p.centrosCusto && p.centrosCusto.length ? esCampo('Centro de custo (sugerido)', p.centrosCusto.map(function(c) {
+      return c.codigo + ' – ' + c.nome + (p.centrosCusto.length > 1 && c.despesa ? ' [desp. ' + c.despesa + ']' : '') + ' · ' + c.motivo + (c.duvida ? ' · ❓ conferir' : '');
+    }).join(' | ')) : '') +
     (dt.contaContabil ? esCampo('Conta contábil', dt.contaContabil) : '') + '</div>';
   (p.alertas || []).forEach(function(a) { h += '<div class="es-alerta">⚠ ' + esH(a) + '</div>'; });
   if (p.parecer) {
