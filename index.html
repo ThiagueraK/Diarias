@@ -3080,6 +3080,7 @@ function esCarregar(forcar, silencioso) {
       var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar' || p.situacao === 'nota_aguardando_empenho'; }).length;
       if (esCaixa === 'open') { var b = document.getElementById('badgeEmpenhos'); b.textContent = prontos; b.style.display = prontos ? '' : 'none'; }
       esRender();
+      if (d.emLeitura && !d.processos.length) lista.innerHTML = '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Lendo o 1Doc pela primeira vez… pode levar 2 a 3 minutos. A lista aparece sozinha.</div>';
     })
     .catch(function(e) {
       document.getElementById('esInfo').textContent = 'Caixa SMS-SE no 1Doc';
