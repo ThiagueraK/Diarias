@@ -3140,6 +3140,7 @@ function esDetalhe(p, animar) {
     var pr = p.parecer, rc = ES_REC[pr.recomendacao] || { nome: pr.recomendacao, cor: '#475569' };
     h += '<div class="es-sec">Parecer automático</div><div class="es-parecer" style="--es-cor:' + rc.cor + '"><div class="es-par-t"><b>' + esH(rc.nome) + '</b>' + (pr.fase ? ' <span class="q">· fase: ' + esH(ES_FASE[pr.fase] || pr.fase) + '</span>' : '') + '</div>' +
       (pr.motivo ? '<div class="es-par-m">' + esH(pr.motivo) + '</div>' : '');
+    if (pr.ajusteSistema) h += '<div class="es-alerta">⚙ ' + esH(pr.ajusteSistema) + '</div>';
     var er = pr.empenhoReferencia;
     if (er && (er.numero || er.valor != null)) h += '<div class="es-par-e">' + (pr.recomendacao === 'gerar_subempenho' ? 'Subempenho do empenho ' : 'Empenho ') + (er.numero ? 'nº ' + esH(er.numero) : '(número não consta)') + (ES_TIPO_EMP[er.tipo] ? ' (' + ES_TIPO_EMP[er.tipo] + ')' : '') + (er.valor != null ? ' · valor desta requisição: ' + esBRL(er.valor) : '') + (pr.recomendacao === 'gerar_subempenho' ? ' · conferir saldo, credor e objeto no CP antes' : '') + '</div>';
     // 06/11/2026 (10.247): descrição pronta para o histórico do empenho no CP
