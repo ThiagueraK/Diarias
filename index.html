@@ -1843,7 +1843,8 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .es-det h3{margin:0 0 4px;font:600 17px var(--mono)}
   .es-det .ass{color:var(--text-muted);font-size:13px;margin-bottom:12px}
   .es-casc>*{opacity:0;transform:translateY(6px);animation:esIn .4s ease forwards}
-  .es-docs{display:grid;gap:8px;margin:4px 0 10px}.es-doc{border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:8px 10px;background:var(--surface,#fff)}.es-doc-t{font-size:13px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.es-doc-t a{color:inherit;word-break:break-all}.es-doc-t .q{opacity:.7;font-size:12px}.es-doc-f{font-size:12.5px;margin-top:4px;line-height:1.45;opacity:.9}.es-doc-f.falta{color:#b45309}
+  .es-rec{margin-top:6px;font-size:11.5px;font-weight:600;color:var(--es-cor);}.es-parecer{border-left:4px solid var(--es-cor);background:var(--surface,#fff);border-radius:8px;padding:10px 12px;margin:4px 0 12px;box-shadow:0 0 0 1px var(--border,#e2e8f0) inset}.es-par-t{font-size:14px}.es-par-t b{color:var(--es-cor)}.es-par-t .q{opacity:.7;font-size:12px}.es-par-m{font-size:13px;margin:6px 0 8px;line-height:1.5}.es-conf td:first-child{width:18px;text-align:center;font-weight:700}.es-conf tr.c-ok td:first-child{color:#1f9d57}.es-conf tr.c-falta td:first-child{color:#b42318}.es-conf tr.c-atencao td:first-child{color:#d97706}.es-conf td{font-size:12px;vertical-align:top}.es-par-p{font-size:12.5px;margin-top:8px}.es-par-p ul{margin:4px 0 0 18px;padding:0}.es-par-a{font-size:11px;opacity:.65;margin-top:8px}
+.es-docs{display:grid;gap:8px;margin:4px 0 10px}.es-doc{border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:8px 10px;background:var(--surface,#fff)}.es-doc-t{font-size:13px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.es-doc-t a{color:inherit;word-break:break-all}.es-doc-t .q{opacity:.7;font-size:12px}.es-doc-f{font-size:12.5px;margin-top:4px;line-height:1.45;opacity:.9}.es-doc-f.falta{color:#b45309}
 .es-campos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:12px 0}
   .es-campo{background:var(--surface2);border-radius:9px;padding:8px 10px}
   .es-campo label{display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
@@ -3027,6 +3028,15 @@ var ES_SIT = {
   empenhado: { nome: 'Empenhado', cor: '#64748b', ord: 8 },
   outro_assunto: { nome: 'Outro assunto', cor: '#94a3b8', ord: 9 }
 };
+// 05/11/2026: parecer automático (DeepSeek) com base na Lei 14.133/2021 e 4.320/1964 - só recomenda, nunca age no 1Doc
+var ES_REC = {
+  empenhar: { nome: 'Recomenda empenhar', cor: '#1f9d57' },
+  usar_empenho_existente: { nome: 'Recomenda usar o empenho existente', cor: '#0d9488' },
+  arquivar_na_caixa: { nome: 'Recomenda arquivar na caixa', cor: '#64748b' },
+  devolver_para_ajuste: { nome: 'Recomenda devolver para ajuste', cor: '#d97706' },
+  aguardar: { nome: 'Recomenda aguardar', cor: '#2563eb' }
+};
+var ES_FASE = { fase_preparatoria: 'fase preparatória', licitacao: 'licitação', contratacao_direta: 'contratação direta', empenho: 'empenho', execucao: 'execução', outro: 'outra' };
 var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function esBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -3075,7 +3085,8 @@ function esRender() {
     return '<div class="es-item' + (esSel === p.idEmissao ? ' sel' : '') + '" style="--es-cor:' + st.cor + ';animation-delay:' + (i * 40) + 'ms" onclick="esAbrir(' + p.idEmissao + ')">' +
       '<div class="n">' + esH(p.numero || p.documento) + '</div>' +
       '<div class="o">' + esH(p.objeto || p.assunto || '') + '</div>' +
-      '<div class="r"><span class="es-tag">' + esH(st.nome) + (p.empenhoExistente && p.empenhoExistente.numero ? ' · nº ' + esH(p.empenhoExistente.numero) : '') + '</span><span class="v">' + esBRL(valor) + '</span></div></div>';
+      '<div class="r"><span class="es-tag">' + esH(st.nome) + (p.empenhoExistente && p.empenhoExistente.numero ? ' · nº ' + esH(p.empenhoExistente.numero) : '') + '</span><span class="v">' + esBRL(valor) + '</span></div>' +
+      (p.parecer && ES_REC[p.parecer.recomendacao] ? '<div class="es-rec" style="--es-cor:' + ES_REC[p.parecer.recomendacao].cor + '">' + esH(ES_REC[p.parecer.recomendacao].nome) + '</div>' : '') + '</div>';
   }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nada aqui.</div>';
   if (esSel) { var p = esDados.processos.find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
 }
@@ -3122,6 +3133,18 @@ function esDetalhe(p, animar) {
     esCampo('Processo LC', p.processoLC) + esCampo('Contrato', p.contrato) + esCampo('Competência', p.competencia) +
     (dt.contaContabil ? esCampo('Conta contábil', dt.contaContabil) : '') + '</div>';
   (p.alertas || []).forEach(function(a) { h += '<div class="es-alerta">⚠ ' + esH(a) + '</div>'; });
+  if (p.parecer) {
+    var pr = p.parecer, rc = ES_REC[pr.recomendacao] || { nome: pr.recomendacao, cor: '#475569' };
+    h += '<div class="es-sec">Parecer automático</div><div class="es-parecer" style="--es-cor:' + rc.cor + '"><div class="es-par-t"><b>' + esH(rc.nome) + '</b>' + (pr.fase ? ' <span class="q">· fase: ' + esH(ES_FASE[pr.fase] || pr.fase) + '</span>' : '') + '</div>' +
+      (pr.motivo ? '<div class="es-par-m">' + esH(pr.motivo) + '</div>' : '');
+    if (pr.conformidade && pr.conformidade.length) {
+      h += '<table class="es-tab es-conf"><tr><th></th><th>Item</th><th>Base legal</th><th>Observação</th></tr>';
+      pr.conformidade.forEach(function(c) { h += '<tr class="c-' + esH(c.status) + '"><td>' + (c.status === 'ok' ? '✓' : c.status === 'falta' ? '✗' : '!') + '</td><td>' + esH(c.item) + '</td><td>' + esH(c.base_legal) + '</td><td>' + esH(c.observacao) + '</td></tr>'; });
+      h += '</table>';
+    }
+    if (pr.pendencias && pr.pendencias.length) h += '<div class="es-par-p"><b>Pendências</b><ul>' + pr.pendencias.map(function(x) { return '<li>' + esH(x) + '</li>'; }).join('') + '</ul></div>';
+    h += '<div class="es-par-a">Gerado pelo DeepSeek em ' + esH(pr.em ? new Date(pr.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '?') + ' a partir dos despachos e documentos, com os artigos da Lei 14.133/2021 e da Lei 4.320/1964. Apoio à decisão; não é parecer jurídico formal e não arquiva nada sozinho.</div></div>';
+  } else if (p.parecerPendente) h += '<div class="es-sec">Parecer automático</div><div style="font-size:12.5px;opacity:.75;margin-bottom:8px">Em preparação… aparece na próxima atualização da aba.</div>';
   // 05/11/2026 (10.437): documentos do processo (TR, DFD, ETP, AR, orçamento...) lidos pelo robô
   if (p.documentos && p.documentos.length) {
     var NOME_DOC = { DFD: 'DFD', ETP: 'Estudo técnico (ETP)', TR: 'Termo de referência', AR: 'Análise de riscos', ORCAMENTO: 'Orçamento', EMPENHO: 'Nota de empenho', CERTIDAO: 'Certidão', DOTACAO: 'Dotação', OUTRO: 'Outro' };
