@@ -3018,6 +3018,7 @@ document.getElementById('tabEmpenhos').addEventListener('click', function() { sw
 // 03/11/2026: EMPENHOS DA SAÚDE (caixa SMS-SE) - só leitura; o robô lê o 1Doc e extrai os dados
 // ═══════════════════════════════════════════════════════
 var ES_SIT = {
+  nota_aguardando_empenho: { nome: 'Nota aguardando empenho', cor: '#16a34a', ord: 0 },
   pronto_para_empenhar: { nome: 'Pronto p/ empenhar', cor: '#1f9d57', ord: 1 },
   usa_empenho_existente: { nome: 'Usa empenho existente', cor: '#0d9488', ord: 2 },
   aguardando_secretaria: { nome: 'Aguardando assinaturas', cor: '#7c3aed', ord: 3 },
@@ -3067,7 +3068,7 @@ function esCarregar(forcar, silencioso) {
       document.getElementById('esInfo').textContent = (esCaixa === 'open' ? 'Caixa aberta' : 'Arquivados recentes') + ' SMS-SE · ' + d.processos.length + ' processos' + (quando ? ' · lido ' + (quando.length > 5 ? 'em ' : 'às ') + quando : '') + (d.atualizando ? ' · atualizando…' : '') + (d.aviso ? ' · ' + d.aviso : '');
       var painel = document.getElementById('panel-empenhos');
       if (d.atualizando && esTentativas < 6 && painel && painel.offsetParent !== null) { esTentativas++; esRepetir = setTimeout(function() { esCarregar(false, true); }, 12000); }
-      var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar'; }).length;
+      var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar' || p.situacao === 'nota_aguardando_empenho'; }).length;
       if (esCaixa === 'open') { var b = document.getElementById('badgeEmpenhos'); b.textContent = prontos; b.style.display = prontos ? '' : 'none'; }
       esRender();
     })
