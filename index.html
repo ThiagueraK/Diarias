@@ -3026,7 +3026,7 @@ var ES_SIT = {
   empenhado: { nome: 'Empenhado', cor: '#64748b', ord: 8 },
   outro_assunto: { nome: 'Outro assunto', cor: '#94a3b8', ord: 9 }
 };
-var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open';
+var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function esBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 function esSitDe(p) { return ES_SIT[p.situacao] || { nome: p.erro ? 'Erro na leitura' : (p.situacao || '?'), cor: '#b42318', ord: 9 }; }
@@ -3035,17 +3035,24 @@ function esTrocarCaixa() {
   document.getElementById('esCaixaBtn').textContent = esCaixa === 'open' ? 'Ver arquivados' : 'Ver caixa aberta';
   esSel = null; esFiltro = 'todos'; esCarregar(false);
 }
-function esCarregar(forcar) {
+// 05/11/2026: a aba abre com a última leitura (guardada no servidor) e, se ela estiver velha, o servidor atualiza por
+// trás e a aba busca de novo sozinha a cada 12 s (até 6 vezes). "↻ Atualizar" espera a leitura nova.
+function esCarregar(forcar, silencioso) {
   var lista = document.getElementById('esLista');
+  clearTimeout(esRepetir);
+  if (!silencioso) esTentativas = 0;
   if (!esDados || forcar) lista.innerHTML = '<div class="es-sk"></div><div class="es-sk" style="width:80%"></div><div class="es-sk"></div><div class="es-sk" style="width:60%"></div>';
-  document.getElementById('esInfo').textContent = 'Lendo o 1Doc…';
+  if (!silencioso) document.getElementById('esInfo').textContent = forcar || !esDados ? 'Lendo o 1Doc…' : 'Carregando…';
   sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude&caixa=' + esCaixa + (forcar ? '&forcar=1' : ''))
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (!d.ok) throw new Error(d.error || d.erro || 'falha na leitura');
       esDados = d;
-      var quando = d.geradoEm ? new Date(d.geradoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-      document.getElementById('esInfo').textContent = (esCaixa === 'open' ? 'Caixa aberta' : 'Arquivados recentes') + ' SMS-SE · ' + d.processos.length + ' processos' + (quando ? ' · lido às ' + quando : '') + (d.aviso ? ' · ' + d.aviso : '');
+      var lidoEm = d._em || d.geradoEm, hojeTxt = new Date().toDateString();
+      var quando = lidoEm ? (new Date(lidoEm).toDateString() === hojeTxt ? new Date(lidoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : new Date(lidoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) : '';
+      document.getElementById('esInfo').textContent = (esCaixa === 'open' ? 'Caixa aberta' : 'Arquivados recentes') + ' SMS-SE · ' + d.processos.length + ' processos' + (quando ? ' · lido ' + (quando.length > 5 ? 'em ' : 'às ') + quando : '') + (d.atualizando ? ' · atualizando…' : '') + (d.aviso ? ' · ' + d.aviso : '');
+      var painel = document.getElementById('panel-empenhos');
+      if (d.atualizando && esTentativas < 6 && painel && painel.offsetParent !== null) { esTentativas++; esRepetir = setTimeout(function() { esCarregar(false, true); }, 12000); }
       var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar'; }).length;
       if (esCaixa === 'open') { var b = document.getElementById('badgeEmpenhos'); b.textContent = prontos; b.style.display = prontos ? '' : 'none'; }
       esRender();
@@ -3067,7 +3074,7 @@ function esRender() {
     return '<div class="es-item' + (esSel === p.idEmissao ? ' sel' : '') + '" style="--es-cor:' + st.cor + ';animation-delay:' + (i * 40) + 'ms" onclick="esAbrir(' + p.idEmissao + ')">' +
       '<div class="n">' + esH(p.numero || p.documento) + '</div>' +
       '<div class="o">' + esH(p.objeto || p.assunto || '') + '</div>' +
-      '<div class="r"><span class="es-tag">' + esH(st.nome) + '</span><span class="v">' + esBRL(valor) + '</span></div></div>';
+      '<div class="r"><span class="es-tag">' + esH(st.nome) + (p.empenhoExistente && p.empenhoExistente.numero ? ' · nº ' + esH(p.empenhoExistente.numero) : '') + '</span><span class="v">' + esBRL(valor) + '</span></div></div>';
   }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nada aqui.</div>';
   if (esSel) { var p = esDados.processos.find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
 }
@@ -3095,8 +3102,20 @@ function esDetalhe(p, animar) {
   h += '<h3 style="margin-top:8px">' + esH(p.documento) + '</h3><div class="ass">' + esH(p.assunto || '') + (p.recebidoEm ? ' · recebido ' + esH(String(p.recebidoEm).slice(0, 10).split('-').reverse().join('/')) : '') + '</div>';
   if (p.erro) h += '<div class="es-erro">' + esH(p.erro) + '</div>';
   h += '<div class="es-valor" id="esValor">' + esBRL(animar ? 0 : valor) + '</div>';
+  // 05/11/2026: empenho existente indicado pelo Financeiro (número do despacho ou do anexo "12692.pdf"), com os dados do CP
+  if (p.empenhoExistente) {
+    var ex = p.empenhoExistente, cp = ex.cp, link1 = ex.link ? 'https://tupancireta.1doc.com.br' + ex.link.replace(/^\/?/, '/') : null;
+    h += '<div class="es-sec">Empenho existente indicado pelo Financeiro</div><div class="es-campos">' +
+      esCampo('Empenho', ex.numero ? 'nº ' + ex.numero + (ex.restosAPagar ? ' (restos a pagar)' : '') : null) +
+      (cp ? esCampo('Data no CP', cp.data) + esCampo('Credor', cp.credor) + esCampo('Valor do empenho', esBRL(cp.valor)) + esCampo('Despesa', cp.desp) : '') + '</div>';
+    if (cp && cp.descricao) h += '<div class="es-obj">' + esH(cp.descricao) + '</div>';
+    if (!cp) h += '<div class="es-alerta">' + (ex.restosAPagar ? 'Empenho de restos a pagar (exercício anterior): os dados não estão nos relatórios do CP guardados.' : ex.numero ? 'Este empenho não está nos relatórios do CP guardados (desde 09/10/2026): confira no CP.' : 'O Financeiro não informou o número: confira o despacho.') + ' Saldo só no CP.</div>';
+    else h += '<div style="font-size:12px;opacity:.75;margin:4px 0 8px">Saldo do empenho: só no CP.</div>';
+    if (link1) h += '<a class="es-btn" href="' + esH(link1) + '" target="_blank" rel="noopener">Abrir a nota de empenho (' + esH(ex.anexo) + ') ↗</a>';
+  }
   if (p.empenho) h += '<div class="es-campo" style="display:inline-block;background:#e8f5ee"><label>Empenho</label><span>nº ' + esH(p.empenho.numero) + (p.empenho.autor ? ' · ' + esH(p.empenho.autor) : '') + '</span></div>';
-  h += '<div class="es-sec">Para lançar no LC / CP</div><div class="es-campos">' +
+  // 05/11/2026: com empenho existente não há empenho novo a lançar - o bloco só mostrava "não informado"
+  if (p.situacao !== 'usa_empenho_existente') h += '<div class="es-sec">Para lançar no LC / CP</div><div class="es-campos">' +
     esCampo('Despesa (reduzido)', dt.despesa) + esCampo('Fonte', dt.fonte) + esCampo('Detalhamento', dt.detalhamento) +
     esCampo('Fornecedor', p.fornecedor) + esCampo('Pregão', p.pregao) + esCampo('Ata RP', p.ata) +
     esCampo('Processo LC', p.processoLC) + esCampo('Contrato', p.contrato) + esCampo('Competência', p.competencia) +
@@ -3115,13 +3134,14 @@ function esDetalhe(p, animar) {
     h += '<div class="es-sec">Linha do tempo</div><div class="es-tl">';
     p.despachos.forEach(function(d) {
       h += '<div class="p"><b>' + esH(d.documento || 'Despacho') + '</b> <span class="q">' + esH(d.autor || '') + (d.data ? ' · ' + esH(String(d.data).slice(0, 16).replace('T', ' ')) : '') + '</span>' +
+        (d.anexos && d.anexos.length ? ' <span class="q">· 📎 ' + esH(d.anexos.join(', ')) + '</span>' : '') +
         (d.resumo ? '<div class="t">' + esH(d.resumo.slice(0, 260)) + (d.resumo.length > 260 ? '…' : '') + '</div>' : '') + '</div>';
     });
     h += '</div>';
   }
   h += '<div class="es-acoes">' + (link ? '<a class="es-btn" href="' + link + '" target="_blank" rel="noopener">Abrir no 1Doc ↗</a>' : '') +
     '<button class="es-btn" onclick="esCopiar(' + p.idEmissao + ')">📋 Copiar dados</button>' +
-    (p.situacao === 'pronto_para_empenhar' ? '<button class="es-btn pri" onclick="esPrepararLC(' + p.idEmissao + ')">⚙ Preparar no LC</button>' : '') + '</div>';
+    '</div>';   // 05/11/2026: "Preparar no LC" sai até existir a automação
   h += '<div class="es-prog" id="esProg"><i></i></div></div>';
   var det = document.getElementById('esDet');
   det.innerHTML = h;
@@ -3137,13 +3157,8 @@ function esCopiar(id) {
   (p.itens || []).forEach(function(it) { linhas.push('- ' + (it.descricao || '') + ' | qtd ' + (it.quantidade == null ? '' : it.quantidade) + ' | ' + esBRL(it.total)); });
   navigator.clipboard.writeText(linhas.join('\n')).then(function() { if (typeof mostrarToast === 'function') mostrarToast('Dados copiados'); });
 }
-function esPrepararLC(id) {
-  // A automação do LC (Pedido de Empenho) ainda não existe - por enquanto só mostra o progresso da leitura e avisa.
-  var pr = document.getElementById('esProg'), barra = pr.querySelector('i'); pr.style.display = 'block'; barra.style.width = '0';
-  var k = 0, t = setInterval(function() { k += 20; barra.style.width = k + '%'; if (k >= 100) { clearInterval(t); setTimeout(function() { pr.style.display = 'none'; alert('Os dados estão prontos. O robô que preenche o Pedido de Empenho no LC ainda vai ser construído; por enquanto use "Copiar dados".'); }, 300); } }, 120);
-}
 // As funções abaixo rodam dentro do bloco de inicialização; os onclick do HTML só enxergam o que está em window.
-window.esAbrir = esAbrir; window.esFiltrar = esFiltrar; window.esCarregar = esCarregar; window.esTrocarCaixa = esTrocarCaixa; window.esCopiar = esCopiar; window.esPrepararLC = esPrepararLC;
+window.esAbrir = esAbrir; window.esFiltrar = esFiltrar; window.esCarregar = esCarregar; window.esTrocarCaixa = esTrocarCaixa; window.esCopiar = esCopiar;
 
 
 // ═══════════════════════════════════════════════════════
