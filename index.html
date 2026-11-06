@@ -3074,7 +3074,7 @@ function esCarregar(forcar, silencioso) {
       esDados = d;
       var lidoEm = d._em || d.geradoEm, hojeTxt = new Date().toDateString();
       var quando = lidoEm ? (new Date(lidoEm).toDateString() === hojeTxt ? new Date(lidoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : new Date(lidoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) : '';
-      document.getElementById('esInfo').textContent = (esCaixa === 'open' ? 'Caixa aberta' : 'Arquivados recentes') + ' SMS-SE · ' + d.processos.length + ' processos' + (quando ? ' · lido ' + (quando.length > 5 ? 'em ' : 'às ') + quando : '') + (d.atualizando ? ' · atualizando…' : '') + (d.aviso ? ' · ' + d.aviso : '');
+      document.getElementById('esInfo').textContent = (esCaixa === 'open' ? 'Caixa aberta' : 'Arquivados recentes') + ' SMS-SE · ' + d.processos.length + ' processos' + (quando ? ' · lido ' + (quando.length > 5 ? 'em ' : 'às ') + quando : '') + (d.atualizando ? ' · atualizando…' : '') + (d.ocr && d.ocr.pendentes ? ' · OCR por trás: ' + d.ocr.pendentes + ' anexo' + (d.ocr.pendentes > 1 ? 's' : '') : '') + (d.aviso ? ' · ' + d.aviso : '');
       var painel = document.getElementById('panel-empenhos');
       if (d.atualizando && esTentativas < 40 && painel && painel.offsetParent !== null) { esTentativas++; esRepetir = setTimeout(function() { esCarregar(false, true); }, 12000); }
       var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar' || p.situacao === 'nota_aguardando_empenho'; }).length;
@@ -3206,7 +3206,7 @@ function esDetalhe(p, animar) {
       h += '<div class="es-doc"><div class="es-doc-t"><span class="es-tag">' + esH(NOME_DOC[d.tipo] || d.tipo) + '</span> ' +
         (href ? '<a href="' + esH(href) + '" target="_blank" rel="noopener">' + esH(d.nome) + ' ↗</a>' : esH(d.nome)) +
         (d.onde && d.onde !== 'abertura' ? ' <span class="q">· ' + esH(String(d.onde).replace(/ - \d+\/\d{4}$/, '')) + '</span>' : '') + '</div>' +
-        (d.erro ? '<div class="es-doc-f falta">Não consegui baixar: ' + esH(d.erro) + '</div>' : d.foto ? '<div class="es-doc-f">Foto: abra para ver (fotos não são lidas automaticamente)</div>' : !d.lido ? '<div class="es-doc-f falta">Sem texto para ler (imagem ou arquivo protegido)</div>' : fatos.length ? '<div class="es-doc-f">' + fatos.join('<br>') + '</div>' : '') + '</div>';
+        (d.erro ? '<div class="es-doc-f falta">Não consegui baixar: ' + esH(d.erro) + '</div>' : d.ocrPendente ? '<div class="es-doc-f">Lendo a imagem (OCR por trás)… o texto aparece numa próxima atualização' + (fatos.length ? '<br>' + fatos.join('<br>') : '') + '</div>' : !d.lido ? '<div class="es-doc-f falta">Sem texto para ler (imagem ou arquivo protegido)</div>' : fatos.length ? '<div class="es-doc-f">' + fatos.join('<br>') + '</div>' : '') + '</div>';
     });
     h += '</div>';
   }
