@@ -3044,6 +3044,15 @@ var ES_FASE = { fase_preparatoria: 'fase preparatória', licitacao: 'licitação
 var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function esBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+// 06/11/2026: processos arquivados que continuam acompanhados (vêm em d.acompanhados, só na caixa aberta)
+function esTodos() { return (esDados.processos || []).concat(esCaixa === 'open' ? (esDados.acompanhados || []) : []); }
+function esAcompanhado(p) { return !!(p && p.hash && (p.foraDaCaixa || (esDados.acompanhar || []).indexOf(String(p.hash).toUpperCase()) >= 0)); }
+function esAcompanhar(hash, documento, acao) {
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-acompanhar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: hash, documento: documento, acao: acao }) })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (!d.ok) throw new Error(d.error || 'falha'); if (acao === 'remover' && esSel) { var p = esTodos().find(function(x) { return x.idEmissao === esSel; }); if (p && p.foraDaCaixa) esSel = null; } esCarregar(esCaixa === 'open'); })
+    .catch(function(e) { alert('Não consegui ' + (acao === 'adicionar' ? 'acompanhar' : acao === 'visto' ? 'marcar como visto' : 'parar de acompanhar') + ': ' + e.message); });
+}
 function esSitDe(p) { return ES_SIT[p.situacao] || { nome: p.erro ? 'Erro na leitura' : (p.situacao || '?'), cor: '#b42318', ord: 9 }; }
 function esTrocarCaixa() {
   esCaixa = esCaixa === 'open' ? 'archived' : 'open';
@@ -3092,13 +3101,22 @@ function esRender() {
       '<div class="r"><span class="es-tag">' + esH(st.nome) + (p.empenhoExistente && p.empenhoExistente.numero ? ' · nº ' + esH(p.empenhoExistente.numero) : '') + '</span><span class="v">' + esBRL(valor) + '</span></div>' +
       (p.parecer && ES_REC[p.parecer.recomendacao] ? '<div class="es-rec" style="--es-cor:' + ES_REC[p.parecer.recomendacao].cor + '">' + esH(ES_REC[p.parecer.recomendacao].nome) + '</div>' : '') + '</div>';
   }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nada aqui.</div>';
-  if (esSel) { var p = esDados.processos.find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
+  // acompanhados fora da caixa: seção própria, abaixo da lista
+  var acs = esCaixa === 'open' && esFiltro === 'todos' ? (esDados.acompanhados || []).filter(function(a) { return a.idEmissao; }) : [];
+  if (acs.length) document.getElementById('esLista').innerHTML += '<div class="es-sec" style="margin-top:10px">📌 Acompanhados fora da caixa (' + acs.length + ')</div>' + acs.map(function(p) {
+    var st = esSitDe(p), valor = p.dotacao && p.dotacao.valorTotal != null ? p.dotacao.valorTotal : p.somaItens;
+    return '<div class="es-item' + (esSel === p.idEmissao ? ' sel' : '') + '" style="--es-cor:' + (p.novidade ? '#d97706' : '#94a3b8') + '" onclick="esAbrir(' + p.idEmissao + ')">' +
+      '<div class="n">' + esH(p.numero || p.documento) + (p.novidade ? ' <span class="es-tag" style="--es-cor:#d97706">⚠ novidade</span>' : '') + '</div>' +
+      '<div class="o">' + esH(p.objeto || p.assunto || '') + '</div>' +
+      '<div class="r"><span class="es-tag">' + esH(st.nome) + '</span><span class="v">' + esBRL(valor) + '</span></div></div>';
+  }).join('');
+  if (esSel) { var p = esTodos().find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
 }
 function esFiltrar(k) { esFiltro = k; esRender(); }
 function esAbrir(id) {
   esSel = id;
   document.querySelectorAll('#esLista .es-item').forEach(function(el) { el.classList.toggle('sel', el.getAttribute('onclick') === 'esAbrir(' + id + ')'); });
-  var p = esDados.processos.find(function(x) { return x.idEmissao === id; });
+  var p = esTodos().find(function(x) { return x.idEmissao === id; });
   var det = document.getElementById('esDet');
   det.innerHTML = '<div class="es-sk" style="width:40%;height:20px"></div><div class="es-sk" style="width:70%"></div><div class="es-sk"></div><div class="es-sk" style="width:85%"></div><div class="es-sk" style="width:55%"></div>';
   setTimeout(function() { esDetalhe(p, true); }, 260);
@@ -3117,6 +3135,17 @@ function esDetalhe(p, animar) {
   h += '<div><span class="es-tag" style="--es-cor:' + st.cor + '">' + esH(st.nome) + '</span>' + (p.etapa ? ' <span style="font-size:12px;opacity:.75">Etapa no 1Doc: ' + esH(p.etapa) + '</span>' : '') + '</div>';
   h += '<h3 style="margin-top:8px">' + esH(p.documento) + '</h3><div class="ass">' + esH(p.assunto || '') + (p.recebidoEm ? ' · recebido ' + esH(String(p.recebidoEm).slice(0, 10).split('-').reverse().join('/')) : '') + '</div>';
   if (p.erro) h += '<div class="es-erro">' + esH(p.erro) + '</div>';
+  if (p.hash) {
+    var hq = esH(JSON.stringify(String(p.hash))).replace(/"/g, '&quot;'), dq = esH(JSON.stringify(String(p.numero || p.documento || ''))).replace(/"/g, '&quot;');
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">';
+    if (esAcompanhado(p)) {
+      h += '<span class="es-tag" style="--es-cor:#0d9488">📌 Acompanhado' + (p.foraDaCaixa ? ' fora da caixa' + (p.ultimaAtividade ? ' · última atividade ' + esH(new Date(p.ultimaAtividade).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) : '') : ': se sair da caixa, continua na aba') + '</span>';
+      if (p.novidade) h += '<button class="es-btn" onclick="esAcompanhar(' + hq + ',' + dq + ',\'visto\')">Já vi a novidade</button>';
+      h += '<button class="es-btn" onclick="esAcompanhar(' + hq + ',' + dq + ',\'remover\')">Parar de acompanhar</button>';
+    } else h += '<button class="es-btn" onclick="esAcompanhar(' + hq + ',' + dq + ',\'adicionar\')">📌 Acompanhar fora da caixa</button>';
+    h += '</div>';
+    if (p.novidade) h += '<div class="es-alerta">⚠ Teve atividade nova no 1Doc depois que saiu da caixa: confira se chegou nota para empenhar.</div>';
+  }
   h += '<div class="es-valor" id="esValor">' + esBRL(animar ? 0 : valor) + '</div>';
   // 05/11/2026: empenho existente indicado pelo Financeiro (número do despacho ou do anexo "12692.pdf"), com os dados do CP
   if (p.empenhoExistente) {
@@ -3210,12 +3239,12 @@ function esDetalhe(p, animar) {
   } else det.querySelectorAll('.es-casc > *').forEach(function(el) { el.style.animation = 'none'; el.style.opacity = 1; el.style.transform = 'none'; });
 }
 function esCopiarDescricao(id) {
-  var p = esDados.processos.find(function(x) { return x.idEmissao === id; });
+  var p = esTodos().find(function(x) { return x.idEmissao === id; });
   var t = p && p.parecer && p.parecer.descricaoEmpenho;
   if (t) navigator.clipboard.writeText(t).then(function() { if (typeof mostrarToast === 'function') mostrarToast('Descrição copiada'); });
 }
 function esCopiar(id) {
-  var p = esDados.processos.find(function(x) { return x.idEmissao === id; }), dt = p.dotacao || {};
+  var p = esTodos().find(function(x) { return x.idEmissao === id; }), dt = p.dotacao || {};
   var linhas = [p.documento, 'Objeto: ' + (p.objeto || ''), 'Fornecedor: ' + (p.fornecedor || ''), 'Pregão: ' + (p.pregao || '') + '  Ata: ' + (p.ata || '') + '  Processo LC: ' + (p.processoLC || ''),
     'Contrato: ' + (p.contrato || '') + '  Competência: ' + (p.competencia || ''), 'Despesa: ' + (dt.despesa || '') + '  Fonte: ' + (dt.fonte || '') + '/' + (dt.detalhamento || ''), 'Valor: ' + esBRL(dt.valorTotal != null ? dt.valorTotal : p.somaItens)];
   (p.itens || []).forEach(function(it) { linhas.push('- ' + (it.descricao || '') + ' | qtd ' + (it.quantidade == null ? '' : it.quantidade) + ' | ' + esBRL(it.total)); });
