@@ -3063,16 +3063,23 @@ function esBuscar() {
       var h = '<div class="es-busca-cab"><span>Pesquisa “' + esH(q) + '”: ' + itens.length + ' processo' + (itens.length === 1 ? '' : 's') + '</span><button class="es-btn" onclick="esLimparBusca()">✕ Voltar à lista</button></div>';
       h += itens.length ? itens.map(function(x, i) {
         var naLista = esTodos().find(function(p) { return p.idEmissao === x.idEmissao; });
-        var tag = naLista ? (esCaixa === 'open' && !naLista.foraDaCaixa ? 'Na caixa' : esCaixa === 'open' ? 'Acompanhado' : 'Nos arquivados recentes') : 'Fora da lista (aberto em outro setor ou arquivado)';
+        var tag = esSituacaoSmsSe(x);
         return '<div class="es-item" style="--es-cor:' + (x.exato ? '#2563eb' : '#94a3b8') + ';animation-delay:' + (i * 30) + 'ms" onclick="esAbrirBusca(' + x.idEmissao + ',\'' + esH(x.hash || '') + '\')">' +
           '<div class="n">' + esH(x.numero || x.documento) + '</div><div class="o">' + esH(x.assunto || '') + '</div>' +
-          '<div class="r"><span class="es-tag">' + esH(tag) + '</span><span class="v">' + (x.ultimaAtividade ? esH(new Date(String(x.ultimaAtividade).replace(' ', 'T')).toLocaleDateString('pt-BR')) : '') + '</span></div></div>';
+          '<div class="r"><span class="es-tag">' + esH(tag) + '</span><span class="v" style="font-size:12px;font-weight:500">' + (x.etapa ? esH(x.etapa) + ' · ' : '') + (x.atividadeHa ? 'há ' + esH(x.atividadeHa) : '') + '</span></div></div>';
       }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nenhum processo do SMS-SE com esse número.</div>';
       document.getElementById('esLista').innerHTML = h;
       var exatos = itens.filter(function(x) { return x.exato; });
       if (exatos.length === 1) esAbrirBusca(exatos[0].idEmissao, exatos[0].hash || '');
     })
     .catch(function(e) { if (esBuscaAtiva === q) document.getElementById('esLista').innerHTML = '<div class="es-erro">Não consegui pesquisar: ' + esH(e.message) + ' <button class="es-btn" onclick="esLimparBusca()">Voltar</button></div>'; });
+}
+// situação do processo no SMS-SE (busca e card aberto pela busca): arquivado/aberto aqui e onde mais está aberto
+function esSituacaoSmsSe(x) {
+  var outros = (x.abertoEm || []).length ? ' · aberto em ' + x.abertoEm.slice(0, 4).join(', ') + (x.abertoEm.length > 4 ? ' +' + (x.abertoEm.length - 4) : '') : '';
+  if (x.smsSe === 'aberto') return 'Aberto no SMS-SE' + outros;
+  if (x.smsSe === 'arquivado') return 'Arquivado no SMS-SE' + outros;
+  return 'Fora do SMS-SE' + outros;
 }
 function esLimparBusca() { esBuscaAtiva = null; var i = document.getElementById('esBuscaTxt'); if (i) i.value = ''; if (esDados) esRender(); }
 function esAbrirBusca(id, hash, tentativa) {
@@ -3187,7 +3194,7 @@ function esDetalhe(p, animar) {
   var st = esSitDe(p), dt = p.dotacao || {}, valor = dt.valorTotal != null ? dt.valorTotal : p.somaItens;
   var link = p.hash ? 'https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + p.hash : null;
   var h = '<div class="es-casc">';
-  h += '<div><span class="es-tag" style="--es-cor:' + st.cor + '">' + esH(st.nome) + '</span>' + (p.etapa ? ' <span style="font-size:12px;opacity:.75">Etapa no 1Doc: ' + esH(p.etapa) + '</span>' : '') + '</div>';
+  h += '<div><span class="es-tag" style="--es-cor:' + st.cor + '">' + esH(st.nome) + '</span>' + (p.etapa ? ' <span style="font-size:12px;opacity:.75">Etapa no 1Doc: ' + esH(p.etapa) + '</span>' : '') + (p.smsSe !== undefined && (p.smsSe || (p.abertoEm || []).length) ? ' <span class="es-tag" style="--es-cor:' + (p.smsSe === 'aberto' ? '#2563eb' : '#64748b') + '">' + esH(esSituacaoSmsSe(p)) + '</span>' : '') + '</div>';
   h += '<h3 style="margin-top:8px">' + esH(p.documento) + '</h3><div class="ass">' + esH(p.assunto || '') + (p.recebidoEm ? ' · recebido ' + esH(String(p.recebidoEm).slice(0, 10).split('-').reverse().join('/')) : '') + '</div>';
   if (p.erro) h += '<div class="es-erro">' + esH(p.erro) + '</div>';
   if (p.hash) {
