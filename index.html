@@ -3245,7 +3245,8 @@ function esDetalhe(p, animar) {
     esCampo('Fornecedor' + (p.fornecedorDe ? ' (' + p.fornecedorDe + ')' : ''), p.fornecedor) + (p.credorCP ? esCampo('Credor no CP (último empenho)', p.credorCP.codigo + ' — ' + (p.credorCP.nome || '') + (p.credorCP.cnpj ? ' · CNPJ ' + p.credorCP.cnpj : '') + ' · empenho ' + p.credorCP.empenho + (p.credorCP.emissao ? ' de ' + p.credorCP.emissao : '')) : p.credorCadastro ? esCampo('Credor no CP (cadastro, pelo ' + p.credorCadastro.como + ')', p.credorCadastro.codigo + ' — ' + p.credorCadastro.nome + (p.credorCadastro.cnpj ? ' · CNPJ ' + p.credorCadastro.cnpj : '') + (p.credorCadastro.conferir ? ' · ❓ conferir' + (p.credorCadastro.alternativas && p.credorCadastro.alternativas.length ? ' (outros: ' + p.credorCadastro.alternativas.join('; ') + ')' : '') : '')) : '') + esCampo('Pregão', p.pregao) + esCampo('Ata RP', p.ata) +
     esCampo('Processo LC', p.processoLC) + esCampo('Contrato', p.contrato) + esCampo('Competência', p.competencia) +
     // 06/11/2026: centro de custo sugerido pelo objeto (um por despesa; "?" = conferir)
-    (p.centrosCusto && p.centrosCusto.length ? esCampo('Centro de custo (sugerido)', p.centrosCusto.map(function(c) {
+    (p.empenhosPorDespesa && p.empenhosPorDespesa.length ? esCampo('Empenho' + (p.empenhosPorDespesa.length > 1 ? 's a lançar (' + p.empenhosPorDespesa.length + ', um por despesa)' : ' a lançar'), p.empenhosPorDespesa.map(function(e) { return 'despesa ' + e.despesa + (e.rotulo ? ' (' + e.rotulo + ')' : '') + ': ' + (e.valor != null ? esBRL(e.valor) : 'valor a definir') + (e.centroCusto != null ? ' · centro ' + e.centroCusto : ''); }).join(' | ')) : '') +
+      (p.centrosCusto && p.centrosCusto.length ? esCampo('Centro de custo (sugerido)', p.centrosCusto.map(function(c) {
       return c.codigo + ' – ' + c.nome + (p.centrosCusto.length > 1 && c.despesa ? ' [desp. ' + c.despesa + ']' : '') + ' · ' + c.motivo + (c.duvida ? ' · ❓ conferir' : '');
     }).join(' | ')) : '') +
     (dt.contaContabil ? esCampo('Conta contábil', dt.contaContabil) : '') + '</div>';
@@ -3297,7 +3298,7 @@ function esDetalhe(p, animar) {
   if (p.itens && p.itens.length) {
     h += '<div class="es-sec">Itens (' + p.itens.length + ')</div><div style="overflow:auto"><table class="es-tab"><tr><th>Item</th><th>Descrição</th><th style="text-align:right">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th></tr>';
     p.itens.forEach(function(it) {
-      h += '<tr' + (it.conferido === false ? ' style="background:#fff4e0"' : '') + '><td>' + esH(it.item || it.codigo || '') + '</td><td>' + esH(it.descricao) + '</td><td class="num">' + (it.quantidade == null ? '' : it.quantidade.toLocaleString('pt-BR')) + '</td><td class="num">' + (it.valorUnitario == null ? '—' : 'R$ ' + Number(it.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })) + '</td><td class="num">' + esBRL(it.total) + '</td></tr>';
+      h += '<tr' + (it.conferido === false ? ' style="background:#fff4e0"' : '') + '><td>' + esH(it.item || it.codigo || '') + '</td><td>' + (it.grupo ? '<span class="es-tag" style="font-size:10px">' + esH(it.grupo) + '</span> ' : '') + esH(it.descricao) + '</td><td class="num">' + (it.quantidade == null ? '' : it.quantidade.toLocaleString('pt-BR')) + '</td><td class="num">' + (it.valorUnitario == null ? '—' : 'R$ ' + Number(it.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })) + '</td><td class="num">' + esBRL(it.total) + '</td></tr>';
     });
     h += '</table></div>';
   }
