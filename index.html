@@ -3102,6 +3102,24 @@ function esAbrirBusca(id, hash, tentativa) {
     .catch(function(e) { if (esSel === id) det.innerHTML = '<div class="es-erro">Não consegui ler o processo: ' + esH(e.message) + '</div>'; });
 }
 window.esBuscar = esBuscar; window.esLimparBusca = esLimparBusca; window.esAbrirBusca = esAbrirBusca;
+// 06/11/2026 (Thiago: "sair assim que eu arquivo la sem refresh", sem pesar no Cloudflare): com a aba visível, pergunta a
+// cada 30 s só a impressão digital da caixa (o robô lê só a lista do 1Doc; nada é gravado no servidor). Mudou (arquivou,
+// entrou processo, despacho novo) = recarrega a lista em silêncio.
+var esAssinaturaCaixa = null;
+function esConferirCaixa() {
+  var painel = document.getElementById('panel-empenhos');
+  if (!esDados || esBuscaAtiva || esCaixa !== 'open' || document.visibilityState !== 'visible' || !painel || painel.offsetParent === null) return;
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-assinatura&caixa=open')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.ok || !d.assinatura) return;
+      var antes = esAssinaturaCaixa; esAssinaturaCaixa = d.assinatura;
+      if (antes && antes !== d.assinatura) esCarregar(true, true, true);
+    })
+    .catch(function() {});
+}
+setInterval(esConferirCaixa, 30000);
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible') esConferirCaixa(); });
 function esH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function esBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 // 06/11/2026: processos arquivados que continuam acompanhados (vêm em d.acompanhados, só na caixa aberta)
@@ -3121,11 +3139,11 @@ function esTrocarCaixa() {
 }
 // 05/11/2026: a aba abre com a última leitura (guardada no servidor) e, se ela estiver velha, o servidor atualiza por
 // trás e a aba busca de novo sozinha a cada 12 s (até 6 vezes). "↻ Atualizar" espera a leitura nova.
-function esCarregar(forcar, silencioso) {
+function esCarregar(forcar, silencioso, quieto) {
   var lista = document.getElementById('esLista');
   clearTimeout(esRepetir);
   if (!silencioso) esTentativas = 0;
-  if (!esDados || forcar) lista.innerHTML = '<div class="es-sk"></div><div class="es-sk" style="width:80%"></div><div class="es-sk"></div><div class="es-sk" style="width:60%"></div>';
+  if ((!esDados || forcar) && !quieto) lista.innerHTML = '<div class="es-sk"></div><div class="es-sk" style="width:80%"></div><div class="es-sk"></div><div class="es-sk" style="width:60%"></div>';
   if (!silencioso) document.getElementById('esInfo').textContent = forcar || !esDados ? 'Lendo o 1Doc…' : 'Carregando…';
   sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude&caixa=' + esCaixa + (forcar ? '&forcar=1' : ''))
     .then(function(r) { return r.json(); })
