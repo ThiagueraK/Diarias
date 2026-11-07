@@ -1875,6 +1875,180 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .es-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
   .es-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
   .es-erro{color:#b42318;background:#fdecea;border-radius:9px;padding:10px 12px;font-size:13px}
+  /* 06/11/2026: ABA EMPENHOS SAÚDE v2 (protótipo C aprovado pelo Thiago) - painel com números, valores por despesa,
+     cards ricos (padrões Spotlight Card / Magic Bento / 3D Card / Tooltip / Neon) e ficha que nasce do card.
+     Tudo com prefixo ec- e dentro de #panel-empenhos; tempos e curvas do DESIGN.md §7. */
+  #panel-empenhos{--ec-dur-micro:100ms;--ec-dur-fast:160ms;--ec-dur-base:250ms;--ec-dur-reveal:800ms;--ec-in:cubic-bezier(.05,.7,.1,1);--ec-out:cubic-bezier(.3,0,1,1);--ec-std:cubic-bezier(.2,0,0,1);--ec-stagger:50ms;--ec-sh-sm:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.06);--ec-sh-md:0 6px 16px -4px rgba(16,24,40,.10),0 2px 6px -2px rgba(16,24,40,.06);--ec-sh-lg:0 24px 48px -12px rgba(16,24,40,.18)}
+  @media (prefers-reduced-motion:reduce){#panel-empenhos *,#panel-empenhos *::before,#panel-empenhos *::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important}}
+  #panel-empenhos .ec-vivo{display:inline-flex;align-items:center;gap:6px;margin-left:8px;font-size:12px;color:var(--success,#1f9d57)}
+  #panel-empenhos .ec-vivo i{width:7px;height:7px;border-radius:50%;background:var(--success,#1f9d57);animation:ecPulso 2.4s var(--ec-std) infinite}
+  @keyframes ecPulso{0%{box-shadow:0 0 0 0 rgba(31,157,87,.5)}70%,100%{box-shadow:0 0 0 7px transparent}}
+  .ec-entra{opacity:0;transform:translateY(8px);animation:ecEntra var(--ec-dur-base) var(--ec-in) forwards;animation-delay:calc(min(var(--i,0),8) * var(--ec-stagger))}
+  @keyframes ecEntra{to{opacity:1;transform:none}}
+  /* bento */
+  .ec-bento{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.3fr;gap:14px;margin-bottom:16px}
+  @media (max-width:1100px){.ec-bento{grid-template-columns:1fr 1fr}}
+  .ec-blk{--mx:-200px;--my:-200px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 20px;box-shadow:var(--ec-sh-sm);position:relative;overflow:hidden;isolation:isolate}
+  .ec-blk::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:radial-gradient(220px circle at var(--mx) var(--my),color-mix(in srgb,var(--accent) 70%,transparent),transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity var(--ec-dur-fast);pointer-events:none}
+  .ec-blk:hover::before{opacity:1}
+  .ec-blk small{font-size:12.5px;color:var(--text-muted)}
+  .ec-blk b{display:block;font:600 30px var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:4px}
+  .ec-blk .ec-sub{font-size:12.5px;color:var(--text-muted);margin-top:6px}
+  .ec-blk.ec-hero{background:var(--brand-deep,#245f47);color:#fff;border:0}
+  .ec-blk.ec-hero small,.ec-blk.ec-hero .ec-sub{color:rgba(255,255,255,.82)}
+  .ec-blk.ec-hero b{font-size:36px}
+  .ec-aurora{position:absolute;inset:-40%;z-index:-1;filter:blur(40px);opacity:.9}
+  .ec-aurora i{position:absolute;width:55%;height:55%;border-radius:50%;mix-blend-mode:screen;animation:ecDeriva 14s ease-in-out infinite alternate}
+  .ec-aurora i:nth-child(1){background:#2f7d5d;left:5%;top:10%}
+  .ec-aurora i:nth-child(2){background:#1f9d57;left:45%;top:35%;animation-duration:18s;animation-delay:-4s}
+  .ec-aurora i:nth-child(3){background:#0d9488;left:25%;top:55%;animation-duration:22s;animation-delay:-9s}
+  @keyframes ecDeriva{0%{transform:translate(0,0) scale(1)}50%{transform:translate(18%,-12%) scale(1.15)}100%{transform:translate(-12%,10%) scale(.95)}}
+  .ec-brilho{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 48%,transparent 66%);transform:translateX(-120%);animation:ecPassa 1.4s 600ms var(--ec-std) forwards;pointer-events:none}
+  @keyframes ecPassa{to{transform:translateX(120%)}}
+  .ec-anel{display:flex;gap:16px;align-items:center}
+  .ec-anel svg{width:104px;height:104px;transform:rotate(-90deg);flex-shrink:0;overflow:visible}
+  .ec-anel circle{fill:none;stroke-width:12}
+  .ec-anel .ec-arco{transition:stroke-dashoffset 700ms var(--ec-in),stroke-width var(--ec-dur-fast) var(--ec-std),opacity var(--ec-dur-fast);cursor:pointer}
+  .ec-anel .ec-arco.ec-foco{stroke-width:17}
+  .ec-anel svg.ec-focando .ec-arco:not(.ec-foco){opacity:.35}
+  .ec-anel ul{list-style:none;margin:0;padding:0;font-size:12px;display:grid;gap:3px}
+  .ec-anel li{display:flex;align-items:center;gap:6px;color:var(--text-muted);cursor:pointer;padding:1px 6px;border-radius:6px;transition:background var(--ec-dur-fast),color var(--ec-dur-fast)}
+  .ec-anel li i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+  .ec-anel li b{display:inline;font:600 12px var(--mono);color:var(--text);margin:0}
+  .ec-anel li.ec-foco,.ec-anel li.ec-on{background:var(--surface2);color:var(--text)}
+  /* valores por despesa */
+  .ec-despesas{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px 20px 18px;box-shadow:var(--ec-sh-sm);margin-bottom:16px}
+  .ec-desp-cab{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .ec-desp-cab h3{margin:0;font:600 15px var(--sans)}
+  .ec-desp-cab h3 small{font-weight:400;color:var(--text-muted);font-size:12.5px;margin-left:8px}
+  .ec-alterna{display:flex;background:var(--surface2);border-radius:10px;padding:3px;position:relative}
+  .ec-alterna button{border:0;background:transparent;padding:5px 11px;border-radius:8px;font:500 12.5px var(--sans);cursor:pointer;color:var(--text-muted);position:relative;z-index:1;transition:color var(--ec-dur-fast)}
+  .ec-alterna button.ec-on{color:var(--text)}
+  .ec-alterna .ec-pil{position:absolute;top:3px;bottom:3px;left:0;border-radius:8px;background:var(--surface);box-shadow:var(--ec-sh-sm);transition:transform var(--ec-dur-base) var(--ec-std),width var(--ec-dur-base) var(--ec-std)}
+  .ec-desp-lista{display:grid;gap:6px}
+  .ec-desp{display:grid;grid-template-columns:70px minmax(140px,260px) 1fr 140px 64px;gap:12px;align-items:center;padding:6px 8px;border-radius:10px;cursor:pointer;transition:background var(--ec-dur-fast)}
+  .ec-desp:hover,.ec-desp.ec-on{background:var(--surface2)}
+  .ec-desp .ec-cod{font:600 13px var(--mono);display:flex;align-items:center;gap:8px}
+  .ec-desp .ec-cod i{width:10px;height:10px;border-radius:3px;background:var(--dc)}
+  .ec-desp .ec-nome{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ec-desp .ec-trilho{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden}
+  .ec-desp .ec-enche{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--dc) 70%,#fff),var(--dc));transform-origin:left;transform:scaleX(0);transition:transform 900ms var(--ec-in);transition-delay:var(--d,0ms)}
+  .ec-despesas.ec-pronto .ec-enche{transform:scaleX(var(--w))}
+  .ec-desp .ec-val{font:600 14px var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  .ec-desp .ec-qt{font:500 12px var(--mono);color:var(--text-muted);text-align:right}
+  @media (max-width:900px){.ec-desp{grid-template-columns:62px 1fr 110px}.ec-desp .ec-nome,.ec-desp .ec-qt{display:none}}
+  /* filtros com pílula */
+  #panel-empenhos .es-filtros{position:relative;display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px;width:max-content;max-width:100%}
+  #panel-empenhos .ec-pilula{position:absolute;top:0;left:0;height:0;border-radius:10px;background:var(--text);transition:transform var(--ec-dur-base) var(--ec-std),width var(--ec-dur-base) var(--ec-std),height var(--ec-dur-base) var(--ec-std);z-index:0}
+  #panel-empenhos .es-chip{position:relative;z-index:1;border:0;background:transparent;border-radius:10px;padding:7px 12px}
+  #panel-empenhos .es-chip.on{background:transparent;color:var(--surface)}
+  #panel-empenhos .es-chip.ec-desp-chip{background:var(--surface2);color:var(--text)}
+  /* grade */
+  #panel-empenhos .ec-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;perspective:1200px;position:relative;max-height:none;overflow:visible;padding:0}
+  @media (max-width:520px){#panel-empenhos .ec-grade{grid-template-columns:1fr}}
+  .ec-grade > .es-busca-cab,.ec-grade > .vazio,.ec-grade > .es-erro,.ec-grade > .es-sk,.ec-grade > .ec-sec{grid-column:1/-1}
+  .ec-grade > .es-sk{height:220px;border-radius:20px;margin:0;grid-column:auto}
+  .ec-sec{font:600 13px var(--sans);color:var(--text-muted);margin:8px 2px -4px}
+  .ec-grade.ec-destacando .ec-card:not(.ec-liga){opacity:.32;filter:saturate(.4);transform:scale(.985)}
+  .ec-card{--mx:-300px;--my:-300px;--c:#64748b;position:relative;background:linear-gradient(180deg,var(--surface) 0%,#fcfdfd 100%);border:1px solid var(--border);border-radius:20px;cursor:pointer;transform-style:preserve-3d;transition:transform var(--ec-dur-fast) var(--ec-std),box-shadow var(--ec-dur-base),border-color var(--ec-dur-fast),opacity var(--ec-dur-base) var(--ec-std),filter var(--ec-dur-base);isolation:isolate;text-align:left}
+  .ec-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(320px circle at var(--mx) var(--my),color-mix(in srgb,var(--c) 11%,transparent),transparent 60%);opacity:0;transition:opacity var(--ec-dur-fast);pointer-events:none;z-index:-1}
+  .ec-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1.2px;background:radial-gradient(240px circle at var(--gx,-500px) var(--gy,-500px),color-mix(in srgb,var(--c) 85%,transparent),transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .ec-card:hover{box-shadow:var(--ec-sh-md)}
+  .ec-card:hover::after{opacity:1}
+  .ec-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .ec-card.ec-oculto{visibility:hidden}
+  .ec-card.ec-espera{opacity:0;transform:translateY(14px) scale(.98)}
+  .ec-card.ec-mostra{animation:ecOnda var(--ec-dur-base) var(--ec-in) forwards;animation-delay:var(--d,0ms)}
+  @keyframes ecOnda{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  .ec-in{position:relative;padding:18px 18px 14px;display:flex;flex-direction:column;gap:12px;border-radius:inherit;overflow:hidden;transform-style:preserve-3d;height:100%;box-sizing:border-box}
+  .ec-in::before{content:"";position:absolute;inset:-30%;width:60%;height:60%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 9%,transparent),transparent);animation:ecPasseia 16s ease-in-out infinite alternate;animation-delay:calc(var(--k2,0) * -1.7s);pointer-events:none;z-index:0;transition:opacity var(--ec-dur-base)}
+  .ec-card:hover .ec-in::before{opacity:0}
+  @keyframes ecPasseia{0%{transform:translate(0,0)}33%{transform:translate(110%,20%)}66%{transform:translate(40%,100%)}100%{transform:translate(120%,90%)}}
+  .ec-in > *{position:relative;z-index:1}
+  .ec-hd{display:flex;align-items:center;gap:12px;transition:transform var(--ec-dur-base) var(--ec-std)}
+  .ec-ava{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font:700 15px var(--sans);color:#fff;background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 80%,#fff),var(--ac));flex-shrink:0;position:relative;box-shadow:0 6px 14px -6px var(--ac)}
+  .ec-ava::after{content:"";position:absolute;inset:-3px;border-radius:17px;border:2px solid color-mix(in srgb,var(--c) 55%,transparent)}
+  .ec-hd .ec-t{min-width:0;flex:1}
+  .ec-hd .ec-n{font:600 18px var(--mono);display:block;line-height:1.1}
+  .ec-hd .ec-fo{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:3px}
+  .ec-rec{font:600 11px var(--sans);padding:4px 9px;border-radius:999px;color:#fff;background:var(--rc);white-space:nowrap;box-shadow:0 4px 10px -4px var(--rc)}
+  .ec-o{font-size:13.5px;line-height:1.45;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:39px}
+  .ec-arte{border-radius:14px;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--border);padding:10px 12px;display:grid;gap:8px}
+  .ec-arte .ec-lin{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim)}
+  .ec-mbarra{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--surface2);gap:2px}
+  .ec-mbarra i{background:var(--dc);transform-origin:left;transform:scaleX(0);transition:transform 700ms var(--ec-in);transition-delay:calc(150ms + var(--k,0) * 90ms)}
+  .ec-card.ec-visto .ec-mbarra i{transform:scaleX(1)}
+  .ec-mleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--text-muted);margin-top:5px}
+  .ec-mleg span{display:inline-flex;align-items:center;gap:5px}
+  .ec-mleg i{width:8px;height:8px;border-radius:2px;background:var(--dc)}
+  .ec-mleg b{font:600 11.5px var(--mono);color:var(--text)}
+  .ec-pulsos{position:relative;height:26px}
+  .ec-pulsos::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border)}
+  .ec-pulsos i{position:absolute;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--c);opacity:0;transform:scale(0);transition:transform 380ms var(--ec-in),opacity 380ms;transition-delay:calc(200ms + var(--k,0) * 45ms)}
+  .ec-pulsos i.ec-ult{width:12px;height:12px;margin:-6px 0 0 -6px;box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 20%,transparent)}
+  .ec-card.ec-visto .ec-pulsos i{opacity:1;transform:scale(1)}
+  .ec-trilha{display:grid;grid-template-columns:repeat(4,1fr);position:relative}
+  .ec-trilha::before,.ec-trilha::after{content:"";position:absolute;left:12.5%;right:12.5%;top:6px;height:2px;border-radius:2px;background:var(--border)}
+  .ec-trilha::after{background:var(--accent);right:auto;width:calc(var(--pr,0) * 75%);transform-origin:left;transform:scaleX(0);transition:transform 800ms 250ms var(--ec-in)}
+  .ec-card.ec-visto .ec-trilha::after{transform:scaleX(1)}
+  .ec-passo{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--text-dim);position:relative;z-index:1}
+  .ec-passo i{width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--border)}
+  .ec-passo.ec-feito i{background:var(--accent);border-color:var(--accent)}
+  .ec-passo.ec-feito{color:var(--text-muted)}
+  .ec-passo.ec-agora{color:var(--text);font-weight:600}
+  .ec-passo.ec-agora i{border-color:var(--accent);animation:ecPulsoV 2.4s var(--ec-std) infinite}
+  @keyframes ecPulsoV{0%{box-shadow:0 0 0 0 rgba(47,125,93,.45)}70%,100%{box-shadow:0 0 0 7px transparent}}
+  .ec-stats{display:grid;grid-template-columns:1.5fr 1fr 1fr;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .ec-stats > div{padding:9px 12px;display:flex;flex-direction:column;gap:1px;transition:transform var(--ec-dur-base) var(--ec-std);min-width:0}
+  .ec-stats > div+div{border-left:1px solid var(--border)}
+  .ec-stats small{font-size:11px;color:var(--text-dim)}
+  .ec-stats b{font:600 15px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ec-stats > div:first-child b{font-size:17px}
+  .ec-card:hover .ec-stats > div:first-child{transform:translateZ(28px)}
+  .ec-card:hover .ec-hd{transform:translateZ(18px)}
+  .ec-cr{border-bottom:1px dashed currentColor;cursor:help}
+  .ec-conferir{color:var(--warning,#c77d18)}
+  .ec-cta{display:flex;gap:8px;align-items:center;margin-top:auto}
+  .ec-cta .ec-pri{flex:1;height:36px;border:0;border-radius:11px;background:var(--text);color:var(--surface);font:600 13px var(--sans);cursor:pointer;transition:transform var(--ec-dur-micro),background var(--ec-dur-fast)}
+  .ec-cta .ec-pri:hover{background:var(--brand-deep,#245f47);color:#fff}
+  .ec-cta .ec-pri:active{transform:scale(.98)}
+  .ec-cta .ec-ico{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer;font-size:14px;text-decoration:none;color:var(--text);transition:border-color var(--ec-dur-fast),transform var(--ec-dur-micro)}
+  .ec-cta .ec-ico:hover{border-color:var(--accent);color:var(--accent)}
+  .ec-cta .ec-ico:active{transform:scale(.94)}
+  .ec-onda{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:color-mix(in srgb,var(--c) 35%,transparent);pointer-events:none;z-index:3;animation:ecOndaClique 520ms var(--ec-in) forwards}
+  @keyframes ecOndaClique{to{transform:scale(60);opacity:0}}
+  .ec-viva::before{background:conic-gradient(from var(--ec-a),#f59e0b,#ef4444,#f59e0b 40%,transparent 60%,#f59e0b)!important;padding:2px!important;inset:-2px!important;filter:drop-shadow(0 0 6px rgba(245,158,11,.55));animation:ecGira 3.5s linear infinite}
+  @property --ec-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+  @keyframes ecGira{to{--ec-a:360deg}}
+  .ec-novidade{--c:#d97706}
+  /* balão do credor */
+  .ec-dica{position:fixed;z-index:70;max-width:300px;background:#1a2230;color:#fff;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.45;box-shadow:var(--ec-sh-lg);pointer-events:none;opacity:0;transform:translateY(6px) scale(.97);transition:opacity var(--ec-dur-fast),transform var(--ec-dur-fast) var(--ec-std)}
+  .ec-dica.ec-on{opacity:1;transform:none}
+  .ec-dica b{font-family:var(--mono)}
+  /* ficha (detalhe) que nasce do card */
+  .ec-veu{position:fixed;inset:0;background:rgba(16,24,40,.32);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity 220ms var(--ec-std);z-index:900}
+  .ec-veu.ec-on{opacity:1;pointer-events:auto}
+  .ec-ficha{position:fixed;z-index:901;left:50%;top:4vh;width:min(1040px,94vw);height:92vh;margin-left:calc(min(1040px,94vw) / -2);background:var(--bg);border-radius:22px;box-shadow:var(--ec-sh-lg);overflow:hidden;display:none;transform-origin:top left}
+  .ec-ficha.ec-on{display:flex;flex-direction:column}
+  .ec-ficha-cab{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .ec-ficha-cab .ec-nav{display:flex;gap:6px}
+  .ec-fx{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:18px;transition:transform var(--ec-dur-micro),border-color var(--ec-dur-fast)}
+  .ec-fx:hover{border-color:var(--accent)} .ec-fx:active{transform:scale(.94)}
+  .ec-ficha .es-det{border:0;border-radius:0;background:transparent;overflow:auto;flex:1;padding:22px 26px;opacity:0;transition:opacity 200ms var(--ec-std)}
+  .ec-ficha.ec-pronta .es-det{opacity:1}
+  .ec-emps{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 0 4px}
+  .ec-emp{border:1px solid var(--border);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;background:var(--surface)}
+  .ec-emp::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dc,var(--accent))}
+  .ec-emp .ec-d{font:600 12px var(--mono);color:var(--text-muted)}
+  .ec-emp .ec-v{font:600 20px var(--mono);font-variant-numeric:tabular-nums;margin:2px 0}
+  .ec-emp .ec-c{font-size:12px;color:var(--text-muted)}
+  /* aviso (saiu da caixa / copiado) */
+  .ec-aviso{position:fixed;right:20px;bottom:24px;z-index:950;background:#1a2230;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--ec-sh-lg);font-size:13.5px;display:flex;gap:10px;align-items:center;transform:translateX(130%);transition:transform var(--ec-dur-base) var(--ec-in)}
+  .ec-aviso.ec-on{transform:none}
+  .ec-aviso.ec-sai{transition:transform 180ms var(--ec-out)}
+  .ec-aviso svg{width:18px;height:18px}
+  .ec-aviso path{fill:none;stroke:#4ade80;stroke-width:2.6;stroke-dasharray:24;stroke-dashoffset:24;animation:ecRisca 200ms 150ms var(--ec-in) forwards}
+  @keyframes ecRisca{to{stroke-dashoffset:0}}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -2489,16 +2663,17 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   <!-- 03/11/2026: ABA EMPENHOS SAÚDE - processos da caixa SMS-SE (setor 190) lidos do 1Doc pelo robô -->
   <div class="tab-panel" id="panel-empenhos">
     <div class="es-top">
-      <h2>🏥 Empenhos da Saúde <small id="esInfo">Caixa SMS-SE no 1Doc</small></h2>
+      <h2>🏥 Empenhos da Saúde<span class="ec-vivo" title="Confere a caixa a cada 30 s: processo arquivado no 1Doc sai sozinho"><i></i>ao vivo</span> <small id="esInfo">Caixa SMS-SE no 1Doc</small></h2>
       <form class="es-busca" onsubmit="esBuscar();return false"><input id="esBuscaTxt" type="search" inputmode="numeric" placeholder="Nº do processo (abertos e arquivados)" aria-label="Pesquisar processo pelo número"><button class="es-btn" type="submit">🔍</button></form>
       <button class="es-btn" id="esCaixaBtn" onclick="esTrocarCaixa()">Ver arquivados</button>
       <button class="es-btn" onclick="esCarregar(true)">↻ Atualizar</button>
     </div>
+    <!-- 06/11/2026: v2 - números, valores por despesa, filtros com pílula e grade de cards; o detalhe (#esDet) vai para a ficha -->
+    <div class="ec-bento" id="ecBento"></div>
+    <section class="ec-despesas" id="ecDespesas" style="display:none"></section>
     <div class="es-filtros" id="esFiltros"></div>
-    <div class="es-grid">
-      <div class="es-lista" id="esLista"><div class="es-sk"></div><div class="es-sk"></div><div class="es-sk"></div></div>
-      <div class="es-det" id="esDet"><div class="vazio">Escolha um processo na lista</div></div>
-    </div>
+    <div class="es-lista ec-grade" id="esLista"><div class="es-sk"></div><div class="es-sk"></div><div class="es-sk"></div></div>
+    <div class="es-det" id="esDet" hidden></div>
   </div>
 
   <div class="tab-panel" id="panel-acomp-cp">
@@ -3045,7 +3220,7 @@ var ES_REC = {
 };
 var ES_TIPO_EMP = { global: 'global', estimativo: 'por estimativa', ordinario: 'ordinário', restos_a_pagar: 'restos a pagar' };
 var ES_FASE = { fase_preparatoria: 'fase preparatória', licitacao: 'licitação', contratacao_direta: 'contratação direta', empenho: 'empenho', execucao: 'execução', outro: 'outra' };
-var esDados = null, esFiltro = 'todos', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
+var esDados = null, esFiltro = 'acao', esSel = null, esCaixa = 'open', esRepetir = null, esTentativas = 0;
 // 06/11/2026 (Thiago): pesquisa por número - processos achados fora da lista atual ficam em esBuscados (abrem no card)
 var esBuscados = [], esBuscaAtiva = null;
 function esBuscar() {
@@ -3087,6 +3262,7 @@ function esAbrirBusca(id, hash, tentativa) {
   if (!hash) return;
   esSel = id;
   var det = document.getElementById('esDet');
+  ecAbrirFicha(null);
   det.innerHTML = '<div class="es-busca-cab">Lendo o processo e os anexos no 1Doc…' + (tentativa ? ' (processo grande, continua lendo)' : '') + '</div><div class="es-sk" style="width:40%;height:20px"></div><div class="es-sk" style="width:70%"></div><div class="es-sk"></div>';
   if (window.innerWidth < 860) det.scrollIntoView({ behavior: 'smooth', block: 'start' });
   sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-processo&hash=' + encodeURIComponent(hash))
@@ -3135,7 +3311,7 @@ function esSitDe(p) { return ES_SIT[p.situacao] || { nome: p.erro ? 'Erro na lei
 function esTrocarCaixa() {
   esCaixa = esCaixa === 'open' ? 'archived' : 'open';
   document.getElementById('esCaixaBtn').textContent = esCaixa === 'open' ? 'Ver arquivados' : 'Ver caixa aberta';
-  esSel = null; esFiltro = 'todos'; esCarregar(false);
+  esSel = null; esFiltro = esCaixa === 'open' ? 'acao' : 'todos'; EC.filtroDesp = null; EC.idsCaixa = null; EC.chaveBento = ''; EC.chaveDesp = ''; esCarregar(false);
 }
 // 05/11/2026: a aba abre com a última leitura (guardada no servidor) e, se ela estiver velha, o servidor atualiza por
 // trás e a aba busca de novo sozinha a cada 12 s (até 6 vezes). "↻ Atualizar" espera a leitura nova.
@@ -3166,42 +3342,290 @@ function esCarregar(forcar, silencioso, quieto) {
       lista.innerHTML = '<div class="es-erro">Não consegui ler a caixa: ' + esH(e.message) + '</div>';
     });
 }
-function esRender() {
-  var ps = esDados.processos.slice().sort(function(a, b) { return esSitDe(a).ord - esSitDe(b).ord || String(b.recebidoEm || '').localeCompare(String(a.recebidoEm || '')); });
+// ═══ 06/11/2026: ABA EMPENHOS SAÚDE v2 (protótipo C aprovado) ═══
+// Números no topo, valores por despesa (ligados aos cards), cards ricos e ficha que nasce do card. A busca dos dados
+// (esCarregar), a pesquisa no 1Doc (esBuscar), acompanhados, a conferência a cada 30 s e a ficha (esDetalhe) seguem iguais.
+var EC = { nos: new Map(), vistos: new Set(), desp: {}, modoDesp: 'agir', filtroDesp: null, idsCaixa: null, chaveBento: '', chaveDesp: '', aberto: null, ordem: [], iniciou: false };
+var EC_PALETA = ['#2f7d5d', '#2563eb', '#c77d18', '#7c3aed', '#0d9488', '#d64545', '#a16207', '#475569', '#db2777', '#0891b2', '#65a30d', '#9333ea'];
+var EC_PASSOS = ['Financeiro', 'Secretária', 'Empenho', 'Pagamento'];
+var ecReduz = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function ecValor(p) { return p.dotacao && p.dotacao.valorTotal != null ? p.dotacao.valorTotal : p.somaItens; }
+function ecNumero(p) { return String(p.numero || p.documento || '').replace(/^Proc\.?\s*Administrativo\s*/i, ''); }
+function ecForn(p) { return String(p.fornecedor || '').replace(/\s*\(CNPJ[^)]*\)/, '').trim(); }
+function ecCredor(p) { var c = p.credorCP || p.credorCadastro; return c ? { cod: c.codigo, nome: c.nome, cnpj: c.cnpj, conferir: !!(p.credorCadastro && !p.credorCP && p.credorCadastro.conferir), alt: !p.credorCP && p.credorCadastro ? p.credorCadastro.alternativas : null, de: p.credorCP ? 'último empenho ' + (p.credorCP.empenho || '') : 'cadastro do CP, pelo ' + p.credorCadastro.como } : null; }
+function ecDias(s) { if (!s) return null; var d = new Date(String(s).replace(' ', 'T')); return isNaN(d) ? null : Math.max(0, Math.floor((Date.now() - d) / 864e5)); }
+function ecIniciais(nome) { var w = String(nome || '?').replace(/\b(LTDA|S\/A|SA|ME|EPP|EIRELI|COM|DE|DA|DO|E|PROD|PRODUTOS)\b\.?/gi, ' ').trim().split(/\s+/).filter(Boolean); return (((w[0] || '?')[0] || '?') + ((w[1] || '')[0] || '')).toUpperCase(); }
+function ecCorDe(s) { var h = 0; String(s || '').split('').forEach(function(c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return ['#2f7d5d', '#2563eb', '#7c3aed', '#0d9488', '#c77d18', '#db2777', '#475569', '#0891b2'][h % 8]; }
+function ecSemAcento(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function ecContarInt(el, fim, ms) { if (!el) return; var ini = performance.now(); (function passo(t) { var k = Math.min(1, (t - ini) / (ms || 700)), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(fim * e); if (k < 1) requestAnimationFrame(passo); })(ini); }
+function ecHolofote(el) { el.addEventListener('pointermove', function(e) { var r = el.getBoundingClientRect(); el.style.setProperty('--mx', (e.clientX - r.left) + 'px'); el.style.setProperty('--my', (e.clientY - r.top) + 'px'); }); }
+function ecPassoAtual(p) {
+  var et = String(p.etapa || '').toLowerCase();
+  if (p.situacao === 'aguardando_financeiro' || /disponibilidade/.test(et)) return 0;
+  if (p.situacao === 'aguardando_secretaria' || p.situacao === 'aguardando_suplementacao') return 1;
+  if (/pronto|nota_aguardando|usa_empenho/.test(p.situacao) || /empenho/.test(et)) return 2;
+  if (p.situacao === 'empenhado' || /pagamento|liquida/.test(et)) return 3;
+  return 0;
+}
+function ecAgir(p) { return /pronto|nota_aguardando/.test(p.situacao); }
+// elementos que vivem no body (o painel da aba pode ter transform, o que estraga position:fixed)
+function ecIniciar() {
+  if (EC.iniciou) return; EC.iniciou = true;
+  var b = document.body;
+  b.insertAdjacentHTML('beforeend', '<div class="ec-veu" id="ecVeu"></div><section class="ec-ficha" id="ecFicha" role="dialog" aria-modal="true" aria-label="Processo"><div class="ec-ficha-cab"><div class="ec-nav"><button class="ec-fx" id="ecAnt" title="Anterior (←)">‹</button><button class="ec-fx" id="ecProx" title="Próximo (→)">›</button></div><button class="ec-fx" id="ecFechar" title="Fechar (Esc)">×</button></div></section>' +
+    '<div class="ec-aviso" id="ecAviso"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="ecAvisoTxt"></span></div><div class="ec-dica" id="ecDica"></div>');
+  // o detalhe (esDetalhe escreve em #esDet) passa a morar dentro da ficha
+  var detEl = document.getElementById('esDet'); detEl.hidden = false; document.getElementById('ecFicha').appendChild(detEl);
+  document.getElementById('ecFechar').onclick = function() { ecFechar(); };
+  document.getElementById('ecVeu').onclick = function() { ecFechar(); };
+  document.getElementById('ecAnt').onclick = function() { ecPasso(-1); };
+  document.getElementById('ecProx').onclick = function() { ecPasso(1); };
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('ecFicha').classList.contains('ec-on')) return;
+    if (e.key === 'Escape') ecFechar(); else if (e.key === 'ArrowRight') ecPasso(1); else if (e.key === 'ArrowLeft') ecPasso(-1);
+  });
+  var g = document.getElementById('esLista');
+  g.addEventListener('pointermove', function(e) {
+    g.querySelectorAll('.ec-card').forEach(function(c) { var r = c.getBoundingClientRect(); if (e.clientX < r.left - 260 || e.clientX > r.right + 260 || e.clientY < r.top - 260 || e.clientY > r.bottom + 260) { c.style.removeProperty('--gx'); return; } c.style.setProperty('--gx', (e.clientX - r.left) + 'px'); c.style.setProperty('--gy', (e.clientY - r.top) + 'px'); });
+  });
+  g.addEventListener('pointerleave', function() { g.querySelectorAll('.ec-card').forEach(function(c) { c.style.removeProperty('--gx'); }); });
+  if (typeof window.mostrarToast !== 'function') window.mostrarToast = ecAvisar;
+}
+function ecAvisar(txt) {
+  var a = document.getElementById('ecAviso'); if (!a) return;
+  document.getElementById('ecAvisoTxt').textContent = txt; a.classList.remove('ec-sai');
+  var pth = a.querySelector('path'); pth.style.animation = 'none'; void a.offsetWidth; pth.style.animation = '';
+  a.classList.add('ec-on'); clearTimeout(ecAvisar.t); ecAvisar.t = setTimeout(function() { a.classList.add('ec-sai'); a.classList.remove('ec-on'); }, 5000);
+}
+// ---------- valores por despesa ----------
+function ecMontarDespesas(ps) {
+  var agg = {};
+  ps.forEach(function(p) { (p.empenhosPorDespesa || []).forEach(function(e) {
+    var a = agg[e.despesa] || (agg[e.despesa] = { cod: e.despesa, total: 0, totalAgir: 0, n: 0, nAgir: 0, nomes: {}, procs: {} });
+    var dt = p.dotacao || {}; a.total += e.valor || 0; a.n++; a.procs[p.idEmissao] = 1;
+    if (ecAgir(p)) { a.totalAgir += e.valor || 0; a.nAgir++; }
+    var nome = e.rotulo ? e.rotulo.charAt(0).toUpperCase() + e.rotulo.slice(1) : (dt.detalhamentoNome || dt.fonteNome || '');
+    if (nome) a.nomes[nome] = (a.nomes[nome] || 0) + 1; a.fonte = a.fonte || dt.fonte;
+  }); });
+  EC.desp = {};
+  Object.keys(agg).map(function(k) { return agg[k]; }).sort(function(x, y) { return y.total - x.total; }).forEach(function(a, i) { a.cor = EC_PALETA[i % EC_PALETA.length]; a.nome = Object.keys(a.nomes).sort(function(x, y) { return a.nomes[y] - a.nomes[x]; })[0] || ''; EC.desp[a.cod] = a; });
+}
+function ecPainelDespesas(forcar) {
+  var s = document.getElementById('ecDespesas'); if (!s) return;
+  var lista = Object.keys(EC.desp).map(function(k) { return EC.desp[k]; }).filter(function(a) { return EC.modoDesp === 'agir' ? a.nAgir : a.n; });
+  var vOf = function(a) { return EC.modoDesp === 'agir' ? a.totalAgir : a.total; };
+  lista.sort(function(x, y) { return vOf(y) - vOf(x); });
+  var chave = EC.modoDesp + '|' + (EC.filtroDesp || '') + '|' + lista.map(function(a) { return a.cod + ':' + vOf(a).toFixed(2); }).join(',');
+  if (!forcar && chave === EC.chaveDesp) return; EC.chaveDesp = chave;
+  s.style.display = lista.length ? '' : 'none'; if (!lista.length) return;
+  var max = Math.max.apply(null, lista.map(vOf).concat([1])), tot = lista.reduce(function(t, a) { return t + vOf(a); }, 0);
+  s.classList.remove('ec-pronto');
+  s.innerHTML = '<div class="ec-desp-cab"><h3>Valores por despesa<small>' + lista.length + ' despesa' + (lista.length > 1 ? 's' : '') + ' · ' + esBRL(tot) + '</small></h3><div class="ec-alterna"><span class="ec-pil"></span><button data-m="agir" class="' + (EC.modoDesp === 'agir' ? 'ec-on' : '') + '">A empenhar agora</button><button data-m="todos" class="' + (EC.modoDesp === 'todos' ? 'ec-on' : '') + '">Caixa toda</button></div></div>' +
+    '<div class="ec-desp-lista">' + lista.map(function(a, i) { var v = vOf(a), n = EC.modoDesp === 'agir' ? a.nAgir : a.n;
+      return '<div class="ec-desp' + (EC.filtroDesp === a.cod ? ' ec-on' : '') + '" data-cod="' + esH(a.cod) + '" style="--dc:' + a.cor + ';--w:' + (v / max).toFixed(4) + ';--d:' + (i * 60) + 'ms" title="Fonte ' + esH(a.fonte || '-') + '"><span class="ec-cod"><i></i>' + esH(a.cod) + '</span><span class="ec-nome">' + esH(a.nome || '—') + '</span><span class="ec-trilho"><span class="ec-enche"></span></span><span class="ec-val" data-v="' + v + '">' + esBRL(v) + '</span><span class="ec-qt">' + n + ' emp.</span></div>'; }).join('') + '</div>';
+  requestAnimationFrame(function() { requestAnimationFrame(function() { s.classList.add('ec-pronto'); }); });
+  s.querySelectorAll('.ec-val').forEach(function(el, i) { setTimeout(function() { esContar(el, Number(el.dataset.v)); }, i * 60); });
+  var al = s.querySelector('.ec-alterna'), pil = al.querySelector('.ec-pil'), on = al.querySelector('.ec-on');
+  if (on) { pil.style.width = on.offsetWidth + 'px'; pil.style.transform = 'translateX(' + on.offsetLeft + 'px)'; }
+  al.querySelectorAll('button').forEach(function(bt) { bt.onclick = function() { EC.modoDesp = bt.dataset.m; ecPainelDespesas(true); }; });
+  var g = document.getElementById('esLista');
+  s.querySelectorAll('.ec-desp').forEach(function(el) {
+    el.onpointerenter = function() { var a = EC.desp[el.dataset.cod]; g.classList.add('ec-destacando'); g.querySelectorAll('.ec-card').forEach(function(c) { c.classList.toggle('ec-liga', !!a.procs[c.dataset.id]); }); };
+    el.onpointerleave = function() { g.classList.remove('ec-destacando'); g.querySelectorAll('.ec-liga').forEach(function(c) { c.classList.remove('ec-liga'); }); };
+    el.onclick = function() { EC.filtroDesp = EC.filtroDesp === el.dataset.cod ? null : el.dataset.cod; if (EC.filtroDesp) esFiltro = 'todos'; g.classList.remove('ec-destacando'); esRender(); };
+  });
+}
+// ---------- números do topo ----------
+function ecBento(ps) {
+  var el = document.getElementById('ecBento'); if (!el) return;
+  if (esCaixa !== 'open') { el.style.display = 'none'; return; } el.style.display = '';
+  var a = ps.filter(ecAgir), tot = a.reduce(function(s, p) { return s + (ecValor(p) || 0); }, 0);
+  var emp = a.reduce(function(s, p) { return s + ((p.empenhosPorDespesa || []).length || 0); }, 0);
+  var conf = ps.filter(function(p) { var c = ecCredor(p); return c && c.conferir; }).length;
+  var notas = ps.filter(function(p) { return p.situacao === 'nota_aguardando_empenho'; }).length;
   var cont = {}; ps.forEach(function(p) { cont[p.situacao] = (cont[p.situacao] || 0) + 1; });
-  var f = '<button class="es-chip' + (esFiltro === 'todos' ? ' on' : '') + '" onclick="esFiltrar(\'todos\')">Todos<b>' + ps.length + '</b></button>';
-  Object.keys(ES_SIT).forEach(function(k) { if (cont[k]) f += '<button class="es-chip' + (esFiltro === k ? ' on' : '') + '" onclick="esFiltrar(\'' + k + '\')">' + ES_SIT[k].nome + '<b>' + cont[k] + '</b></button>'; });
-  document.getElementById('esFiltros').innerHTML = f;
-  var vis = ps.filter(function(p) { return esFiltro === 'todos' || p.situacao === esFiltro; });
-  document.getElementById('esLista').innerHTML = vis.length ? vis.map(function(p, i) {
-    var st = esSitDe(p), valor = p.dotacao && p.dotacao.valorTotal != null ? p.dotacao.valorTotal : p.somaItens;
-    return '<div class="es-item' + (esSel === p.idEmissao ? ' sel' : '') + '" style="--es-cor:' + st.cor + ';animation-delay:' + (i * 40) + 'ms" onclick="esAbrir(' + p.idEmissao + ')">' +
-      '<div class="n">' + esH(p.numero || p.documento) + '</div>' +
-      '<div class="o">' + esH(p.objeto || p.assunto || '') + '</div>' +
-      '<div class="r"><span class="es-tag">' + esH(st.nome) + (p.empenhoExistente && p.empenhoExistente.numero ? ' · nº ' + esH(p.empenhoExistente.numero) : '') + '</span><span class="v">' + esBRL(valor) + '</span></div>' +
-      (p.parecer && ES_REC[p.parecer.recomendacao] ? '<div class="es-rec" style="--es-cor:' + ES_REC[p.parecer.recomendacao].cor + '">' + esH(ES_REC[p.parecer.recomendacao].nome) + '</div>' : '') + '</div>';
-  }).join('') : '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nada aqui.</div>';
-  // acompanhados fora da caixa: seção própria, abaixo da lista
-  var acs = esCaixa === 'open' && esFiltro === 'todos' ? (esDados.acompanhados || []).filter(function(a) { return a.idEmissao; }) : [];
-  if (acs.length) document.getElementById('esLista').innerHTML += '<div class="es-sec" style="margin-top:10px">📌 Acompanhados fora da caixa (' + acs.length + ')</div>' + acs.map(function(p) {
-    var st = esSitDe(p), valor = p.dotacao && p.dotacao.valorTotal != null ? p.dotacao.valorTotal : p.somaItens;
-    return '<div class="es-item' + (esSel === p.idEmissao ? ' sel' : '') + '" style="--es-cor:' + (p.novidade ? '#d97706' : '#94a3b8') + '" onclick="esAbrir(' + p.idEmissao + ')">' +
-      '<div class="n">' + esH(p.numero || p.documento) + (p.novidade ? ' <span class="es-tag" style="--es-cor:#d97706">⚠ novidade</span>' : '') + '</div>' +
-      '<div class="o">' + esH(p.objeto || p.assunto || '') + '</div>' +
-      '<div class="r"><span class="es-tag">' + esH(st.nome) + '</span><span class="v">' + esBRL(valor) + '</span></div></div>';
-  }).join('');
-  if (esSel) { var p = esTodos().find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
+  var ks = Object.keys(cont).filter(function(k) { return ES_SIT[k]; }).sort(function(x, y) { return ES_SIT[x].ord - ES_SIT[y].ord; });
+  var chave = [tot.toFixed(2), a.length, emp, conf, notas, ks.map(function(k) { return k + cont[k]; }).join(',')].join('|');
+  if (chave === EC.chaveBento) { el.querySelectorAll('.ec-anel li').forEach(function(li) { li.classList.toggle('ec-on', li.dataset.k === esFiltro); }); return; }
+  var primeira = !EC.chaveBento; EC.chaveBento = chave;
+  var C = 2 * Math.PI * 40, acc = 0, n = ps.length || 1;
+  var arcos = ks.map(function(k, i) { var fr = cont[k] / n, s = '<circle class="ec-arco" data-k="' + k + '" cx="48" cy="48" r="40" stroke="' + ES_SIT[k].cor + '" stroke-dasharray="' + Math.max(0, fr * C - 2) + ' ' + C + '" stroke-dashoffset="' + (-acc * C + fr * C) + '" data-off="' + (-acc * C) + '" style="transition-delay:' + (200 + i * 110) + 'ms"/>'; acc += fr; return s; }).join('');
+  el.innerHTML = '<div class="ec-blk ec-hero' + (primeira ? ' ec-entra' : '') + '" style="--i:0"><div class="ec-aurora"><i></i><i></i><i></i></div><div class="ec-brilho"></div><small>A empenhar agora</small><b id="ecTot">' + esBRL(tot) + '</b><div class="ec-sub"><span id="ecN">' + a.length + '</span> processos prontos ou com nota esperando</div></div>' +
+    '<div class="ec-blk' + (primeira ? ' ec-entra' : '') + '" style="--i:1"><small>Empenhos a lançar</small><b id="ecEmp">' + emp + '</b><div class="ec-sub">um por despesa (peças e mão de obra separados)</div></div>' +
+    '<div class="ec-blk' + (primeira ? ' ec-entra' : '') + '" style="--i:2"><small>Notas aguardando empenho</small><b id="ecNotas" style="color:var(--success,#1f9d57)">' + notas + '</b><div class="ec-sub"><span id="ecConf">' + conf + '</span> credor' + (conf === 1 ? '' : 'es') + ' para conferir no CP</div></div>' +
+    '<div class="ec-blk ec-anel' + (primeira ? ' ec-entra' : '') + '" style="--i:3"><svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" stroke="var(--surface2)"/>' + arcos + '</svg><ul>' + ks.map(function(k) { return '<li data-k="' + k + '" class="' + (esFiltro === k ? 'ec-on' : '') + '" style="--c:' + ES_SIT[k].cor + '"><i></i>' + ES_SIT[k].nome + ' <b>' + cont[k] + '</b></li>'; }).join('') + '</ul></div>';
+  esContar(document.getElementById('ecTot'), tot); ecContarInt(document.getElementById('ecN'), a.length); ecContarInt(document.getElementById('ecEmp'), emp); ecContarInt(document.getElementById('ecNotas'), notas); ecContarInt(document.getElementById('ecConf'), conf);
+  setTimeout(function() { el.querySelectorAll('.ec-arco').forEach(function(c) { c.style.strokeDashoffset = c.dataset.off; }); }, 60);
+  el.querySelectorAll('.ec-blk').forEach(ecHolofote);
+  var svg = el.querySelector('svg');
+  el.querySelectorAll('.ec-anel li, .ec-arco').forEach(function(x) {
+    x.addEventListener('pointerenter', function() { var k = x.dataset.k; svg.classList.add('ec-focando'); el.querySelectorAll('.ec-arco, .ec-anel li').forEach(function(y) { y.classList.toggle('ec-foco', y.dataset.k === k); }); });
+    x.addEventListener('pointerleave', function() { svg.classList.remove('ec-focando'); el.querySelectorAll('.ec-foco').forEach(function(y) { y.classList.remove('ec-foco'); }); });
+    x.addEventListener('click', function() { esFiltro = x.dataset.k; EC.filtroDesp = null; esRender(); });
+  });
+}
+// ---------- filtros com pílula ----------
+function ecGrupo(k, p) { return k === 'todos' ? true : k === 'acao' ? /pronto|nota_aguardando|usa_empenho/.test(p.situacao) : p.situacao === k; }
+function ecFiltros(ps) {
+  var nav = document.getElementById('esFiltros');
+  var cont = {}; ps.forEach(function(p) { cont[p.situacao] = (cont[p.situacao] || 0) + 1; });
+  var ks = (esCaixa === 'open' ? ['acao'] : []).concat(['todos']).concat(Object.keys(ES_SIT).filter(function(k) { return cont[k]; }));
+  var nome = function(k) { return k === 'acao' ? 'Para agir agora' : k === 'todos' ? 'Todos' : ES_SIT[k].nome; };
+  var nOf = function(k) { return ps.filter(function(p) { return ecGrupo(k, p); }).length; };
+  nav.innerHTML = '<span class="ec-pilula"></span>' + ks.map(function(k) { return '<button class="es-chip' + (esFiltro === k ? ' on' : '') + '" data-k="' + k + '">' + nome(k) + '<b>' + nOf(k) + '</b></button>'; }).join('') +
+    (EC.filtroDesp && EC.desp[EC.filtroDesp] ? '<button class="es-chip ec-desp-chip" data-x="1" style="border-left:4px solid ' + EC.desp[EC.filtroDesp].cor + '">Despesa ' + esH(EC.filtroDesp) + ' ✕</button>' : '');
+  nav.querySelectorAll('.es-chip').forEach(function(b) { b.onclick = function() { if (b.dataset.x) EC.filtroDesp = null; else esFiltro = b.dataset.k; esRender(); }; });
+  var on = nav.querySelector('.es-chip.on'), pil = nav.querySelector('.ec-pilula');
+  if (on) requestAnimationFrame(function() { pil.style.width = on.offsetWidth + 'px'; pil.style.height = on.offsetHeight + 'px'; pil.style.transform = 'translate(' + on.offsetLeft + 'px,' + on.offsetTop + 'px)'; });
+}
+// ---------- cards ----------
+function ecCardHTML(p) {
+  var st = esSitDe(p), cr = ecCredor(p), par = p.parecer || {}, rec = ES_REC[par.recomendacao], emp = p.empenhosPorDespesa || [], forn = ecForn(p);
+  var totE = emp.reduce(function(s, e) { return s + (e.valor || 0); }, 0) || 1, pa = ecPassoAtual(p), dias = ecDias(p.etapaDesde);
+  var ts = (p.despachos || []).map(function(d) { return new Date(String(d.data || '').replace(' ', 'T')).getTime(); }).filter(function(t) { return !isNaN(t); });
+  var t0 = Math.min.apply(null, ts), t1 = Math.max.apply(null, ts), span = t1 - t0, porIndice = ts.length < 2 || span < 6 * 3600e3;
+  var h = '<div class="ec-in">' +
+    '<div class="ec-hd"><span class="ec-ava" style="--ac:' + ecCorDe(forn) + '">' + esH(ecIniciais(forn)) + '</span><span class="ec-t"><span class="ec-n">' + esH(ecNumero(p)) + '</span><span class="ec-fo">' + esH(forn || 'fornecedor não identificado') + '</span></span>' +
+    '<span class="ec-rec" style="--rc:' + (p.novidade ? '#d97706' : rec ? rec.cor : st.cor) + '">' + esH(p.novidade ? '⚠ novidade' : rec ? rec.nome : st.nome) + '</span></div>' +
+    '<div class="ec-o">' + esH(p.objeto || p.assunto || '') + '</div><div class="ec-arte">';
+  if (emp.length && p.situacao !== 'em_licitacao') h += '<div><div class="ec-mbarra">' + emp.map(function(e, k) { var d = EC.desp[e.despesa] || {}; return '<i style="--dc:' + (d.cor || '#94a3b8') + ';--k:' + k + ';flex:' + Math.max(.04, (e.valor || 0) / totE) + '"></i>'; }).join('') + '</div>' +
+    '<div class="ec-mleg">' + emp.map(function(e) { var d = EC.desp[e.despesa] || {}; return '<span style="--dc:' + (d.cor || '#94a3b8') + '"><i></i>' + esH(e.despesa) + (e.rotulo ? ' ' + esH(e.rotulo) : '') + ' <b>' + esBRL(e.valor) + '</b></span>'; }).join('') + '</div></div>';
+  h += '<div class="ec-lin"><span>' + ts.length + ' despacho' + (ts.length === 1 ? '' : 's') + (p.foraDaCaixa ? ' · 📌 acompanhado' : '') + '</span><span>' + esH(p.etapa || st.nome) + '</span></div><div class="ec-pulsos">' +
+    ts.map(function(t, k) { var x = porIndice ? (ts.length < 2 ? 50 : 4 + k / (ts.length - 1) * 92) : 4 + (t - t0) / span * 92; return '<i class="' + (k === ts.length - 1 ? 'ec-ult' : '') + '" title="' + new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '" style="left:' + x.toFixed(1) + '%;--k:' + k + '"></i>'; }).join('') + '</div>';
+  if (p.situacao !== 'em_licitacao') h += '<div class="ec-trilha" style="--pr:' + (pa / 3) + '">' + EC_PASSOS.map(function(n, i) { return '<span class="ec-passo' + (i < pa ? ' ec-feito' : i === pa ? ' ec-agora' : '') + '"><i></i>' + n + '</span>'; }).join('') + '</div>';
+  h += '</div>';
+  var nAl = (p.alertas || []).length, v = ecValor(p);
+  h += '<div class="ec-stats"><div><small>Valor</small><b class="ec-v" data-v="' + (v == null ? '' : v) + '">' + esBRL(v) + '</b></div>' +
+    '<div><small>Credor</small><b>' + (cr ? '<span class="ec-cr' + (cr.conferir ? ' ec-conferir' : '') + '" data-cr="1">' + esH(cr.cod) + (cr.conferir ? ' ❓' : '') + '</span>' : '—') + '</b></div>' +
+    '<div><small>' + (nAl ? 'Alertas' : 'Na etapa') + '</small><b' + (nAl ? ' style="color:var(--warning,#c77d18)"' : '') + '>' + (nAl ? '⚠ ' + nAl : dias == null ? '—' : dias === 0 ? 'hoje' : dias + 'd') + '</b></div></div>';
+  h += '<div class="ec-cta"><button class="ec-pri" data-a="abrir">Abrir ficha</button>' + (par.descricaoEmpenho ? '<button class="ec-ico" data-a="copiar" title="Copiar histórico para o empenho">⧉</button>' : '') +
+    (p.hash ? '<a class="ec-ico" data-a="1doc" title="Abrir no 1Doc" href="https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + esH(p.hash) + '" target="_blank" rel="noopener">↗</a>' : '') + '</div>';
+  return h + '</div>';
+}
+function ecNo(p) {
+  var chave = String(p.idEmissao), el = EC.nos.get(chave), html = ecCardHTML(p);
+  if (el) { if (el._html !== html) { el.innerHTML = html; el._html = html; ecLigarCredor(el, p); } el._p = p; el.classList.toggle('ec-novidade', !!p.novidade); return el; }
+  el = document.createElement('article'); el.className = 'ec-card' + (p.novidade ? ' ec-novidade' : ''); el.dataset.id = chave; el.tabIndex = 0;
+  el.style.setProperty('--c', p.novidade ? '#d97706' : esSitDe(p).cor); el.style.setProperty('--k2', (Number(p.idEmissao) || 0) % 9);
+  el.innerHTML = html; el._html = html; el._p = p;
+  el.onclick = function(e) {
+    var a = e.target.closest('[data-a]');
+    if (a && a.dataset.a === '1doc') { e.stopPropagation(); return; }
+    if (a && a.dataset.a === 'copiar') { e.stopPropagation(); esCopiarDescricao(el._p.idEmissao); return; }
+    esAbrir(el._p.idEmissao);
+  };
+  el.onkeydown = function(e) { if (e.key === 'Enter' && e.target === el) esAbrir(el._p.idEmissao); };
+  el.addEventListener('pointerdown', function(e) { if (ecReduz || e.target.closest('[data-a="1doc"],[data-a="copiar"]')) return; var r = el.getBoundingClientRect(), o = document.createElement('span'); o.className = 'ec-onda'; o.style.left = (e.clientX - r.left) + 'px'; o.style.top = (e.clientY - r.top) + 'px'; el.querySelector('.ec-in').appendChild(o); setTimeout(function() { o.remove(); }, 560); });
+  el.addEventListener('pointermove', function(e) { if (ecReduz) return; var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.transform = 'rotateX(' + (-y * 3.5) + 'deg) rotateY(' + (x * 3.5) + 'deg) translateY(-2px)'; });
+  el.addEventListener('pointerleave', function() { el.style.transform = ''; });
+  ecHolofote(el); ecLigarCredor(el, p);
+  EC.nos.set(chave, el); return el;
+}
+function ecLigarCredor(el, p) {
+  var c = el.querySelector('[data-cr]'), dica = document.getElementById('ecDica'); if (!c || !dica) return;
+  var pos = function(e) { dica.style.left = Math.min(innerWidth - 320, e.clientX + 14) + 'px'; dica.style.top = (e.clientY + 16) + 'px'; };
+  c.addEventListener('pointerenter', function(e) { var cr = ecCredor(el._p); if (!cr) return; dica.innerHTML = '<b>' + esH(cr.cod) + '</b> ' + esH(cr.nome || '') + (cr.cnpj ? '<br>CNPJ <b>' + esH(cr.cnpj) + '</b>' : '') + '<br><span style="opacity:.7">' + esH(cr.de) + '</span>' + (cr.conferir ? '<br><span style="color:#fbbf24">❓ conferir' + (cr.alt && cr.alt.length ? ': ' + esH(cr.alt.join('; ')) : '') + '</span>' : ''); pos(e); dica.classList.add('ec-on'); });
+  c.addEventListener('pointermove', pos); c.addEventListener('pointerleave', function() { dica.classList.remove('ec-on'); });
+}
+var ecOlho = window.IntersectionObserver ? new IntersectionObserver(function(es) { es.forEach(function(e) { if (!e.isIntersecting) return; var el = e.target; el.classList.add('ec-visto'); if (!EC.vistos.has(el.dataset.id)) { EC.vistos.add(el.dataset.id); var v = el.querySelector('.ec-v'); if (v && v.dataset.v !== '') esContar(v, Number(v.dataset.v)); } ecOlho.unobserve(el); }); }, { rootMargin: '0px 0px -40px 0px' }) : null;
+function ecLimparSaida(el) { clearTimeout(el._sai); el.getAnimations().forEach(function(a) { a.cancel(); }); ['position', 'left', 'top', 'width', 'height', 'pointerEvents'].forEach(function(k) { el.style[k] = ''; }); delete el.dataset.saindo; }
+// FLIP: quem fica desliza, quem sai encolhe (ou desliza para a direita se saiu da caixa), quem entra vem em onda do centro
+function ecGrade(vis, acs, saidos) {
+  var g = document.getElementById('esLista'); g.classList.add('ec-grade');
+  var ids = {}; vis.concat(acs).forEach(function(p) { ids[String(p.idEmissao)] = 1; });
+  var antes = {}; g.querySelectorAll('.ec-card').forEach(function(el) { antes[el.dataset.id] = el.getBoundingClientRect(); });
+  Array.prototype.slice.call(g.children).forEach(function(el) { if (!el.classList.contains('ec-card')) el.remove(); });
+  var gr = g.getBoundingClientRect();
+  g.querySelectorAll('.ec-card').forEach(function(el) {
+    if (ids[el.dataset.id] || el.dataset.saindo) return;
+    var r = antes[el.dataset.id]; el.dataset.saindo = '1';
+    el.style.position = 'absolute'; el.style.left = (r.left - gr.left) + 'px'; el.style.top = (r.top - gr.top) + 'px'; el.style.width = r.width + 'px'; el.style.height = r.height + 'px'; el.style.pointerEvents = 'none';
+    var saiu = saidos && saidos[el.dataset.id];
+    el.animate(saiu ? [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(28px)' }] : [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.92)' }], { duration: saiu ? 220 : 180, easing: 'cubic-bezier(.3,0,1,1)', fill: 'forwards' });
+    el._sai = setTimeout(function() { if (el.dataset.saindo) { ecLimparSaida(el); el.remove(); } }, saiu ? 240 : 200);
+  });
+  var anexar = function(p) { var el = ecNo(p); if (el.dataset.saindo) ecLimparSaida(el); g.appendChild(el); el.getAnimations().forEach(function(a) { if (!(window.CSSAnimation && a instanceof CSSAnimation) && a.playState === 'finished') a.cancel(); }); return el; };
+  vis.forEach(anexar);
+  if (!vis.length && !acs.length) g.insertAdjacentHTML('beforeend', '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Nada aqui.</div>');
+  if (acs.length) { var sec = document.createElement('div'); sec.className = 'ec-sec'; sec.textContent = '📌 Acompanhados fora da caixa (' + acs.length + ')'; g.appendChild(sec); acs.forEach(anexar); }
+  // borda neon: só 1 card, o de alerta mais grave
+  g.querySelectorAll('.ec-viva').forEach(function(c) { c.classList.remove('ec-viva'); });
+  var grave = vis.find(function(p) { return (p.alertas || []).some(function(a) { return /≠|substituída|não é o CNPJ|anulad/.test(a); }); });
+  if (grave && EC.nos.get(String(grave.idEmissao))) EC.nos.get(String(grave.idEmissao)).classList.add('ec-viva');
+  var gr2 = g.getBoundingClientRect(), cx = gr2.left + gr2.width / 2, novos = [];
+  vis.concat(acs).forEach(function(p) {
+    var el = EC.nos.get(String(p.idEmissao)), r0 = antes[String(p.idEmissao)], r1 = el.getBoundingClientRect();
+    if (r0) { var dx = r0.left - r1.left, dy = r0.top - r1.top; if ((dx || dy) && !ecReduz) el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,0,0,1)' }); }
+    else novos.push({ el: el, dist: Math.hypot(r1.left + r1.width / 2 - cx, r1.top - gr2.top) });
+    if (ecOlho) ecOlho.observe(el); else el.classList.add('ec-visto');
+  });
+  var max = Math.max.apply(null, novos.map(function(n) { return n.dist; }).concat([1]));
+  novos.slice(0, 40).forEach(function(n) { n.el.classList.remove('ec-mostra'); n.el.classList.add('ec-espera'); n.el.style.setProperty('--d', Math.round(n.dist / max * 380) + 'ms'); void n.el.offsetWidth; n.el.classList.remove('ec-espera'); n.el.classList.add('ec-mostra'); });
+  EC.ordem = vis.concat(acs).map(function(p) { return p.idEmissao; });
+}
+function esRender() {
+  ecIniciar();
+  var ps = esDados.processos.slice().sort(function(a, b) { return esSitDe(a).ord - esSitDe(b).ord || String(b.recebidoEm || '').localeCompare(String(a.recebidoEm || '')); });
+  // quem saiu da caixa desde a última leitura (arquivado no 1Doc): sai deslizando e avisa
+  var saidos = null;
+  if (esCaixa === 'open') {
+    var agora = {}; ps.forEach(function(p) { agora[String(p.idEmissao)] = p; });
+    if (EC.idsCaixa) { var foi = Object.keys(EC.idsCaixa).filter(function(k) { return !agora[k]; }); if (foi.length) { saidos = {}; foi.forEach(function(k) { saidos[k] = 1; }); ecAvisar(foi.length === 1 ? EC.idsCaixa[foi[0]] + ' saiu da caixa (arquivado ou encaminhado no 1Doc)' : foi.length + ' processos saíram da caixa'); } }
+    EC.idsCaixa = {}; ps.forEach(function(p) { EC.idsCaixa[String(p.idEmissao)] = ecNumero(p); });
+  }
+  if (esFiltro === 'acao' && esCaixa !== 'open') esFiltro = 'todos';
+  ecMontarDespesas(ps); ecBento(ps); ecPainelDespesas(); ecFiltros(ps);
+  var q = '';
+  var vis = ps.filter(function(p) { return ecGrupo(esFiltro, p) && (!EC.filtroDesp || (p.empenhosPorDespesa || []).some(function(e) { return e.despesa === EC.filtroDesp; })); });
+  var acs = esCaixa === 'open' && (esFiltro === 'todos' || esFiltro === 'acao') && !EC.filtroDesp ? (esDados.acompanhados || []).filter(function(a) { return a.idEmissao; }) : [];
+  ecGrade(vis, acs, saidos);
+  if (esSel && document.getElementById('ecFicha').classList.contains('ec-on')) { var p = esTodos().find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
 }
 function esFiltrar(k) { esFiltro = k; esRender(); }
+// ---------- ficha que nasce do card ----------
+function ecAbrirFicha(el, depois) {
+  ecIniciar();
+  var f = document.getElementById('ecFicha'), ja = f.classList.contains('ec-on');
+  if (EC.aberto && EC.aberto !== el) EC.aberto.classList.remove('ec-oculto');
+  EC.aberto = el || null;
+  f.classList.add('ec-on'); document.getElementById('ecVeu').classList.add('ec-on'); document.body.style.overflow = 'hidden';
+  if (ja) { f.classList.add('ec-pronta'); if (el) el.classList.add('ec-oculto'); if (depois) depois(); return; }
+  f.classList.remove('ec-pronta');
+  var b = f.getBoundingClientRect(), quadros;
+  if (el && el.isConnected && el.offsetParent !== null) { var a = el.getBoundingClientRect(); el.classList.add('ec-oculto'); quadros = [{ transform: 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ',' + (a.height / b.height) + ')', borderRadius: '20px' }, { transform: 'none', borderRadius: '22px' }]; }
+  else quadros = [{ transform: 'scale(.96)', opacity: 0 }, { transform: 'none', opacity: 1 }];
+  var fim = function() { f.classList.add('ec-pronta'); if (depois) depois(); };
+  if (ecReduz) { fim(); return; }
+  f.animate(quadros, { duration: el ? 460 : 280, easing: 'cubic-bezier(.05,.7,.1,1)' });
+  setTimeout(fim, el ? 470 : 290);
+}
+function ecFechar() {
+  var f = document.getElementById('ecFicha'); if (!f || !f.classList.contains('ec-on')) return;
+  var el = EC.aberto; EC.aberto = null; esSel = null;
+  f.classList.remove('ec-pronta'); document.getElementById('ecVeu').classList.remove('ec-on'); document.body.style.overflow = '';
+  var b = f.getBoundingClientRect(), quadros;
+  if (el && el.isConnected && el.offsetParent !== null) { var a = el.getBoundingClientRect(); quadros = [{ transform: 'none' }, { transform: 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ',' + (a.height / b.height) + ')' }]; }
+  else quadros = [{ opacity: 1 }, { opacity: 0, transform: 'scale(.97)' }];
+  var fim = function() { f.classList.remove('ec-on'); if (el) { el.classList.remove('ec-oculto'); el.focus({ preventScroll: true }); } };
+  if (ecReduz) { fim(); return; }
+  f.animate(quadros, { duration: 300, easing: 'cubic-bezier(.3,0,1,1)' }); setTimeout(fim, 300);
+}
+function ecPasso(d) {
+  if (esSel == null) return; var i = EC.ordem.indexOf(esSel), id = EC.ordem[i + d]; if (id == null) return;
+  var det = document.getElementById('esDet'), p = esTodos().find(function(x) { return x.idEmissao === id; }); if (!p) return;
+  if (EC.aberto) EC.aberto.classList.remove('ec-oculto');
+  EC.aberto = EC.nos.get(String(id)) || null; if (EC.aberto) EC.aberto.classList.add('ec-oculto'); esSel = id;
+  if (ecReduz) { esDetalhe(p, true); det.scrollTop = 0; return; }
+  det.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-d * 16) + 'px)' }], { duration: 140, easing: 'cubic-bezier(.3,0,1,1)' });
+  setTimeout(function() { esDetalhe(p, true); det.scrollTop = 0; det.animate([{ opacity: 0, transform: 'translateX(' + (d * 16) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.05,.7,.1,1)' }); }, 140);
+}
 function esAbrir(id) {
   esSel = id;
-  document.querySelectorAll('#esLista .es-item').forEach(function(el) { el.classList.toggle('sel', el.getAttribute('onclick') === 'esAbrir(' + id + ')'); });
-  var p = esTodos().find(function(x) { return x.idEmissao === id; });
-  var det = document.getElementById('esDet');
-  det.innerHTML = '<div class="es-sk" style="width:40%;height:20px"></div><div class="es-sk" style="width:70%"></div><div class="es-sk"></div><div class="es-sk" style="width:85%"></div><div class="es-sk" style="width:55%"></div>';
-  setTimeout(function() { esDetalhe(p, true); }, 260);
-  if (window.innerWidth < 860) det.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var p = esTodos().find(function(x) { return x.idEmissao === id; }); if (!p) return;
+  var det = document.getElementById('esDet'); det.innerHTML = ''; det.scrollTop = 0;
+  ecAbrirFicha(EC.nos.get(String(id)) || null, function() { esDetalhe(p, true); });
 }
+window.ecFechar = ecFechar;
 function esCampo(rot, val) { var falta = val == null || val === ''; return '<div class="es-campo' + (falta ? ' falta' : '') + '"><label>' + rot + '</label><span>' + (falta ? 'não informado' : esH(val)) + '</span></div>'; }
 function esContar(el, alvo) {
   if (alvo == null) { el.textContent = '—'; return; }
@@ -3240,6 +3664,8 @@ function esDetalhe(p, animar) {
   }
   if (p.empenho) h += '<div class="es-campo" style="display:inline-block;background:#e8f5ee"><label>Empenho</label><span>nº ' + esH(p.empenho.numero) + (p.empenho.autor ? ' · ' + esH(p.empenho.autor) : '') + '</span></div>';
   // 05/11/2026: com empenho existente não há empenho novo a lançar - o bloco só mostrava "não informado"
+  // 06/11/2026 (v2): empenhos a lançar, um cartão por despesa (cor igual à do painel de despesas)
+  if (p.situacao !== 'usa_empenho_existente' && p.empenhosPorDespesa && p.empenhosPorDespesa.length) h += '<div class="es-sec">Empenhos a lançar (' + p.empenhosPorDespesa.length + ')</div><div class="ec-emps">' + p.empenhosPorDespesa.map(function(e) { var d = (typeof EC !== 'undefined' && EC.desp[e.despesa]) || {}; return '<div class="ec-emp" style="--dc:' + (d.cor || 'var(--accent)') + '"><div class="ec-d">Despesa ' + esH(e.despesa) + (e.rotulo ? ' · ' + esH(e.rotulo) : '') + '</div><div class="ec-v" data-v="' + (e.valor == null ? '' : e.valor) + '">' + esBRL(e.valor) + '</div><div class="ec-c">' + (e.centroCusto != null ? 'Centro de custo ' + esH(e.centroCusto) : 'centro a definir') + '</div></div>'; }).join('') + '</div>';
   if (p.situacao !== 'usa_empenho_existente') h += '<div class="es-sec">Para lançar no LC / CP</div><div class="es-campos">' +
     esCampo(dt.despesas && dt.despesas.length > 1 ? 'Despesas (reduzido)' : 'Despesa (reduzido)', dt.despesa) + esCampo('Fonte', dt.fonte ? dt.fonte + (dt.fonteNome ? ' – ' + dt.fonteNome : '') : null) + esCampo('Detalhamento', dt.detalhamento ? dt.detalhamento + (dt.detalhamentoNome ? ' – ' + dt.detalhamentoNome : '') : null) +
     esCampo('Fornecedor' + (p.fornecedorDe ? ' (' + p.fornecedorDe + ')' : ''), p.fornecedor) + (p.credorCP ? esCampo('Credor no CP (último empenho)', p.credorCP.codigo + ' — ' + (p.credorCP.nome || '') + (p.credorCP.cnpj ? ' · CNPJ ' + p.credorCP.cnpj : '') + ' · empenho ' + p.credorCP.empenho + (p.credorCP.emissao ? ' de ' + p.credorCP.emissao : '')) : p.credorCadastro ? esCampo('Credor no CP (cadastro, pelo ' + p.credorCadastro.como + ')', p.credorCadastro.codigo + ' — ' + p.credorCadastro.nome + (p.credorCadastro.cnpj ? ' · CNPJ ' + p.credorCadastro.cnpj : '') + (p.credorCadastro.conferir ? ' · ❓ conferir' + (p.credorCadastro.alternativas && p.credorCadastro.alternativas.length ? ' (outros: ' + p.credorCadastro.alternativas.join('; ') + ')' : '') : '')) : '') + esCampo('Pregão', p.pregao) + esCampo('Ata RP', p.ata) +
@@ -3320,6 +3746,7 @@ function esDetalhe(p, animar) {
   if (animar) {
     det.querySelectorAll('.es-casc > *').forEach(function(el, i) { el.style.animationDelay = (i * 45) + 'ms'; });
     esContar(document.getElementById('esValor'), valor);
+    det.querySelectorAll('.ec-emp .ec-v').forEach(function(el) { if (el.dataset.v !== '') esContar(el, Number(el.dataset.v)); });
   } else det.querySelectorAll('.es-casc > *').forEach(function(el) { el.style.animation = 'none'; el.style.opacity = 1; el.style.transform = 'none'; });
 }
 function esCopiarDescricao(id) {
