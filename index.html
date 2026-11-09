@@ -261,6 +261,55 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   @keyframes axIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
   @keyframes axFade{from{opacity:0}to{opacity:1}}
   @keyframes axShim{from{background-position:200% 0}to{background-position:-200% 0}}
+  /* 08/11/2026 (Thiago, 10.493 x 10.467): comparação lado a lado dos processos em conflito */
+  .pcmp-faixa{display:flex;flex-direction:column;gap:6px;margin:8px 0 2px}
+  .pcmp-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;padding:9px 12px;border-radius:10px;border:1.5px solid #dc2626;background:rgba(220,38,38,.07);color:var(--text,#1a2230);font:inherit;cursor:pointer;transition:background .2s,transform .15s}
+  .pcmp-btn:hover{background:rgba(220,38,38,.14);transform:translateY(-1px)}
+  .pcmp-btn b{font-size:13px;color:#dc2626}
+  .pcmp-btn span{font-size:11.5px;color:var(--text-muted,#5b6577);line-height:1.35}
+  .pcmp-veu{position:fixed;inset:0;z-index:8900;background:rgba(10,15,25,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;animation:axFade .25s ease both}
+  .pcmp-box{background:var(--surface,#fff);color:var(--text,#1a2230);width:min(1320px,100%);max-height:100%;border-radius:16px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;animation:axIn .35s cubic-bezier(.2,.8,.2,1) both}
+  .pcmp-top{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border,#e3e7ee)}
+  .pcmp-top h3{margin:0;font-size:16px}
+  .pcmp-top .sp{flex:1}
+  .pcmp-x{border:1px solid var(--border,#e3e7ee);background:transparent;color:inherit;border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit}
+  .pcmp-corpo{overflow:auto;padding:14px 16px 18px;display:flex;flex-direction:column;gap:14px}
+  .pcmp-corpo>*{flex-shrink:0}
+  .pcmp-motivos{border:1.5px solid #dc2626;background:rgba(220,38,38,.06);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.45}
+  .pcmp-motivos b{color:#dc2626}
+  .pcmp-motivos ul{margin:4px 0 0;padding-left:18px}
+  .pcmp-tl{border:1px solid var(--border,#e3e7ee);border-radius:12px;padding:10px 14px 8px}
+  .pcmp-tl-tit{font-size:12px;font-weight:700;color:var(--text-muted,#5b6577);margin-bottom:8px}
+  .pcmp-pista{position:relative;height:30px;margin:4px 0;background:var(--surface2,#f3f5f8);border-radius:8px}
+  .pcmp-barra{position:absolute;top:4px;bottom:4px;border-radius:6px;color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden}
+  .pcmp-barra.a{background:#2563eb}.pcmp-barra.b{background:#7c3aed}
+  .pcmp-sobre{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(220,38,38,.35) 0 6px,rgba(220,38,38,.12) 6px 12px);border-left:2px solid #dc2626;border-right:2px solid #dc2626;pointer-events:none}
+  .pcmp-eixo{position:relative;height:16px;font-size:10.5px;color:var(--text-muted,#5b6577)}
+  .pcmp-eixo span{position:absolute;transform:translateX(-50%)}
+  .pcmp-eixo span:first-child{transform:none}.pcmp-eixo span:last-child{transform:translateX(-100%)}
+  .pcmp-sobre-rot{font-size:12px;color:#dc2626;font-weight:700;margin-top:2px}
+  .pcmp-tab{width:100%;border-collapse:collapse;font-size:13px}
+  .pcmp-tab th,.pcmp-tab td{padding:7px 10px;border-bottom:1px solid var(--border,#e3e7ee);text-align:left;vertical-align:top}
+  .pcmp-tab thead th{font-size:12px;position:sticky;top:0;background:var(--surface,#fff)}
+  .pcmp-tab thead th.a{color:#2563eb}.pcmp-tab thead th.b{color:#7c3aed}
+  .pcmp-tab td.rot{color:var(--text-muted,#5b6577);font-weight:600;white-space:nowrap;width:1%}
+  .pcmp-tab tr.igual td.v{background:rgba(245,158,11,.12)}
+  .pcmp-tab td.m{width:1%;white-space:nowrap;font-weight:700;font-size:12px}
+  .pcmp-tab tr.igual td.m{color:#b45309}.pcmp-tab tr.dif td.m{color:var(--text-muted,#5b6577)}
+  .pcmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pcmp-col{border:1px solid var(--border,#e3e7ee);border-radius:12px;padding:10px 12px;min-width:0;border-top:4px solid var(--pc,#2563eb)}
+  .pcmp-col h4{margin:0 0 6px;font-size:13.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pcmp-col h4 a{font-size:12px;font-weight:600}
+  .pcmp-conf{margin:4px 0 8px;padding-left:18px;font-size:12.5px;line-height:1.4}
+  .pcmp-conf li.alerta{color:#dc2626}.pcmp-conf li.atencao{color:#b45309}.pcmp-conf li.ok{color:var(--text-muted,#5b6577)}
+  .pcmp-ths{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .pcmp-th{border:1px solid var(--border,#e3e7ee);background:var(--surface2,#f3f5f8);color:inherit;border-radius:8px;padding:5px 8px;font:inherit;font-size:11.5px;cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pcmp-th.on{border-color:var(--pc,#2563eb);box-shadow:0 0 0 2px var(--pc,#2563eb) inset}
+  .pcmp-palco{height:min(56vh,520px);border-radius:10px;background:var(--surface2,#f3f5f8);display:flex;align-items:center;justify-content:center;overflow:auto}
+  .pcmp-palco img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+  .pcmp-palco iframe{width:100%;height:100%;border:0}
+  .pcmp-dica{font-size:12px;color:var(--text-muted,#5b6577)}
+  @media (max-width:760px){.pcmp-cols{grid-template-columns:1fr}.pcmp-veu{padding:0}.pcmp-box{border-radius:0;height:100%}}
   .ax-veu{position:fixed;inset:0;z-index:9000;background:rgba(10,15,25,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:18px;animation:axFade .25s ease both;}
   .ax-box{background:var(--surface,#fff);color:var(--text,#1a2230);width:min(1280px,100%);height:min(860px,100%);border-radius:16px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;animation:axIn .35s cubic-bezier(.2,.8,.2,1) both;}
   .ax-top{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border,#e3e7ed);flex-wrap:wrap;}
@@ -2051,6 +2100,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   @keyframes ecRisca{to{stroke-dashoffset:0}}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="assets/proc-comparar.js?v=20261108"></script>
 </head>
 <body>
 <!-- BANNER DUPLICATA -->
@@ -4358,7 +4408,7 @@ function renderProcessosCaixa(itens, atualizadoEm) {
           + '<span>DURAÇÃO<b' + (du.pern ? ' class="pern"' : '') + '>' + escaparHtmlProc(du.txt) + '</b></span><span>PLACA<b>' + escaparHtmlProc(p.placa || '—') + '</b></span></div>'
         + '<div class="proc-tags"><span class="proc-sit" data-hash="' + escaparHtmlProc(p.hash || '') + '">…</span>' + origemTag + tipoTag + (p.clinicaDestino ? '<span class="proc-tag">📍 ' + escaparHtmlProc(p.clinicaDestino) + '</span>' : '') + (temDup ? '<span class="proc-tag dup">⛔ Mesma data</span>' : '') + riscoTag + '</div>'
         + '<div class="proc-motivo-bloq" data-hash-motivo="' + escaparHtmlProc(p.hash || '') + '" hidden></div>'
-        + avisoDuplicataHtml + empenhoHtml
+        + avisoDuplicataHtml + empenhoHtml + procCompararFaixaHtml(p)
         + '<div class="tkt-dica"><i>▾</i> VER A CONFERÊNCIA DA VIAGEM</div>'
         + seloTkt
       + '</div>'
@@ -4594,6 +4644,131 @@ function procHistoricoHtml(p) {
   return '<div class="proc-hist' + (temDup ? ' tem-dup' : '') + '"><div class="proc-hist-tit">Viagens de ' + escaparHtmlProc(primeiro) + ' perto de ' + escaparHtmlProc((p.dataSaida || '').slice(0, 5)) + '</div>'
     + (linhas.length ? linhas.join('') : '<div class="proc-hist-vazio">Nenhuma outra viagem empenhada em ±20 dias.</div>') + '</div>';
 }
+// 08/11/2026 (Thiago, 10.493 x 10.467): processo com problema que aponta OUTRO processo (mesma placa no mesmo
+// horário, mesma pessoa na mesma data...) ganha a faixa "⚖ Comparar com ...": abre os dois lado a lado, com os
+// horários sobrepostos, os campos iguais em destaque e os anexos de cada um. Lógica em assets/proc-comparar.js.
+function procCompararFaixaHtml(p) {
+  if (typeof procCompararAlvos !== 'function' || !p) return '';
+  var al;
+  try { al = procCompararAlvos(p, processosCaixaAtual || [], (typeof processos !== 'undefined' && processos) || []); } catch (e) { return ''; }
+  if (!al || !al.length) return '';
+  return '<div class="pcmp-faixa">' + al.map(function(a) {
+    var m = String(a.motivos[0] || '').replace(/^Auditor:\s*/, '');
+    if (m.length > 140) m = m.slice(0, 137) + '…';
+    return '<button type="button" class="pcmp-btn" data-hash="' + escaparHtmlProc(p.hash || '') + '" data-outro="' + escaparHtmlProc(a.numero) + '" title="' + escaparHtmlProc(a.motivos.join(' · ')) + '"><b>⚖ Comparar com o processo ' + escaparHtmlProc(a.numero) + (a.motivos.length > 1 ? ' (' + a.motivos.length + ' motivos)' : '') + '</b><span>' + escaparHtmlProc(m) + '</span></button>';
+  }).join('') + '</div>';
+}
+var _pcmp = null;
+function pcmpFechar() {
+  var v = document.getElementById('pcmp-veu'); if (v) v.remove();
+  document.removeEventListener('keydown', pcmpTeclas);
+  _pcmp = null;
+}
+function pcmpTeclas(e) { if (e.key === 'Escape' && !document.getElementById('ax-veu')) pcmpFechar(); }
+function pcmpHora(ms) { var d = new Date(ms); return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0'); }
+function pcmpDia(ms) { var d = new Date(ms); return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0'); }
+function pcmpLinhaTempo(mod, a, b) {
+  if (!mod.faixa || !mod.barras || !mod.barras.length) return '';
+  var ini = mod.faixa.inicio, tot = Math.max(mod.faixa.fim - ini, 3600000);
+  var pct = function(ms) { return ((ms - ini) / tot * 100).toFixed(2) + '%'; };
+  var larg = function(x, y) { return ((y - x) / tot * 100).toFixed(2) + '%'; };
+  var sobre = mod.sobreposicao;
+  var pista = function(lado) {
+    var br = mod.barras.filter(function(x) { return x.lado === lado; })[0], q = lado === 'a' ? a : b;
+    var h = '<div class="pcmp-pista">';
+    if (br) h += '<div class="pcmp-barra ' + lado + '" style="left:' + pct(br.inicio) + ';width:' + larg(br.inicio, br.fim) + '" title="' + escaparHtmlProc(pcmpDia(br.inicio) + ' ' + pcmpHora(br.inicio) + ' → ' + pcmpDia(br.fim) + ' ' + pcmpHora(br.fim)) + '">' + escaparHtmlProc((q && q.numero || '') + ' · ' + pcmpHora(br.inicio) + '–' + pcmpHora(br.fim) + (q && q.cidade ? ' · ' + q.cidade : '')) + '</div>';
+    else h += '<span class="pcmp-dica" style="padding:6px 8px;display:block">' + escaparHtmlProc((q && q.numero) || '') + ': horário não informado</span>';
+    if (sobre) h += '<div class="pcmp-sobre" style="left:' + pct(sobre.inicio) + ';width:' + larg(sobre.inicio, sobre.fim) + '"></div>';
+    return h + '</div>';
+  };
+  var horas = Math.round(tot / 3600000), passo = horas > 36 ? 6 : (horas > 16 ? 2 : 1), eixo = '';
+  for (var k = 0; k <= horas; k += passo) { var t = ini + k * 3600000; eixo += '<span style="left:' + pct(t) + '">' + (k === 0 || new Date(t).getUTCHours() === 0 ? pcmpDia(t) + ' ' : '') + pcmpHora(t) + '</span>'; }
+  var rot = sobre ? '⛔ As duas viagens se sobrepõem por ' + (sobre.minutos >= 60 ? Math.floor(sobre.minutos / 60) + 'h' + (sobre.minutos % 60 ? String(sobre.minutos % 60).padStart(2, '0') : '') : sobre.minutos + ' min') + ' (' + pcmpHora(sobre.inicio) + '–' + pcmpHora(sobre.fim) + ')' : 'Os horários não se sobrepõem';
+  return '<div class="pcmp-tl"><div class="pcmp-tl-tit">Linha do tempo</div>' + pista('a') + pista('b') + '<div class="pcmp-eixo">' + eixo + '</div><div class="pcmp-sobre-rot" style="' + (sobre ? '' : 'color:var(--text-muted,#5b6577)') + '">' + rot + '</div></div>';
+}
+function pcmpColuna(lado, q, de) {
+  var cor = lado === 'a' ? '#2563eb' : '#7c3aed';
+  if (!q) return '<div class="pcmp-col" style="--pc:' + cor + '"><h4>Processo não encontrado</h4><p class="pcmp-dica">Não está na caixa nem na Tabela de Controle. Procure pelo número no 1Doc.</p></div>';
+  var c = q.conferencia, conf = '';
+  if (c && c.itens && c.itens.length) conf = '<ul class="pcmp-conf">' + c.itens.filter(function(i) { return i.nivel !== 'ok'; }).concat(c.itens.filter(function(i) { return i.nivel === 'ok'; })).map(function(i) { return '<li class="' + i.nivel + '">' + (i.nivel === 'ok' ? '✓' : i.nivel === 'alerta' ? '⛔' : '⚠') + ' ' + escaparHtmlProc(i.texto) + '</li>'; }).join('') + '</ul>';
+  else if (de === 'tabela') conf = '<p class="pcmp-dica">Já está na Tabela de Controle' + (q.empenho ? ' (empenho ' + escaparHtmlProc(q.empenho) + ')' : '') + '.</p>';
+  return '<div class="pcmp-col" style="--pc:' + cor + '" data-lado="' + lado + '">'
+    + '<h4>Proc. ' + escaparHtmlProc(q.numero) + ' <span class="pcmp-dica">' + (de === 'tabela' ? 'Tabela de Controle' : 'na caixa') + '</span>' + (q.url ? '<a href="' + escaparHtmlProc(q.url) + '" target="_blank" rel="noopener">1Doc ↗</a>' : '') + '</h4>'
+    + conf
+    + (q.hash ? '<div class="pcmp-dica">📎 Anexos</div><div class="pcmp-ths"><span class="pcmp-dica">Lendo a lista no 1Doc…</span></div><div class="pcmp-palco"><span class="pcmp-dica">Escolha um anexo</span></div>'
+        + '<button type="button" class="pcmp-x" data-ax="' + escaparHtmlProc(q.hash) + '" style="margin-top:6px">Abrir no visualizador completo (zoom, girar)</button>' : '<p class="pcmp-dica">Sem link do 1Doc para ler os anexos.</p>')
+    + '</div>';
+}
+function pcmpCarregarAnexos(col, hash) {
+  var ths = col.querySelector('.pcmp-ths'), palco = col.querySelector('.pcmp-palco');
+  if (!ths) return;
+  sgdFetch(SGD_WORKER_URL + '?action=processo-anexos&hash=' + encodeURIComponent(hash)).then(function(r) { return r.json(); }).then(function(j) {
+    if (!col.isConnected) return;
+    var an = (j && j.anexos) || [];
+    if (!j.ok) { ths.innerHTML = '<span class="pcmp-dica">' + escaparHtmlProc(j.error || 'Não consegui ler os anexos.') + '</span>'; return; }
+    if (!an.length) { ths.innerHTML = '<span class="pcmp-dica">Sem anexos.</span>'; palco.innerHTML = ''; return; }
+    ths.innerHTML = an.map(function(a, i) { return '<button type="button" class="pcmp-th" data-i="' + i + '" title="' + escaparHtmlProc(a.nome) + '">' + escaparHtmlProc(a.nome) + '</button>'; }).join('');
+    pcmpMostrar(col, hash, 0);
+  }).catch(function(err) { if (col.isConnected) ths.innerHTML = '<span class="pcmp-dica">Erro: ' + escaparHtmlProc(err.message) + '</span>'; });
+}
+function pcmpMostrar(col, hash, i) {
+  var palco = col.querySelector('.pcmp-palco');
+  col.querySelectorAll('.pcmp-th').forEach(function(b) { b.classList.toggle('on', Number(b.dataset.i) === i); });
+  palco.innerHTML = '<span class="pcmp-dica">Carregando…</span>';
+  axBaixar(hash, i).then(function(v) {
+    if (!col.isConnected) return;
+    if (/^image\//.test(v.tipo)) palco.innerHTML = '<img alt="' + escaparHtmlProc(v.nome) + '" src="' + v.url + '" data-ax="' + escaparHtmlProc(hash) + '">';
+    else if (/pdf/.test(v.tipo)) palco.innerHTML = '<iframe title="' + escaparHtmlProc(v.nome) + '" src="' + v.url + '"></iframe>';
+    else palco.innerHTML = '<a href="' + v.url + '" download="' + escaparHtmlProc(v.nome) + '">Baixar ' + escaparHtmlProc(v.nome) + '</a>';
+  }).catch(function(err) { if (col.isConnected) palco.innerHTML = '<span class="pcmp-dica">Erro: ' + escaparHtmlProc(err.message) + '</span>'; });
+}
+function pcmpAbrir(hash, outro) {
+  pcmpFechar();
+  var p = (processosCaixaAtual || []).filter(function(x) { return x.hash === hash; })[0]; if (!p) return;
+  var tab = (typeof processos !== 'undefined' && processos) || [];
+  var dig = function(n) { return String(n || '').replace(/\D/g, ''); };
+  var alvo = procCompararAlvos(p, processosCaixaAtual || [], tab).filter(function(x) { return dig(x.numero) === dig(outro); })[0];
+  if (!alvo) return;
+  var a = procCompararNormalizar(p), b = alvo.proc;
+  // valor que o card mostra (regra da diária), quando a leitura não trouxe valor
+  var valorCard = function(raw) {
+    try { var t = tktValor(raw); if (t && t.v && t.v !== '—' && t.v !== '?') return 'R$ ' + t.v; } catch (e) {}
+    var ve = raw && raw.conferencia && Number(raw.conferencia.valorEsperado);   // valor que o Conferente calculou
+    return ve ? 'R$ ' + ve.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+  };
+  if (!a.valor) a.valor = valorCard(p);
+  if (b && alvo.de === 'caixa' && !b.valor) { var rawB = (processosCaixaAtual || []).filter(function(x) { return dig(x.numeroProcesso) === dig(outro); })[0]; if (rawB) b.valor = valorCard(rawB); }
+  var mod = procCompararModelo(a, b);
+  var linhas = mod.linhas.map(function(l) {
+    return '<tr class="' + (l.igual ? 'igual' : 'dif') + '"><td class="rot">' + escaparHtmlProc(l.rotulo) + '</td><td class="v">' + escaparHtmlProc(l.a || '—') + '</td><td class="v">' + escaparHtmlProc(l.b || '—') + '</td><td class="m">' + (l.igual ? '= igual' : '≠') + '</td></tr>';
+  }).join('');
+  var veu = document.createElement('div');
+  veu.className = 'pcmp-veu'; veu.id = 'pcmp-veu';
+  veu.innerHTML = '<div class="pcmp-box" role="dialog" aria-modal="true" aria-label="Comparar processos">'
+    + '<div class="pcmp-top"><h3>⚖ ' + escaparHtmlProc(a.numero) + ' × ' + escaparHtmlProc(alvo.numero) + '</h3><span class="sp"></span><button type="button" class="pcmp-x" id="pcmp-fechar" aria-label="Fechar">✕</button></div>'
+    + '<div class="pcmp-corpo">'
+      + '<div class="pcmp-motivos"><b>Por que está pendente</b><ul>' + alvo.motivos.map(function(m) { return '<li>' + escaparHtmlProc(m) + '</li>'; }).join('') + '</ul></div>'
+      + pcmpLinhaTempo(mod, a, b)
+      + '<div style="overflow:auto"><table class="pcmp-tab"><thead><tr><th></th><th class="a">Este: ' + escaparHtmlProc(a.numero) + '</th><th class="b">Outro: ' + escaparHtmlProc(alvo.numero) + (alvo.de === 'tabela' ? ' (já empenhado)' : alvo.de === 'caixa' ? ' (na caixa)' : '') + '</th><th></th></tr></thead><tbody>' + linhas + '</tbody></table>'
+      + '<div class="pcmp-dica" style="margin-top:4px">Em amarelo: o que é igual nos dois processos.</div></div>'
+      + '<div class="pcmp-cols">' + pcmpColuna('a', a, 'caixa') + pcmpColuna('b', b, alvo.de) + '</div>'
+    + '</div></div>';
+  document.body.appendChild(veu);
+  _pcmp = { a: a, b: b };
+  veu.addEventListener('click', function(e) {
+    if (e.target === veu || (e.target.closest && e.target.closest('#pcmp-fechar'))) return pcmpFechar();
+    var ax = e.target.closest && e.target.closest('[data-ax]'); if (ax) { axAbrir(ax.dataset.ax); return; }
+    var th = e.target.closest && e.target.closest('.pcmp-th'); if (th) { var col = th.closest('.pcmp-col'); pcmpMostrar(col, (col.dataset.lado === 'a' ? a : b).hash, Number(th.dataset.i)); }
+  });
+  document.addEventListener('keydown', pcmpTeclas);
+  veu.querySelectorAll('.pcmp-col[data-lado]').forEach(function(col) { var q = col.dataset.lado === 'a' ? a : b; if (q && q.hash) pcmpCarregarAnexos(col, q.hash); });
+}
+document.addEventListener('click', function(e) {
+  var b = e.target && e.target.closest && e.target.closest('.pcmp-btn');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  pcmpAbrir(b.dataset.hash, b.dataset.outro);
+});
 // 08/10/2026: resultado do bot CONFERENTE (equipe) no card
 function procConferenciaHtml(p) {
   var c = p.conferencia;
