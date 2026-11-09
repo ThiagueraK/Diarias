@@ -2644,6 +2644,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
             <span id="cp-vigia-online" style="font-size:12px;color:var(--text-muted);">verificando o vigia…</span>
             <button id="cp-btn-copiar-vigia" title="Copia o comando que liga o vigia. Cole no PowerShell da sessão do CP e deixe a janela aberta." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📋 Copiar comando do vigia</button>
             <button id="lc-btn-copiar-sonda" title="Separado do vigia das diárias: copia o comando da sonda do LC (só lê as telas do LC, não grava nada). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🔎 Copiar comando da sonda do LC</button>
+            <button id="lc-btn-copiar-ensaio" title="Separado do vigia: copia o comando do ENSAIO do LC (preenche uma requisição passo a passo e NÃO grava). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🧪 Copiar comando do ensaio do LC</button>
           </span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;align-items:center;">
@@ -7077,6 +7078,14 @@ document.getElementById('cp-btn-copiar-vigia').addEventListener('click', functio
 document.getElementById('lc-btn-copiar-sonda').addEventListener('click', function(){
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+    return navigator.clipboard.writeText(res.comando);
+  }).then(function(){
+    b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
+  }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
+document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', function(){
+  var b = this, orig = b.textContent;
+  sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_ensaio', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
     return navigator.clipboard.writeText(res.comando);
   }).then(function(){
