@@ -7083,6 +7083,7 @@ document.getElementById('lc-btn-copiar-sonda').addEventListener('click', functio
   }).then(function(){
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
   }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
+});
 document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', function(){
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_ensaio', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
