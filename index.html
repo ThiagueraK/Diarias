@@ -2637,6 +2637,18 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
       <div class="x-sec" style="margin-top:20px;"><h3>Caixa SGD · a empenhar</h3><span class="x-lbl">cada cartão é um processo de diária na sua caixa do 1Doc, com a descrição pronta pra colar no empenho (nunca cita paciente)</span></div>
       <div class="prx-ops">
+      <!-- 10/11/2026: LOTE DO LC (ata -> requisicao -> pedido -> empenho no CP -> envio no 1Doc), escolhido aqui como nas diarias -->
+      <div id="lc-lote-painel" class="prx-box">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
+          <b class="prx-box-tit">Lote do LC <span style="font-weight:400;color:var(--text-muted);font-size:12px;">ata → requisição → pedido → empenho → 1Doc</span></b>
+          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button id="lc-lote-btn-escolher" title="Lista os processos de ata da caixa da Saúde que o robô sabe empenhar (1 item, 1 despesa) para você marcar o lote." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📦 Escolher processos</button>
+            <button id="lc-btn-copiar-lote" title="Copia o comando da FASE DO LC do lote (requisição e pedido de cada processo, sem perguntas). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📋 Copiar comando do lote no LC</button>
+          </span>
+        </div>
+        <div id="lc-lote-estado" style="font-size:12px;margin-top:6px;color:var(--text-muted);">carregando…</div>
+        <div id="lc-lote-lista" style="display:none;margin-top:8px;font-size:12px;"></div>
+      </div>
       <div id="cp-vigia-painel" class="prx-box">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
           <b class="prx-box-tit">Rodar no CP</b>
@@ -7093,6 +7105,88 @@ document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', functi
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
   }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
 });
+// 10/11/2026: LOTE DO LC - escolher processos, acompanhar a etapa de cada um, pedir o CP e copiar o comando da fase do LC
+(function(){
+  var ETAPAS = { '': 'falta a requisição', requisicao: 'falta o pedido', pedido: 'falta o empenho (CP)', 'empenho-gravando': 'empenho sem confirmar - conferir no CP', empenho: 'falta enviar no 1Doc', 'enviado-1doc': 'enviado no 1Doc ✅' };
+  function el(tag, txt, css){ var e = document.createElement(tag); if (txt != null) e.textContent = txt; if (css) e.style.cssText = css; return e; }
+  function btn(txt, fn){ var b = el('button', txt, 'padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);margin-right:6px;'); b.addEventListener('click', fn); return b; }
+  function j(r){ return r.json(); }
+  function estado(){
+    var box = document.getElementById('lc-lote-estado'); if (!box) return;
+    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-estado').then(j).then(function(res){
+      box.textContent = '';
+      var l = res && res.lote;
+      if (!l) { box.textContent = 'Nenhum lote do LC pedido ainda.'; return; }
+      box.appendChild(el('div', 'Lote ' + l.status + ' · pedido ' + new Date(l.criadoEm).toLocaleString('pt-BR') + ' · ' + l.itens.length + ' processo(s)', 'margin-bottom:4px;'));
+      var ul = el('div', null, 'display:flex;flex-direction:column;gap:2px;');
+      var prontosCp = 0;
+      l.itens.forEach(function(it){
+        var e = it.etapa || '';
+        if (!it.erro && (e === 'pedido' || e === 'empenho')) prontosCp++;
+        var linha = el('div', it.numero + ' — ' + (ETAPAS[e] || e) + (it.erro ? ' · ⚠️ parou (' + it.erro.fase + '): ' + it.erro.mensagem : '') + (it.texto ? ' · ' + it.texto.replace(/\s+/g, ' ').slice(0, 90) : ''), 'color:' + (it.erro ? 'var(--danger,#c0392b)' : 'var(--text)') + ';');
+        ul.appendChild(linha);
+      });
+      box.appendChild(ul);
+      if (l.status === 'ativo') {
+        var acoes = el('div', null, 'margin-top:6px;');
+        if (prontosCp) acoes.appendChild(btn('▶️ Pedir o CP agora (' + prontosCp + ')', function(){
+          if (!confirm('Pedir ao robô do CP o empenho + envio no 1Doc de ' + prontosCp + ' processo(s) com pedido gravado?')) return;
+          sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cp-disparar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(j).then(function(r){ alert(r.ok ? 'CP pedido' + (r.roboDisparado ? ' (robô do notebook disparado).' : '. Ligue o vigia do CP se ele não estiver ativo.') : 'Não pedi: ' + r.error); estado(); });
+        }));
+        acoes.appendChild(btn('✖ Cancelar lote', function(){
+          if (!confirm('Cancelar o lote do LC? O que já foi gravado continua gravado.')) return;
+          sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cancelar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(j).then(function(r){ if (!r.ok) alert(r.error); estado(); });
+        }));
+        box.appendChild(acoes);
+      }
+    }).catch(function(e){ box.textContent = 'Não consegui ler o lote do LC: ' + e.message; });
+  }
+  function escolher(){
+    var lista = document.getElementById('lc-lote-lista');
+    if (lista.style.display !== 'none') { lista.style.display = 'none'; return; }
+    lista.style.display = ''; lista.textContent = 'carregando os processos de ata…';
+    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-elegiveis').then(j).then(function(res){
+      lista.textContent = '';
+      var ps = (res && res.processos) || [];
+      if (!ps.length) { lista.textContent = 'Nenhum processo de ata do LC na caixa da Saúde lida pelo SGD (atualize a aba Empenhos).'; return; }
+      var marcados = {};
+      var mandar = btn('Mandar lote (0)', function(){
+        var nums = Object.keys(marcados).filter(function(k){ return marcados[k]; });
+        if (!nums.length) { alert('Marque pelo menos um processo.'); return; }
+        var sel = ps.filter(function(p){ return marcados[p.numero]; });
+        var total = sel.reduce(function(a, p){ return a + (Number(p.valor) || 0); }, 0);
+        if (!confirm('Empenhar pelo robô ' + nums.length + ' processo(s), total R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ':\n\n' + sel.map(function(p){ return p.numero + ' · LC ' + p.processoLC + ' · ' + (p.fornecedor || '') + ' · R$ ' + Number(p.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }).join('\n') + '\n\nO robô grava requisição, pedido e empenho e envia no 1Doc com a sua assinatura, sem perguntar de novo.')) return;
+        sgdFetch(SGD_WORKER_URL + '?action=lc-lote-solicitar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ processos: nums }) }).then(j).then(function(r){
+          if (!r.ok) { alert('Lote não criado: ' + r.error + (r.recusados ? '\n' + r.recusados.map(function(x){ return x.numero + ': ' + x.motivo; }).join('\n') : '')); return; }
+          alert('Lote criado com ' + r.lote.itens.length + ' processo(s).' + (r.recusados && r.recusados.length ? '\nFora do lote: ' + r.recusados.map(function(x){ return x.numero + ' (' + x.motivo + ')'; }).join('; ') : '') + '\n\nAgora cole o "comando do lote no LC" no PowerShell do LC.');
+          lista.style.display = 'none'; estado();
+        });
+      });
+      ps.forEach(function(p){
+        var lin = el('label', null, 'display:flex;gap:8px;align-items:flex-start;padding:3px 0;' + (p.elegivel ? 'cursor:pointer;' : 'opacity:.55;'));
+        var cb = el('input'); cb.type = 'checkbox'; cb.disabled = !p.elegivel;
+        cb.addEventListener('change', function(){ marcados[p.numero] = cb.checked; mandar.textContent = 'Mandar lote (' + Object.keys(marcados).filter(function(k){ return marcados[k]; }).length + ')'; });
+        lin.appendChild(cb);
+        lin.appendChild(el('span', p.numero + ' · LC ' + p.processoLC + ' · ' + (p.fornecedor || '?') + (p.valor != null ? ' · R$ ' + Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + (p.etapa ? ' · etapa: ' + p.etapa : '') + (p.elegivel ? '' : ' — ' + p.motivos.join('; '))));
+        lista.appendChild(lin);
+      });
+      var rod = el('div', null, 'margin-top:6px;'); rod.appendChild(mandar); lista.appendChild(rod);
+    }).catch(function(e){ lista.textContent = 'Não consegui listar: ' + e.message; });
+  }
+  var be = document.getElementById('lc-lote-btn-escolher'); if (be) be.addEventListener('click', escolher);
+  var bc = document.getElementById('lc-btn-copiar-lote');
+  if (bc) bc.addEventListener('click', function(){
+    var b = this, orig = b.textContent;
+    sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_lote', { method: 'GET' }).then(j).then(function(res){
+      if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+      return navigator.clipboard.writeText(res.comando);
+    }).then(function(){ b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000); })
+      .catch(function(e){ alert('Não consegui copiar: ' + e.message); });
+  });
+  document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(estado, 700); });
+  setInterval(function(){ var pp = document.getElementById('panel-processos'); if (!document.hidden && pp && pp.classList.contains('active')) estado(); }, 15000);
+  setTimeout(estado, 2500);
+})();
 document.getElementById('cp-btn-empenho').addEventListener('click', function(){ cpPedir('empenho'); });
 document.getElementById('cp-btn-prestacao').addEventListener('click', function(){ cpPedir('prestacao'); });
 ['cp-qtd-empenho', 'cp-qtd-prestacao'].forEach(function(id){ document.getElementById(id).addEventListener('input', function(){ this.dataset.mexido = '1'; }); });
