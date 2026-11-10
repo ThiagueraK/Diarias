@@ -2020,6 +2020,29 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .ec-hd .ec-t{min-width:0;flex:1}
   .ec-hd .ec-n{font:600 18px var(--mono);display:block;line-height:1.1}
   .ec-hd .ec-fo{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:3px}
+  /* 10/11/2026: lote do LC na aba Empenhos */
+  .lcl-marca{flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1.6px solid var(--border);background:var(--surface);color:transparent;font:700 15px var(--sans);cursor:pointer;display:grid;place-items:center;transition:all .16s}
+  .lcl-marca:hover{border-color:#0d9488;color:#0d948866}
+  .lcl-marca.on{background:#0d9488;border-color:#0d9488;color:#fff;box-shadow:0 4px 12px -4px #0d9488}
+  .ec-card.lcl-sel{outline:2px solid #0d9488;outline-offset:2px}
+  .lcl-tag{flex:0 0 auto;font:600 10.5px var(--sans);padding:3px 8px;border-radius:999px;background:#0d948818;color:#0f766e;white-space:nowrap}
+  .lcl-nao{flex:0 0 auto;font-size:13px;opacity:.35;cursor:help}
+  .lcl-faixa{margin:10px 0 4px;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#f0fdfa,var(--surface));font:13px var(--sans)}
+  .lcl-faixa h4{margin:0 0 8px;font:600 14px var(--sans);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .lcl-faixa h4 small{font-weight:400;color:var(--text-muted)}
+  .lcl-itens{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .lcl-item{border:1px solid var(--border);border-radius:10px;padding:5px 9px;background:var(--surface);font-size:12px}
+  .lcl-item b{margin-right:6px}
+  .lcl-item.ok{border-color:#16a34a66;background:#f0fdf4}
+  .lcl-item.erro{border-color:#dc262666;background:#fef2f2}
+  .lcl-acoes{display:flex;gap:8px;flex-wrap:wrap}
+  .lcl-bt{padding:6px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font:500 12.5px var(--sans);background:var(--surface);color:var(--text)}
+  .lcl-bt.pri{background:#0d9488;border-color:#0d9488;color:#fff}
+  .lcl-barra{position:sticky;bottom:12px;z-index:30;margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:16px;background:#0f172a;color:#fff;box-shadow:0 12px 30px -10px #0f172a99;font:13px var(--sans)}
+  .lcl-barra .lcl-tot{font-variant-numeric:tabular-nums;font-weight:600}
+  .lcl-barra .lcl-bt{background:transparent;color:#fff;border-color:#ffffff44}
+  .lcl-barra .lcl-bt.pri{background:#14b8a6;border-color:#14b8a6;color:#04201d}
+  @media (max-width:560px){ #panel-empenhos .ec-hd{flex-wrap:wrap} #panel-empenhos .ec-hd .lcl-marca,#panel-empenhos .ec-hd .lcl-tag{margin-left:auto} .lcl-barra{bottom:8px;padding:8px 10px} }
   .ec-rec{font:600 11px var(--sans);padding:4px 9px;border-radius:999px;color:#fff;background:var(--rc);white-space:nowrap;box-shadow:0 4px 10px -4px var(--rc)}
   .ec-o{font-size:13.5px;line-height:1.45;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:39px}
   .ec-arte{border-radius:14px;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--border);padding:10px 12px;display:grid;gap:8px}
@@ -2637,18 +2660,6 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
 
       <div class="x-sec" style="margin-top:20px;"><h3>Caixa SGD · a empenhar</h3><span class="x-lbl">cada cartão é um processo de diária na sua caixa do 1Doc, com a descrição pronta pra colar no empenho (nunca cita paciente)</span></div>
       <div class="prx-ops">
-      <!-- 10/11/2026: LOTE DO LC (ata -> requisicao -> pedido -> empenho no CP -> envio no 1Doc), escolhido aqui como nas diarias -->
-      <div id="lc-lote-painel" class="prx-box">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
-          <b class="prx-box-tit">Lote do LC <span style="font-weight:400;color:var(--text-muted);font-size:12px;">ata → requisição → pedido → empenho → 1Doc</span></b>
-          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <button id="lc-lote-btn-escolher" title="Lista os processos de ata da caixa da Saúde que o robô sabe empenhar (1 item, 1 despesa) para você marcar o lote." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📦 Escolher processos</button>
-            <button id="lc-btn-copiar-lote" title="Copia o comando da FASE DO LC do lote (requisição e pedido de cada processo, sem perguntas). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📋 Copiar comando do lote no LC</button>
-          </span>
-        </div>
-        <div id="lc-lote-estado" style="font-size:12px;margin-top:6px;color:var(--text-muted);">carregando…</div>
-        <div id="lc-lote-lista" style="display:none;margin-top:8px;font-size:12px;"></div>
-      </div>
       <div id="cp-vigia-painel" class="prx-box">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;">
           <b class="prx-box-tit">Rodar no CP</b>
@@ -2735,9 +2746,12 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <!-- 06/11/2026: v2 - números, valores por despesa, filtros com pílula e grade de cards; o detalhe (#esDet) vai para a ficha -->
     <div class="ec-bento" id="ecBento"></div>
     <section class="ec-despesas" id="ecDespesas" style="display:none"></section>
+    <!-- 10/11/2026: LOTE DO LC - faixa do lote em andamento; a selecao e nos proprios cards (✓) e a barra fixa embaixo -->
+    <section class="lcl-faixa" id="lclFaixa" hidden></section>
     <div class="es-filtros" id="esFiltros"></div>
     <div class="es-lista ec-grade" id="esLista"><div class="es-sk"></div><div class="es-sk"></div><div class="es-sk"></div></div>
     <div class="es-det" id="esDet" hidden></div>
+    <div class="lcl-barra" id="lclBarra" hidden></div>
   </div>
 
   <div class="tab-panel" id="panel-acomp-cp">
@@ -3529,12 +3543,128 @@ function ecBento(ps) {
   });
 }
 // ---------- filtros com pílula ----------
-function ecGrupo(k, p) { return k === 'todos' ? true : k === 'acao' ? /pronto|nota_aguardando|usa_empenho/.test(p.situacao) : p.situacao === k; }
+// 10/11/2026: LOTE DO LC na aba Empenhos (pedido do Thiago: "coloque tudo na aba empenhos saude e melhore a selecao").
+// Selecao nos proprios cards (✓ so nos processos que o robo sabe empenhar), filtro "Robo do LC", barra fixa com total e
+// faixa do lote em andamento. Worker: lc-lote-elegiveis / solicitar / estado / cp-disparar / cancelar.
+var LCL = { porNum: {}, sel: {}, lote: null, carregando: false };
+var LCL_ETAPA = { '': 'falta a requisição', requisicao: 'falta o pedido', pedido: 'falta o empenho', 'empenho-gravando': 'conferir no CP', empenho: 'falta o 1Doc', 'enviado-1doc': 'no 1Doc ✅' };
+function lclDig(x) { return String(x || '').replace(/\D/g, ''); }
+function lclInfo(p) { return LCL.porNum[lclDig(p.numero || p.documento)] || null; }
+function lclNoLote(p) { var l = LCL.lote; if (!l || l.status !== 'ativo') return null; var d = lclDig(p.numero || p.documento); return (l.itens || []).find(function(i) { return i.num === d || lclDig(i.numero) === d; }) || null; }
+function lclMarcaHTML(p) {
+  var info = lclInfo(p); if (!info) return '';
+  var noLote = lclNoLote(p);
+  if (noLote) return '<span class="lcl-tag" title="No lote do robô">🤖 ' + esH(noLote.erro ? 'parou' : (LCL_ETAPA[noLote.etapa || ''] || noLote.etapa)) + '</span>';
+  if (info.elegivel) return '<button type="button" class="lcl-marca' + (LCL.sel[lclDig(info.numero)] ? ' on' : '') + '" data-a="lote" title="Marcar para o robô empenhar (LC → CP → 1Doc)" aria-pressed="' + (LCL.sel[lclDig(info.numero)] ? 'true' : 'false') + '">✓</button>';
+  return '<span class="lcl-nao" data-a="lotenao" title="Robô do LC não faz este: ' + esH(info.motivos.join('; ')) + '">🤖</span>';
+}
+function lclAlternar(el) {
+  var info = lclInfo(el._p); if (!info || !info.elegivel) return;
+  var d = lclDig(info.numero); if (LCL.sel[d]) delete LCL.sel[d]; else LCL.sel[d] = true;
+  var b = el.querySelector('[data-a="lote"]'); if (b) { b.classList.toggle('on', !!LCL.sel[d]); b.setAttribute('aria-pressed', LCL.sel[d] ? 'true' : 'false'); }
+  el.classList.toggle('lcl-sel', !!LCL.sel[d]); el._html = null;
+  lclBarra();
+}
+function lclEmLote(d) { var l = LCL.lote; return !!(l && l.status === 'ativo' && (l.itens || []).some(function(i) { return (i.num || lclDig(i.numero)) === d; })); }
+function lclApto(d) { var i = LCL.porNum[d]; return !!(i && i.elegivel && !lclEmLote(d)); }
+function lclSelecionados() { return Object.keys(LCL.sel).map(function(d) { return LCL.porNum[d]; }).filter(Boolean); }
+function lclBRL(v) { return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function lclBarra() {
+  var bar = document.getElementById('lclBarra'); if (!bar) return;
+  document.querySelectorAll('#esLista .ec-card').forEach(function(c) { var p = c._p; c.classList.toggle('lcl-sel', !!(p && LCL.sel[lclDig(p.numero || p.documento)])); });
+  var sel = lclSelecionados();
+  if (!sel.length) { bar.hidden = true; return; }
+  var tot = sel.reduce(function(a, i) { return a + (Number(i.valor) || 0); }, 0);
+  var aptos = Object.keys(LCL.porNum).filter(function(d) { return lclApto(d) && !LCL.sel[d]; }).length;
+  bar.hidden = false; bar.innerHTML = '';
+  var t = document.createElement('span'); t.innerHTML = '🤖 <b>' + sel.length + '</b> processo' + (sel.length > 1 ? 's' : '') + ' para o robô · <span class="lcl-tot">' + lclBRL(tot) + '</span>'; bar.appendChild(t);
+  var sp = document.createElement('span'); sp.style.flex = '1'; bar.appendChild(sp);
+  if (aptos) bar.appendChild(lclBt('Marcar todos os aptos (+' + aptos + ')', function() { Object.keys(LCL.porNum).forEach(function(d) { if (lclApto(d)) LCL.sel[d] = true; }); esRender(); }));
+  bar.appendChild(lclBt('Limpar', function() { LCL.sel = {}; esRender(); }));
+  bar.appendChild(lclBt('🤖 Empenhar pelo robô', lclMandar, 'pri'));
+}
+function lclBt(txt, fn, cls) { var b = document.createElement('button'); b.type = 'button'; b.className = 'lcl-bt' + (cls ? ' ' + cls : ''); b.textContent = txt; b.onclick = fn; return b; }
+function lclMandar() {
+  var sel = lclSelecionados(); if (!sel.length) return;
+  if (LCL.lote && LCL.lote.status === 'ativo') { alert('Já tem um lote do LC em andamento. Espere terminar ou cancele na faixa do lote.'); return; }
+  var tot = sel.reduce(function(a, i) { return a + (Number(i.valor) || 0); }, 0);
+  if (!confirm('Empenhar pelo robô ' + sel.length + ' processo(s), total ' + lclBRL(tot) + ':\n\n' + sel.map(function(i) { return '• ' + i.numero + ' · LC ' + i.processoLC + ' · ' + (i.fornecedor || '') + ' · ' + lclBRL(i.valor); }).join('\n') + '\n\nO robô grava requisição e pedido no LC, o empenho no CP e envia no 1Doc com a sua assinatura, sem perguntar de novo.')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=lc-lote-solicitar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ processos: sel.map(function(i) { return i.numero; }) }) })
+    .then(function(r) { return r.json(); }).then(function(r) {
+      if (!r.ok) { alert('Lote não criado: ' + r.error + (r.recusados ? '\n' + r.recusados.map(function(x) { return x.numero + ': ' + x.motivo; }).join('\n') : '')); return; }
+      LCL.sel = {};
+      alert('Lote criado com ' + r.lote.itens.length + ' processo(s).' + (r.recusados && r.recusados.length ? '\nFora do lote: ' + r.recusados.map(function(x) { return x.numero + ' (' + x.motivo + ')'; }).join('; ') : '') + '\n\nAgora copie o comando do lote (faixa no topo) e cole no PowerShell do LC.');
+      lclCarregar();
+    }).catch(function(e) { alert('Não consegui mandar o lote: ' + e.message); });
+}
+function lclFaixa() {
+  var fx = document.getElementById('lclFaixa'); if (!fx) return;
+  var l = LCL.lote, nAptos = Object.keys(LCL.porNum).filter(lclApto).length;
+  if (!l || (l.status !== 'ativo' && Date.now() - (l.fimEm || l.criadoEm || 0) > 6 * 3600e3)) {
+    if (!nAptos || esCaixa !== 'open') { fx.hidden = true; return; }
+    fx.hidden = false;
+    fx.innerHTML = '<h4>🤖 Robô do LC <small>' + nAptos + ' processo' + (nAptos > 1 ? 's' : '') + ' de ata que o robô sabe empenhar — marque o ✓ nos cards ou use o filtro "Robô do LC"</small></h4>';
+    return;
+  }
+  fx.hidden = false; fx.innerHTML = '';
+  var h = document.createElement('h4');
+  h.innerHTML = '🤖 Lote do LC <small>' + esH(l.status === 'ativo' ? 'em andamento' : l.status === 'fim' ? 'terminou' : l.status) + ' · pedido ' + esH(new Date(l.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) + ' · ' + l.itens.length + ' processo' + (l.itens.length > 1 ? 's' : '') + '</small>';
+  fx.appendChild(h);
+  var lista = document.createElement('div'); lista.className = 'lcl-itens';
+  var prontosCp = 0;
+  l.itens.forEach(function(it) {
+    var e = it.etapa || ''; if (!it.erro && (e === 'pedido' || e === 'empenho')) prontosCp++;
+    var d = document.createElement('div'); d.className = 'lcl-item' + (it.erro ? ' erro' : e === 'enviado-1doc' ? ' ok' : '');
+    d.title = (it.texto || '') + (it.erro ? '\nParou (' + it.erro.fase + '): ' + it.erro.mensagem : '');
+    d.innerHTML = '<b>' + esH(it.numero) + '</b>' + esH(it.erro ? '⚠ parou na fase ' + it.erro.fase : (LCL_ETAPA[e] || e));
+    lista.appendChild(d);
+  });
+  fx.appendChild(lista);
+  if (l.status === 'ativo') {
+    var ac = document.createElement('div'); ac.className = 'lcl-acoes';
+    var bc = lclBt('📋 Copiar comando do lote no LC', function() {
+      sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_lote').then(function(r) { return r.json(); }).then(function(res) {
+        if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+        return navigator.clipboard.writeText(res.comando);
+      }).then(function() { bc.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function() { bc.textContent = '📋 Copiar comando do lote no LC'; }, 4000); })
+        .catch(function(e) { alert('Não consegui copiar: ' + e.message); });
+    }, 'pri');
+    ac.appendChild(bc);
+    if (prontosCp) ac.appendChild(lclBt('▶ Pedir o CP agora (' + prontosCp + ')', function() {
+      if (!confirm('Pedir ao robô do CP o empenho + envio no 1Doc de ' + prontosCp + ' processo(s) com pedido gravado?')) return;
+      sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cp-disparar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(function(r) { return r.json(); })
+        .then(function(r) { alert(r.ok ? 'CP pedido' + (r.roboDisparado ? ' (robô do notebook disparado).' : '. Ligue o vigia do CP se ele não estiver ativo.') : 'Não pedi: ' + r.error); lclCarregar(); });
+    }));
+    ac.appendChild(lclBt('✖ Cancelar lote', function() {
+      if (!confirm('Cancelar o lote do LC? O que já foi gravado continua gravado.')) return;
+      sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cancelar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(function(r) { return r.json(); }).then(function(r) { if (!r.ok) alert(r.error); lclCarregar(); });
+    }));
+    fx.appendChild(ac);
+  }
+}
+function lclCarregar() {
+  if (LCL.carregando) return; LCL.carregando = true;
+  Promise.all([
+    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-elegiveis').then(function(r) { return r.json(); }).catch(function() { return null; }),
+    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-estado').then(function(r) { return r.json(); }).catch(function() { return null; })
+  ]).then(function(rs) {
+    LCL.carregando = false;
+    if (rs[0] && rs[0].ok) { var m = {}; (rs[0].processos || []).forEach(function(i) { m[lclDig(i.numero)] = i; }); LCL.porNum = m; Object.keys(LCL.sel).forEach(function(d) { if (!m[d] || !m[d].elegivel) delete LCL.sel[d]; }); }
+    if (rs[1] && rs[1].ok) LCL.lote = rs[1].lote;
+    // quem ja esta no lote em andamento nao fica marcado (nem conta na barra)
+    if (LCL.lote && LCL.lote.status === 'ativo') (LCL.lote.itens || []).forEach(function(i) { delete LCL.sel[i.num || lclDig(i.numero)]; });
+    lclFaixa();
+    if (typeof esDados !== 'undefined' && esDados && document.getElementById('panel-empenhos').classList.contains('active')) esRender(); else lclBarra();
+  });
+}
+document.getElementById('tabEmpenhos').addEventListener('click', function() { setTimeout(lclCarregar, 400); });
+setInterval(function() { var pe = document.getElementById('panel-empenhos'); if (!document.hidden && pe && pe.classList.contains('active') && LCL.lote && LCL.lote.status === 'ativo') lclCarregar(); }, 20000);
+function ecGrupo(k, p) { return k === 'robo' ? !!lclInfo(p) : k === 'todos' ? true : k === 'acao' ? /pronto|nota_aguardando|usa_empenho/.test(p.situacao) : p.situacao === k; }
 function ecFiltros(ps) {
   var nav = document.getElementById('esFiltros');
   var cont = {}; ps.forEach(function(p) { cont[p.situacao] = (cont[p.situacao] || 0) + 1; });
-  var ks = (esCaixa === 'open' ? ['acao'] : []).concat(['todos']).concat(Object.keys(ES_SIT).filter(function(k) { return cont[k]; }));
-  var nome = function(k) { return k === 'acao' ? 'Para agir agora' : k === 'todos' ? 'Todos' : ES_SIT[k].nome; };
+  var ks = (esCaixa === 'open' ? ['acao'] : []).concat(['todos']).concat(esCaixa === 'open' && ps.some(function(p) { return lclInfo(p); }) ? ['robo'] : []).concat(Object.keys(ES_SIT).filter(function(k) { return cont[k]; }));
+  var nome = function(k) { return k === 'acao' ? 'Para agir agora' : k === 'todos' ? 'Todos' : k === 'robo' ? '🤖 Robô do LC' : ES_SIT[k].nome; };
   var nOf = function(k) { return ps.filter(function(p) { return ecGrupo(k, p); }).length; };
   nav.innerHTML = '<span class="ec-pilula"></span>' + ks.map(function(k) { return '<button class="es-chip' + (esFiltro === k ? ' on' : '') + '" data-k="' + k + '">' + nome(k) + '<b>' + nOf(k) + '</b></button>'; }).join('') +
     (EC.filtroDesp && EC.desp[EC.filtroDesp] ? '<button class="es-chip ec-desp-chip" data-x="1" style="border-left:4px solid ' + EC.desp[EC.filtroDesp].cor + '">Despesa ' + esH(EC.filtroDesp) + ' ✕</button>' : '');
@@ -3550,7 +3680,7 @@ function ecCardHTML(p) {
   var t0 = Math.min.apply(null, ts), t1 = Math.max.apply(null, ts), span = t1 - t0, porIndice = ts.length < 2 || span < 6 * 3600e3;
   var h = '<div class="ec-in">' +
     '<div class="ec-hd"><span class="ec-ava" style="--ac:' + ecCorDe(forn) + '">' + esH(ecIniciais(forn)) + '</span><span class="ec-t"><span class="ec-n">' + esH(ecNumero(p)) + '</span><span class="ec-fo">' + esH(forn || 'fornecedor não identificado') + '</span></span>' +
-    '<span class="ec-rec" style="--rc:' + (p.novidade ? '#d97706' : rec ? rec.cor : st.cor) + '">' + esH(p.novidade ? '⚠ novidade' : rec ? rec.nome : st.nome) + '</span></div>' +
+    '<span class="ec-rec" style="--rc:' + (p.novidade ? '#d97706' : rec ? rec.cor : st.cor) + '">' + esH(p.novidade ? '⚠ novidade' : rec ? rec.nome : st.nome) + '</span>' + lclMarcaHTML(p) + '</div>' +
     '<div class="ec-o">' + esH(p.objeto || p.assunto || '') + '</div><div class="ec-arte">';
   if (emp.length && p.situacao !== 'em_licitacao') h += '<div><div class="ec-mbarra">' + emp.map(function(e, k) { var d = EC.desp[e.despesa] || {}; return '<i style="--dc:' + (d.cor || '#94a3b8') + ';--k:' + k + ';flex:' + Math.max(.04, (e.valor || 0) / totE) + '"></i>'; }).join('') + '</div>' +
     '<div class="ec-mleg">' + emp.map(function(e) { var d = EC.desp[e.despesa] || {}; return '<span style="--dc:' + (d.cor || '#94a3b8') + '"><i></i>' + esH(e.despesa) + (e.rotulo ? ' ' + esH(e.rotulo) : '') + ' <b>' + esBRL(e.valor) + '</b></span>'; }).join('') + '</div></div>';
@@ -3576,10 +3706,12 @@ function ecNo(p) {
     var a = e.target.closest('[data-a]');
     if (a && a.dataset.a === '1doc') { e.stopPropagation(); return; }
     if (a && a.dataset.a === 'copiar') { e.stopPropagation(); esCopiarDescricao(el._p.idEmissao); return; }
+    if (a && a.dataset.a === 'lote') { e.stopPropagation(); lclAlternar(el); return; }
+    if (a && a.dataset.a === 'lotenao') { e.stopPropagation(); return; }
     esAbrir(el._p.idEmissao);
   };
   el.onkeydown = function(e) { if (e.key === 'Enter' && e.target === el) esAbrir(el._p.idEmissao); };
-  el.addEventListener('pointerdown', function(e) { if (ecReduz || e.target.closest('[data-a="1doc"],[data-a="copiar"]')) return; var r = el.getBoundingClientRect(), o = document.createElement('span'); o.className = 'ec-onda'; o.style.left = (e.clientX - r.left) + 'px'; o.style.top = (e.clientY - r.top) + 'px'; el.querySelector('.ec-in').appendChild(o); setTimeout(function() { o.remove(); }, 560); });
+  el.addEventListener('pointerdown', function(e) { if (ecReduz || e.target.closest('[data-a="1doc"],[data-a="copiar"],[data-a="lote"]')) return; var r = el.getBoundingClientRect(), o = document.createElement('span'); o.className = 'ec-onda'; o.style.left = (e.clientX - r.left) + 'px'; o.style.top = (e.clientY - r.top) + 'px'; el.querySelector('.ec-in').appendChild(o); setTimeout(function() { o.remove(); }, 560); });
   el.addEventListener('pointermove', function(e) { if (ecReduz) return; var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.transform = 'rotateX(' + (-y * 3.5) + 'deg) rotateY(' + (x * 3.5) + 'deg) translateY(-2px)'; });
   el.addEventListener('pointerleave', function() { el.style.transform = ''; });
   ecHolofote(el); ecLigarCredor(el, p);
@@ -3643,6 +3775,7 @@ function esRender() {
   var vis = ps.filter(function(p) { return ecGrupo(esFiltro, p) && (!EC.filtroDesp || (p.empenhosPorDespesa || []).some(function(e) { return e.despesa === EC.filtroDesp; })); });
   var acs = esCaixa === 'open' && (esFiltro === 'todos' || esFiltro === 'acao') && !EC.filtroDesp ? (esDados.acompanhados || []).filter(function(a) { return a.idEmissao; }) : [];
   ecGrade(vis, acs, saidos);
+  lclBarra();
   if (esSel && document.getElementById('ecFicha').classList.contains('ec-on')) { var p = esTodos().find(function(x) { return x.idEmissao === esSel; }); if (p) esDetalhe(p, false); }
 }
 function esFiltrar(k) { esFiltro = k; esRender(); }
@@ -7105,88 +7238,6 @@ document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', functi
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
   }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
 });
-// 10/11/2026: LOTE DO LC - escolher processos, acompanhar a etapa de cada um, pedir o CP e copiar o comando da fase do LC
-(function(){
-  var ETAPAS = { '': 'falta a requisição', requisicao: 'falta o pedido', pedido: 'falta o empenho (CP)', 'empenho-gravando': 'empenho sem confirmar - conferir no CP', empenho: 'falta enviar no 1Doc', 'enviado-1doc': 'enviado no 1Doc ✅' };
-  function el(tag, txt, css){ var e = document.createElement(tag); if (txt != null) e.textContent = txt; if (css) e.style.cssText = css; return e; }
-  function btn(txt, fn){ var b = el('button', txt, 'padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);margin-right:6px;'); b.addEventListener('click', fn); return b; }
-  function j(r){ return r.json(); }
-  function estado(){
-    var box = document.getElementById('lc-lote-estado'); if (!box) return;
-    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-estado').then(j).then(function(res){
-      box.textContent = '';
-      var l = res && res.lote;
-      if (!l) { box.textContent = 'Nenhum lote do LC pedido ainda.'; return; }
-      box.appendChild(el('div', 'Lote ' + l.status + ' · pedido ' + new Date(l.criadoEm).toLocaleString('pt-BR') + ' · ' + l.itens.length + ' processo(s)', 'margin-bottom:4px;'));
-      var ul = el('div', null, 'display:flex;flex-direction:column;gap:2px;');
-      var prontosCp = 0;
-      l.itens.forEach(function(it){
-        var e = it.etapa || '';
-        if (!it.erro && (e === 'pedido' || e === 'empenho')) prontosCp++;
-        var linha = el('div', it.numero + ' — ' + (ETAPAS[e] || e) + (it.erro ? ' · ⚠️ parou (' + it.erro.fase + '): ' + it.erro.mensagem : '') + (it.texto ? ' · ' + it.texto.replace(/\s+/g, ' ').slice(0, 90) : ''), 'color:' + (it.erro ? 'var(--danger,#c0392b)' : 'var(--text)') + ';');
-        ul.appendChild(linha);
-      });
-      box.appendChild(ul);
-      if (l.status === 'ativo') {
-        var acoes = el('div', null, 'margin-top:6px;');
-        if (prontosCp) acoes.appendChild(btn('▶️ Pedir o CP agora (' + prontosCp + ')', function(){
-          if (!confirm('Pedir ao robô do CP o empenho + envio no 1Doc de ' + prontosCp + ' processo(s) com pedido gravado?')) return;
-          sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cp-disparar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(j).then(function(r){ alert(r.ok ? 'CP pedido' + (r.roboDisparado ? ' (robô do notebook disparado).' : '. Ligue o vigia do CP se ele não estiver ativo.') : 'Não pedi: ' + r.error); estado(); });
-        }));
-        acoes.appendChild(btn('✖ Cancelar lote', function(){
-          if (!confirm('Cancelar o lote do LC? O que já foi gravado continua gravado.')) return;
-          sgdFetch(SGD_WORKER_URL + '?action=lc-lote-cancelar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(j).then(function(r){ if (!r.ok) alert(r.error); estado(); });
-        }));
-        box.appendChild(acoes);
-      }
-    }).catch(function(e){ box.textContent = 'Não consegui ler o lote do LC: ' + e.message; });
-  }
-  function escolher(){
-    var lista = document.getElementById('lc-lote-lista');
-    if (lista.style.display !== 'none') { lista.style.display = 'none'; return; }
-    lista.style.display = ''; lista.textContent = 'carregando os processos de ata…';
-    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-elegiveis').then(j).then(function(res){
-      lista.textContent = '';
-      var ps = (res && res.processos) || [];
-      if (!ps.length) { lista.textContent = 'Nenhum processo de ata do LC na caixa da Saúde lida pelo SGD (atualize a aba Empenhos).'; return; }
-      var marcados = {};
-      var mandar = btn('Mandar lote (0)', function(){
-        var nums = Object.keys(marcados).filter(function(k){ return marcados[k]; });
-        if (!nums.length) { alert('Marque pelo menos um processo.'); return; }
-        var sel = ps.filter(function(p){ return marcados[p.numero]; });
-        var total = sel.reduce(function(a, p){ return a + (Number(p.valor) || 0); }, 0);
-        if (!confirm('Empenhar pelo robô ' + nums.length + ' processo(s), total R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ':\n\n' + sel.map(function(p){ return p.numero + ' · LC ' + p.processoLC + ' · ' + (p.fornecedor || '') + ' · R$ ' + Number(p.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }).join('\n') + '\n\nO robô grava requisição, pedido e empenho e envia no 1Doc com a sua assinatura, sem perguntar de novo.')) return;
-        sgdFetch(SGD_WORKER_URL + '?action=lc-lote-solicitar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ processos: nums }) }).then(j).then(function(r){
-          if (!r.ok) { alert('Lote não criado: ' + r.error + (r.recusados ? '\n' + r.recusados.map(function(x){ return x.numero + ': ' + x.motivo; }).join('\n') : '')); return; }
-          alert('Lote criado com ' + r.lote.itens.length + ' processo(s).' + (r.recusados && r.recusados.length ? '\nFora do lote: ' + r.recusados.map(function(x){ return x.numero + ' (' + x.motivo + ')'; }).join('; ') : '') + '\n\nAgora cole o "comando do lote no LC" no PowerShell do LC.');
-          lista.style.display = 'none'; estado();
-        });
-      });
-      ps.forEach(function(p){
-        var lin = el('label', null, 'display:flex;gap:8px;align-items:flex-start;padding:3px 0;' + (p.elegivel ? 'cursor:pointer;' : 'opacity:.55;'));
-        var cb = el('input'); cb.type = 'checkbox'; cb.disabled = !p.elegivel;
-        cb.addEventListener('change', function(){ marcados[p.numero] = cb.checked; mandar.textContent = 'Mandar lote (' + Object.keys(marcados).filter(function(k){ return marcados[k]; }).length + ')'; });
-        lin.appendChild(cb);
-        lin.appendChild(el('span', p.numero + ' · LC ' + p.processoLC + ' · ' + (p.fornecedor || '?') + (p.valor != null ? ' · R$ ' + Number(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '') + (p.etapa ? ' · etapa: ' + p.etapa : '') + (p.elegivel ? '' : ' — ' + p.motivos.join('; '))));
-        lista.appendChild(lin);
-      });
-      var rod = el('div', null, 'margin-top:6px;'); rod.appendChild(mandar); lista.appendChild(rod);
-    }).catch(function(e){ lista.textContent = 'Não consegui listar: ' + e.message; });
-  }
-  var be = document.getElementById('lc-lote-btn-escolher'); if (be) be.addEventListener('click', escolher);
-  var bc = document.getElementById('lc-btn-copiar-lote');
-  if (bc) bc.addEventListener('click', function(){
-    var b = this, orig = b.textContent;
-    sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_lote', { method: 'GET' }).then(j).then(function(res){
-      if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
-      return navigator.clipboard.writeText(res.comando);
-    }).then(function(){ b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000); })
-      .catch(function(e){ alert('Não consegui copiar: ' + e.message); });
-  });
-  document.getElementById('tabProcessos').addEventListener('click', function(){ setTimeout(estado, 700); });
-  setInterval(function(){ var pp = document.getElementById('panel-processos'); if (!document.hidden && pp && pp.classList.contains('active')) estado(); }, 15000);
-  setTimeout(estado, 2500);
-})();
 document.getElementById('cp-btn-empenho').addEventListener('click', function(){ cpPedir('empenho'); });
 document.getElementById('cp-btn-prestacao').addEventListener('click', function(){ cpPedir('prestacao'); });
 ['cp-qtd-empenho', 'cp-qtd-prestacao'].forEach(function(id){ document.getElementById(id).addEventListener('input', function(){ this.dataset.mexido = '1'; }); });
