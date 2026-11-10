@@ -3593,7 +3593,7 @@ function lclMandar() {
     .then(function(r) { return r.json(); }).then(function(r) {
       if (!r.ok) { alert('Lote não criado: ' + r.error + (r.recusados ? '\n' + r.recusados.map(function(x) { return x.numero + ': ' + x.motivo; }).join('\n') : '')); return; }
       LCL.sel = {};
-      alert('Lote criado com ' + r.lote.itens.length + ' processo(s).' + (r.recusados && r.recusados.length ? '\nFora do lote: ' + r.recusados.map(function(x) { return x.numero + ' (' + x.motivo + ')'; }).join('; ') : '') + '\n\nAgora copie o comando do lote (faixa no topo) e cole no PowerShell do LC.');
+      alert('Lote criado com ' + r.lote.itens.length + ' processo(s).' + (r.recusados && r.recusados.length ? '\nFora do lote: ' + r.recusados.map(function(x) { return x.numero + ' (' + x.motivo + ')'; }).join('; ') : '') + (r.roboDisparado ? '\n\nO robô do notebook foi chamado: ele abre o LC, faz requisição e pedido, depois o CP e o 1Doc. Acompanhe pela faixa no topo.' : '\n\nO robô do notebook não está ativo agora: copie o comando do lote (faixa no topo) e cole no PowerShell do LC.'));
       lclCarregar();
     }).catch(function(e) { alert('Não consegui mandar o lote: ' + e.message); });
 }
