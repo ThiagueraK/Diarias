@@ -11706,6 +11706,10 @@ function dataAdicaoBR(id) {
 // 13/10/2026: Data oficial do EMPENHO emitido no CP (fato gerador contábil principal)
 function dataEmpenhoBR(p) {
   if (!p) return '—';
+  if (p.dataEmissaoEmpenho) {
+    if (p.dataEmissaoEmpenho.indexOf('/') !== -1) return p.dataEmissaoEmpenho;
+    return isoParaBR(p.dataEmissaoEmpenho);
+  }
   if (p.dataEmpenho) {
     if (p.dataEmpenho.indexOf('/') !== -1) return p.dataEmpenho;
     return isoParaBR(p.dataEmpenho);
