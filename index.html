@@ -3411,6 +3411,7 @@ function esCarregar(forcar, silencioso, quieto) {
       if (d.atualizando && esTentativas < 40 && painel && painel.offsetParent !== null) { esTentativas++; esRepetir = setTimeout(function() { esCarregar(false, true); }, 12000); }
       var prontos = d.processos.filter(function(p) { return p.situacao === 'pronto_para_empenhar' || p.situacao === 'nota_aguardando_empenho'; }).length;
       if (esCaixa === 'open') { var b = document.getElementById('badgeEmpenhos'); b.textContent = prontos; b.style.display = prontos ? '' : 'none'; }
+      if (esCaixa === 'open' && typeof lclCarregar === 'function') lclCarregar();
       if (esBuscaAtiva) return;   // pesquisa aberta: não troca a lista de resultados
       esRender();
       if (d.emLeitura && !d.processos.length) lista.innerHTML = '<div class="vazio" style="color:var(--text-dim);padding:30px;text-align:center">Lendo o 1Doc por completo (todos os anexos e despachos)… a primeira leitura pode levar vários minutos. A lista aparece sozinha.</div>';
