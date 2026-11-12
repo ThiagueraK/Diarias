@@ -1870,6 +1870,51 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   #panel-empenhos .es-busca-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--text-muted);margin:0 0 8px}
   .es-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:9px;padding:7px 12px;font:600 13px var(--sans);cursor:pointer;transition:all .18s}
   .es-btn:hover{border-color:var(--accent);color:var(--accent)}
+  /* 12/11/2026: aba Usuários (no lugar do site SaudeFrota). Prefixo us- */
+  #panel-usuarios{--us-ease:cubic-bezier(.05,.7,.1,1)}
+  .us-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .us-top h2{margin:0;font:600 20px var(--sans)}.us-top small{font-weight:400;color:var(--text-muted);font-size:13px;margin-left:6px}
+  .us-busca{flex:1;min-width:200px;max-width:360px;margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px}
+  .us-busca input{border:0;outline:0;flex:1;min-width:0;font:14px var(--sans);background:transparent;color:var(--text)}
+  .us-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  .us-kpi{display:grid;grid-template-columns:10px 1fr;column-gap:8px;align-items:center;text-align:left;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font:inherit;color:var(--text);transition:transform .2s var(--us-ease),box-shadow .2s,border-color .2s}
+  .us-kpi:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}.us-kpi[aria-pressed=true]{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
+  .us-kpi i{width:10px;height:10px;border-radius:50%;grid-row:span 2}.us-kpi .us-n{font:500 24px var(--mono);line-height:1.1}.us-kpi span{font-size:12.5px;color:var(--text-muted);grid-column:2}
+  .us-cont{font-size:12.5px;color:var(--text-muted);margin:0 0 10px}
+  .us-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+  .us-card{display:grid;grid-template-columns:42px minmax(0,1fr);gap:4px 12px;text-align:left;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font:inherit;color:var(--text);animation:usEntra .3s var(--us-ease) both;transition:transform .2s var(--us-ease),box-shadow .2s,border-color .2s}
+  .us-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--border-strong)}.us-card.off{opacity:.6}
+  .us-card.us-flash{animation:usFlash 1.4s ease}
+  @keyframes usEntra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes usFlash{0%{box-shadow:0 0 0 0 rgba(47,125,93,.5)}100%{box-shadow:0 0 0 14px rgba(47,125,93,0)}}
+  .us-av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;font:600 14px var(--sans);grid-row:span 2;transition:transform .3s var(--us-ease)}
+  .us-card:hover .us-av{transform:scale(1.08) rotate(-4deg)}.us-av.grande{width:52px;height:52px;font-size:17px}
+  .us-tx{display:grid;min-width:0}.us-tx b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.us-tx span{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .us-mono{font-family:var(--mono)!important}
+  .us-tags{grid-column:2;display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.us-tag{font:500 11.5px var(--sans);border:1px solid var(--border);border-radius:999px;padding:1px 8px;color:var(--text-muted)}
+  .us-esq{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}.us-esq div{height:86px;border-radius:12px;background:linear-gradient(90deg,var(--surface2),var(--surface),var(--surface2));background-size:200% 100%;animation:usOnda 1.3s linear infinite}
+  @keyframes usOnda{from{background-position:150% 0}to{background-position:-50% 0}}
+  .us-erro{padding:16px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:12px}
+  .us-veu{position:fixed;inset:0;background:rgba(16,24,40,.3);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200}.us-veu.on{opacity:1;pointer-events:auto}
+  .us-gaveta{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--border);box-shadow:-12px 0 30px rgba(16,24,40,.12);transform:translateX(100%);transition:transform .5s var(--us-ease);z-index:201;display:flex;flex-direction:column;overflow:auto}
+  .us-gaveta.on{transform:none}
+  .us-g-cab{display:flex;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.us-g-cab h3{margin:0;font:600 17px var(--sans)}.us-muted{color:var(--text-muted);font-size:12.5px;font-weight:400}
+  .us-form{display:grid;gap:12px;padding:16px 20px}
+  .us-form>label,.us-form fieldset{display:grid;gap:5px;font-size:12.5px;color:var(--text-muted);border:0;padding:0;margin:0}
+  .us-form input[type=text],.us-form input:not([type]),.us-form input[type=email],.us-form input[type=password]{padding:8px 10px;border:1px solid var(--border-strong);border-radius:8px;font:14px var(--sans);color:var(--text);background:var(--surface)}
+  .us-form legend{padding:0;margin-bottom:5px}
+  .us-papeis{display:flex;gap:6px;flex-wrap:wrap}.us-papel input{position:absolute;opacity:0;pointer-events:none}
+  .us-papel span{display:inline-block;border:1px solid var(--border-strong);border-radius:999px;padding:5px 12px;font:500 13px var(--sans);color:var(--text);cursor:pointer;transition:all .18s}
+  .us-papel input:checked+span{background:var(--c);border-color:var(--c);color:#fff}.us-papel input:focus-visible+span{outline:2px solid var(--c);outline-offset:2px}
+  .us-sw{display:flex!important;align-items:center;gap:10px;color:var(--text)!important;font-size:13.5px!important;cursor:pointer}
+  .us-sw input{position:absolute;opacity:0}.us-sw span{width:36px;height:20px;border-radius:999px;background:var(--border-strong);position:relative;transition:background .2s;flex:none}
+  .us-sw span::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s var(--us-ease)}
+  .us-sw input:checked+span{background:var(--accent)}.us-sw input:checked+span::after{transform:translateX(16px)}.us-sw input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+  .us-senha{display:flex;gap:6px}.us-senha input{flex:1;min-width:0}.us-senha button{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;cursor:pointer;padding:0 10px}
+  .us-msg{min-height:18px;font-size:13px;color:var(--danger)}
+  .us-rod{display:flex;gap:8px;justify-content:flex-end}
+  @media (max-width:760px){.us-kpis{grid-template-columns:repeat(2,1fr)}}
+  @media (prefers-reduced-motion:reduce){#panel-usuarios *,.us-gaveta{animation:none!important;transition:none!important}}
   /* 12/11/2026 v2: CAIXA DE COMPRAS na aba Empenhos Saúde - proposta D aprovada pelo Thiago (animações inspiradas no beui.dev e 60fps.design, reescritas em CSS/JS puro). Tudo com prefixo cx- */
   #cmp{--cx-age1:#c9e8d7;--cx-age2:#7fbf9c;--cx-age3:#3f8f6a;--cx-age4:#1f5c43;--cx-ease-enter:cubic-bezier(.05,.7,.1,1);--cx-ease-exit:cubic-bezier(.3,0,1,1);--cx-ease:cubic-bezier(.2,0,0,1);margin:10px 0 18px;font:14px/1.45 var(--sans);color:var(--text)}
   #cmp *,#cx-ov *{box-sizing:border-box}
@@ -2345,7 +2390,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.25.1</span>
+    <span class="header-version">v1.26.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -2359,6 +2404,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <button class="tab-btn" id="tabRelatorio">📈 Relatórios</button>
     <button class="tab-btn" id="tabProcessos">📋 Processos</button>
     <button class="tab-btn" id="tabEmpenhos">🏥 Empenhos Saúde <span class="tab-badge" id="badgeEmpenhos" style="display:none"></span></button>
+    <button class="tab-btn" id="tabUsuarios">👥 Usuários</button>
     <button class="tab-btn" id="tabAcompCP">📡 Acompanhamento CP <span class="tab-badge" id="badgeAcompCP" style="display:none"></span></button>
     <button class="tab-btn" id="tabSolicitacoes">🎫 Solicitações do Bot/APP</button>
     <button class="tab-btn" id="tabPC">📄 Prestação de Contas <span class="tab-badge" id="badgePCCount">0</span></button>
@@ -2925,6 +2971,18 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <div class="lcl-barra" id="lclBarra" hidden></div>
   </div>
 
+  <!-- 12/11/2026: ABA USUÁRIOS - cadastro do app do motorista (no lugar do site SaudeFrota) -->
+  <div class="tab-panel" id="panel-usuarios">
+    <div class="us-top"><h2>👥 Usuários<small>acesso ao app do motorista</small></h2>
+      <label class="us-busca">🔍<input id="usBusca" type="search" placeholder="Nome, e-mail ou matrícula" aria-label="Buscar usuário"></label>
+      <button type="button" class="es-btn" id="usRecarregar" title="Ler de novo">↻</button>
+      <button type="button" class="es-btn pri" id="usNovo">＋ Novo usuário</button></div>
+    <div class="us-kpis" id="usKpis"></div>
+    <p class="us-cont" id="usCont"></p>
+    <div id="usCorpo"></div>
+  </div>
+  <div class="us-veu" id="usVeu"></div><aside class="us-gaveta" id="usGaveta" aria-label="Editar usuário"></aside>
+
   <div class="tab-panel" id="panel-acomp-cp">
     <div class="ce cpa" id="cpa">
       <div class="ce-header">
@@ -3441,6 +3499,56 @@ document.getElementById('tabProcessos').addEventListener('click', function() { s
 document.getElementById('tabAcompCP').addEventListener('click', function() { switchTab('panel-acomp-cp','tabAcompCP'); cpaCarregar(); cpaCarregarCentral(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
 document.getElementById('tabEmpenhos').addEventListener('click', function() { switchTab('panel-empenhos','tabEmpenhos'); esCarregar(false); csCarregar(false); });
+// ═══════════════════════════════════════════════════════
+// 12/11/2026: ABA USUÁRIOS - cadastro do app (motoristas, técnicos, gestores, admins), no lugar do site SaudeFrota.
+// Worker usuarios-listar / usuarios-salvar -> backend do SaudeFrota (/sgd/usuarios). Prefixo us-.
+// ═══════════════════════════════════════════════════════
+(function(){
+var US={lista:null,f:'todos',q:'',sel:null};
+var PAPEIS={admin:{n:'Administrador',pl:'Administradores',c:'#7c3aed'},gestor:{n:'Gestor',pl:'Gestores',c:'#2563eb'},tecnico:{n:'Técnico',pl:'Técnicos',c:'#0d9488'},motorista:{n:'Motorista',pl:'Motoristas',c:'#2f7d5d'}};
+function h(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function ini(n){n=String(n||'?').trim().split(/\s+/);return((n[0]||'?')[0]+((n.length>1?n[n.length-1]:'')[0]||'')).toUpperCase()}
+function api(acao,corpo){return sgdFetch(SGD_WORKER_URL+'?action='+acao,corpo?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)}:undefined).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||('erro '+r.status));return j})})}
+function carregar(){var c=document.getElementById('usCorpo');if(!US.lista)c.innerHTML='<div class="us-esq"><div></div><div></div><div></div></div>';
+ api('usuarios-listar').then(function(j){US.lista=j.usuarios||[];desenhar()}).catch(function(e){c.innerHTML='<div class="us-erro">Não consegui ler os usuários: '+h(e.message)+'</div>'})}
+function filtrados(){var q=US.q.toLowerCase();return(US.lista||[]).filter(function(u){if(US.f==='inativos'?u.ativo:US.f!=='todos'&&(u.role!==US.f||!u.ativo))return false;return!q||(u.nome+' '+u.email+' '+(u.matricula||'')).toLowerCase().indexOf(q)>=0})}
+function desenhar(){var l=US.lista||[],cont={todos:l.length,inativos:l.filter(function(u){return!u.ativo}).length};Object.keys(PAPEIS).forEach(function(p){cont[p]=l.filter(function(u){return u.role===p&&u.ativo}).length});
+ document.getElementById('usKpis').innerHTML=['motorista','tecnico','gestor','admin'].map(function(p){return'<button type="button" class="us-kpi" data-f="'+p+'" aria-pressed="'+(US.f===p)+'"><i style="background:'+PAPEIS[p].c+'"></i><b class="us-n">'+cont[p]+'</b><span>'+(cont[p]===1?PAPEIS[p].n:PAPEIS[p].pl)+'</span></button>'}).join('')
+  +'<button type="button" class="us-kpi" data-f="inativos" aria-pressed="'+(US.f==='inativos')+'"><i style="background:#97a1b0"></i><b class="us-n">'+cont.inativos+'</b><span>Inativos</span></button>';
+ document.querySelectorAll('#usKpis .us-kpi').forEach(function(b){b.onclick=function(){US.f=US.f===b.dataset.f?'todos':b.dataset.f;desenhar()}});
+ var v=filtrados();document.getElementById('usCont').textContent=v.length+' de '+l.length+(US.f!=='todos'?' · filtro: '+(US.f==='inativos'?'inativos':PAPEIS[US.f].n):'');
+ document.getElementById('usCorpo').innerHTML=v.length?'<div class="us-grade">'+v.map(function(u,i){var p=PAPEIS[u.role]||{n:u.role,c:'#475569'};return'<button type="button" class="us-card'+(u.ativo?'':' off')+'" data-id="'+h(u.id)+'" style="animation-delay:'+Math.min(i,10)*35+'ms"><span class="us-av" style="background:'+p.c+'">'+h(ini(u.nome))+'</span><span class="us-tx"><b>'+h(u.nome)+'</b><span>'+h(u.email)+'</span><span class="us-mono">mat. '+h(u.matricula||'—')+'</span></span><span class="us-tags"><span class="us-tag" style="color:'+p.c+';border-color:'+p.c+'33">'+h(p.n)+'</span>'+(u.escala_ambulancia?'<span class="us-tag">🚑 ambulância</span>':'')+(u.ativo?'':'<span class="us-tag">inativo</span>')+'</span></button>'}).join('')+'</div>':'<div class="us-erro">Ninguém encontrado.</div>';
+ document.querySelectorAll('#usCorpo .us-card').forEach(function(c){c.onclick=function(){abrir(c.dataset.id)}})}
+function senhaAleatoria(){var a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789',s='',r=new Uint32Array(10);crypto.getRandomValues(r);r.forEach(function(x){s+=a[x%a.length]});return s}
+function abrir(id){var u=id?(US.lista||[]).find(function(x){return x.id===id}):null,novo=!u;u=u||{nome:'',email:'',matricula:'',role:'motorista',ativo:true,escala_ambulancia:false};
+ var g=document.getElementById('usGaveta');g.innerHTML='<div class="us-g-cab"><span class="us-av grande" style="background:'+((PAPEIS[u.role]||{}).c||'#475569')+'">'+h(novo?'+':ini(u.nome))+'</span><div><h3>'+(novo?'Novo usuário':h(u.nome))+'</h3><span class="us-muted">'+(novo?'Acesso ao app do motorista':h(u.email))+'</span></div></div>'
+  +'<form class="us-form" id="usForm" autocomplete="off"><label>Nome completo<input name="nome" required maxlength="255" value="'+h(u.nome)+'"></label><label>E-mail (login)<input name="email" type="email" required maxlength="255" value="'+h(u.email)+'"></label><label>Matrícula<input name="matricula" required maxlength="50" value="'+h(u.matricula||'')+'"></label>'
+  +'<fieldset><legend>Papel</legend><div class="us-papeis">'+Object.keys(PAPEIS).map(function(p){return'<label class="us-papel"><input type="radio" name="role" value="'+p+'"'+(u.role===p?' checked':'')+'><span style="--c:'+PAPEIS[p].c+'">'+PAPEIS[p].n+'</span></label>'}).join('')+'</div></fieldset>'
+  +'<label class="us-sw"><input type="checkbox" name="ativo"'+(u.ativo?' checked':'')+'><span></span>Ativo (pode entrar no app)</label><label class="us-sw"><input type="checkbox" name="escala_ambulancia"'+(u.escala_ambulancia?' checked':'')+'><span></span>Faz escala de ambulância</label>'
+  +'<label>'+(novo?'Senha':'Nova senha <span class="us-muted">(deixe em branco para manter a atual)</span>')+'<span class="us-senha"><input name="senha" type="password" minlength="6" maxlength="100" autocomplete="new-password"'+(novo?' required':'')+'><button type="button" data-ver title="Mostrar">👁</button><button type="button" data-gerar title="Gerar uma senha">🎲</button></span></label>'
+  +'<div class="us-msg" id="usMsg" role="status"></div><div class="us-rod"><button type="button" class="es-btn" data-fecha>Cancelar</button><button type="submit" class="es-btn pri" id="usSalvar">'+(novo?'Criar usuário':'Salvar')+'</button></div></form>';
+ g.classList.add('on');document.getElementById('usVeu').classList.add('on');var f=document.getElementById('usForm');setTimeout(function(){f.nome.focus()},300);
+ g.querySelector('[data-fecha]').onclick=fechar;
+ g.querySelector('[data-ver]').onclick=function(){f.senha.type=f.senha.type==='password'?'text':'password'};
+ g.querySelector('[data-gerar]').onclick=function(){f.senha.value=senhaAleatoria();f.senha.type='text';f.senha.select()};
+ f.onsubmit=function(e){e.preventDefault();var b=document.getElementById('usSalvar'),m=document.getElementById('usMsg');
+  var corpo={id:novo?null:u.id,nome:f.nome.value.trim(),email:f.email.value.trim(),matricula:f.matricula.value.trim(),role:(f.querySelector('input[name=role]:checked')||{}).value||'motorista',ativo:f.ativo.checked,escala_ambulancia:f.escala_ambulancia.checked};
+  if(f.senha.value)corpo.senha=f.senha.value;
+  if(!novo&&u.ativo&&!corpo.ativo&&!confirm('Desativar '+u.nome+'? A pessoa não vai conseguir entrar no app.'))return;
+  b.disabled=true;b.textContent='Salvando…';m.textContent='';
+  api('usuarios-salvar',corpo).then(function(j){var x=j.usuario;if(novo)US.lista.push(x);else US.lista=US.lista.map(function(y){return y.id===x.id?x:y});US.lista.sort(function(a,b){return a.nome.localeCompare(b.nome)});
+    fechar();desenhar();var c=document.querySelector('.us-card[data-id="'+x.id+'"]');if(c){c.classList.add('us-flash');c.scrollIntoView({block:'nearest',behavior:'smooth'})}
+    if(typeof window.mostrarToast==='function')window.mostrarToast(novo?'Usuário criado':corpo.senha?'Salvo, com senha nova':'Usuário salvo')})
+  .catch(function(e){b.disabled=false;b.textContent=novo?'Criar usuário':'Salvar';m.textContent='Não salvei: '+e.message})}}
+function fechar(){document.getElementById('usGaveta').classList.remove('on');document.getElementById('usVeu').classList.remove('on')}
+document.getElementById('usVeu').onclick=fechar;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('usGaveta').classList.contains('on'))fechar()});
+document.getElementById('usBusca').oninput=function(e){US.q=e.target.value;if(US.lista)desenhar()};
+document.getElementById('usNovo').onclick=function(){abrir(null)};
+document.getElementById('usRecarregar').onclick=function(){carregar()};
+document.getElementById('tabUsuarios').addEventListener('click',function(){switchTab('panel-usuarios','tabUsuarios');carregar()});
+})();
+
 
 // ═══════════════════════════════════════════════════════
 // 12/11/2026 v2: CAIXA DE COMPRAS (SMS-SC, setor 193) na aba Empenhos Saúde - proposta D aprovada pelo Thiago.
