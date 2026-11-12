@@ -1876,7 +1876,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .us-top h2{margin:0;font:600 20px var(--sans)}.us-top small{font-weight:400;color:var(--text-muted);font-size:13px;margin-left:6px}
   .us-busca{flex:1;min-width:200px;max-width:360px;margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px}
   .us-busca input{border:0;outline:0;flex:1;min-width:0;font:14px var(--sans);background:transparent;color:var(--text)}
-  .us-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  .us-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:12px}
   .us-kpi{display:grid;grid-template-columns:10px 1fr;column-gap:8px;align-items:center;text-align:left;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font:inherit;color:var(--text);transition:transform .2s var(--us-ease),box-shadow .2s,border-color .2s}
   .us-kpi:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}.us-kpi[aria-pressed=true]{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
   .us-kpi i{width:10px;height:10px;border-radius:50%;grid-row:span 2}.us-kpi .us-n{font:500 24px var(--mono);line-height:1.1}.us-kpi span{font-size:12.5px;color:var(--text-muted);grid-column:2}
@@ -2390,7 +2390,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.26.0</span>
+    <span class="header-version">v1.26.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3505,7 +3505,7 @@ document.getElementById('tabEmpenhos').addEventListener('click', function() { sw
 // ═══════════════════════════════════════════════════════
 (function(){
 var US={lista:null,f:'todos',q:'',sel:null};
-var PAPEIS={admin:{n:'Administrador',pl:'Administradores',c:'#7c3aed'},gestor:{n:'Gestor',pl:'Gestores',c:'#2563eb'},tecnico:{n:'Técnico',pl:'Técnicos',c:'#0d9488'},motorista:{n:'Motorista',pl:'Motoristas',c:'#2f7d5d'}};
+var PAPEIS={admin:{n:'Administrador',pl:'Administradores',c:'#7c3aed'},gestor:{n:'Gestor',pl:'Gestores',c:'#2563eb'},tecnico:{n:'Técnico',pl:'Técnicos',c:'#0d9488'},motorista:{n:'Motorista',pl:'Motoristas',c:'#2f7d5d'},funcionario:{n:'Funcionário',pl:'Funcionários',c:'#c77d18'}};
 function h(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ini(n){n=String(n||'?').trim().split(/\s+/);return((n[0]||'?')[0]+((n.length>1?n[n.length-1]:'')[0]||'')).toUpperCase()}
 function api(acao,corpo){return sgdFetch(SGD_WORKER_URL+'?action='+acao,corpo?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)}:undefined).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw new Error(j.error||('erro '+r.status));return j})})}
@@ -3513,7 +3513,7 @@ function carregar(){var c=document.getElementById('usCorpo');if(!US.lista)c.inne
  api('usuarios-listar').then(function(j){US.lista=j.usuarios||[];desenhar()}).catch(function(e){c.innerHTML='<div class="us-erro">Não consegui ler os usuários: '+h(e.message)+'</div>'})}
 function filtrados(){var q=US.q.toLowerCase();return(US.lista||[]).filter(function(u){if(US.f==='inativos'?u.ativo:US.f!=='todos'&&(u.role!==US.f||!u.ativo))return false;return!q||(u.nome+' '+u.email+' '+(u.matricula||'')).toLowerCase().indexOf(q)>=0})}
 function desenhar(){var l=US.lista||[],cont={todos:l.length,inativos:l.filter(function(u){return!u.ativo}).length};Object.keys(PAPEIS).forEach(function(p){cont[p]=l.filter(function(u){return u.role===p&&u.ativo}).length});
- document.getElementById('usKpis').innerHTML=['motorista','tecnico','gestor','admin'].map(function(p){return'<button type="button" class="us-kpi" data-f="'+p+'" aria-pressed="'+(US.f===p)+'"><i style="background:'+PAPEIS[p].c+'"></i><b class="us-n">'+cont[p]+'</b><span>'+(cont[p]===1?PAPEIS[p].n:PAPEIS[p].pl)+'</span></button>'}).join('')
+ document.getElementById('usKpis').innerHTML=['motorista','funcionario','tecnico','gestor','admin'].map(function(p){return'<button type="button" class="us-kpi" data-f="'+p+'" aria-pressed="'+(US.f===p)+'"><i style="background:'+PAPEIS[p].c+'"></i><b class="us-n">'+cont[p]+'</b><span>'+(cont[p]===1?PAPEIS[p].n:PAPEIS[p].pl)+'</span></button>'}).join('')
   +'<button type="button" class="us-kpi" data-f="inativos" aria-pressed="'+(US.f==='inativos')+'"><i style="background:#97a1b0"></i><b class="us-n">'+cont.inativos+'</b><span>Inativos</span></button>';
  document.querySelectorAll('#usKpis .us-kpi').forEach(function(b){b.onclick=function(){US.f=US.f===b.dataset.f?'todos':b.dataset.f;desenhar()}});
  var v=filtrados();document.getElementById('usCont').textContent=v.length+' de '+l.length+(US.f!=='todos'?' · filtro: '+(US.f==='inativos'?'inativos':PAPEIS[US.f].n):'');
@@ -3532,7 +3532,7 @@ function abrir(id){var u=id?(US.lista||[]).find(function(x){return x.id===id}):n
  g.querySelector('[data-ver]').onclick=function(){f.senha.type=f.senha.type==='password'?'text':'password'};
  g.querySelector('[data-gerar]').onclick=function(){f.senha.value=senhaAleatoria();f.senha.type='text';f.senha.select()};
  f.onsubmit=function(e){e.preventDefault();var b=document.getElementById('usSalvar'),m=document.getElementById('usMsg');
-  var corpo={id:novo?null:u.id,nome:f.nome.value.trim(),email:f.email.value.trim(),matricula:f.matricula.value.trim(),role:(f.querySelector('input[name=role]:checked')||{}).value||'motorista',ativo:f.ativo.checked,escala_ambulancia:f.escala_ambulancia.checked};
+  var corpo={id:novo?null:u.id,nome:f.nome.value.trim(),email:f.email.value.trim(),matricula:f.matricula.value.trim(),role:(f.querySelector('input[name=role]:checked')||{}).value||u.role||'motorista',ativo:f.ativo.checked,escala_ambulancia:f.escala_ambulancia.checked};
   if(f.senha.value)corpo.senha=f.senha.value;
   if(!novo&&u.ativo&&!corpo.ativo&&!confirm('Desativar '+u.nome+'? A pessoa não vai conseguir entrar no app.'))return;
   b.disabled=true;b.textContent='Salvando…';m.textContent='';
