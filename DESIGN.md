@@ -236,6 +236,41 @@ Legenda: ✅ usar diretamente · 🎨 inspiração (reescrever em vanilla) · �
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | Skill de protótipo: gera 3 direções antes de escolher, usa marca real | 🤖 quando for desenhar tela nova (ex.: módulo de Empenho de Contratos) |
 | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) | Transforma o código em grafo consultável (não é design) | 🤖 útil pra navegar o `index.html` de 600 KB e o Worker; não é UI |
 
+### Galerias e inspiração (enviadas pelo Thiago em 12/11/2026, para reformular a UI/UX)
+Classificadas pela descrição das listas que ele mandou; **ainda não abertas uma a uma**. Antes de redesenhar uma tela, abrir as marcadas ⭐ e anotar aqui o padrão escolhido (link da tela + o que copiar).
+
+| Link | O que é | Uso aqui |
+|---|---|---|
+| ⭐ [styles.refero.design](https://styles.refero.design) | Estilos de produtos reais (cores, tipografia, componentes) | 🎨 1ª parada para o SGD: painel de trabalho, não landing |
+| ⭐ [mobbin.com](https://mobbin.com) | Telas reais de apps (já citado acima) | 🎨 listas, filas, caixas de entrada, filtros, estados vazios |
+| ⭐ [jiro.build](https://jiro.build) | 1400+ designs com prompt pronto para IA e código-fonte | 🎨🤖 achar um painel/lista parecido e adaptar o código aos tokens §2 |
+| ⭐ [beui.dev](https://beui.dev) | Componentes animados | 🎨 micro-interações dentro das regras §7 (reescrever em vanilla) |
+| ⭐ [60fps.design](https://60fps.design) | Animações de UI mobile | 🎨 App do Motorista e equipe.html (celular) |
+| [recent.design](https://recent.design) | Galeria de design recente | 🎨 referência geral |
+| [on.design](https://on.design) | Comunidade de design | 🎨 referência geral |
+| [wonderlist.design](https://wonderlist.design) | Designs em Figma | 🎨 referência geral |
+| [navbar.gallery](https://navbar.gallery) | Barras de navegação | 🎨 abas do topo do SGD |
+| [cta.gallery](https://cta.gallery) | Botões/chamadas de ação | 🎨 botão principal de cada tela (Empenhar, Passar, Conferido) |
+| [iconly.design](https://iconly.design) | Pacote de ícones | ✅/🎨 trocar emojis por ícones coerentes (ver licença antes) |
+| [fontinlogo.com](https://fontinlogo.com) | Fontes usadas por marcas | 🎨 só se for revisar a tipografia §3 |
+| [modulify.ai](https://modulify.ai) e [modulify.ai/templates](https://modulify.ai/templates) | Ferramenta de "vibecoding" e modelos grátis | 🎨 modelos; o SGD continua HTML/JS puro |
+| [motionin.design](https://motionin.design) | Gera site a partir de um prompt | 🤖 protótipo rápido de uma direção, nunca colar direto |
+| [paperanimation.ai](https://paperanimation.ai) | Animação estilo papel | ⛔ painel · 💡 vídeo curto de treino |
+| [landdding.com](https://landdding.com), [godly.website](https://godly.website) | Landing pages premiadas | ⛔ SGD é ferramenta de trabalho · 💡 página pública, se houver |
+| [footer.design](https://footer.design) | Rodapés | ⛔ o SGD não tem rodapé |
+| [backgrounds.supply](https://backgrounds.supply) | Fundos | ⛔ SGD (fundo neutro §2) · 💡 tela de login |
+| [posts.design](https://posts.design) | Posts de grandes marcas | ⛔ |
+| [logotouse.com](https://logotouse.com) | Logos premium | ⛔ |
+| [sent.dm](https://sent.dm) | SMS barato | ⛔ não é design · 💡 aviso por SMS a motorista, se um dia precisar |
+
+#### O que se tirou dos ⭐ (abertos em 12/11/2026)
+- **styles.refero.design → Linear** (o mais útil para o SGD, lista de trabalho tipo caixa de entrada): separar com **linha fina de 1px em vez de sombra**; **uma só cor de ação por tela** (o botão principal; nada mais colorido); números de processo/empenho em **mono**; densidade compacta (linha ~40 px, espaços 8/12/24); só 3 raios (6 botão, 12 painel, 999 pílula); peso máximo 600, sem negrito pesado; status em etiqueta pequena e discreta, não em pílula colorida grande.
+- **jiro.build**: biblioteca de sites/landing com prompt e código — pouco útil para painel; serve para tela pública.
+- **beui.dev**: componentes React (Motion + Tailwind); úteis como ideia de "Animated Collapsible", "Sortable List", "Timeline" (reescrever em vanilla, §7.4).
+- **60fps.design**: catálogo de animações de apps (filtros por efeito: Stagger, Ticker, Shimmer, Pulse…) — referência para o App do Motorista e equipe.html.
+- **mobbin.com**: bloqueou o acesso sem conta (403).
+- Aplicação: **caixa = lista agrupada**, o que pede ação aberto em cima e o resto recolhido com contagem; detalhe (último despacho) em 2ª linha cinza; "dias parado" à direita em mono. Propostas A/B/C da seção Caixa de Compras foram montadas com esses princípios.
+
 ### Fora do escopo destas telas (anotado para outros usos)
 | Link | O que é | Possível uso futuro |
 |---|---|---|
