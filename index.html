@@ -1870,6 +1870,27 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   #panel-empenhos .es-busca-cab{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--text-muted);margin:0 0 8px}
   .es-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:9px;padding:7px 12px;font:600 13px var(--sans);cursor:pointer;transition:all .18s}
   .es-btn:hover{border-color:var(--accent);color:var(--accent)}
+  /* 12/11/2026: caixa de Compras na aba Empenhos Saúde */
+  .cs{border:1px solid var(--border);background:var(--surface);border-radius:12px;margin:10px 0 14px;padding:0 12px}
+  .cs>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;cursor:pointer;list-style:none}
+  .cs>summary::-webkit-details-marker{display:none}
+  .cs-tit{font:700 15px var(--sans);color:var(--text)} .cs-tit small{font-weight:500;color:var(--text-muted)}
+  .cs-res{flex:1;min-width:0;font:13px var(--sans);color:var(--text-muted)} .cs-res b{color:var(--text)}
+  .cs-res .cs-pas{color:#b45309;font-weight:700}
+  .cs-at{padding:4px 10px}
+  .cs-filtros{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:8px}
+  .cs-f{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:999px;padding:4px 11px;font:600 12px var(--sans);cursor:pointer}
+  .cs-f[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .cs-lista{display:grid;gap:8px;padding-bottom:12px;max-height:520px;overflow-y:auto}
+  .cs-it{border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--surface)}
+  .cs-it.pas{border-color:#f59e0b;background:rgba(245,158,11,.07)}
+  .cs-l1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .cs-doc{font:700 13px var(--sans);color:var(--text);text-decoration:none} .cs-doc:hover{color:var(--accent)}
+  .cs-tag{font:600 11px var(--sans);border-radius:999px;padding:2px 8px;background:var(--surface2);color:var(--text-muted)}
+  .cs-tag.pas{background:#f59e0b;color:#fff} .cs-tag.novo{background:#16a34a;color:#fff}
+  .cs-ab{font:13px var(--sans);color:var(--text);margin-top:4px;overflow-wrap:anywhere}
+  .cs-ul{font:12px var(--sans);color:var(--text-muted);margin-top:3px;overflow-wrap:anywhere}
+  .cs-vazio{font:13px var(--sans);color:var(--text-muted);padding:6px 0 12px}
   .es-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
   .es-btn.pri:hover{filter:brightness(1.08);color:#fff}
   .es-btn:disabled{opacity:.5;cursor:default}
@@ -2743,6 +2764,13 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       <button class="es-btn" id="esCaixaBtn" onclick="esTrocarCaixa()">Ver arquivados</button>
       <button class="es-btn" onclick="esCarregar(true)">↻ Atualizar</button>
     </div>
+    <!-- 12/11/2026: CAIXA DE COMPRAS (SMS-SC, setor 193) - o Thiago faz a passagem de Orçamentos para Disponibilidade;
+         o robô do notebook olha a caixa de 5 em 5 min (só leitura). Dados: rota compras-saude. -->
+    <details class="cs" id="csCaixa" open>
+      <summary><span class="cs-tit">🛒 Caixa de Compras <small>SMS-SC</small></span><span class="cs-res" id="csRes">carregando…</span><button type="button" class="es-btn cs-at" onclick="event.preventDefault();csCarregar(true)" title="Ler a caixa de Compras agora">↻</button></summary>
+      <div class="cs-filtros" id="csFiltros"></div>
+      <div class="cs-lista" id="csLista"></div>
+    </details>
     <!-- 06/11/2026: v2 - números, valores por despesa, filtros com pílula e grade de cards; o detalhe (#esDet) vai para a ficha -->
     <div class="ec-bento" id="ecBento"></div>
     <section class="ec-despesas" id="ecDespesas" style="display:none"></section>
@@ -3269,7 +3297,61 @@ document.getElementById('tabRelatorio').addEventListener('click', function() { s
 document.getElementById('tabProcessos').addEventListener('click', function() { switchTab('panel-processos','tabProcessos'); carregarProcessosCaixa(); carregarEmpenhosAndamento(); carregarResumoTriagemMarcos(); });
 document.getElementById('tabAcompCP').addEventListener('click', function() { switchTab('panel-acomp-cp','tabAcompCP'); cpaCarregar(); cpaCarregarCentral(); });
 document.getElementById('tabPC').addEventListener('click', function() { switchTab('panel-pc','tabPC'); renderPCFila(true); });
-document.getElementById('tabEmpenhos').addEventListener('click', function() { switchTab('panel-empenhos','tabEmpenhos'); esCarregar(false); });
+document.getElementById('tabEmpenhos').addEventListener('click', function() { switchTab('panel-empenhos','tabEmpenhos'); esCarregar(false); csCarregar(false); });
+
+// ═══════════════════════════════════════════════════════
+// 12/11/2026: CAIXA DE COMPRAS (SMS-SC, setor 193) - o Thiago faz a passagem de Orçamentos para Disponibilidade
+// Orçamentária. O robô do notebook olha a caixa de 5 em 5 min (só leitura, nada fica lido no 1Doc); aqui só mostra.
+// ═══════════════════════════════════════════════════════
+var CS = { dados: null, filtro: 'passagem', timer: null };
+var CS_FILTROS = [
+  ['passagem', 'Passagem', function(x) { return x.pedidoAta; }],
+  ['novos', 'Novos (3 dias)', function(x) { return x.novo; }],
+  ['orcamentos', 'Orçamentos', function(x) { return !!x.situacao; }],
+  ['andamento', 'Outras etapas', function(x) { return x.etapa && !x.situacao; }],
+  ['memorandos', 'Memorandos', function(x) { return !x.etapa; }],
+  ['todos', 'Todos', function() { return true; }]
+];
+function csCarregar(forcar) {
+  clearTimeout(CS.timer); CS.timer = null;
+  var res = document.getElementById('csRes');
+  if (forcar || !CS.dados) res.textContent = forcar ? 'lendo a caixa de Compras…' : 'carregando…';
+  sgdFetch(SGD_WORKER_URL + '?action=compras-saude' + (forcar ? '&forcar=1' : ''))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok) { if (d.emLeitura) { res.textContent = 'o robô está lendo a caixa de Compras…'; CS.timer = setTimeout(function() { csCarregar(false); }, 20000); return; } throw new Error(d.error || 'falha'); }
+      CS.dados = d; csDesenhar();
+    })
+    .catch(function(e) { res.textContent = (CS.dados ? 'mostrando a última leitura · ' : '') + 'não consegui ler: ' + e.message; })
+    .finally(function() {
+      // de 5 em 5 min enquanto a aba estiver aberta (o robô relê no mesmo ritmo)
+      if (!CS.timer) CS.timer = setTimeout(function() { CS.timer = null; var p = document.getElementById('panel-empenhos'); if (p && p.offsetParent !== null) csCarregar(false); }, 5 * 60 * 1000);
+    });
+}
+function csDesenhar() {
+  var d = CS.dados; if (!d) return;
+  var hora = new Date(d.em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('csRes').innerHTML = '<b>' + d.total + '</b> na caixa · ' + (d.passagem ? '<span class="cs-pas">' + d.passagem + ' para passagem</span>' : 'nenhuma passagem') + ' · ' + d.novos + ' novos · lida às ' + hora + (d.atualizando ? ' (relendo…)' : '');
+  document.getElementById('csFiltros').innerHTML = CS_FILTROS.map(function(f) {
+    var n = d.itens.filter(f[2]).length;
+    return '<button type="button" class="cs-f" data-f="' + f[0] + '" aria-pressed="' + (CS.filtro === f[0]) + '">' + f[1] + ' ' + n + '</button>';
+  }).join('');
+  document.querySelectorAll('#csFiltros .cs-f').forEach(function(b) { b.onclick = function() { CS.filtro = b.dataset.f; csDesenhar(); }; });
+  var f = CS_FILTROS.find(function(x) { return x[0] === CS.filtro; }) || CS_FILTROS[0];
+  var itens = d.itens.filter(f[2]).sort(function(a, b) { return (b.novo - a.novo) || String(b.ultimaEm || b.recebido || '').localeCompare(String(a.ultimaEm || a.recebido || '')); });
+  var lista = document.getElementById('csLista');
+  if (!itens.length) { lista.innerHTML = '<div class="cs-vazio">' + (CS.filtro === 'passagem' ? 'Nenhum pedido esperando a passagem para Disponibilidade agora.' : 'Nada neste filtro.') + '</div>'; return; }
+  lista.innerHTML = itens.map(function(x) {
+    var link = x.hash ? 'https://tupancireta.1doc.com.br/?pg=doc/ver&hash=' + encodeURIComponent(x.hash) : null;
+    var doc = esH(String(x.documento || '').replace('Proc. Administrativo', 'Proc.'));
+    var tags = (x.novo ? '<span class="cs-tag novo">novo</span>' : '') + (x.situacao ? '<span class="cs-tag' + (x.pedidoAta ? ' pas' : '') + '">' + esH(x.pedidoAta ? 'passagem para Disponibilidade?' : x.situacao) + '</span>' : '') + (x.etapa && !x.situacao ? '<span class="cs-tag">' + esH(x.etapa) + '</span>' : '');
+    var ul = x.ultimo ? esH(String(x.ultimo.quando || '').slice(0, 10).split('-').reverse().join('/') + ' · ' + (x.ultimo.de || '') + ': ' + String(x.ultimo.texto || '').slice(0, 220)) : '';
+    return '<div class="cs-it' + (x.pedidoAta ? ' pas' : '') + '"><div class="cs-l1">' + (link ? '<a class="cs-doc" href="' + esH(link) + '" target="_blank" rel="noopener" title="Abrir no 1Doc">' + doc + ' ↗</a>' : '<span class="cs-doc">' + doc + '</span>') + tags + '</div>'
+      + (x.abertura ? '<div class="cs-ab">' + esH(x.abertura) + '</div>' : '')
+      + (ul ? '<div class="cs-ul">Último despacho: ' + ul + '</div>' : '')
+      + (x.anexos && x.anexos.length ? '<div class="cs-ul">📎 ' + esH(x.anexos.join(' · ')) + '</div>' : '') + '</div>';
+  }).join('');
+}
 
 // ═══════════════════════════════════════════════════════
 // 03/11/2026: EMPENHOS DA SAÚDE (caixa SMS-SE) - só leitura; o robô lê o 1Doc e extrai os dados
