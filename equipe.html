@@ -4038,6 +4038,8 @@ function passoPedir(qual){
      +'<div class="botoes"><button type="button" class="sim" id="okPc">Prestar '+PED.qPc+' agora</button><button type="button" data-ir="menu">Voltar</button></div></div>';
   } else if(qual==='emp'){
     h='<div class="passo2"><h3>Empenhar lote no CP</h3><p style="font:12px var(--font-mono);color:#94a3b8;">Confira os processos prontos:</p>'
+     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><label style="display:flex;align-items:center;gap:8px;font:12px var(--font-mono);color:#cbd5e1;"><input type="checkbox" id="todasEmp" checked> Marcar todas</label>'
+     +'<span id="somaEmp" aria-live="polite" style="font:600 13px var(--font-mono);color:#f1f5f9;"></span></div>'
      +'<div id="listaEmp" style="display:grid;gap:6px;max-height:220px;overflow-y:auto;">'+prontos.map(function(p){
        return '<label style="display:flex;align-items:center;gap:8px;font:12px var(--font-mono);color:#cbd5e1;"><input type="checkbox" checked value="'+esc(p.hash)+'" data-v="'+(p.valor||0)+'"><span><b>'+esc(p.processo)+'</b> · '+esc(curto(p.servidor))+' · '+real(p.valor)+'</span></label>';
      }).join('')+'</div>'
@@ -4072,10 +4074,20 @@ function passoPedir(qual){
   };
 
   var btEmp=$('#btEmp'); if(btEmp){
+    var somaMarcadas=function(c){return c.reduce(function(s,i){return s+Math.round(Number(i.dataset.v||0)*100);},0)/100;};
+    var atualizaEmp=function(){
+      var todas=$$('#listaEmp input'), c=$$('#listaEmp input:checked'), t=$('#todasEmp');
+      $('#somaEmp').textContent=c.length+' de '+todas.length+' · '+real(somaMarcadas(c));
+      t.checked=c.length===todas.length; t.indeterminate=c.length>0&&c.length<todas.length;
+      btEmp.textContent=c.length?'Empenhar '+c.length:'Empenhar selecionados';
+    };
+    $('#todasEmp').onchange=function(){var m=this.checked;$$('#listaEmp input').forEach(function(i){i.checked=m;});atualizaEmp();};
+    $('#listaEmp').onchange=atualizaEmp;
+    atualizaEmp();
     btEmp.onclick=function(){
       var c=$$('#listaEmp input:checked'); if(!c.length){toast('Nenhum processo marcado.');return;}
       $('#preEmp').hidden=true;
-      $('#confEmp').innerHTML='<div class="confirma">Confirmar gravação de <b>'+c.length+' empenhos</b> no CP?<div class="botoes"><button type="button" class="perigo" id="empSim">Confirmar e Gravar</button><button type="button" id="empNao">Revisar</button></div></div>';
+      $('#confEmp').innerHTML='<div class="confirma">Confirmar gravação de <b>'+c.length+' empenhos</b> (total <b>'+real(somaMarcadas(c))+'</b>) no CP?<div class="botoes"><button type="button" class="perigo" id="empSim">Confirmar e Gravar</button><button type="button" id="empNao">Revisar</button></div></div>';
       $('#empNao').onclick=function(){$('#confEmp').innerHTML='';$('#preEmp').hidden=false;};
       $('#empSim').onclick=function(){
         this.disabled=true;api('celular-empenhar',{body:{hashes:c.map(function(i){return i.value;})}}).then(function(j){
