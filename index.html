@@ -2027,7 +2027,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .cx-campo{border:1px solid var(--border);border-radius:8px;padding:8px 10px}.cx-campo span{display:block;font-size:11.5px;color:var(--text-muted)}.cx-campo b{font:500 13px var(--mono)}
   .cx-campo.lendo b{display:block;height:14px;border-radius:4px;margin-top:3px;background:linear-gradient(90deg,var(--surface2),var(--surface),var(--surface2));background-size:200% 100%;animation:cxOnda 1.1s linear infinite}
   .cx-despacho{border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:12px 14px;font:13px/1.55 var(--sans);min-height:100px;white-space:pre-wrap}
-  .cx-cur{display:inline-block;width:2px;height:15px;background:var(--accent);vertical-align:-2px;animation:cxPisca 1s steps(1) infinite}@keyframes cxPisca{50%{opacity:0}}
+  .cx-cur{display:inline-block;width:2px;height:15px;background:var(--accent);vertical-align:-2px;animation:cxPisca 1s steps(1) infinite}@keyframes cxPisca{50%{opacity:0}}@keyframes cxRisca{to{stroke-dashoffset:0}}
   .cx-morf .m-rod{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
   .cx-cmd{position:fixed;top:14vh;left:50%;width:min(620px,92vw);transform:translateX(-50%) scale(.96);opacity:0;z-index:330;background:var(--surface);color:var(--text);border-radius:14px;box-shadow:0 30px 80px rgba(16,24,40,.35);overflow:hidden;transition:transform .45s var(--cx-spring,ease),opacity .2s;pointer-events:none;font:14px var(--sans)}
   .cx-cmd.on{transform:translateX(-50%);opacity:1;pointer-events:auto}
@@ -2345,7 +2345,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.23.0</span>
+    <span class="header-version">v1.24.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3446,7 +3446,7 @@ document.getElementById('tabEmpenhos').addEventListener('click', function() { sw
 // 12/11/2026 v2: CAIXA DE COMPRAS (SMS-SC, setor 193) na aba Empenhos Saúde - proposta D aprovada pelo Thiago.
 // O robô do notebook olha a caixa de 5 em 5 min (só leitura, nada fica lido no 1Doc); a rota compras-saude só repassa.
 // Animações inspiradas no beui.dev e 60fps.design, reescritas em JS/CSS puro (DESIGN.md §7). Prefixo cx-.
-// A passagem pelo SGD ainda NÃO envia nada: "Preparar passagem" mostra a prévia do despacho e o botão de envio fica desligado.
+// "Preparar passagem" confere no 1Doc (montar) e envia (rota compras-passagem) - ligado em 12/11/2026 ("Sim, ligue").
 // ═══════════════════════════════════════════════════════
 (function(){
 var D=null,F=null,Q='',SEL=null,TIMER=null,PRIMEIRA=true;
@@ -3523,19 +3523,37 @@ function abrir(id){var x=D.itens.find(function(z){return z.id===id});if(!x)retur
  g.classList.add('on');g.setAttribute('aria-hidden','false');OV.querySelector('.cx-veu').classList.add('on');g.querySelector('[data-fecha]').onclick=fecharGaveta}
 function fecharGaveta(){OV.querySelector('.cx-gaveta').classList.remove('on');OV.querySelector('.cx-gaveta').setAttribute('aria-hidden','true');OV.querySelector('.cx-veu').classList.remove('on');SEL=null;$$c('#cxGrupos .cx-linha.sel').forEach(function(l){l.classList.remove('sel')})}
 OV.querySelector('.cx-veu').onclick=fecharGaveta;
-// "Preparar passagem": janela que nasce do botão. Só PRÉVIA - o envio pelo SGD ainda não existe.
-function preparar(btn,x){fecharGaveta();var r=btn.getBoundingClientRect(),W=Math.min(640,innerWidth-32),L=(innerWidth-W)/2;
+// "Preparar passagem": janela que nasce do botão. 12/11/2026 ("Sim, ligue"): ao abrir, o robô CONFERE no 1Doc (modo montar, não envia);
+// o botão "Enviar para Disponibilidade" só liga com a conferência ok e o texto pronto. Enviar = despacho para a DGAF + arquiva e para de acompanhar em Compras.
+function passagemApi(x,modo,texto){return sgdFetch(SGD_WORKER_URL+'?action=compras-passagem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hash:x.hash,modo:modo,texto:texto||'',documento:x.documento})}).then(function(r){return r.json()})}
+function preparar(btn,x){fecharGaveta();if(!x.hash){aviso('Este item não tem o código do 1Doc; abra pelo 1Doc.',3500);return}
+ var r=btn.getBoundingClientRect(),W=Math.min(640,innerWidth-32),L=(innerWidth-W)/2;
  var veu=document.createElement('div');veu.className='cx-morf-veu';OV.appendChild(veu);
  var m=document.createElement('div');m.className='cx-morf';Object.assign(m.style,{left:L+'px',top:'20px',width:W+'px',maxHeight:(innerHeight-40)+'px',visibility:'hidden'});
- m.innerHTML='<div class="m-cab"><div><div class="cx-muted cx-mono" style="font-size:12.5px">'+h(num(x))+' → Disponibilidade Orçamentária (DGAF)</div><h3>Preparar passagem</h3></div><button type="button" class="cx-bt" data-x aria-label="Fechar">✕</button></div><div class="m-corpo"><div class="cx-campos"><div class="cx-campo lendo"><span>Pedido</span><b></b></div><div class="cx-campo lendo"><span>Dias na caixa</span><b></b></div><div class="cx-campo lendo"><span>Destino</span><b></b></div></div><div><div class="cx-muted" style="font-size:12px;margin-bottom:6px">Despacho que vai ser enviado</div><div class="cx-despacho"><span class="cx-cur"></span></div></div><div class="cx-muted" style="font-size:12px">Prévia: o envio pelo SGD ainda não está ligado. Confira o pedido no 1Doc e peça a passagem ao Claude (ele usa este mesmo texto, sem assinatura, arquiva e para de acompanhar em Compras).</div></div><div class="m-rod"><a class="cx-bt" href="'+link(x)+'" target="_blank" rel="noopener">'+IC.ext+'Abrir no 1Doc</a><button type="button" class="cx-bt" data-copia>Copiar despacho</button><button type="button" class="cx-bt pri" disabled title="Em breve">Enviar pelo SGD (em breve)</button></div>';
+ m.innerHTML='<div class="m-cab"><div><div class="cx-muted cx-mono" style="font-size:12.5px">'+h(num(x))+' → Disponibilidade Orçamentária (DGAF)</div><h3>Preparar passagem</h3></div><button type="button" class="cx-bt" data-x aria-label="Fechar">✕</button></div><div class="m-corpo"><div class="cx-campos"><div class="cx-campo lendo"><span>Etapa no 1Doc</span><b></b></div><div class="cx-campo lendo"><span>Destino</span><b></b></div><div class="cx-campo lendo"><span>Conferência</span><b></b></div></div><div><div class="cx-muted" style="font-size:12px;margin-bottom:6px">Despacho que vai ser enviado (dá para editar)</div><div class="cx-despacho"><span class="cx-cur"></span></div></div><div class="cx-muted cx-nota" style="font-size:12px">O robô está conferindo o processo no 1Doc (só lê, não envia nada)…</div></div><div class="m-rod"><a class="cx-bt" href="'+link(x)+'" target="_blank" rel="noopener">'+IC.ext+'Abrir no 1Doc</a><button type="button" class="cx-bt" data-copia>Copiar despacho</button><button type="button" class="cx-bt pri" data-envia disabled>'+IC.env+'Enviar para Disponibilidade</button></div>';
  OV.appendChild(m);var H=m.offsetHeight,T=Math.max(20,(innerHeight-H)/2);m.style.top=T+'px';m.style.visibility='';requestAnimationFrame(function(){veu.classList.add('on')});
  var txt='Encaminha-se o presente processo para verificação da disponibilidade orçamentária e indicação da despesa.\n'+(x.abertura||x.assunto)+'.';
+ var desp=m.querySelector('.cx-despacho'),nota=m.querySelector('.cx-nota'),bEnv=m.querySelector('[data-envia]'),escrito=false,conferido=false,enviando=false;
+ function liga(){bEnv.disabled=!(escrito&&conferido)||enviando}
+ function campo(i,v,ok){var c=m.querySelectorAll('.cx-campo')[i];c.classList.remove('lendo');c.querySelector('b').innerHTML=v;if(ok===false)c.style.borderColor='var(--danger)';if(!CALMO)c.animate([{transform:'scale(.96)'},{transform:'none'}],{duration:400,easing:MOLA})}
  var a=m.animate([{transform:'translate('+(r.left-L)+'px,'+(r.top-T)+'px) scale('+(r.width/W)+','+(r.height/H)+')',transformOrigin:'0 0',borderRadius:'8px',opacity:.6},{transform:'none',transformOrigin:'0 0',borderRadius:'14px',opacity:1}],{duration:CALMO?1:650,easing:MOLA});
- a.onfinish=function(){m.classList.add('pronto');var fs=[num(x),dias(x)+' dias','DGAF (setor 189)'];m.querySelectorAll('.cx-campo').forEach(function(c,i){setTimeout(function(){c.classList.remove('lendo');c.querySelector('b').textContent=fs[i];if(!CALMO)c.animate([{transform:'scale(.96)'},{transform:'none'}],{duration:400,easing:MOLA})},250+i*260)});
-  var el=m.querySelector('.cx-despacho'),i=0;(function escreve(){if(i<=txt.length){el.innerHTML=h(txt.slice(0,i))+'<span class="cx-cur"></span>';i+=CALMO?txt.length+1:2;setTimeout(escreve,14)}else el.textContent=txt})()};
- function fechar(){veu.classList.remove('on');m.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.96) translateY(10px)'}],{duration:200,easing:'cubic-bezier(.3,0,1,1)',fill:'forwards'}).onfinish=function(){m.remove();veu.remove()}}
+ a.onfinish=function(){m.classList.add('pronto');var i=0;(function escreve(){if(i<=txt.length){desp.innerHTML=h(txt.slice(0,i))+'<span class="cx-cur"></span>';i+=CALMO?txt.length+1:2;setTimeout(escreve,14)}else{desp.textContent=txt;desp.contentEditable='true';desp.spellcheck=true;escrito=true;liga()}})()};
+ passagemApi(x,'montar').then(function(j){
+   if(!j.ok){campo(0,h(j.etapa||'—'),false);campo(1,h(j.destino||'—'),false);campo(2,'✕ não dá',false);nota.innerHTML='<b style="color:var(--danger)">Não dá para passar pelo SGD:</b> '+h(j.error||'falha na conferência')+'. Confira no 1Doc.';return}
+   campo(0,'Orçamentos ✓');campo(1,h(j.destino||'DGAF')+' ✓');campo(2,'pronto para enviar ✓');conferido=true;liga();
+   nota.innerHTML='Conferido no 1Doc: está em <b>Orçamentos</b> e a próxima etapa vai só para a <b>DGAF</b>. Ao enviar, o processo sai da caixa de Compras e para de ser acompanhado aqui.'})
+ .catch(function(e){campo(0,'—',false);campo(1,'—',false);campo(2,'✕ sem resposta',false);nota.innerHTML='<b style="color:var(--danger)">O robô não respondeu:</b> '+h(e.message)});
+ function fechar(){if(enviando)return;veu.classList.remove('on');m.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.96) translateY(10px)'}],{duration:200,easing:'cubic-bezier(.3,0,1,1)',fill:'forwards'}).onfinish=function(){m.remove();veu.remove()}}
  veu.onclick=fechar;m.querySelector('[data-x]').onclick=fechar;
- m.querySelector('[data-copia]').onclick=function(){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){aviso('✓ Despacho copiado',2500)}).catch(function(){aviso('Não consegui copiar; selecione o texto e copie.',3500)})}}
+ m.querySelector('[data-copia]').onclick=function(){var t=desp.innerText.trim();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){aviso('✓ Despacho copiado',2500)}).catch(function(){aviso('Não consegui copiar; selecione o texto e copie.',3500)})};
+ bEnv.onclick=function(){var t=desp.innerText.replace(/ /g,' ').trim();if(t.length<20){aviso('O texto do despacho ficou curto demais.',3000);return}
+  enviando=true;liga();desp.contentEditable='false';bEnv.innerHTML='<svg class="cx-i cx-gira" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/></svg>Enviando ao 1Doc…';ilhaDiz('Enviando a passagem de '+h(num(x))+'…',false);
+  passagemApi(x,'enviar',t).then(function(j){enviando=false;
+    if(!j.ok||!j.enviado){bEnv.innerHTML=IC.env+'Enviar para Disponibilidade';desp.contentEditable='true';liga();nota.innerHTML='<b style="color:var(--danger)">Não foi enviado:</b> '+h(j.error||'falha')+'. Nada mudou no 1Doc'+(j.conferido?' (a conferência tinha passado; tente de novo ou abra no 1Doc).':'.');ilhaDiz('✕ A passagem de '+h(num(x))+' não foi enviada',true,4000);return}
+    m.querySelector('.m-corpo').innerHTML='<div class="cx-sucesso" style="display:grid;place-items:center;gap:10px;padding:26px 10px;text-align:center"><svg viewBox="0 0 64 64" style="width:64px;height:64px"><circle cx="32" cy="32" r="29" style="stroke:var(--success);stroke-width:3;fill:none;stroke-dasharray:190;stroke-dashoffset:190;animation:cxRisca .6s var(--cx-ease-enter) forwards"/><path d="M20 33l8 8 16-17" style="stroke:var(--success);stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:cxRisca .35s .5s var(--cx-ease-enter) forwards"/></svg><b>Passagem enviada</b><span class="cx-muted">'+h(num(x))+' foi para Disponibilidade Orçamentária (DGAF), arquivado e sem acompanhar em Compras.</span></div>';
+    m.querySelector('.m-rod').innerHTML='<a class="cx-bt" href="'+link(x)+'" target="_blank" rel="noopener">'+IC.ext+'Ver no 1Doc</a><button type="button" class="cx-bt" data-x>Fechar</button>';m.querySelector('.m-rod [data-x]').onclick=fechar;
+    ilhaDiz('✓ '+h(num(x))+' passado para Disponibilidade',true,4000);setTimeout(function(){carregar(true)},2500)})
+  .catch(function(e){enviando=false;bEnv.innerHTML=IC.env+'Enviar para Disponibilidade';liga();nota.innerHTML='<b style="color:var(--danger)">Sem resposta do robô:</b> '+h(e.message)+'. Confira no 1Doc antes de tentar de novo: o envio pode ter chegado.'})}}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-prep]');if(!b||!D)return;e.preventDefault();var x=D.itens.find(function(z){return z.id===b.dataset.prep});if(x)preparar(b,x)});
 // paleta de comandos ⌘K / Ctrl+K (só com a aba Empenhos Saúde aberta)
 var cmd=OV.querySelector('.cx-cmd'),at=0,opcs=[];
