@@ -2345,7 +2345,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.24.0</span>
+    <span class="header-version">v1.25.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4244,9 +4244,13 @@ function esDetalhe(p, animar) {
   if (p.itens && p.itens.length) {
     h += '<div class="es-sec">Itens (' + p.itens.length + ')</div><div style="overflow:auto"><table class="es-tab"><tr><th>Item</th><th>Descrição</th><th style="text-align:right">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th></tr>';
     p.itens.forEach(function(it) {
-      h += '<tr' + (it.conferido === false ? ' style="background:#fff4e0"' : '') + '><td>' + esH(it.item || it.codigo || '') + '</td><td>' + (it.grupo ? '<span class="es-tag" style="font-size:10px">' + esH(it.grupo) + '</span> ' : '') + esH(it.descricao) + '</td><td class="num">' + (it.quantidade != null ? it.quantidade.toLocaleString('pt-BR') : it.qtd != null ? Number(it.qtd).toLocaleString('pt-BR') : '') + '</td><td class="num">' + (it.valorUnitario == null ? '—' : 'R$ ' + Number(it.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })) + '</td><td class="num">' + esBRL(it.total) + '</td></tr>';
+      h += '<tr' + (it.ajustado ? ' style="background:#eaf1fe"' : it.conferido === false ? ' style="background:#fff4e0"' : '') + '><td>' + esH(it.item || it.codigo || '') + '</td><td>' + (it.grupo ? '<span class="es-tag" style="font-size:10px">' + esH(it.grupo) + '</span> ' : '') + esH(it.descricao) + (it.ajustado && it.original ? ' <span class="es-tag" style="font-size:10px" title="Ajustado à mão no SGD">✏️ era ' + esH(it.original.quantidade) + ' × ' + esBRL(it.original.valorUnitario) + '</span>' : '') + '</td><td class="num">' + (it.quantidade != null ? it.quantidade.toLocaleString('pt-BR') : it.qtd != null ? Number(it.qtd).toLocaleString('pt-BR') : '') + '</td><td class="num">' + (it.valorUnitario == null ? '—' : 'R$ ' + Number(it.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })) + '</td><td class="num">' + esBRL(it.total) + '</td></tr>';
     });
     h += '</table></div>';
+    // 12/11/2026 (Thiago, 10639: pedido atualizado de 1 para 5 celulares e o robô leu 1): ajuste manual dos itens
+    h += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0"><button type="button" class="es-btn" onclick="esAjustarItens(' + p.idEmissao + ')">✏️ Ajustar itens</button>'
+      + (p.ajusteManual ? '<span style="font-size:12.5px;color:var(--text-muted)">Ajustado à mão' + (p.ajusteManual.motivo ? ': ' + esH(p.ajusteManual.motivo) : '') + ' · <a href="#" onclick="esDesfazerAjuste(' + p.idEmissao + ');return false">desfazer</a></span>' : '')
+      + '</div><div id="esAjuste' + p.idEmissao + '"></div>';
   }
   if (p.despachos && p.despachos.length) {
     h += '<div class="es-sec">Linha do tempo</div><div class="es-tl">';
@@ -4306,6 +4310,46 @@ function esCopiarItensLC(id) {
   p.itensLC.forEach(function(it) { linhas.push([it.grupo || '', it.item || '', it.descricao || '', it.codigoLC == null ? '' : it.codigoLC, it.descricaoLC || '', it.unidadeLC || '', it.qtd == null ? '' : String(it.qtd).replace('.', ','), br(it.valorUnitario), br(it.total)].join('\t')); });
   navigator.clipboard.writeText(linhas.join('\n')).then(function() { if (typeof mostrarToast === 'function') mostrarToast('Lista para o LC copiada'); });
 }
+// 12/11/2026: editor dos itens (quantidade e valor unitário) -> rota empenhos-saude-ajustar; vale para a aba e para o lote do LC
+function esAjustarItens(id) {
+  var p = esTodos().find(function(x) { return x.idEmissao === id; }), box = document.getElementById('esAjuste' + id);
+  if (!p || !box || !p.itens) return;
+  var fin = p.dotacao && Number(p.dotacao.valorTotal);
+  box.innerHTML = '<div style="border:1px solid var(--border-strong);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">'
+    + '<div style="font:600 13px var(--sans);margin-bottom:8px">Ajustar itens de ' + esH(p.numero) + (fin > 0 ? ' <span style="font-weight:400;color:var(--text-muted)">· valor do Financeiro ' + esBRL(fin) + '</span>' : '') + '</div>'
+    + p.itens.map(function(it, i) {
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) 90px 120px 110px;gap:8px;align-items:center;margin-bottom:6px;font-size:13px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esH(it.descricao) + '">' + esH((it.item ? it.item + ' · ' : '') + (it.descricao || '')) + '</span>'
+          + '<input type="number" min="0" step="any" data-i="' + i + '" data-c="q" value="' + (it.quantidade == null ? '' : it.quantidade) + '" aria-label="Quantidade" style="padding:6px;border:1px solid var(--border-strong);border-radius:6px;font:13px var(--mono)">'
+          + '<input type="number" min="0" step="any" data-i="' + i + '" data-c="u" value="' + (it.valorUnitario == null ? '' : it.valorUnitario) + '" aria-label="Valor unitário" style="padding:6px;border:1px solid var(--border-strong);border-radius:6px;font:13px var(--mono)">'
+          + '<span class="num" data-t="' + i + '" style="font:13px var(--mono);text-align:right"></span></div>';
+      }).join('')
+    + '<div id="esAjSoma' + id + '" style="font-size:12.5px;margin:6px 0 8px"></div>'
+    + '<input type="text" id="esAjMot' + id + '" placeholder="Motivo (ex.: despacho 4 atualizou para 5 unidades)" maxlength="200" style="width:100%;padding:7px;border:1px solid var(--border-strong);border-radius:6px;font:13px var(--sans);margin-bottom:8px">'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="es-btn" onclick="document.getElementById(\'esAjuste' + id + '\').innerHTML=\'\'">Cancelar</button><button type="button" class="es-btn pri" id="esAjOk' + id + '">Gravar ajuste</button></div></div>';
+  function soma() {
+    var s = 0;
+    p.itens.forEach(function(it, i) {
+      var q = Number(box.querySelector('[data-i="' + i + '"][data-c="q"]').value), u = Number(box.querySelector('[data-i="' + i + '"][data-c="u"]').value), t = q > 0 && u > 0 ? Math.round(q * u * 100) / 100 : 0;
+      s += t; box.querySelector('[data-t="' + i + '"]').textContent = esBRL(t);
+    });
+    var ok = !(fin > 0) || Math.abs(s - fin) <= 0.05;
+    document.getElementById('esAjSoma' + id).innerHTML = 'Soma: <b>' + esBRL(Math.round(s * 100) / 100) + '</b>' + (fin > 0 ? (ok ? ' <span style="color:var(--success)">✓ bate com o Financeiro</span>' : ' <span style="color:var(--danger)">≠ Financeiro ' + esBRL(fin) + '</span>') : '');
+  }
+  box.querySelectorAll('input[type=number]').forEach(function(i) { i.oninput = soma; }); soma();
+  document.getElementById('esAjOk' + id).onclick = function() {
+    var b = this, itens = p.itens.map(function(it, i) { return { item: it.item || null, quantidade: Number(box.querySelector('[data-i="' + i + '"][data-c="q"]').value), valorUnitario: Number(box.querySelector('[data-i="' + i + '"][data-c="u"]').value) }; });
+    if (itens.some(function(x) { return !(x.quantidade > 0) || !(x.valorUnitario > 0); })) { alert('Quantidade e valor unitário precisam ser maiores que zero.'); return; }
+    b.disabled = true; b.textContent = 'Gravando…';
+    sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-ajustar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ numero: p.numero, itens: itens, motivo: document.getElementById('esAjMot' + id).value }) })
+      .then(function(r) { return r.json(); }).then(function(d) { if (!d.ok) throw new Error(d.error || 'falha'); if (typeof mostrarToast === 'function') mostrarToast('Itens ajustados - relendo a caixa'); esCarregar(true); })
+      .catch(function(e) { b.disabled = false; b.textContent = 'Gravar ajuste'; alert('Não gravei o ajuste: ' + e.message); });
+  };
+}
+function esDesfazerAjuste(id) {
+  var p = esTodos().find(function(x) { return x.idEmissao === id; }); if (!p || !confirm('Voltar os itens de ' + p.numero + ' para o que o robô leu do 1Doc?')) return;
+  sgdFetch(SGD_WORKER_URL + '?action=empenhos-saude-ajustar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ numero: p.numero, remover: true }) })
+    .then(function(r) { return r.json(); }).then(function(d) { if (!d.ok) throw new Error(d.error || 'falha'); esCarregar(true); }).catch(function(e) { alert('Não desfiz: ' + e.message); });
+}
 function esCopiarDescricao(id, i) {
   var p = esTodos().find(function(x) { return x.idEmissao === id; });
   var t = p && (i != null ? p.empenhosPorDespesa && p.empenhosPorDespesa[i] && p.empenhosPorDespesa[i].descricao : p.parecer && p.parecer.descricaoEmpenho);
@@ -4319,7 +4363,7 @@ function esCopiar(id) {
   navigator.clipboard.writeText(linhas.join('\n')).then(function() { if (typeof mostrarToast === 'function') mostrarToast('Dados copiados'); });
 }
 // As funções abaixo rodam dentro do bloco de inicialização; os onclick do HTML só enxergam o que está em window.
-window.esAbrir = esAbrir; window.esFiltrar = esFiltrar; window.esCarregar = esCarregar; window.esTrocarCaixa = esTrocarCaixa; window.esCopiar = esCopiar; window.esCopiarDescricao = esCopiarDescricao; window.esTrocarLC = esTrocarLC; window.esCopiarItensLC = esCopiarItensLC; window.esCopiarTexto = esCopiarTexto;
+window.esAbrir = esAbrir; window.esFiltrar = esFiltrar; window.esCarregar = esCarregar; window.esTrocarCaixa = esTrocarCaixa; window.esCopiar = esCopiar; window.esCopiarDescricao = esCopiarDescricao; window.esAjustarItens = esAjustarItens; window.esDesfazerAjuste = esDesfazerAjuste; window.esTrocarLC = esTrocarLC; window.esCopiarItensLC = esCopiarItensLC; window.esCopiarTexto = esCopiarTexto;
 
 
 // ═══════════════════════════════════════════════════════
