@@ -2242,6 +2242,49 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .lcl-tag{flex:0 0 auto;font:600 10.5px var(--sans);padding:3px 8px;border-radius:999px;background:#0d948818;color:#0f766e;white-space:nowrap}
   .lcl-nao{flex:0 0 auto;font-size:13px;opacity:.35;cursor:help}
   .lcl-faixa{margin:10px 0 4px;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,#f0fdfa,var(--surface));font:13px var(--sans)}
+  /* 13/11/2026: tela de andamento do lote do LC/CP (prefixo and-) */
+  .and-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .and-cab h4{margin:0;font:600 15px var(--sans);display:flex;align-items:center;gap:8px}
+  .and-cab small{color:var(--text-muted);font-size:12.5px}
+  .and-vivo{display:inline-flex;align-items:center;gap:6px;font:500 11.5px var(--sans);color:var(--success);background:var(--ok-soft);border-radius:999px;padding:2px 9px}
+  .and-vivo i{width:7px;height:7px;border-radius:50%;background:var(--success);animation:andPulsa 2s infinite}
+  @keyframes andPulsa{0%{box-shadow:0 0 0 0 rgba(31,157,87,.45)}70%{box-shadow:0 0 0 7px rgba(31,157,87,0)}100%{box-shadow:0 0 0 0 rgba(31,157,87,0)}}
+  .and-fim{font:500 11.5px var(--sans);color:var(--text-muted);background:var(--surface2);border-radius:999px;padding:2px 9px}
+  .and-placar{display:flex;gap:8px;flex-wrap:wrap}.and-placar span{font-size:12.5px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px 10px}
+  .and-placar b{font:600 13px var(--mono);color:var(--text)}.and-placar .ok b{color:var(--success)}.and-placar .er b{color:var(--danger)}
+  .and-robo{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+  .and-robo-trilha{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .and-rp{display:inline-flex;align-items:center;gap:5px;font:500 12px var(--sans);border-radius:999px;padding:3px 9px;background:var(--surface2);color:var(--text-muted)}
+  .and-rp.ok{background:var(--ok-soft);color:#17663d}.and-rp.er{background:#fde8e8;color:var(--danger)}.and-rp.cur{background:#e0ecff;color:#1d4ed8}
+  .and-seta{color:var(--text-dim)}
+  .and-robo-msg{font-size:12.5px;color:var(--text);margin-top:6px}.and-robo-msg span{color:var(--text-dim)}
+  .and-gira{display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:andGira .8s linear infinite}
+  @keyframes andGira{to{transform:rotate(360deg)}}
+  .and-procs{display:grid;gap:8px}
+  .and-proc{border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:10px 12px;animation:andEntra .35s cubic-bezier(.05,.7,.1,1) both}
+  .and-proc.ok{border-color:#bfe5cf}.and-proc.erro{border-color:#f3c2c2;background:linear-gradient(180deg,#fff7f7,var(--surface))}
+  @keyframes andEntra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .and-proc-cab{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px}.and-proc-cab b{font:600 13px var(--mono)}.and-proc-cab span{color:var(--text-muted)}
+  .and-trilha{display:flex;align-items:flex-start;gap:0}
+  .and-no{flex:0 0 auto;display:grid;justify-items:center;text-align:center;gap:3px;width:118px}
+  .and-no b{font:500 12px var(--sans);color:var(--text-muted)}.and-no small{font:11px var(--mono);color:var(--text-dim)}
+  .and-bola{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);background:var(--surface2);color:var(--text-dim);border:2px solid var(--border);transition:all .3s}
+  .and-bola svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;animation:andRisca .45s .1s cubic-bezier(.05,.7,.1,1) forwards}
+  @keyframes andRisca{to{stroke-dashoffset:0}}
+  .and-no.feito .and-bola{background:var(--success);border-color:var(--success)}.and-no.feito b{color:var(--text)}
+  .and-no.agora .and-bola{background:#e0ecff;border-color:#2563eb;color:#1d4ed8;box-shadow:0 0 0 0 rgba(37,99,235,.4);animation:andPulsaAz 1.8s infinite}.and-no.agora b{color:#1d4ed8}
+  @keyframes andPulsaAz{0%{box-shadow:0 0 0 0 rgba(37,99,235,.4)}70%{box-shadow:0 0 0 8px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+  .and-no.falhou .and-bola{background:var(--danger);border-color:var(--danger);color:#fff}.and-no.falhou b{color:var(--danger)}
+  .and-liga{flex:1;min-width:16px;height:2px;background:var(--border);margin-top:13px;position:relative;overflow:hidden}
+  .and-no.feito+.and-liga{background:var(--success)}
+  .and-erro{margin-top:8px;font-size:12.5px;color:var(--danger);background:#fff1f1;border-radius:8px;padding:6px 9px;overflow-wrap:anywhere}
+  .and-log{margin-top:10px;border:1px solid var(--border);border-radius:12px;background:#0f1419;color:#d7dee8}
+  .and-log summary{cursor:pointer;padding:8px 12px;font:500 12.5px var(--sans);color:#d7dee8;list-style:none}.and-log summary::-webkit-details-marker{display:none}
+  .and-log pre{margin:0;padding:4px 12px 12px;font:11.5px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto}
+  .and-log .ok{color:#6ee7a8}.and-log .er{color:#fca5a5}.and-log .pa{color:#93c5fd}
+  .and-log .novo{animation:andLinha .6s ease both}@keyframes andLinha{from{background:rgba(147,197,253,.25)}to{background:transparent}}
+  @media (max-width:760px){.and-no{width:78px}.and-no b{font-size:11px}}
+  @media (prefers-reduced-motion:reduce){.and-proc,.and-bola svg,.and-no.agora .and-bola,.and-vivo i,.and-gira,.and-log .novo{animation:none!important}.and-bola svg{stroke-dashoffset:0}}
   .lcl-faixa h4{margin:0 0 8px;font:600 14px var(--sans);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .lcl-faixa h4 small{font-weight:400;color:var(--text-muted)}
   .lcl-itens{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
@@ -2390,7 +2433,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.26.1</span>
+    <span class="header-version">v1.27.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4024,6 +4067,63 @@ function lclMandar() {
       lclCarregar();
     }).catch(function(e) { alert('Não consegui mandar o lote: ' + e.message); });
 }
+// ═══════════════════════════════════════════════════════
+// 13/11/2026: TELA DE ANDAMENTO do lote do LC/CP (Thiago: "criar um modo de ver o andamento dos processos melhorado").
+// Dados: rota lc-andamento (lote + historico de etapas + robo do notebook + ultimas linhas do registro). Prefixo and-.
+// ═══════════════════════════════════════════════════════
+var AND_PASSOS = [['requisicao', 'Requisição', 'LC'], ['pedido', 'Pedido de Empenho', 'LC'], ['empenho', 'Empenho', 'CP'], ['enviado-1doc', 'Enviado no 1Doc', '1Doc']];
+var AND_ROBO = { sessao: 'Sessão', impressora: 'Impressora', lc: 'LC', cp: 'Abrir o CP', login: 'Login no CP', emissao: 'Emissão', vigia: 'Vigia do CP' };
+var AND = { abertoLog: false, ultLinhas: {} };
+function andHora(ms) { return ms ? new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : ''; }
+function andDur(ms) { if (!(ms > 0)) return ''; var s = Math.round(ms / 1000); if (s < 60) return s + ' s'; var m = Math.floor(s / 60); return m < 60 ? m + ' min' + (s % 60 >= 30 && m < 10 ? ' ' + (s % 60) + ' s' : '') : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'; }
+function andIdx(etapa) { return etapa === 'enviado-1doc' ? 4 : etapa === 'empenho' || etapa === 'empenho-gravando' ? 3 : etapa === 'pedido' ? 2 : etapa === 'requisicao' ? 1 : 0; }
+function andQuando(it, chave) { var h = (it.hist || []).filter(function(x) { return x.etapa === chave || (chave === 'empenho' && x.etapa === 'empenho-gravando'); }); return h.length ? h[h.length - 1].em : null; }
+function andEmpenho(it) { var m = String(it.texto || '').match(/Empenho\s+0*(\d{4,6})/i); return m ? ('0' + m[1]).slice(-6) : null; }
+function andFaixa(fx, l, dados) {
+  var ativo = l.status === 'ativo', agora = Date.now();
+  var n = l.itens.length, prontos = l.itens.filter(function(i) { return i.etapa === 'enviado-1doc'; }).length, parados = l.itens.filter(function(i) { return i.erro; }).length;
+  var fim = l.fimEm || (ativo ? agora : null);
+  var h = '<div class="and-cab"><div><h4>🤖 Robô do LC e do CP ' + (ativo ? '<span class="and-vivo"><i></i>ao vivo</span>' : '<span class="and-fim">' + (l.status === 'fim' ? 'terminou' : esH(l.status)) + '</span>') + '</h4>'
+    + '<small>lote ' + esH(l.id) + ' · começou ' + andHora(l.criadoEm) + (fim ? ' · ' + andDur(fim - l.criadoEm) + (ativo ? ' até agora' : ' no total') : '') + '</small></div>'
+    + '<div class="and-placar"><span class="ok"><b>' + prontos + '</b> no 1Doc</span>' + (parados ? '<span class="er"><b>' + parados + '</b> parado' + (parados > 1 ? 's' : '') + '</span>' : '') + '<span><b>' + (n - prontos - parados) + '</b> em andamento</span></div></div>';
+  // robo do notebook
+  var r = dados && dados.robo;
+  if (r && ativo) {
+    var atual = r.atual;
+    h += '<div class="and-robo"><div class="and-robo-trilha">' + (r.etapas || []).map(function(e) {
+      var cl = e.status === 'ok' ? 'ok' : e.status === 'erro' ? 'er' : 'cur';
+      if (e.nome === atual && !e.fim) cl = 'cur';
+      return '<span class="and-rp ' + cl + '" title="' + esH((AND_ROBO[e.nome] || e.nome) + (e.inicio ? ' · ' + andHora(e.inicio) : '') + (e.fim && e.inicio ? ' · ' + andDur(e.fim - e.inicio) : '')) + '">' + (cl === 'ok' ? '✓' : cl === 'er' ? '!' : '<i class="and-gira"></i>') + esH(AND_ROBO[e.nome] || e.nome) + '</span>';
+    }).join('<span class="and-seta">›</span>') + '</div><div class="and-robo-msg">' + esH(r.mensagem || '') + (r.em ? ' <span>· ' + andHora(r.em) + '</span>' : '') + '</div></div>';
+  }
+  // processos
+  h += '<div class="and-procs">' + l.itens.map(function(it, k) {
+    var idx = andIdx(it.etapa), emp = andEmpenho(it), err = it.erro;
+    var nos = AND_PASSOS.map(function(p, i) {
+      var feito = idx > i, cur = !err && idx === i, falhou = err && idx === i;
+      var t = andQuando(it, p[0]), tAnt = i === 0 ? l.criadoEm : andQuando(it, AND_PASSOS[i - 1][0]);
+      var cl = feito ? 'feito' : falhou ? 'falhou' : cur ? 'agora' : '';
+      return '<div class="and-no ' + cl + '"><span class="and-bola">' + (feito ? '<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg>' : falhou ? '!' : cur && ativo ? '<i class="and-gira"></i>' : (i + 1)) + '</span>'
+        + '<b>' + p[1] + '</b><small>' + p[2] + (feito && t ? ' · ' + andHora(t) + (tAnt ? ' · ' + andDur(t - tAnt) : '') : cur && ativo ? ' · agora' : '') + '</small></div>';
+    }).join('<span class="and-liga ' + '"></span>');
+    var rot = err ? '⚠ parou no ' + (err.fase === 'cp' ? 'CP' : 'LC') : emp ? 'empenho ' + emp : (LCL_ETAPA[it.etapa || ''] || '');
+    return '<div class="and-proc' + (err ? ' erro' : it.etapa === 'enviado-1doc' ? ' ok' : '') + '" style="animation-delay:' + Math.min(k, 8) * 50 + 'ms"><div class="and-proc-cab"><b>' + esH(it.numero) + '</b><span>' + esH(rot) + '</span></div><div class="and-trilha">' + nos + '</div>'
+      + (err ? '<div class="and-erro">' + esH(err.mensagem) + '</div>' : '') + '</div>';
+  }).join('') + '</div>';
+  // registro ao vivo
+  var reg = dados && dados.registro;
+  if (reg && (reg.lc || reg.cp)) {
+    var ult = [reg.lc, reg.cp].filter(Boolean).sort(function(a, b) { return (b.em || 0) - (a.em || 0); })[0];
+    var qual = ult === reg.cp ? 'CP' : 'LC';
+    h += '<details class="and-log"' + (AND.abertoLog ? ' open' : '') + '><summary>📜 O que o robô está fazendo (registro do ' + qual + ', ' + andHora(ult.em) + ')</summary><pre>' + ult.linhas.map(function(x) {
+      var novo = !AND.ultLinhas[qual + x]; AND.ultLinhas[qual + x] = 1;
+      var cl = /PAROU|ERRO|parado/i.test(x) ? 'er' : /CONFERE|GRAVAD|enviado|achado|Resumo aberto|gravado/i.test(x) ? 'ok' : /PASSO/.test(x) ? 'pa' : '';
+      return '<span class="' + cl + (novo ? ' novo' : '') + '">' + esH(x) + '</span>';
+    }).join('\n') + '</pre></details>';
+  }
+  fx.innerHTML = h;
+  var dl = fx.querySelector('.and-log'); if (dl) dl.addEventListener('toggle', function() { AND.abertoLog = dl.open; });
+}
 function lclFaixa() {
   var fx = document.getElementById('lclFaixa'); if (!fx) return;
   var l = LCL.lote, nAptos = Object.keys(LCL.porNum).filter(lclApto).length;
@@ -4033,20 +4133,9 @@ function lclFaixa() {
     fx.innerHTML = '<h4>🤖 Robô do LC <small>' + nAptos + ' processo' + (nAptos > 1 ? 's' : '') + ' de ata que o robô sabe empenhar — marque o ✓ nos cards ou use o filtro "Robô do LC"</small></h4>';
     return;
   }
-  fx.hidden = false; fx.innerHTML = '';
-  var h = document.createElement('h4');
-  h.innerHTML = '🤖 Lote do LC <small>' + esH(l.status === 'ativo' ? 'em andamento' : l.status === 'fim' ? 'terminou' : l.status) + ' · pedido ' + esH(new Date(l.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })) + ' · ' + l.itens.length + ' processo' + (l.itens.length > 1 ? 's' : '') + '</small>';
-  fx.appendChild(h);
-  var lista = document.createElement('div'); lista.className = 'lcl-itens';
-  var prontosCp = 0;
-  l.itens.forEach(function(it) {
-    var e = it.etapa || ''; if (!it.erro && (e === 'pedido' || e === 'empenho')) prontosCp++;
-    var d = document.createElement('div'); d.className = 'lcl-item' + (it.erro ? ' erro' : e === 'enviado-1doc' ? ' ok' : '');
-    d.title = (it.texto || '') + (it.erro ? '\nParou (' + it.erro.fase + '): ' + it.erro.mensagem : '');
-    d.innerHTML = '<b>' + esH(it.numero) + '</b>' + esH(it.erro ? '⚠ parou na fase ' + it.erro.fase : (LCL_ETAPA[e] || e));
-    lista.appendChild(d);
-  });
-  fx.appendChild(lista);
+  fx.hidden = false;
+  andFaixa(fx, l, LCL.andamento);   // 13/11/2026: tela de andamento (etapas, horarios, robo e registro ao vivo)
+  var prontosCp = l.itens.filter(function(it) { var e = it.etapa || ''; return !it.erro && (e === 'pedido' || e === 'empenho'); }).length;
   if (l.status === 'ativo') {
     var ac = document.createElement('div'); ac.className = 'lcl-acoes';
     var bc = lclBt('📋 Copiar comando do lote no LC', function() {
@@ -4073,11 +4162,11 @@ function lclCarregar() {
   if (LCL.carregando) return; LCL.carregando = true;
   Promise.all([
     sgdFetch(SGD_WORKER_URL + '?action=lc-lote-elegiveis').then(function(r) { return r.json(); }).catch(function() { return null; }),
-    sgdFetch(SGD_WORKER_URL + '?action=lc-lote-estado').then(function(r) { return r.json(); }).catch(function() { return null; })
+    sgdFetch(SGD_WORKER_URL + '?action=lc-andamento').then(function(r) { return r.json(); }).catch(function() { return null; })
   ]).then(function(rs) {
     LCL.carregando = false;
     if (rs[0] && rs[0].ok) { var m = {}; (rs[0].processos || []).forEach(function(i) { m[lclDig(i.numero)] = i; }); LCL.porNum = m; Object.keys(LCL.sel).forEach(function(d) { if (!m[d] || !m[d].elegivel) delete LCL.sel[d]; }); }
-    if (rs[1] && rs[1].ok) LCL.lote = rs[1].lote;
+    if (rs[1] && rs[1].ok) { LCL.lote = rs[1].lote; LCL.andamento = rs[1]; }
     // quem ja esta no lote em andamento nao fica marcado (nem conta na barra)
     if (LCL.lote && LCL.lote.status === 'ativo') (LCL.lote.itens || []).forEach(function(i) { delete LCL.sel[i.num || lclDig(i.numero)]; });
     lclFaixa();
@@ -4085,7 +4174,7 @@ function lclCarregar() {
   });
 }
 document.getElementById('tabEmpenhos').addEventListener('click', function() { setTimeout(lclCarregar, 400); });
-setInterval(function() { var pe = document.getElementById('panel-empenhos'); if (!document.hidden && pe && pe.classList.contains('active') && LCL.lote && LCL.lote.status === 'ativo') lclCarregar(); }, 20000);
+setInterval(function() { var pe = document.getElementById('panel-empenhos'); if (!document.hidden && pe && pe.classList.contains('active') && LCL.lote && LCL.lote.status === 'ativo') lclCarregar(); }, 15000);
 function ecGrupo(k, p) { return k === 'robo' ? !!lclInfo(p) : k === 'todos' ? true : k === 'acao' ? /pronto|nota_aguardando|usa_empenho/.test(p.situacao) : p.situacao === k; }
 function ecFiltros(ps) {
   var nav = document.getElementById('esFiltros');
