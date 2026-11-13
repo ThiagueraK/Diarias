@@ -2509,7 +2509,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.28.1</span>
+    <span class="header-version">v1.28.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3002,6 +3002,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
             <button id="cp-btn-copiar-vigia" title="Copia o comando que liga o vigia. Cole no PowerShell da sessão do CP e deixe a janela aberta." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">📋 Copiar comando do vigia</button>
             <button id="lc-btn-copiar-sonda" title="Separado do vigia das diárias: copia o comando da sonda do LC (só lê as telas do LC, não grava nada). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🔎 Copiar comando da sonda do LC</button>
             <button id="lc-btn-copiar-ensaio" title="Separado do vigia: copia o comando do ENSAIO do LC (preenche uma requisição passo a passo e NÃO grava). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🧪 Copiar comando do ensaio do LC</button>
+            <button id="lc-btn-copiar-dispensa" title="Copia o comando do ENSAIO DA DISPENSA POR LIMITE (preenche a dispensa no LC até a Proposta e NÃO grava). Cole no PowerShell da sessão do LC." style="padding:4px 10px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;background:var(--surface);color:var(--text);">🧾 Copiar comando do ensaio da dispensa</button>
           </span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;align-items:center;">
@@ -7999,6 +8000,16 @@ document.getElementById('lc-btn-copiar-sonda').addEventListener('click', functio
 document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', function(){
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_ensaio', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
+    if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+    return navigator.clipboard.writeText(res.comando);
+  }).then(function(){
+    b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
+  }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
+});
+// 13/11/2026: ensaio da dispensa por limite (script:lc_dispensa) - preenche a dispensa e NAO grava
+document.getElementById('lc-btn-copiar-dispensa').addEventListener('click', function(){
+  var b = this, orig = b.textContent;
+  sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_dispensa', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
     return navigator.clipboard.writeText(res.comando);
   }).then(function(){
