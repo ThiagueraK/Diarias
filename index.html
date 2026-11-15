@@ -2318,6 +2318,54 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .np-st{font:500 11px var(--sans);border-radius:999px;padding:2px 8px}.np-st.ok{background:var(--ok-soft);color:#17663d}.np-st.enviando{background:#e0ecff;color:#1d4ed8}.np-st.erro,.np-st.falhou{background:#fde8e8;color:var(--danger)}.np-st.encaminhado-sem-assinatura{background:var(--warn-soft);color:#9a5b00}
   @media (max-width:760px){.np-grade{grid-template-columns:1fr}.np-solta{min-height:190px}.np-cand{grid-template-columns:auto 1fr}.np-val{grid-column:2;text-align:left}}
   @media (prefers-reduced-motion:reduce){.np-solta .np-ic,.np-scan,.np-cand,.np-anel .v,.np-envio,.np-ok,.np-rota i,.np-campo input.lido,.np-solta.sobre{animation:none!important}.np-anel .v{stroke-dashoffset:var(--o)}.np-ok path{stroke-dashoffset:0}}
+
+  /* 15/11/2026: ROBO DO CP AO VIVO (prefixo cav-) - video da tela do robo, ritmo, processos com trilha e passo a passo */
+  .cav{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+  @media(max-width:1000px){.cav{grid-template-columns:1fr}}
+  .cav-video{position:relative;background:#000;border:1px solid rgba(0,229,255,.25);border-radius:10px;overflow:hidden;aspect-ratio:16/10;display:grid;place-items:center}
+  .cav-video img{width:100%;height:100%;object-fit:contain;display:block}
+  .cav-video .cav-vazio{color:var(--ce-muted);font-size:.72rem;text-align:center;padding:20px;line-height:1.6}
+  .cav-selo{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:6px;font:700 .62rem 'Chakra Petch',sans-serif;letter-spacing:.08em;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.65);color:var(--ce-muted);border:1px solid rgba(255,255,255,.15)}
+  .cav-selo.vivo{color:#fff;border-color:rgba(255,61,113,.6)}
+  .cav-selo.vivo i{width:8px;height:8px;border-radius:50%;background:var(--ce-danger);animation:cavPulsa 1.4s infinite}
+  @keyframes cavPulsa{0%{box-shadow:0 0 0 0 rgba(255,61,113,.6)}70%{box-shadow:0 0 0 8px rgba(255,61,113,0)}100%{box-shadow:0 0 0 0 rgba(255,61,113,0)}}
+  .cav-tela-bt{position:absolute;right:10px;top:10px;font-size:.62rem;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff;border:1px solid rgba(255,255,255,.2);cursor:pointer}
+  .cav-agora{position:absolute;left:0;right:0;bottom:0;padding:8px 12px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-size:.68rem;color:#fff}
+  .cav-agora b{color:var(--ce-warn)}
+  .cav-lado{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .cav-ritmo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .cav-ritmo div{background:var(--ce-glass);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:9px 11px}
+  .cav-ritmo small{display:block;font-size:.56rem;color:var(--ce-muted);letter-spacing:.08em;text-transform:uppercase}
+  .cav-ritmo b{font:700 1.05rem 'Chakra Petch',sans-serif;color:#fff;font-variant-numeric:tabular-nums}
+  .cav-barra{height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+  .cav-barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ce-cyan),var(--ce-ok));transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .cav-passos{flex:1;min-height:180px;max-height:300px;overflow:auto;background:#05070b;border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:6px 10px;font-size:.64rem;line-height:1.7}
+  .cav-passos div{display:flex;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cav-passos span{color:var(--ce-muted);font-variant-numeric:tabular-nums}
+  .cav-passos .ok{color:var(--ce-ok)} .cav-passos .pdf{color:var(--ce-cyan)} .cav-passos .liq{color:var(--ce-amber)}
+  .cav-passos .novo{animation:cavNovo 1.2s ease}
+  @keyframes cavNovo{from{background:rgba(0,229,255,.18)}to{background:transparent}}
+  .cav-lista{grid-column:1/-1;background:var(--ce-glass);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px}
+  .cav-filtros{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+  .cav-filtros button{font-size:.6rem;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--ce-muted);cursor:pointer}
+  .cav-filtros button.on{background:rgba(0,229,255,.15);color:#fff;border-color:rgba(0,229,255,.5)}
+  .cav-linhas{display:grid;gap:4px;max-height:420px;overflow:auto}
+  .cav-lin{display:grid;grid-template-columns:86px minmax(120px,1.2fr) 66px minmax(260px,2.2fr) 92px;gap:10px;align-items:center;padding:6px 8px;border-radius:7px;font-size:.66rem;background:rgba(255,255,255,.02);animation:cavEntra .4s ease both}
+  @keyframes cavEntra{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .cav-lin.agora{background:rgba(255,209,102,.08);outline:1px solid rgba(255,209,102,.35)}
+  .cav-lin b{font-family:'Chakra Petch',sans-serif;color:#fff}
+  .cav-lin .nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ce-text)}
+  .cav-lin .emp{color:var(--ce-cyan);font-variant-numeric:tabular-nums}
+  .cav-lin .dur{text-align:right;color:var(--ce-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .cav-trilha{display:flex;align-items:center;gap:3px}
+  .cav-pt{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+  .cav-pt i{width:100%;height:5px;border-radius:99px;background:rgba(255,255,255,.08);transition:background .4s}
+  .cav-pt small{font-size:.52rem;color:var(--ce-muted);white-space:nowrap}
+  .cav-pt.feito i{background:var(--ce-ok)} .cav-pt.feito small{color:var(--ce-text)}
+  .cav-pt.agora i{background:var(--ce-warn);animation:cavBrilha 1.2s ease-in-out infinite}
+  @keyframes cavBrilha{50%{opacity:.45}}
+  @media(max-width:760px){.cav-lin{grid-template-columns:70px 1fr 60px;}.cav-lin .nome,.cav-lin .dur{display:none}.cav-trilha{grid-column:1/-1}}
+  @media (prefers-reduced-motion:reduce){.cav-selo.vivo i,.cav-pt.agora i,.cav-lin,.cav-passos .novo{animation:none!important}}
   /* 13/11/2026: tela de andamento do lote do LC/CP (prefixo and-) */
   .and-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
   .and-cab h4{margin:0;font:600 15px var(--sans);display:flex;align-items:center;gap:8px}
@@ -2509,7 +2557,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.28.2</span>
+    <span class="header-version">v1.29.0</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3119,6 +3167,25 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
         </div>
       </div>
 
+
+      <!-- 15/11/2026: ROBO DO CP AO VIVO - video da tela do robo, ritmo, passo a passo e processos (dados: cp-ao-vivo) -->
+      <section class="cav" id="cav" aria-label="Robô do CP ao vivo">
+        <div class="cav-video" id="cav-video"><div class="cav-vazio">Carregando…</div></div>
+        <div class="cav-lado">
+          <div class="cav-ritmo">
+            <div><small>Feitos</small><b id="cav-feitos">—</b></div>
+            <div><small>Média por processo</small><b id="cav-media">—</b></div>
+            <div><small>Previsão de término</small><b id="cav-prev">—</b></div>
+            <div><small>Decorrido</small><b id="cav-dec">—</b></div>
+          </div>
+          <div class="cav-barra"><i id="cav-barra"></i></div>
+          <div class="cav-passos" id="cav-passos" aria-live="polite"><div><span>—</span>sem lote</div></div>
+        </div>
+        <div class="cav-lista">
+          <div class="cav-filtros" id="cav-filtros"></div>
+          <div class="cav-linhas" id="cav-linhas"></div>
+        </div>
+      </section>
       <div class="ce-panel ce-cut cpa-controle">
         <div class="cpa-ctl-bts">
           <button type="button" class="cpa-bt cpa-bt-ir" id="cpa-disparar">▶ Disparar robô</button>
@@ -8848,6 +8915,93 @@ function cpaRenderRelatorio(d) {
       }).catch(function(e) { b.disabled = false; alert('Erro: ' + e.message); });
   });
 })();
+
+// ═══════════════════════════════════════════════════════
+// 15/11/2026: ROBO DO CP AO VIVO (Thiago: "nao estou gostando de como acompanhamos o robo nas emissoes" + "streaming
+// da tela sem ser por fotos"). Rota cp-ao-vivo: lote com a trilha de cada processo, passo a passo, situacao no 1Doc e
+// o endereco do video (MJPEG do notebook, chave de 10 min). O video so liga com esta aba aberta e visivel.
+// ═══════════════════════════════════════════════════════
+var CAV = { dados: null, filtro: 'todos', urlVideo: null, chaveAte: 0, vistos: {}, carregando: false };
+var CAV_PASSOS = [['emp', 'Empenho'], ['pdf', 'PDF'], ['liq', 'Liquidação'], ['cp', 'Fim no CP'], ['doc', '1Doc assinado']];
+function cavIdx(it, doc) {
+  var e = String(it.etapa || '');
+  var n = /concluid/.test(e) || it.concluido ? 4 : /liquidac/.test(e) ? 3 : /PDF|gravado/.test(e) ? 2 : /empenho|iniciando/.test(e) ? 1 : 0;
+  if (n === 4 && doc && doc.autorAssinou) n = 5;
+  return n;
+}
+function cavDur(ms) { if (!(ms > 0)) return '—'; var s = Math.round(ms / 1000); return s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + String(s % 60).padStart(2, '0') + ' s'; }
+function cavHora(ms) { return ms ? new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Sao_Paulo' }) : ''; }
+function cavVideo(d) {
+  var box = document.getElementById('cav-video'); if (!box) return;
+  var lote = d.lote, ativo = lote && lote.ativo, robo = d.robo, roboVivo = robo && !robo.fim && Date.now() - (robo.em || 0) < 15 * 60000;
+  var querVideo = cpaAtiva() && !document.hidden && (ativo || roboVivo) && d.tela && d.tela.url;
+  var agora = ativo ? ('Agora: <b>' + esH(lote.processo || '—') + '</b> ' + esH(lote.servidor || '') + ' · ' + esH(lote.etapa || '')) : robo ? ('Robô: ' + esH(robo.mensagem || robo.atual || '')) : '';
+  if (!querVideo) {
+    CAV.urlVideo = null;
+    box.innerHTML = '<span class="cav-selo">○ SEM VÍDEO</span><div class="cav-vazio">' + (ativo || roboVivo ? 'Abra esta aba para ver a tela do robô.' : 'O robô do CP não está rodando agora.<br>O vídeo aparece sozinho quando um lote começar.') + '</div>' + (agora ? '<div class="cav-agora">' + agora + '</div>' : '');
+    return;
+  }
+  // chave nova so quando a atual estiver para vencer (troca de src reconecta o video)
+  if (!CAV.urlVideo || Date.now() > CAV.chaveAte - 60000) {
+    CAV.urlVideo = d.tela.url; CAV.chaveAte = d.tela.validoAte || (Date.now() + 9 * 60000);
+    box.innerHTML = '<span class="cav-selo vivo" id="cav-selo"><i></i>AO VIVO</span><button type="button" class="cav-tela-bt" id="cav-cheia" title="Tela cheia">⛶ Tela cheia</button><img id="cav-img" alt="Tela do robô do CP ao vivo" src="' + esH(CAV.urlVideo) + '"><div class="cav-agora" id="cav-agora"></div>';
+    var img = document.getElementById('cav-img');
+    img.onerror = function() { var s = document.getElementById('cav-selo'); if (s) { s.className = 'cav-selo'; s.innerHTML = '○ VÍDEO FORA DO AR'; } CAV.urlVideo = null; };
+    document.getElementById('cav-cheia').onclick = function() { var v = document.getElementById('cav-video'); if (v.requestFullscreen) v.requestFullscreen(); };
+  }
+  var ag = document.getElementById('cav-agora'); if (ag) ag.innerHTML = agora;
+}
+function cavRender() {
+  var d = CAV.dados; if (!d) return;
+  cavVideo(d);
+  var lote = d.lote, itens = (lote && lote.itens) || [], doc = d.doc || {};
+  var total = (lote && lote.total) || (d.tarefa && d.tarefa.processos && d.tarefa.processos.length) || itens.length;
+  var feitos = itens.filter(function(i) { return i.concluido; }).length;
+  var ini = lote && lote.inicio, fimL = lote && !lote.ativo ? lote.em : Date.now();
+  var durs = itens.filter(function(i) { return i.concluido && i.hist && i.hist.length; }).map(function(i) { return (i.em || 0) - i.hist[0].em; }).filter(function(x) { return x > 0; });
+  var media = durs.length ? durs.reduce(function(a, b) { return a + b; }, 0) / durs.length : null;
+  document.getElementById('cav-feitos').textContent = lote ? feitos + ' de ' + total : '—';
+  document.getElementById('cav-media').textContent = media ? cavDur(media) : '—';
+  document.getElementById('cav-prev').textContent = lote && lote.ativo && media ? new Date(Date.now() + media * Math.max(0, total - feitos)).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : lote && !lote.ativo ? 'terminou' : '—';
+  document.getElementById('cav-dec').textContent = ini ? cavDur(fimL - ini) : '—';
+  document.getElementById('cav-barra').style.width = total ? Math.round(100 * feitos / total) + '%' : '0';
+  // passo a passo (mais novo em cima)
+  var ev = (d.eventos || []).slice().reverse();
+  document.getElementById('cav-passos').innerHTML = ev.length ? ev.map(function(e) {
+    var k = e.em + e.etapa + e.processo, novo = !CAV.vistos[k]; CAV.vistos[k] = 1;
+    var cl = /concluid/.test(e.etapa) ? 'ok' : /PDF|gravado/.test(e.etapa) ? 'pdf' : /liquidac/.test(e.etapa) ? 'liq' : '';
+    return '<div class="' + (novo ? 'novo' : '') + '"><span>' + cavHora(e.em) + '</span><b class="' + cl + '">' + esH(e.etapa) + '</b>' + (e.processo ? ' · ' + esH(e.processo) + (e.empenho ? ' · emp ' + esH(e.empenho) : '') : '') + '</div>';
+  }).join('') : '<div><span>—</span>nenhum passo deste lote ainda</div>';
+  // processos: os do lote + os que ainda vao (pedido)
+  var linhas = itens.slice();
+  var noLote = {}; itens.forEach(function(i) { noLote[String(i.processo)] = 1; });
+  ((d.tarefa && d.tarefa.processos) || []).forEach(function(n) { if (!noLote[String(n)]) linhas.push({ processo: n, aguardando: true }); });
+  var cont = { todos: linhas.length, andamento: 0, feitos: 0, aguardando: 0 };
+  linhas.forEach(function(i) { i._idx = i.aguardando ? 0 : cavIdx(i, doc[String(i.empenho || '').replace(/^0+/, '')]); if (i.aguardando) cont.aguardando++; else if (i._idx >= 4) cont.feitos++; else cont.andamento++; });
+  document.getElementById('cav-filtros').innerHTML = [['todos', 'Todos'], ['andamento', 'Agora'], ['feitos', 'Feitos'], ['aguardando', 'Na fila']].map(function(f) { return '<button type="button" data-f="' + f[0] + '" class="' + (CAV.filtro === f[0] ? 'on' : '') + '">' + f[1] + ' (' + cont[f[0]] + ')</button>'; }).join('');
+  var mostrar = linhas.filter(function(i) { return CAV.filtro === 'todos' || (CAV.filtro === 'aguardando' ? i.aguardando : CAV.filtro === 'feitos' ? !i.aguardando && i._idx >= 4 : !i.aguardando && i._idx < 4); });
+  document.getElementById('cav-linhas').innerHTML = mostrar.length ? mostrar.map(function(i) {
+    var dc = doc[String(i.empenho || '').replace(/^0+/, '')], idx = i._idx, eAgora = lote && lote.ativo && String(lote.processo) === String(i.processo);
+    var h = i.hist || [], quando = function(re) { var x = h.filter(function(p) { return re.test(p.etapa); })[0]; return x ? x.em : null; };
+    var tempos = [quando(/iniciando|empenho: preench/), quando(/PDF|gravado/), quando(/liquidac/), quando(/concluid/)];
+    var trilha = CAV_PASSOS.map(function(p, k) {
+      var cl = idx > k + 1 || (k === 4 && idx === 5) ? 'feito' : idx === k + 1 && !i.aguardando && k < 4 && (eAgora || k < 3) ? 'agora' : idx > k ? 'feito' : '';
+      var tt = k < 4 && tempos[k] ? cavHora(tempos[k]) : k === 4 && dc && dc.autorAssinou ? 'assinado' : '';
+      return '<span class="cav-pt ' + cl + '" title="' + esH(p[1] + (tt ? ' · ' + tt : '')) + '"><i></i><small>' + p[1] + '</small></span>';
+    }).join('');
+    var dur = h.length ? ((i.concluido ? i.em : Date.now()) - h[0].em) : 0;
+    return '<div class="cav-lin' + (eAgora ? ' agora' : '') + '"><b>' + esH(i.processo) + '</b><span class="nome">' + esH(i.servidor || (i.aguardando ? 'na fila' : '')) + '</span><span class="emp">' + esH(i.empenho || '—') + '</span><span class="cav-trilha">' + trilha + '</span><span class="dur">' + (i.aguardando ? '' : cavDur(dur)) + '</span></div>';
+  }).join('') : '<div class="ce-empty">Nada aqui.</div>';
+}
+document.getElementById('cav-filtros').addEventListener('click', function(e) { var b = e.target.closest('button[data-f]'); if (b) { CAV.filtro = b.dataset.f; cavRender(); } });
+function cavCarregar() {
+  if (CAV.carregando || !sgdGetToken()) return; CAV.carregando = true;
+  sgdFetch(SGD_WORKER_URL + '?action=cp-ao-vivo').then(function(r) { return r.json(); }).then(function(res) { if (res && res.ok) { CAV.dados = res; cavRender(); } })
+    .catch(function() {}).then(function() { CAV.carregando = false; });
+}
+document.getElementById('tabAcompCP').addEventListener('click', function() { CAV.urlVideo = null; cavCarregar(); });
+setInterval(function() { if (cpaAtiva() && !document.hidden) cavCarregar(); }, 5000);
+document.addEventListener('visibilitychange', function() { if (document.hidden && CAV.urlVideo) { CAV.urlVideo = null; var v = document.getElementById('cav-video'); if (v) v.innerHTML = '<div class="cav-vazio">Vídeo pausado (aba escondida).</div>'; } else if (!document.hidden && cpaAtiva()) cavCarregar(); });
 // roda mesmo com a aba fechada (a cada 20 s) só pra manter os avisos e o "!" da aba; aberta, a cada 4 s
 var cpaUltimaCarga = 0;
 function cpaCarregar() {
