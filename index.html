@@ -2319,6 +2319,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   @media (max-width:760px){.np-grade{grid-template-columns:1fr}.np-solta{min-height:190px}.np-cand{grid-template-columns:auto 1fr}.np-val{grid-column:2;text-align:left}}
   @media (prefers-reduced-motion:reduce){.np-solta .np-ic,.np-scan,.np-cand,.np-anel .v,.np-envio,.np-ok,.np-rota i,.np-campo input.lido,.np-solta.sobre{animation:none!important}.np-anel .v{stroke-dashoffset:var(--o)}.np-ok path{stroke-dashoffset:0}}
 
+  /* 15/11/2026: video da tela do robo no lote do LC (aba Empenhos) */
+  .lcl-video{margin:0 0 12px;border-radius:12px;overflow:hidden;background:#000;border:1px solid var(--border);position:relative}
+  .lcl-video .lv-cab{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:#0b0f16;color:#e9f2fa;font:600 13px var(--sans)}
+  .lcl-video .lv-cab small{color:#79899f;font-weight:500}
+  .lcl-video .lv-selo{display:inline-flex;align-items:center;gap:6px;font:700 11px var(--sans);letter-spacing:.06em;padding:2px 9px;border-radius:999px;background:rgba(255,61,113,.15);color:#ff6b8f}
+  .lcl-video .lv-selo i{width:7px;height:7px;border-radius:50%;background:#ff3d71;animation:cavPulsa 1.4s infinite}
+  .lcl-video .lv-tela{aspect-ratio:16/10;max-height:520px;width:100%;display:grid;place-items:center}
+  .lcl-video img{width:100%;height:100%;object-fit:contain;display:block}
+  .lcl-video .lv-vazio{color:#79899f;font-size:13px;padding:30px;text-align:center}
+  .lcl-video button{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid #334;background:transparent;color:#e9f2fa;cursor:pointer}
   /* 15/11/2026: ROBO DO CP AO VIVO (prefixo cav-) - video da tela do robo, ritmo, processos com trilha e passo a passo */
   .cav{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
   @media(max-width:1000px){.cav{grid-template-columns:1fr}}
@@ -2557,7 +2567,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.29.0</span>
+    <span class="header-version">v1.29.1</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -3134,6 +3144,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
     <div class="ec-bento" id="ecBento"></div>
     <section class="ec-despesas" id="ecDespesas" style="display:none"></section>
     <!-- 10/11/2026: LOTE DO LC - faixa do lote em andamento; a selecao e nos proprios cards (✓) e a barra fixa embaixo -->
+    <section class="lcl-video" id="lclVideo" hidden aria-label="Tela do robô ao vivo"></section>
     <section class="lcl-faixa" id="lclFaixa" hidden></section>
     <div class="es-filtros" id="esFiltros"></div>
     <div class="es-lista ec-grade" id="esLista"><div class="es-sk"></div><div class="es-sk"></div><div class="es-sk"></div></div>
@@ -4433,6 +4444,32 @@ function lclFaixa() {
     fx.appendChild(ac);
   }
 }
+
+// 15/11/2026: VIDEO DA TELA DO ROBO no lote do LC (o LC e o CP rodam no mesmo navegador do robo no notebook). Secao propria
+// (#lclVideo): a faixa do lote e redesenhada a cada 15 s e o video nao pode reconectar a cada vez.
+var LCV = { url: null, ate: 0, fechado: false };
+function lclVideo() {
+  var box = document.getElementById('lclVideo'); if (!box) return;
+  var l = LCL.lote, tela = LCL.andamento && LCL.andamento.tela, pe = document.getElementById('panel-empenhos');
+  var ligar = l && l.status === 'ativo' && tela && tela.url && pe && pe.classList.contains('active') && !document.hidden && !LCV.fechado;
+  if (!ligar) {
+    if (LCV.url || !box.hidden) { LCV.url = null; box.innerHTML = ''; }
+    box.hidden = !(l && l.status === 'ativo' && LCV.fechado);
+    if (!box.hidden) box.innerHTML = '<div class="lv-cab"><span>🎥 Tela do robô <small>vídeo escondido</small></span><button type="button" id="lvAbrir">Mostrar vídeo</button></div>';
+    var ab = document.getElementById('lvAbrir'); if (ab) ab.onclick = function() { LCV.fechado = false; lclVideo(); };
+    return;
+  }
+  box.hidden = false;
+  if (!LCV.url || Date.now() > LCV.ate - 60000) {
+    LCV.url = tela.url; LCV.ate = tela.validoAte || (Date.now() + 9 * 60000);
+    box.innerHTML = '<div class="lv-cab"><span><span class="lv-selo" id="lvSelo"><i></i>AO VIVO</span> Tela do robô no notebook <small>LC e CP · só enquanto esta aba está aberta</small></span><span><button type="button" id="lvCheia">⛶ Tela cheia</button> <button type="button" id="lvFechar">Esconder</button></span></div>'
+      + '<div class="lv-tela" id="lvTela"><img id="lvImg" alt="Tela do robô ao vivo" src="' + esH(LCV.url) + '"></div>';
+    document.getElementById('lvImg').onerror = function() { var t = document.getElementById('lvTela'); if (t) t.innerHTML = '<div class="lv-vazio">Vídeo fora do ar agora (o robô ainda não está transmitindo). Tento de novo na próxima atualização.</div>'; LCV.url = null; };
+    document.getElementById('lvCheia').onclick = function() { var t = document.getElementById('lvTela'); if (t && t.requestFullscreen) t.requestFullscreen(); };
+    document.getElementById('lvFechar').onclick = function() { LCV.fechado = true; lclVideo(); };
+  }
+}
+document.addEventListener('visibilitychange', function() { if (typeof lclVideo === 'function') lclVideo(); });
 function lclCarregar() {
   if (LCL.carregando) return; LCL.carregando = true;
   Promise.all([
@@ -4444,7 +4481,7 @@ function lclCarregar() {
     if (rs[1] && rs[1].ok) { LCL.lote = rs[1].lote; LCL.andamento = rs[1]; }
     // quem ja esta no lote em andamento nao fica marcado (nem conta na barra)
     if (LCL.lote && LCL.lote.status === 'ativo') (LCL.lote.itens || []).forEach(function(i) { delete LCL.sel[i.num || lclDig(i.numero)]; });
-    lclFaixa();
+    lclFaixa(); lclVideo();
     if (typeof esDados !== 'undefined' && esDados && document.getElementById('panel-empenhos').classList.contains('active')) esRender(); else lclBarra();
   });
 }
