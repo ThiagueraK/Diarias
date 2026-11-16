@@ -2567,7 +2567,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.29.1</span>
+    <span class="header-version">v1.29.2</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4211,6 +4211,8 @@ function lclBarra() {
   var aptos = Object.keys(LCL.porNum).filter(function(d) { return lclApto(d) && !LCL.sel[d]; }).length;
   bar.hidden = false; bar.innerHTML = '';
   var t = document.createElement('span'); t.innerHTML = '🤖 <b>' + sel.length + '</b> processo' + (sel.length > 1 ? 's' : '') + ' para o robô · <span class="lcl-tot">' + lclBRL(tot) + '</span>'; bar.appendChild(t);
+  // 15/11/2026 (10220, domingo): fora de dia util o LC grava o pedido, mas o CP recusa o empenho (data do movimento anterior ao pedido)
+  if (LCL.diaCp && LCL.diaCp.util === false) { var av = document.createElement('span'); av.className = 'lcl-aviso-dia'; av.style.cssText = 'margin-left:12px;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,.18);color:#b45309;font-weight:600'; av.title = 'O CP trabalha com a data do movimento no último dia útil (' + LCL.diaCp.movimento + ') e não empenha pedido do LC gravado depois dela.'; av.textContent = '⚠️ Hoje não é dia útil no CP: o LC grava o pedido, mas o empenho só sai num dia útil'; bar.appendChild(av); }
   var sp = document.createElement('span'); sp.style.flex = '1'; bar.appendChild(sp);
   if (aptos) bar.appendChild(lclBt('Marcar todos os aptos (+' + aptos + ')', function() { Object.keys(LCL.porNum).forEach(function(d) { if (lclApto(d)) LCL.sel[d] = true; }); esRender(); }));
   bar.appendChild(lclBt('Limpar', function() { LCL.sel = {}; esRender(); }));
@@ -4220,6 +4222,8 @@ function lclBt(txt, fn, cls) { var b = document.createElement('button'); b.type 
 function lclMandar() {
   var sel = lclSelecionados(); if (!sel.length) return;
   if (LCL.lote && LCL.lote.status === 'ativo') { alert('Já tem um lote do LC em andamento. Espere terminar ou cancele na faixa do lote.'); return; }
+  // 15/11/2026: fim de semana/feriado - o CP nao empenha pedido do LC gravado hoje
+  if (LCL.diaCp && LCL.diaCp.util === false && !confirm('⚠️ Hoje (' + LCL.diaCp.hoje + ') não é dia útil no CP.\n\nO robô vai gravar a requisição e o pedido no LC, mas o CP NÃO vai empenhar: a data do movimento do CP é ' + LCL.diaCp.movimento + ' e ele recusa pedido com data posterior ("Data do Movimento menor que Data do Pedido de Empenho").\n\nO empenho sai mandando o processo de novo num dia útil (o robô vai direto ao CP).\n\nMandar mesmo assim?')) return;
   var tot = sel.reduce(function(a, i) { return a + (Number(i.valor) || 0); }, 0);
   if (!confirm('Empenhar pelo robô ' + sel.length + ' processo(s), total ' + lclBRL(tot) + ':\n\n' + sel.map(function(i) { return '• ' + i.numero + ' · LC ' + i.processoLC + ' · ' + (i.fornecedor || '') + ' · ' + lclBRL(i.valor); }).join('\n') + '\n\nO robô grava requisição e pedido no LC, o empenho no CP e envia no 1Doc com a sua assinatura, sem perguntar de novo.')) return;
   sgdFetch(SGD_WORKER_URL + '?action=lc-lote-solicitar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ processos: sel.map(function(i) { return i.numero; }) }) })
@@ -4477,6 +4481,7 @@ function lclCarregar() {
     sgdFetch(SGD_WORKER_URL + '?action=lc-andamento').then(function(r) { return r.json(); }).catch(function() { return null; })
   ]).then(function(rs) {
     LCL.carregando = false;
+    if (rs[0] && rs[0].ok) LCL.diaCp = rs[0].diaCp || null;   // 15/11/2026: dia util do CP (aviso de fim de semana/feriado)
     if (rs[0] && rs[0].ok) { var m = {}; (rs[0].processos || []).forEach(function(i) { m[lclDig(i.numero)] = i; }); LCL.porNum = m; Object.keys(LCL.sel).forEach(function(d) { if (!m[d] || !m[d].elegivel) delete LCL.sel[d]; }); }
     if (rs[1] && rs[1].ok) { LCL.lote = rs[1].lote; LCL.andamento = rs[1]; }
     // quem ja esta no lote em andamento nao fica marcado (nem conta na barra)
