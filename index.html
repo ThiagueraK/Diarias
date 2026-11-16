@@ -2325,7 +2325,16 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
   .lcl-video .lv-cab small{color:#79899f;font-weight:500}
   .lcl-video .lv-selo{display:inline-flex;align-items:center;gap:6px;font:700 11px var(--sans);letter-spacing:.06em;padding:2px 9px;border-radius:999px;background:rgba(255,61,113,.15);color:#ff6b8f}
   .lcl-video .lv-selo i{width:7px;height:7px;border-radius:50%;background:#ff3d71;animation:cavPulsa 1.4s infinite}
-  .lcl-video .lv-tela{aspect-ratio:16/10;max-height:520px;width:100%;display:grid;place-items:center}
+  .lcl-video .lv-tela{aspect-ratio:16/10;max-height:82vh;width:100%;display:grid;place-items:center}
+  /* 15/11/2026: zoom do video do robo (Thiago: "fora da tela cheia nao da pra ver quase nada") - Ajustar / 100% / 150%,
+     duplo clique alterna, arrastar com o mouse quando ampliado */
+  .vz{width:100%;height:100%;display:grid;place-items:center}
+  .vz img{cursor:zoom-in}
+  .vz.vz-real{overflow:auto;display:block;place-items:normal;justify-items:normal;cursor:grab;overscroll-behavior:contain}
+  .vz.vz-real img{width:auto;height:auto;max-width:none;max-height:none;object-fit:fill;cursor:grab}
+  .vz.vz-arrasto,.vz.vz-arrasto img{cursor:grabbing;user-select:none}
+  .cav-video .vz{position:absolute;inset:0}
+  .cav-zoom-bt{right:108px}
   .lcl-video img{width:100%;height:100%;object-fit:contain;display:block}
   .lcl-video .lv-vazio{color:#79899f;font-size:13px;padding:30px;text-align:center}
   .lcl-video button{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid #334;background:transparent;color:#e9f2fa;cursor:pointer}
@@ -2567,7 +2576,7 @@ background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;
       </button>
       <div id="painelDivergencias" style="display:none;position:absolute;top:36px;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:12px;z-index:9999;"></div>
     </div>
-    <span class="header-version">v1.29.2</span>
+    <span class="header-version">v1.29.3</span>
     <button class="header-sair" onclick="sgdLogout()" title="Sair da sessão">Sair</button>
   </header>
 
@@ -4452,6 +4461,36 @@ function lclFaixa() {
 // 15/11/2026: VIDEO DA TELA DO ROBO no lote do LC (o LC e o CP rodam no mesmo navegador do robo no notebook). Secao propria
 // (#lclVideo): a faixa do lote e redesenhada a cada 15 s e o video nao pode reconectar a cada vez.
 var LCV = { url: null, ate: 0, fechado: false };
+// 15/11/2026: zoom do video do robo. vz = caixa do video, img = <img> do MJPEG, bt = botao que troca o nivel.
+// Nivel guardado por caixa (VZ[id]) para sobreviver a troca da chave do video (a cada ~9 min o <img> e recriado).
+var VZ = {};
+function vzLigar(vz, img, bt) {
+  if (!vz || !img || !bt) return;
+  var id = vz.id || 'vz', niveis = [0, 1, 1.5];
+  function aplicar(cx, cy) {
+    var nivel = VZ[id] || 0, w = img.naturalWidth || 1600;
+    var antesW = img.getBoundingClientRect().width || vz.clientWidth, antesH = img.getBoundingClientRect().height || vz.clientHeight;
+    var px = cx == null ? vz.clientWidth / 2 : cx, py = cy == null ? vz.clientHeight / 2 : cy;
+    var fx = (vz.scrollLeft + px) / Math.max(1, vz.classList.contains('vz-real') ? antesW : vz.clientWidth);
+    var fy = (vz.scrollTop + py) / Math.max(1, vz.classList.contains('vz-real') ? antesH : vz.clientHeight);
+    if (!nivel) { vz.classList.remove('vz-real'); img.style.width = ''; vz.scrollLeft = 0; vz.scrollTop = 0; }
+    else {
+      vz.classList.add('vz-real'); img.style.width = Math.round(w * nivel) + 'px';
+      var nw = img.getBoundingClientRect().width, nh = img.getBoundingClientRect().height;
+      vz.scrollLeft = Math.max(0, fx * nw - px); vz.scrollTop = Math.max(0, fy * nh - py);
+    }
+    bt.textContent = nivel ? '🔍 ' + Math.round(nivel * 100) + '%' : '🔍 Ajustar';
+    bt.title = 'Tamanho do vídeo (duplo clique na imagem também alterna). Ampliado: arraste com o mouse.';
+  }
+  bt.onclick = function(e) { e.stopPropagation(); var i = niveis.indexOf(VZ[id] || 0); VZ[id] = niveis[(i + 1) % niveis.length]; aplicar(); };
+  img.ondblclick = function(e) { var r = vz.getBoundingClientRect(); VZ[id] = VZ[id] ? 0 : 1; aplicar(e.clientX - r.left, e.clientY - r.top); };
+  var arr = null;
+  vz.onmousedown = function(e) { if (!VZ[id] || e.button !== 0) return; arr = { x: e.clientX, y: e.clientY, l: vz.scrollLeft, t: vz.scrollTop }; vz.classList.add('vz-arrasto'); e.preventDefault(); };
+  vz.onmousemove = function(e) { if (!arr) return; vz.scrollLeft = arr.l - (e.clientX - arr.x); vz.scrollTop = arr.t - (e.clientY - arr.y); };
+  vz.onmouseup = vz.onmouseleave = function() { arr = null; vz.classList.remove('vz-arrasto'); };
+  img.addEventListener('load', function() { if (VZ[id]) aplicar(); }, { once: true });
+  aplicar();
+}
 function lclVideo() {
   var box = document.getElementById('lclVideo'); if (!box) return;
   var l = LCL.lote, tela = LCL.andamento && LCL.andamento.tela, pe = document.getElementById('panel-empenhos');
@@ -4466,11 +4505,12 @@ function lclVideo() {
   box.hidden = false;
   if (!LCV.url || Date.now() > LCV.ate - 60000) {
     LCV.url = tela.url; LCV.ate = tela.validoAte || (Date.now() + 9 * 60000);
-    box.innerHTML = '<div class="lv-cab"><span><span class="lv-selo" id="lvSelo"><i></i>AO VIVO</span> Tela do robô no notebook <small>LC e CP · só enquanto esta aba está aberta</small></span><span><button type="button" id="lvCheia">⛶ Tela cheia</button> <button type="button" id="lvFechar">Esconder</button></span></div>'
-      + '<div class="lv-tela" id="lvTela"><img id="lvImg" alt="Tela do robô ao vivo" src="' + esH(LCV.url) + '"></div>';
+    box.innerHTML = '<div class="lv-cab"><span><span class="lv-selo" id="lvSelo"><i></i>AO VIVO</span> Tela do robô no notebook <small>LC e CP · só enquanto esta aba está aberta</small></span><span><button type="button" id="lvZoom">🔍 Ajustar</button> <button type="button" id="lvCheia">⛶ Tela cheia</button> <button type="button" id="lvFechar">Esconder</button></span></div>'
+      + '<div class="lv-tela vz" id="lvTela"><img id="lvImg" alt="Tela do robô ao vivo" src="' + esH(LCV.url) + '"></div>';
     document.getElementById('lvImg').onerror = function() { var t = document.getElementById('lvTela'); if (t) t.innerHTML = '<div class="lv-vazio">Vídeo fora do ar agora (o robô ainda não está transmitindo). Tento de novo na próxima atualização.</div>'; LCV.url = null; };
     document.getElementById('lvCheia').onclick = function() { var t = document.getElementById('lvTela'); if (t && t.requestFullscreen) t.requestFullscreen(); };
     document.getElementById('lvFechar').onclick = function() { LCV.fechado = true; lclVideo(); };
+    vzLigar(document.getElementById('lvTela'), document.getElementById('lvImg'), document.getElementById('lvZoom'));
   }
 }
 document.addEventListener('visibilitychange', function() { if (typeof lclVideo === 'function') lclVideo(); });
@@ -8986,10 +9026,11 @@ function cavVideo(d) {
   // chave nova so quando a atual estiver para vencer (troca de src reconecta o video)
   if (!CAV.urlVideo || Date.now() > CAV.chaveAte - 60000) {
     CAV.urlVideo = d.tela.url; CAV.chaveAte = d.tela.validoAte || (Date.now() + 9 * 60000);
-    box.innerHTML = '<span class="cav-selo vivo" id="cav-selo"><i></i>AO VIVO</span><button type="button" class="cav-tela-bt" id="cav-cheia" title="Tela cheia">⛶ Tela cheia</button><img id="cav-img" alt="Tela do robô do CP ao vivo" src="' + esH(CAV.urlVideo) + '"><div class="cav-agora" id="cav-agora"></div>';
+    box.innerHTML = '<span class="cav-selo vivo" id="cav-selo"><i></i>AO VIVO</span><button type="button" class="cav-tela-bt" id="cav-cheia" title="Tela cheia">⛶ Tela cheia</button><button type="button" class="cav-tela-bt cav-zoom-bt" id="cav-zoom">🔍 Ajustar</button><div class="vz" id="cav-vz"><img id="cav-img" alt="Tela do robô do CP ao vivo" src="' + esH(CAV.urlVideo) + '"></div><div class="cav-agora" id="cav-agora"></div>';
     var img = document.getElementById('cav-img');
     img.onerror = function() { var s = document.getElementById('cav-selo'); if (s) { s.className = 'cav-selo'; s.innerHTML = '○ VÍDEO FORA DO AR'; } CAV.urlVideo = null; };
     document.getElementById('cav-cheia').onclick = function() { var v = document.getElementById('cav-video'); if (v.requestFullscreen) v.requestFullscreen(); };
+    vzLigar(document.getElementById('cav-vz'), img, document.getElementById('cav-zoom'));
   }
   var ag = document.getElementById('cav-agora'); if (ag) ag.innerHTML = agora;
 }
