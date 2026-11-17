@@ -10748,6 +10748,27 @@ var _tabelaLimite = 300, _tabelaChaveFiltro = null;
 document.addEventListener('click', function(e) {
   if (e.target && e.target.id === 'btnTabelaMais') { _tabelaLimite += 300; renderTabela(); }
 });
+// 17/11/2026: CONFERÊNCIA DA DIÁRIA PELA VIAGEM (SaúdeFrota: viagens do CELK + Roteirização). Selo ao lado do servidor;
+// passe o mouse para ver o motivo. Não muda nada para o motorista. Worker: action=conferencia-viagens (últimos 40 dias).
+var CONF_VIAGEM = null;
+function carregarConfViagem() {
+  if (typeof sgdFetch !== 'function') return;
+  sgdFetch(SGD_WORKER_URL + '?action=conferencia-viagens').then(function(r) { return r.json(); }).then(function(j) {
+    if (j && j.ok) { CONF_VIAGEM = j.conferencias || {}; try { renderTabela(); } catch (e) {} }
+  }).catch(function() {});
+}
+function confViagemBadge(p) {
+  var c = CONF_VIAGEM && CONF_VIAGEM[p.id];
+  if (!c || c.st === 'sem_dados') return '';
+  var M = { ok: ['🚐 ✓', '#16a34a'], sem_viagem: ['⚠ sem viagem', '#d97706'], cidade: ['⚠ cidade', '#d97706'], horario: ['⚠ horário', '#d97706'], valor: ['⚠ valor', '#dc2626'], duplicada: ['⚠ duplicada', '#dc2626'], data_futura: ['⚠ data futura', '#dc2626'] };
+  var m = M[c.st] || [c.st, '#64748b'];
+  var v = c.viagem ? ('Viagem' + (c.viagem.numero ? ' nº ' + c.viagem.numero : '') + ': ' + (c.viagem.cidade || '') + (c.viagem.hora ? ' às ' + c.viagem.hora : '') + (c.viagem.placa ? ' · ' + c.viagem.placa : '') + (c.viagem.origem === 'celk' ? ' (CELK)' : '')) : '';
+  var tit = (c.st === 'ok' ? 'Bate com a viagem do SaúdeFrota.' : (c.msgs || []).join(' ')) + (v ? '\n' + v : '');
+  return ' <span title="' + String(tit).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '" style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap;color:' + m[1] + ';border:1px solid ' + m[1] + '55;background:' + m[1] + '14">' + m[0] + '</span>';
+}
+setTimeout(carregarConfViagem, 4000);
+setInterval(function() { if (!document.hidden) carregarConfViagem(); }, 10 * 60000);
+
 function renderTabela() {
   var dias = getDiasDisponiveis();
   renderPills(dias);
@@ -10903,7 +10924,7 @@ function renderTabela() {
       : '<span class="badge-pc-pendente">Pendente</span>';
     return '<tr'+trClass+' data-id="'+p.id+'">'+ 
       '<td class="td-num">'+(i+1)+'</td>'+
-      '<td>'+hl(p.servidor,'servidor')+'</td>'+
+      '<td>'+hl(p.servidor,'servidor')+confViagemBadge(p)+'</td>'+
       '<td class="td-num">'+hl(p.numProcesso,'numProcesso')+'</td>'+
       '<td class="td-num">'+hl(p.empenho,'empenho')+'</td>'+
       '<td class="'+(p.valor?'td-valor':'td-num')+'">'+hl(p.valor?'R$ '+p.valor:'','valor')+'</td>'+
