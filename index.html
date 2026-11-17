@@ -4440,6 +4440,7 @@ function lclFaixa() {
     var bc = lclBt('📋 Copiar comando do lote no LC', function() {
       sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_lote').then(function(r) { return r.json(); }).then(function(res) {
         if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+        lcMostrarComandoCurto(bc, res);
         return navigator.clipboard.writeText(res.comando);
       }).then(function() { bc.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function() { bc.textContent = '📋 Copiar comando do lote no LC'; }, 4000); })
         .catch(function(e) { alert('Não consegui copiar: ' + e.message); });
@@ -8136,11 +8137,22 @@ document.getElementById('cp-btn-copiar-vigia').addEventListener('click', functio
     b.textContent = '✅ Copiado — cole no PowerShell do CP'; setTimeout(function(){ b.textContent = orig; }, 4000);
   }).catch(function(e){ alert('Não consegui copiar: ' + e.message); });
 });
+// 17/11/2026: a sessao do LC as vezes nao cola. Alem de copiar, mostra um comando CURTO para digitar (vale 15 min).
+function lcMostrarComandoCurto(botao, res) {
+  if (!res || !res.comandoCurto) return;
+  if (!botao.id) botao.id = 'lc-btn-' + Date.now();
+  var id = botao.id + '-curto', box = document.getElementById(id);
+  if (!box) { box = document.createElement('div'); box.id = id; botao.insertAdjacentElement('afterend', box); }
+  box.style.cssText = 'margin:8px 0;padding:10px 12px;border:1px dashed #7c3aed;border-radius:8px;background:rgba(124,58,237,.08);font-size:13px;line-height:1.5';
+  box.innerHTML = 'Se não colar, <b>digite</b> no PowerShell do LC (vale 15 min):<br><code style="font-size:16px;font-weight:700;user-select:all;letter-spacing:.5px"></code>';
+  box.querySelector('code').textContent = res.comandoCurto;
+}
 // 09/11/2026: botão separado da sonda do LC (script:lc_sonda, só leitura) - não mexe no vigia das diárias
 document.getElementById('lc-btn-copiar-sonda').addEventListener('click', function(){
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+    lcMostrarComandoCurto(b, res);
     return navigator.clipboard.writeText(res.comando);
   }).then(function(){
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
@@ -8150,6 +8162,7 @@ document.getElementById('lc-btn-copiar-ensaio').addEventListener('click', functi
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_ensaio', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+    lcMostrarComandoCurto(b, res);
     return navigator.clipboard.writeText(res.comando);
   }).then(function(){
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
@@ -8160,6 +8173,7 @@ document.getElementById('lc-btn-copiar-dispensa').addEventListener('click', func
   var b = this, orig = b.textContent;
   sgdFetch(SGD_WORKER_URL + '?action=lc-sonda-comando&script=lc_dispensa', { method: 'GET' }).then(function(r){ return r.json(); }).then(function(res){
     if (!res || !res.ok || !res.comando) throw new Error((res && res.error) || 'sem comando');
+    lcMostrarComandoCurto(b, res);
     return navigator.clipboard.writeText(res.comando);
   }).then(function(){
     b.textContent = '✅ Copiado — cole no PowerShell do LC'; setTimeout(function(){ b.textContent = orig; }, 4000);
