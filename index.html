@@ -4836,11 +4836,13 @@ function esItensLCHtml(p) {
     '<div style="font-size:12.5px;opacity:.8;margin:-2px 0 6px">Produto do Cadastro de Produtos do LC sugerido para cada item do orçamento/nota. ' +
     Object.keys(tot).map(function(g) { return esH(g) + ': ' + esBRL(Math.round(tot[g] * 100) / 100); }).join(' · ') +
     (n.conferir ? ' · <b style="color:#b45309">' + n.conferir + ' para conferir</b>' : '') + '</div>' +
-    '<div style="overflow:auto"><table class="es-tab" style="min-width:760px"><tr><th>Orçamento</th><th style="text-align:right">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th><th>Código LC</th><th>Produto no LC</th><th></th></tr>';
+    '<div style="overflow:auto"><table class="es-tab" style="min-width:800px"><tr><th title="Número do item no LC (conta separado em peças e mão de obra, uma dispensa por despesa)">Nº</th><th>Orçamento</th><th style="text-align:right">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th><th>Código LC</th><th>Produto no LC</th><th></th></tr>';
+  var nItem = {};   // 17/11/2026 (Thiago): número do item no LC, contado por grupo (peças / mão de obra = uma dispensa cada)
   p.itensLC.forEach(function(it, i) {
+    var g0 = it.grupo || 'item'; nItem[g0] = (nItem[g0] || 0) + 1;
     var c = ES_CONF_LC[it.confianca] || [it.confianca, '#475569'];
     var alt = (it.alternativas || []).slice(0, 3).map(function(a) { return '<a href="#" onclick="esTrocarLC(' + p.idEmissao + ',' + i + ',' + a.codigo + ');return false" title="Usar este">' + a.codigo + '</a> ' + esH(a.descricao) + (a.unidade ? ' (' + esH(a.unidade) + ')' : ''); }).join(' · ');
-    h += '<tr><td>' + (it.grupo ? '<span class="es-tag" style="font-size:10px">' + esH(it.grupo) + '</span> ' : '') + esH(it.descricao) + (it.item ? ' <span class="q" style="opacity:.6">' + esH(it.item) + '</span>' : '') + '</td>' +
+    h += '<tr><td class="num"><b>' + nItem[g0] + '</b></td><td>' + (it.grupo ? '<span class="es-tag" style="font-size:10px">' + esH(it.grupo) + '</span> ' : '') + esH(it.descricao) + (it.item ? ' <span class="q" style="opacity:.6">' + esH(it.item) + '</span>' : '') + '</td>' +
       '<td class="num">' + (it.qtd == null ? '' : Number(it.qtd).toLocaleString('pt-BR')) + '</td><td class="num">' + (it.valorUnitario == null ? '—' : esBRL(it.valorUnitario)) + '</td><td class="num">' + esBRL(it.total) + '</td>' +
       '<td><b style="font-size:14px">' + (it.codigoLC == null ? '—' : esH(it.codigoLC)) + '</b>' + (it.codigoLC != null ? ' <button class="es-btn" style="padding:1px 6px;font-size:11px" onclick="esCopiarTexto(\'' + it.codigoLC + '\')" title="Copiar código">📋</button>' : '') + '</td>' +
       '<td>' + esH(it.descricaoLC || '') + (it.unidadeLC ? ' <span class="q" style="opacity:.7">(' + esH(it.unidadeLC) + ')</span>' : '') + (alt ? '<div style="font-size:11.5px;opacity:.75;margin-top:2px">outros: ' + alt + '</div>' : '') + '</td>' +
@@ -4861,8 +4863,9 @@ function esTrocarLC(id, i, cod) {
 function esCopiarItensLC(id) {
   var p = esTodos().find(function(x) { return x.idEmissao === id; }); if (!p || !p.itensLC) return;
   var br = function(v) { return v == null ? '' : Number(v).toFixed(2).replace('.', ','); };
-  var linhas = [['Grupo', 'Item orçamento', 'Descrição orçamento', 'Código LC', 'Produto LC', 'Un', 'Qtd', 'Unitário', 'Total'].join('\t')];
-  p.itensLC.forEach(function(it) { linhas.push([it.grupo || '', it.item || '', it.descricao || '', it.codigoLC == null ? '' : it.codigoLC, it.descricaoLC || '', it.unidadeLC || '', it.qtd == null ? '' : String(it.qtd).replace('.', ','), br(it.valorUnitario), br(it.total)].join('\t')); });
+  var linhas = [['Grupo', 'Nº', 'Item orçamento', 'Descrição orçamento', 'Código LC', 'Produto LC', 'Un', 'Qtd', 'Unitário', 'Total'].join('\t')];
+  var nIt = {};
+  p.itensLC.forEach(function(it) { var g = it.grupo || 'item'; nIt[g] = (nIt[g] || 0) + 1; linhas.push([it.grupo || '', nIt[g], it.item || '', it.descricao || '', it.codigoLC == null ? '' : it.codigoLC, it.descricaoLC || '', it.unidadeLC || '', it.qtd == null ? '' : String(it.qtd).replace('.', ','), br(it.valorUnitario), br(it.total)].join('\t')); });
   navigator.clipboard.writeText(linhas.join('\n')).then(function() { if (typeof mostrarToast === 'function') mostrarToast('Lista para o LC copiada'); });
 }
 // 12/11/2026: editor dos itens (quantidade e valor unitário) -> rota empenhos-saude-ajustar; vale para a aba e para o lote do LC
